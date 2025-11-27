@@ -1,0 +1,13 @@
+<agency_master>
+	<agency id="ACS" value="Administration for Children&apos;s Services" />
+	<agency id="CJC" value="Criminal Justice Coordinator" />
+	<agency id="DFTA" value="Department for the Aging" />
+	<agency id="DOC" value="Department of Corrections" />
+	<agency id="DOHMH" value="Department of Health and Mental Hygiene" />
+	<agency id="DHS" value="Department of Homeless Services" />
+	<agency id="HPD" value="Department of Housing Preservation and Development" />
+	<agency id="DOP" value="Department of Probation" />
+	<agency id="DYCD" value="Department of Youth and Community Development" />
+	<agency id="HRA" value="Human Resources Administration" />
+	<agency id="SBS" value="Small Business Services" />
+</agency_master>

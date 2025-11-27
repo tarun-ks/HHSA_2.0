@@ -1,0 +1,751 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.NycRegisterMapper">
+
+
+
+	<resultMap id="QuestionsList" type="com.nyc.hhs.model.SecurityQuestionBean">
+		<result property="miquestionId" column="QUESTION_ID" />
+		<result property="msQuestionText" column="QUESTION" />
+	</resultMap>
+
+	<resultMap id="userOrgDetails" type="com.nyc.hhs.model.StaffDetails">
+		<result property="msStaffFirstName" column="FIRST_NAME" />
+		<result property="msStaffMidInitial" column="MIDDLE_INITIAL" />
+		<result property="msStaffLastName" column="LAST_NAME" />
+		<result property="msStaffActiveFlag" column="ACTIVE_FLAG" />
+		<result property="msNYCUserId" column="NYC_USER_ID" />
+		<result property="msOrgId" column="ORGANIZATION_ID" />
+		<result property="msTermConditionStatus" column="TERMS_CONDITIONS_ACCEPTED" />
+		<result property="msOrgActiveFlag" column="ORGANIZATION_ACTIVE_FLAG" />
+		<result property="msUserDN" column="USER_DN" />
+		<result property="msOrgProcStatus" column="PROC_STATUS" />
+		<result property="msDuplicate" column="ISDUPLICATE" />
+		<result property="msPermissionLevel" column="PERMISSION_LEVEL" />
+		<result property="msPermissionType" column="PERMISSION_TYPE" />
+		<result property="msAdminPermission" column="ADMIN_PERMISSION" />
+		<result property="msOrganisationName" column="ORGANIZATION_LEGAL_NAME" />
+		<result property="msStaffEmail" column="EMAIL" />
+		<result property="msStaffId" column="STAFF_ID" />
+		<result property="msOfficeTitle" column="MEMBER_NAME" />
+	</resultMap>
+
+
+	<resultMap id="orgEinRecord" type="com.nyc.hhs.model.OrganizationBean">
+		<result property="msEinId" column="EIN_ID_NN" />
+		<result property="msOrgId" column="ORGANIZATION_ID" />
+	</resultMap>
+
+	<select id="getSecurityQuestions" resultMap="QuestionsList">
+		SELECT * FROM
+		SECURITY_QUESTION
+    </select>
+
+	<insert id="insertNYCUserData" parameterType="com.nyc.hhs.model.RegisterNycIdBean">
+		INSERT INTO
+		USER_DETAILS(USER_ID, FIRST_NAME, MIDDLE_NAME_INITIAL, LAST_NAME,
+		EMAIL_ADDRESS, PASSWORD,
+		QUESTION_ID1, QUESTION_ID2, QUESTION_ID3,
+		ANSWER_ID1, ANSWER_ID2, ANSWER_ID3)
+		VALUES(SEQ_NYC_USER_ID.NEXTVAL,
+		#{msFirstName}, #{msMiddleName},
+		#{msLastName}, #{msEmailAddress},
+		#{msPassword},
+		#{miSecurityQuestion1Id}, #{miSecurityQuestion2Id},
+		#{miSecurityQuestion3Id}, #{msAnswer1}, #{msAnswer2}, #{msAnswer3})
+	</insert>
+
+	<!-- Missing Profile Information Start -->
+	<resultMap id="EINBeanList" type="com.nyc.hhs.model.EINBean">
+		<result property="msEINid" column="EIN_ID_NN" />
+		<result property="msEINActive" column="EIN_ACTIVE" />
+	</resultMap>
+
+	<select id="searchEIN" resultMap="EINBeanList">
+		select EIN_ID_NN,EIN_ACTIVE
+		from EIN_MASTER WHERE ein_id_nn = #{einNumber}
+	</select>
+
+	<select id="searchEinInOrg" resultMap="orgEinRecord">
+		select
+		EIN_ID_NN,ORGANIZATION_ID from ORGANIZATION WHERE EIN_ID_NN =
+		#{einNumber} and trim(lower(PROC_STATUS)) != 'rejected'
+	</select>
+
+	<select id="getStaffIdSequence" resultType="string">
+		SELECT SEQ_STAFF_ID.NEXTVAL from dual
+	</select>
+	
+	<insert id="insertIntoStaffDetails" parameterType="com.nyc.hhs.model.StaffDetails">
+		INSERT INTO
+		STAFF_DETAILS ( FIRST_NAME,
+		MIDDLE_INITIAL,
+		LAST_NAME,
+		PHONE, EMAIL, STAFF_ID, NYC_USER_ID,TERMS_CONDITIONS_ACCEPTED,USER_DN,
+		MODIFIED_DATE,CREATED_DATE,CREATED_BY,MODIFIED_BY)
+		VALUES
+		(#{msStaffFirstName,
+		jdbcType=VARCHAR},#{msStaffMidInitial,jdbcType=VARCHAR},#{msStaffLastName,
+		jdbcType=VARCHAR},
+		#{msStaffPhone,jdbcType=VARCHAR},#{msStaffEmail,
+		jdbcType=VARCHAR},
+		#{msStaffId},#{msNYCUserId,
+		jdbcType=VARCHAR},#{msTermConditionStatus,
+		jdbcType=VARCHAR},#{msUserDN, jdbcType=VARCHAR} ,
+		current_timestamp,current_timestamp,SEQ_STAFF_ID.CURRVAL,SEQ_STAFF_ID.CURRVAL)
+	</insert>
+	
+	<insert id="insertIntoStaffOrgMapping" parameterType="com.nyc.hhs.model.StaffDetails">
+		INSERT INTO
+		STAFF_ORGANIZATION (STAFF_ORGANIZATION_ID, STAFF_ID, ACTIVE_FLAG, TITLE, MEMBER_STATUS,
+		ORGANIZATION_ID,USER_STATUS,PERMISSION_LEVEL, PERMISSION_TYPE,ADMIN_PERMISSION,
+		MODIFIED_DATE,CREATED_DATE,CREATED_BY_USER_ID,MODIFIED_BY_USER_ID, IS_BASE_ORGANIZATION)
+		VALUES
+		(SEQ_STAFF_ORGANIZATION_ID.NEXTVAL, #{msStaffId},#{msStaffActiveFlag,jdbcType=VARCHAR},
+		#{msStaffTitle,jdbcType=VARCHAR},#{msMemberStatus,jdbcType=VARCHAR}, #{msOrgId, jdbcType=VARCHAR},
+		#{msUserStatus,jdbcType=VARCHAR},#{msPermissionLevel, jdbcType=VARCHAR}, #{msPermissionType, jdbcType=VARCHAR},
+		#{msAdminPermission, jdbcType=VARCHAR},current_timestamp,current_timestamp,#{msStaffId},#{msStaffId}, '1')
+	</insert>
+
+	<insert id="insertIntoOrgAccountDetails" parameterType="com.nyc.hhs.model.OrganizationBean">
+		INSERT INTO ORGANIZATION
+		(
+		ORGANIZATION_ID,
+		ORGANIZATION_TYPE,
+		ORGANIZATION_STATUS,
+		MISSION_STATEMENT,
+		ORGANIZATION_LEGAL_NAME,
+		ORGANIZATION_ACTIVE_FLAG,
+		DUNS_ID,
+		ORGANIZATION_CREATION_DATE,
+		ORGANIZATION_EXPIRATION_DATE,
+		ACCOUNTING_PERIOD_START_MONTH,
+		ACCOUNTING_PERIOD_END_MONTH,
+		EIN_ID_NN,
+		OVERRIDING_FLAG,
+		OVERRIDING_REASON,
+		ENTITY_TYPE_ID,
+		ALTERNATE_NAME,
+		CREATED_BY,
+		CORPORATE_STRUCTURE_ID,
+		EMAIL_ADDRESS,
+		PHONE_NUMBER,
+		PROC_STATUS,
+		CREATED_DATE,
+		ORGANIZATION_START_DATE,
+		ADDRESS_1,
+		ADDRESS_2,
+		CITY,
+		BOROUGH,
+		STATE,
+		ZIP_CODE,
+		WEBSITE,
+		FAX_NUMBER,
+		FORM_NAME,
+		FORM_VERSION,
+		FORM_ID,
+		OTHER_PLEASE_SPECIFY,
+		MODIFIED_BY,
+		MODIFIED_DATE,
+		VAL_STATUS_DECSCRIPTION,
+		VAL_STATUS_REASON_TEXT,
+		VAL_NORM_HOUSE_NUMBER,
+		VAL_NORM_STREET_NAME,
+		VAL_CITY,
+		VAL_STATE,
+		VAL_ZIP_CODE,
+		VAL_X_COORDINATE,
+		VAL_Y_COORDINATE,
+		VAL_COMMUNITY_DISTRICT,
+		VAL_CIVIAL_COURT_DISTRICT,
+		VAL_SCHOOL_DISTR_NAME,
+		VAL_HEALTH_AREA,
+		VAL_BUILDING_ID_NUMBER,
+		VAL_BOROUGH,
+		VAL_TAX_BLOCK,
+		VAL_TAX_LOT,
+		VAL_CONGRESS_DISTRICT,
+		VAL_SENATOR_DISTRICT,
+		VAL_ASSEMBLY_DISTRICT,
+		VAL_COUNCIL_DISTRICT,
+		VAL_LOW_END_CROSS_STREET_NO,
+		VAL_HIGH_END_CROSS_STREET_NO,
+		VAL_LOW_END_CROSS_STREET_NAME,
+		VAL_HIGH_END_CROSS_STREET_NAME,
+		VAL_LATITUDE,
+		VAL_LONGITUDE,
+		REPORTING_MODIFIED_BY,
+		REPORTING_MODIFIED_DATE
+		)
+		VALUES
+		(
+		#{msOrgId , jdbcType=VARCHAR},
+		#{msOrgType, jdbcType=VARCHAR},
+		#{msOrgStatus, jdbcType=VARCHAR},
+		#{msMissionStatement,jdbcType=VARCHAR},
+		#{msOrgLegalName, jdbcType=VARCHAR},
+		#{msOrgActiveFlag, jdbcType=VARCHAR},
+		#{msDunsId, jdbcType=VARCHAR},
+		#{msOrgCreationDate, jdbcType=VARCHAR},
+		<!-- Rel 4.1.0 QC 8280 begin-->
+		to_date('31-dec-2999', 'dd-mon-yyyy'),
+		<!-- Rel 4.1.0 QC 8280 end-->
+		#{msAcctPeriodStrtMonth, jdbcType=VARCHAR},
+		#{msAcctPeriodEndMonth, jdbcType=VARCHAR},
+		#{msEinId,jdbcType=VARCHAR},
+		#{msOverridingFlag, jdbcType=VARCHAR},
+		#{msOverridingReason, jdbcType=VARCHAR},
+		#{msEntityTypeId,jdbcType=VARCHAR},
+		#{msAlternateName, jdbcType=VARCHAR},
+		(SELECT STAFF_ID FROM (SELECT distinct(sd.STAFF_ID)FROM STAFF_DETAILS sd, STAFF_ORGANIZATION SOM WHERE sd.email=#{msEmailAddress} AND sd.USER_DN is not null AND (som.USER_STATUS='Yes' OR som.USER_STATUS='Pending') AND som.staff_id = sd.staff_id) WHERE ROWNUM = 1),
+		#{msCorpStrucId, jdbcType=VARCHAR},
+		#{msEmailAddress, jdbcType=VARCHAR},
+		#{msPhoneNo, jdbcType=VARCHAR},
+		#{msProcStatus, jdbcType=VARCHAR},
+		#{msSubmissionDate,	jdbcType=VARCHAR},
+		#{msOrgStrtDate, jdbcType=VARCHAR},
+		#{msAddress1,jdbcType=VARCHAR},
+		#{msAddress2, jdbcType=VARCHAR},
+		#{msCity,jdbcType=VARCHAR},
+		#{msBorough, jdbcType=VARCHAR},
+		#{msState,jdbcType=VARCHAR},
+		#{msZipCode, jdbcType=VARCHAR},
+		#{msWebSite,jdbcType=VARCHAR},
+		#{msFaxNumber, jdbcType=VARCHAR},
+		#{msFormName,jdbcType=VARCHAR},
+		#{msFormVersion, jdbcType=VARCHAR},
+		#{msFormId,	jdbcType=VARCHAR},
+		#{msEntityTypeOthers, jdbcType=VARCHAR},
+		(SELECT STAFF_ID FROM (SELECT distinct(sd.STAFF_ID)FROM STAFF_DETAILS sd, STAFF_ORGANIZATION SOM WHERE sd.email=#{msEmailAddress} AND sd.USER_DN is not null AND (som.USER_STATUS='Yes' OR som.USER_STATUS='Pending') AND som.staff_id = sd.staff_id) WHERE ROWNUM = 1),
+		#{msSubmissionDate, jdbcType=VARCHAR},
+		#{msStatusDescriptionText, jdbcType=VARCHAR},
+		#{msStatusReason, jdbcType=VARCHAR},
+		#{msNormHouseNumber, jdbcType=VARCHAR},
+		#{msStreetNumberText, jdbcType=VARCHAR},
+		#{msValCity, jdbcType=VARCHAR},
+		#{msValState, jdbcType=VARCHAR},
+		#{msValZipCode, jdbcType=VARCHAR},
+		#{msValXCoordinate, jdbcType=VARCHAR},
+		#{msValYCoordinate, jdbcType=VARCHAR},
+		#{msCommDistt, jdbcType=VARCHAR},
+		#{msCivilCourtDistt, jdbcType=VARCHAR},
+		#{msSchoolDisttName, jdbcType=VARCHAR},
+		#{msHealthArea, jdbcType=VARCHAR},
+		#{msBuildIdNumber, jdbcType=VARCHAR},
+		#{msValBorough, jdbcType=VARCHAR},
+		#{msTaxBlock, jdbcType=VARCHAR},
+		#{msTaxLot, jdbcType=VARCHAR},
+		#{msCongressionalDistrictName, jdbcType=VARCHAR},
+		#{msSenatorDistt, jdbcType=VARCHAR},
+		#{msAssemblyDistt, jdbcType=VARCHAR},
+		#{msCouncilDistt, jdbcType=VARCHAR},
+		#{msLowEndCrossStreetNo, jdbcType=VARCHAR},
+		#{msHighEndCrossStreetNo, jdbcType=VARCHAR},
+		#{msLowEndCrossStreetName, jdbcType=VARCHAR},
+		#{msHighEndCrossStreetName, jdbcType=VARCHAR},
+		#{msLatitude, jdbcType=VARCHAR},
+		#{msLongitude, jdbcType=VARCHAR},
+		(SELECT STAFF_ID FROM (SELECT distinct(sd.STAFF_ID)FROM STAFF_DETAILS sd, STAFF_ORGANIZATION SOM WHERE sd.email=#{msEmailAddress} AND sd.USER_DN is not null AND (som.USER_STATUS='Yes' OR som.USER_STATUS='Pending') AND som.staff_id = sd.staff_id) WHERE ROWNUM = 1),
+		SYSTIMESTAMP
+		)
+</insert>
+	<!-- 
+	<select id="getUserOrgDetails" resultMap="userOrgDetails">
+		SELECT SD.FIRST_NAME,
+		SD.MIDDLE_INITIAL,
+		SD.LAST_NAME,
+		SD.ACTIVE_FLAG,
+		SD.NYC_USER_ID,
+		SD.ORGANIZATION_ID,
+		SD.TERMS_CONDITIONS_ACCEPTED,
+		ORG.ORGANIZATION_ID,
+		ORG.ORGANIZATION_LEGAL_NAME,
+		ORG.ORGANIZATION_ACTIVE_FLAG,
+		ORG.PROC_STATUS
+		FROM STAFF_DETAILS SD, ORGANIZATION ORG
+		WHERE SD.ORGANIZATION_ID = ORG.ORGANIZATION_ID AND
+		SD.USER_DN = #{msUserDN} AND ORG.PROC_STATUS !='Rejected'
+	</select>
+	 -->
+	
+	<select id="getUserOrgDetails" resultMap="userOrgDetails">
+		SELECT SD.FIRST_NAME,
+		SD.MIDDLE_INITIAL,
+		SD.LAST_NAME,
+		SMO.ADMIN_PERMISSION,
+		SMO.ACTIVE_FLAG,
+		SD.NYC_USER_ID,
+		SMO.ORGANIZATION_ID,
+		SD.TERMS_CONDITIONS_ACCEPTED,
+		SMO.PERMISSION_LEVEL,
+		SMO.PERMISSION_TYPE,
+		ORG.ORGANIZATION_ID,
+		ORG.ORGANIZATION_LEGAL_NAME,
+		ORG.ORGANIZATION_ACTIVE_FLAG,
+		ORG.PROC_STATUS
+		FROM STAFF_DETAILS SD, STAFF_ORGANIZATION SMO, ORGANIZATION ORG
+		WHERE 
+		SD.USER_DN = #{msUserDN} AND 
+		SMO.STAFF_ID = SD.STAFF_ID AND
+    	ORG.ORGANIZATION_ID  = SMO.ORGANIZATION_ID AND
+		SMO.USER_STATUS IN ('Yes', 'Pending') AND ORG.PROC_STATUS !='Rejected'
+		ORDER BY SMO.ACTIVE_FLAG DESC
+	</select>
+	
+	
+<!--   [Start] R7.8.0 SAML check Email update  -->
+	<insert id="checkProviderNycIdUpdate" parameterType="com.nyc.hhs.model.StaffDetails">
+		MERGE INTO STAFF_DETAILS  sd 
+        using (select  FIRST_NAME, MIDDLE_INITIAL, LAST_NAME, USER_DN, STAFF_ID
+                from   STAFF_DETAILS
+                where  USER_DN =  #{msUserDN}
+                  and   ( NYC_USER_ID !=  #{msNYCUserId}
+                          or    NVL(FIRST_NAME,'') != NVL(#{msStaffFirstName},'')
+                          or    NVL(MIDDLE_INITIAL,' ') != NVL(#{msStaffMidInitial},' ')
+                          or    NVL(LAST_NAME,'') != NVL(#{msStaffLastName},'') 
+                          or    EMAIL != #{msNYCUserId} 
+                        )
+                union 
+                select   FIRST_NAME, MIDDLE_INITIAL, LAST_NAME, USER_DN, STAFF_ID
+                 from    STAFF_DETAILS
+                where    USER_DN =  #{msUserDN}
+                  and    ( FIRST_NAME is null or  LAST_NAME  is null or MIDDLE_INITIAL  is null  )         
+              ) Tmp
+           on (   Tmp.STAFF_ID = sd.STAFF_ID 
+           	      and Tmp.USER_DN = sd.USER_DN
+              )
+        WHEN MATCHED THEN
+          update  
+          set     sd.NYC_USER_ID = #{msNYCUserId}
+          ,       sd.EMAIL  =   #{msNYCUserId}
+          ,       sd.FIRST_NAME  =   #{msStaffFirstName}
+          ,       sd.MIDDLE_INITIAL  =   #{msStaffMidInitial}
+          ,       sd.LAST_NAME  =   #{msStaffLastName}
+          ,       sd.MODIFIED_DATE = SYSDATE
+          where   Tmp.STAFF_ID = sd.STAFF_ID
+          and     Tmp.USER_DN = sd.USER_DN  
+    </insert>
+<!--   [End] R7.8.0 SAML check Email update  -->
+
+	<select id="getUserOrgDetailsMultiAccount" resultMap="userOrgDetails">
+
+		SELECT SD.FIRST_NAME,
+		SD.MIDDLE_INITIAL,
+		SD.LAST_NAME,
+		SMO.ACTIVE_FLAG,
+		SD.NYC_USER_ID,
+		SMO.ORGANIZATION_ID,
+		SD.TERMS_CONDITIONS_ACCEPTED,
+		SMO.PERMISSION_LEVEL,
+		MT.MEMBER_NAME,
+		ORG.ORGANIZATION_ID,
+		ORG.ORGANIZATION_LEGAL_NAME,
+		ORG.ORGANIZATION_ACTIVE_FLAG,
+		ORG.PROC_STATUS
+		FROM STAFF_DETAILS SD, STAFF_ORGANIZATION SMO, ORGANIZATION ORG, MEMBER_TITLE MT
+		WHERE 
+		SD.USER_DN = #{msUserDN} AND 
+		SMO.STAFF_ID = SD.STAFF_ID AND
+    	ORG.ORGANIZATION_ID  = SMO.ORGANIZATION_ID AND
+		SMO.TITLE = MT.MEMBER_ID AND
+		ORG.PROC_STATUS !='Rejected'
+	</select>
+
+	<resultMap id="missingDetails" type="com.nyc.hhs.model.OrgStaffDetailBean">
+		<result property="msOrgEinTinNumber" column="EIN_ID_NN" />
+		<result property="msOrgLegalName" column="ORGANIZATION_LEGAL_NAME" />
+		<result property="msOrgCorpStructure" column="CORPORATE_STRUCTURE_ID" />
+		<result property="msOrgEntityType" column="ENTITY_TYPE_ID" />
+		<result property="msOrgEntityTypeOther" column="OTHER_PLEASE_SPECIFY" />
+		<result property="msOrgDoingBusAs" column="ALTERNATE_NAME" />
+		<result property="msOrgDunsNumber" column="DUNS_ID" />
+		<result property="msOrgAcctPeriodStart" column="ACCOUNTING_PERIOD_START_MONTH" />
+		<result property="msOrgAcctPeriodEnd" column="ACCOUNTING_PERIOD_END_MONTH" />
+		<result property="msExecAddrLine1" column="ADDRESS_1" />
+		<result property="msExecAddrLine2" column="ADDRESS_2" />
+		<result property="msExecCity" column="CITY" />
+		<result property="msExecBorough" column="BOROUGH" />
+		<result property="msExecState" column="STATE" />
+		<result property="msExecZipCode" column="ZIP_CODE" />
+		<result property="msExecPhoneNo" column="PHONE_NUMBER" />
+		<result property="msExecFaxNo" column="FAX_NUMBER" />
+		<result property="msExecWebSite" column="WEBSITE" />
+		<result property="msFirstName" column="FIRST_NAME" />
+		<result property="msMiddleInitial" column="MIDDLE_INITIAL" />
+		<result property="msLastName" column="LAST_NAME" />
+		<result property="msPhoneNo" column="PHONE" />
+		<result property="msEmailAdd" column="EMAIL" />
+		<result property="msTitle" column="TITLE" />
+		<result property="msAdminNYCId" column="NYC_USER_ID" />
+		<result property="msAdminUserDN" column="USER_DN" />
+	</resultMap>
+
+	<select id="getMissingDetails" resultMap="missingDetails">
+		SELECT
+		ORG.ORGANIZATION_ID,
+		ORG.ORGANIZATION_LEGAL_NAME,
+		ORG.DUNS_ID,
+		ORG.ACCOUNTING_PERIOD_START_MONTH,
+		ORG.ACCOUNTING_PERIOD_END_MONTH,
+		ORG.EIN_ID_NN,
+		ORG.ENTITY_TYPE_ID,
+		ORG.ALTERNATE_NAME,
+		ORG.CORPORATE_STRUCTURE_ID,
+		ORG.EMAIL_ADDRESS,
+		ORG.PHONE_NUMBER,
+		ORG.PROC_STATUS,
+		ORG.ADDRESS_1,
+		ORG.ADDRESS_2,
+		ORG.CITY,
+		ORG.BOROUGH,
+		ORG.STATE,
+		ORG.ZIP_CODE,
+		ORG.WEBSITE,
+		ORG.FAX_NUMBER,
+		ORG.OTHER_PLEASE_SPECIFY,
+		SD.FIRST_NAME,
+		SD.MIDDLE_INITIAL,
+		SD.LAST_NAME,
+		SOM.TITLE,
+		SD.PHONE,
+		SD.EMAIL,
+		SD.STAFF_ID,
+		SOM.ORGANIZATION_ID,
+		SD.NYC_USER_ID,
+		SD.USER_DN
+		FROM ORGANIZATION ORG , STAFF_DETAILS SD, STAFF_ORGANIZATION SOM
+		WHERE
+		ORG.ORGANIZATION_ID = #{msOrgId} AND
+		ORG.ORGANIZATION_ID=SOM.ORGANIZATION_ID and
+		SOM.STAFF_ID = SD.STAFF_ID
+</select>
+
+	<update id="updateStaffEmail" parameterType="com.nyc.hhs.model.StaffDetails">
+		UPDATE STAFF_DETAILS
+		SET EMAIL=#{msStaffEmail},
+		MODIFIED_DATE=current_timestamp,
+		MODIFIED_BY=#{msModifiedBy}
+		WHERE USER_DN=#{msUserDN}  
+</update>
+
+	<update id="updateLastLoginDate" parameterType="map">
+		UPDATE STAFF_DETAILS
+		SET LAST_LOGIN_DATE=#{LastLoginDate},
+		MODIFIED_DATE=current_timestamp,
+		MODIFIED_BY=#{ModifyBy}
+		WHERE USER_DN=#{UserDN}  
+</update>
+
+	<update id="updateTCinStaffDetails" parameterType="com.nyc.hhs.model.StaffDetails">
+		UPDATE STAFF_DETAILS
+		SET TERMS_CONDITIONS_ACCEPTED=#{msTermConditionStatus},
+		MODIFIED_DATE=current_timestamp,
+		MODIFIED_BY=#{msModifiedBy}
+		WHERE USER_DN=#{msUserDN}  
+</update>
+
+	<update id="updateUserProfileinStaffDetails" parameterType="map">
+		UPDATE STAFF_DETAILS
+		SET
+		FIRST_NAME=#{FirstName},MIDDLE_INITIAL=#{Initials},LAST_NAME=#{LastName},
+		MODIFIED_DATE=current_timestamp,
+		MODIFIED_BY=#{ModifiedBy}
+		WHERE USER_DN=#{UserDN}  
+</update>
+
+	<select id="searchUserDnInStaffDetails" parameterType="com.nyc.hhs.model.MissingNameBean" resultMap="userOrgDetails">
+		SELECT SD.USER_DN ,
+		SD.FIRST_NAME,SD.MIDDLE_INITIAL,SD.LAST_NAME,SD.EMAIL,SD.TERMS_CONDITIONS_ACCEPTED,
+		SOM.PERMISSION_LEVEL,SOM.ADMIN_PERMISSION,SOM.STAFF_ID 
+		FROM STAFF_DETAILS SD, STAFF_ORGANIZATION SOM
+		WHERE
+		SOM.ORGANIZATION_ID = #{msOrgId} AND
+		(SOM.USER_STATUS='Yes' or SOM.USER_STATUS='Pending') AND
+		SOM.STAFF_ID = SD.STAFF_ID AND 
+		SD.USER_DN=#{msUserDN}
+	</select>
+	
+	<select id="checkUserDnInStaffDetails" resultMap="userOrgDetails">
+		SELECT SD.USER_DN ,
+		SD.FIRST_NAME,SD.MIDDLE_INITIAL,SD.LAST_NAME,SD.EMAIL,SD.TERMS_CONDITIONS_ACCEPTED,
+		SOM.PERMISSION_LEVEL,SOM.PERMISSION_TYPE,SOM.ADMIN_PERMISSION,SOM.STAFF_ID FROM STAFF_DETAILS SD, STAFF_ORGANIZATION SOM 
+		WHERE
+		SOM.ORGANIZATION_ID = #{msOrgId} AND
+		SOM.USER_STATUS='Yes' AND
+		SOM.STAFF_ID = SD.STAFF_ID AND 
+		SD.USER_DN=#{msUserDN}
+	</select>	
+
+	<insert id="insertIntoEinMaster" parameterType="com.nyc.hhs.model.EINBean">
+
+		INSERT INTO EIN_MASTER(EIN_ID_NN,EIN_ACTIVE) VALUES (#{msEINid,
+		jdbcType=VARCHAR},#{msEINActive, jdbcType=VARCHAR})
+
+</insert>
+
+	<select id="ceoCheckInStaffDetails" resultMap="userOrgDetails">
+		SELECT count(1) as ISDUPLICATE from STAFF_ORGANIZATION where
+		title=#{msStaffTitle} and organization_id=#{msOrgId}
+	</select>
+
+	<resultMap id="SequeneceID" type="java.lang.Integer">
+		<result property="msSequenceID" column="CURRENTELEMENTID" />
+	</resultMap>
+
+	<select id="getCurrentSeqFromTable" resultMap="SequeneceID">
+		select SEQ_ORGANIZATION_ID.currval CURRENTELEMENTID from dual		
+ </select>
+
+	<select id="getNextSeqFromTable" resultMap="SequeneceID">
+		select
+		SEQ_ORGANIZATION_ID.NEXTVAL CURRENTELEMENTID from dual		
+ </select>
+
+
+	<select id="getCurrentSeqFromStaff" resultMap="SequeneceID">
+		select SEQ_STAFF_ID.currval CURRENTELEMENTID from dual		
+ </select>
+
+	<select id="getNextSeqFromStaff" resultMap="SequeneceID">
+		select
+		SEQ_STAFF_ID.NEXTVAL CURRENTELEMENTID from dual		
+ </select>
+
+	<!-- Missing Profile Information End -->
+	<!-- site minder start -->
+
+	<resultMap id="SeqID" type="java.lang.Integer">
+		<result property="msSequenceID" column="NEXTSEQID" />
+	</resultMap>
+
+	<select id="getSiteMinderUserDetails" parameterType="map"
+		resultType="map">
+		SELECT FIRST_NAME,LAST_NAME,USER_ID,EMAIL_ID,USER_ROLE,
+		USER_TYPE,ORGANIZATION_NAME,ACTIVE_FLAG FROM CITY_USER_DETAILS
+		WHERE USER_DN = #{asCmUserDN}
+	</select>
+
+	<select id="getNextSeqFromSiteMinderUserDetails" resultMap="SeqID">
+		select SEQ_CITY_USER_ID.NEXTVAL NEXTSEQID from dual      
+	</select>
+
+	<insert id="insertIntoSiteMinderUserDetails" parameterType="map">
+		INSERT INTO
+		CITY_USER_DETAILS ( USER_ID,FIRST_NAME,LAST_NAME,EMAIL_ID,USER_DN,
+		USER_ROLE,USER_TYPE,ORGANIZATION_NAME,ACTIVE_FLAG)
+		VALUES(#{SequenceId},#{FirstName},#{LastName},#{EmailAddress},#{UserDN},#{UserRole},
+		#{UserType},#{OrgName},'1')                
+	</insert>
+
+	<select id="searchStaffIdInStaffDetails" resultMap="userOrgDetails">
+		SELECT STAFF_ID FROM (SELECT distinct(sd.STAFF_ID) FROM STAFF_DETAILS sd, STAFF_ORGANIZATION SOM 
+		WHERE sd.email=#{msStaffEmail} 
+		AND sd.USER_DN=#{msUserDN} 
+		AND (som.USER_STATUS='Yes' OR som.USER_STATUS='Pending')
+		and som.staff_id = sd.staff_id)
+		WHERE ROWNUM = 1
+	</select>
+	
+	<select id="searchZipCode" parameterType="String" resultType="map">
+	SELECT ZIP_CODE,BOROUGH FROM NYC_ZIPBOROUGHMAPPING
+			WHERE ZIP_CODE=#{asZipCode}
+	</select>
+
+	<update id="updateRoleInCityUserDetails" parameterType="map" >
+	
+	UPDATE CITY_USER_DETAILS 
+	SET FIRST_NAME=#{FirstName},
+		LAST_NAME=#{LastName},
+		EMAIL_ID=#{EmailAddress},
+		USER_ROLE=#{UserRole},
+		USER_TYPE=#{UserType},
+		ORGANIZATION_NAME=#{OrgName},
+		ACTIVE_FLAG='1'
+	WHERE USER_DN=#{UserDN}
+	</update>
+	
+	<update id="updateRoleInCityUserDetailsForLdapBatch" parameterType="map" >
+	UPDATE CITY_USER_DETAILS 
+	SET FIRST_NAME=#{FirstName},
+		LAST_NAME=#{LastName},
+		EMAIL_ID=#{EmailAddress},
+		USER_ROLE=#{UserRole},
+		USER_TYPE=#{UserType},
+		ORGANIZATION_NAME=#{OrgName},
+		ACTIVE_FLAG='1'
+		WHERE USER_DN=#{UserDN}
+	</update>
+	<!-- site minder end -->
+
+<select id="getPendingRequestCount" parameterType="com.nyc.hhs.model.StaffDetails" resultType="int">
+	SELECT COUNT (SO.STAFF_ID) 
+	FROM STAFF_DETAILS SD, STAFF_ORGANIZATION SO 
+	WHERE
+	SD.STAFF_ID = SO.STAFF_ID AND 
+	SO.ORGANIZATION_ID = #{msOrgId} AND
+	SD.EMAIL=#{msStaffEmail} AND SO.USER_STATUS='Pending'
+</select>
+
+	<select id="getSiteMinderUserDetailsForLdapBatch" parameterType="map"
+		resultType="map">
+		SELECT FIRST_NAME,LAST_NAME,USER_ID,EMAIL_ID,USER_ROLE,
+		USER_TYPE,ORGANIZATION_NAME FROM CITY_USER_DETAILS
+		WHERE USER_DN = #{asCmUserDN}
+	</select>
+
+<select id="searchUserOnEmailId" resultMap="userOrgDetails">
+	select distinct sd.staff_id, sd.email from staff_details sd , STAFF_ORGANIZATION som 
+	where sd.staff_id = som.staff_id and
+	      som.active_flag = 'Yes' and 
+	      som.user_status = 'Yes' and 
+	      som.member_status = 'Active'  and 
+	      sd.user_dn is not null and
+	      sd.email like #{msStaffEmail}
+	      order by lower(sd.email) asc
+</select>
+
+	<insert id="insertSubmitAccessRequestProvider" parameterType="com.nyc.hhs.model.StaffDetails">
+		INSERT INTO	STAFF_ORGANIZATION(STAFF_ORGANIZATION_ID, STAFF_ID,ACTIVE_FLAG,MEMBER_STATUS,ORGANIZATION_ID,USER_STATUS,
+		PERMISSION_LEVEL,ADMIN_PERMISSION,LAST_LOGIN_DATE,
+		CREATED_BY_USER_ID,MODIFIED_BY_USER_ID,CREATED_DATE,MODIFIED_DATE,TITLE, IS_BASE_ORGANIZATION)
+		VALUES(SEQ_STAFF_ORGANIZATION_ID.NEXTVAL, #{msStaffId},#{msStaffActiveFlag},#{msMemberStatus},#{msOrgId}, #{msUserStatus},
+		#{msPermissionLevel}, #{msAdminPermission},null,
+		#{msCreatedBy},#{msCreatedBy},current_timestamp,current_timestamp, #{msStaffTitle}, '0')
+	</insert>
+	
+	<update id="updateStaffMappingForSubmitAccessRequest" parameterType="com.nyc.hhs.model.StaffDetails">
+		UPDATE STAFF_ORGANIZATION SET 
+		TITLE = #{msStaffTitle, jdbcType=VARCHAR}, 
+		ACTIVE_FLAG = #{msStaffActiveFlag, jdbcType=VARCHAR}, 
+		MEMBER_STATUS = #{msMemberStatus, jdbcType=VARCHAR}, 
+		ORGANIZATION_ID =  #{msOrgId, jdbcType=VARCHAR},
+		USER_STATUS=#{msUserStatus, jdbcType=VARCHAR},
+		PERMISSION_LEVEL=#{msPermissionLevel, jdbcType=VARCHAR},
+		PERMISSION_TYPE=#{msPermissionType, jdbcType=VARCHAR},
+		ADMIN_PERMISSION=#{msAdminPermission, jdbcType=VARCHAR},
+		MODIFIED_DATE = SYSDATE, MODIFIED_BY_USER_ID = #{msCreatedBy, jdbcType=VARCHAR}
+		WHERE STAFF_ID = #{msStaffId} AND ORGANIZATION_ID =  #{msOrgId} 
+	</update>
+	
+	<update id="deactivateInternalUser" parameterType="map" >
+	UPDATE CITY_USER_DETAILS 
+	SET ACTIVE_FLAG='0'
+	WHERE USER_DN=#{UserDN}
+	</update>	
+	<select id="getStaffDetailsFromId" parameterType="string" resultMap="userOrgDetails">
+		SELECT SD.FIRST_NAME,
+		SD.MIDDLE_INITIAL,
+		SD.LAST_NAME,
+		SMO.ACTIVE_FLAG,
+		SD.NYC_USER_ID,
+		SMO.ORGANIZATION_ID,
+		SD.TERMS_CONDITIONS_ACCEPTED,
+		SMO.PERMISSION_LEVEL,
+		MT.MEMBER_NAME,
+		ORG.ORGANIZATION_ID,
+		ORG.ORGANIZATION_LEGAL_NAME,
+		ORG.ORGANIZATION_ACTIVE_FLAG,
+		ORG.PROC_STATUS
+		FROM STAFF_DETAILS SD, STAFF_ORGANIZATION SMO, ORGANIZATION ORG, MEMBER_TITLE MT
+		WHERE 
+		SD.STAFF_ID = #{lsStaffId} AND 
+		SMO.STAFF_ID = SD.STAFF_ID AND
+		SMO.USER_STATUS IN ('Yes', 'Pending') AND
+    	ORG.ORGANIZATION_ID  = SMO.ORGANIZATION_ID AND
+		SMO.TITLE = MT.MEMBER_ID(+) AND
+		ORG.ORGANIZATION_ACTIVE_FLAG !='false'
+		order by lower(ORG.ORGANIZATION_LEGAL_NAME) ASC
+	</select>
+	
+	<select id="fetchStaffIdFromEmail" parameterType="string" resultType="string">
+            select staff_id from staff_details where user_dn is not null and email = #{asEmail,jdbcType=VARCHAR}
+    </select>
+
+
+<!-- Start R8.9.0 QC9531  cleaning Dup user_dn  -->
+	<resultMap id="userDNOrgInfo" type="com.nyc.hhs.model.StaffDetails">
+		<result property="msStaffFirstName" column="FIRST_NAME" />
+		<result property="msStaffLastName" column="LAST_NAME" />
+		<result property="msStaffActiveFlag" column="ACTIVE_FLAG" />
+		<result property="msNYCUserId" column="NYC_USER_ID" />
+		<result property="msOrgId" column="ORGANIZATION_ID" />
+		<result property="msTermConditionStatus" column="TERMS_CONDITIONS_ACCEPTED" />
+		<result property="msUserDN" column="USER_DN" />
+		<result property="msPermissionLevel" column="PERMISSION_LEVEL" />
+		<result property="msPermissionType" column="PERMISSION_TYPE" />
+		<result property="msAdminPermission" column="ADMIN_PERMISSION" />
+		<result property="msStaffEmail" column="EMAIL" />
+		<result property="msStaffId" column="STAFF_ID" />
+		<result property="msIsBaseOrg" column="IS_BASE_ORGANIZATION" />
+		<result property="msStaffOrgId" column="STAFF_ORGANIZATION_ID" />
+	</resultMap>
+
+	<select id="fetchDupBothUserNOrg"  resultMap="userDNOrgInfo">
+		select tf.FIRST_NAME, tf.LAST_NAME , tf.USER_DN, so.staff_id , so.ORGANIZATION_ID, so.ACTIVE_FLAG, 
+		       so.USER_STATUS , so.PERMISSION_LEVEL, so.ADMIN_PERMISSION, so.PERMISSION_TYPE, so.IS_BASE_ORGANIZATION, 
+		       so.MEMBER_INACTIVE_DATE , tf.NYC_USER_ID , tf.email ,  tf.TERMS_CONDITIONS_ACCEPTED , so.STAFF_ORGANIZATION_ID
+		from   STAFF_DETAILS tf  , STAFF_ORGANIZATION so
+		where  tf.USER_DN in ( select USER_DN  from STAFF_DETAILS where USER_DN is not null group by USER_DN having  count(*) > 1 ) 
+		and    tf.USER_DN in ( select   USER_DN 
+		                       from (  select   USER_DN,    ORGANIZATION_ID
+		                                 from ( select   tf.USER_DN, so.ORGANIZATION_ID
+		                                          from   STAFF_DETAILS tf  , STAFF_ORGANIZATION so
+		                                         where  tf.USER_DN in ( select USER_DN  from STAFF_DETAILS where USER_DN is not null 
+		                                                                 group by USER_DN having  count(*) > 1 ) 
+		                                           and  so.staff_id = tf.staff_id
+		                                         order  by  tf.USER_DN, so.staff_id , so.ORGANIZATION_ID
+		                                       )
+		                                group by  USER_DN, ORGANIZATION_ID
+		                                having count(*) > 1  )  
+		                     )
+		and   so.staff_id = tf.staff_id
+		order by  tf.USER_DN, so.staff_id , so.ORGANIZATION_ID
+    </select>
+
+	<select id="fetchDupUserDNOnly"  resultMap="userDNOrgInfo">
+		select tf.FIRST_NAME, tf.LAST_NAME , tf.USER_DN, tf.staff_id , so.ORGANIZATION_ID, so.ACTIVE_FLAG, 
+		       so.USER_STATUS , so.PERMISSION_LEVEL, so.ADMIN_PERMISSION, so.PERMISSION_TYPE, so.IS_BASE_ORGANIZATION, 
+		       so.MEMBER_INACTIVE_DATE , tf.NYC_USER_ID , tf.email,  tf.TERMS_CONDITIONS_ACCEPTED , so.STAFF_ORGANIZATION_ID
+		from   STAFF_DETAILS tf  , STAFF_ORGANIZATION so
+		where  tf.USER_DN in ( select USER_DN  from STAFF_DETAILS where USER_DN is not null group by USER_DN having  count(*) > 1 ) 
+		and    tf.USER_DN NOT in ( select   USER_DN 
+		                             from (  select   USER_DN,    ORGANIZATION_ID
+		                                       from ( select   tf.USER_DN, so.ORGANIZATION_ID
+		                                                from   STAFF_DETAILS tf  , STAFF_ORGANIZATION so
+                                                       where  tf.USER_DN in ( select USER_DN  from STAFF_DETAILS where USER_DN is not null 
+		                                                                 group by USER_DN having  count(*) > 1 ) 
+		                                                 and  so.staff_id = tf.staff_id
+		                                               order  by  tf.USER_DN, so.staff_id , so.ORGANIZATION_ID
+		                                              )
+		                                      group by  USER_DN, ORGANIZATION_ID
+		                                      having count(*) > 1  )  
+		                           )
+		and   tf.staff_id  =  so.staff_id 
+		order by  tf.USER_DN, so.staff_id , so.ORGANIZATION_ID
+    </select>
+    
+	<update id="removeDupUserDn" parameterType="com.nyc.hhs.model.StaffDetails">
+		Update  STAFF_DETAILS 
+		set NYC_USER_ID  = null
+		, EMAIL = null
+		, USER_DN = null
+		, TERMS_CONDITIONS_ACCEPTED = null
+		where   STAFF_ID = #{msStaffId}
+	</update>
+
+	<update id="replaceStaffIdBaseOrg" parameterType="com.nyc.hhs.model.StaffDetails">
+	    Update  STAFF_ORGANIZATION
+	       set  STAFF_ID = #{msStaffId}
+	       ,    IS_BASE_ORGANIZATION = #{msIsBaseOrg}
+	   where    STAFF_ORGANIZATION_ID = #{msStaffOrgId}
+	     AND    ORGANIZATION_ID =  #{msOrgId}   
+	</update>    
+<!-- End R8.9.0 QC9531 cleaning Dup user_dn  -->
+
+</mapper>
+
+
+

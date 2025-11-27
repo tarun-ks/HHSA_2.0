@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ROOT>
+	<organizationId name="all">
+		<DocumentCategory name="implementationstatus">
+			<DocType name="Pending Implementation"></DocType>
+			<DocType name="In Progress"></DocType>
+			<DocType name="Completed"></DocType>
+		</DocumentCategory>
+	</organizationId>
+	<organizationId name="provider_org">
+		<DocumentCategory name="All">
+			<DocType name="Organizational Chart"></DocType>
+			<!-- Modified CHAR500 doc type for release 3.1.0, Enhancement 6021 -->
+			 <!--Start R 9.1.0 QC 9609 Disable CHAR 500 Document type in Document Vault --> 
+			 <!--
+			<DocType name="CHAR 500 + 990 + Audit"></DocType>
+			-->
+			<!--End R 9.1.0 QC 9609 Disable CHAR 500 Document type in Document Vault --> 
+			<DocType name="Board of Directors List or Equivalent"></DocType>
+			<DocType name="Key Staff - Resume"></DocType>
+			<DocType name="Annual Report"></DocType>
+			<DocType name="Anti-Nepotism Policy"></DocType>
+			<DocType name="Board Resolution"></DocType>
+			<DocType name="Broker Certification"></DocType>
+			<DocType name="CEO Compensation Policy"></DocType>
+			<DocType name="Certificate of Insurance"></DocType>
+			<DocType name="Certificate of Occupancy"></DocType>
+			<DocType name="Certification of Client Abuse and Neglect"></DocType>
+			<DocType
+				name="Community Based Development Organization (CBDO) certification"></DocType>
+			<DocType
+				name="Community Housing Development Organization (CHDO) certification"></DocType>
+			<DocType name="Conflict of Interest Policy"></DocType>
+			<DocType name="Continuity of Operations Plan (COOP)"></DocType>
+			<DocType
+				name="Direct Deposit/Electronic Funds Transfer (EFT) Vendor Payment Enrollment Form"></DocType>
+			<DocType name="Diversity Policy"></DocType>
+			<DocType name="Doing Business Data Form"></DocType>
+			<DocType name="Emergency Preparedness"></DocType>
+			<DocType name="Employee Loan Policy"></DocType>
+			<DocType name="Financial Signature Authorization"></DocType>
+			<DocType name="Financial/Internal Controls Policy"></DocType>
+			<DocType name="Contract Agreement"></DocType>
+			<DocType name="Lease or Rental Agreement"></DocType>
+			<DocType name="Licenses/Certifications/Permits"></DocType>
+			<DocType
+				name="Non-Discrimination/Equal Employment Opportunity (EEO) Policy"></DocType>
+			<!--Fix for Defect 8229 -->
+			<DocType name="Solicitation - Other"></DocType>
+			<!--Fix for Defect 8229 end -->
+			<DocType name="Personnel Manual/Employee Handbook"></DocType>
+			<DocType name="Personnel recruitment, screening and hiring"></DocType>
+			<DocType name="Personnel retention and training"></DocType>
+			<DocType name="Personnel supervision and performance evaluation"></DocType>
+			<DocType name="Place of Assembly Permit"></DocType>
+			<DocType name="Policies and Procedures Manual"></DocType>
+			<DocType name="Project Labor Agreement"></DocType>
+			<DocType name="Record Retention Policy"></DocType>
+			<DocType name="Security Plan"></DocType>
+			<DocType name="Signature Authorization (authority to sign contracts)"></DocType>
+			<DocType name="State Education Department Waiver"></DocType>
+			<DocType name="Tax Affirmation"></DocType>
+			<DocType name="Transition Policy/Succession Policy"></DocType>
+			<!--Fix for Defect 8229 -->
+			<DocType name="W-9 Form"></DocType>
+			<!--Fix for Defect 8229 end-->
+			<DocType name="Whistleblower Policy"></DocType>
+			<DocType name="Workscope"></DocType>
+			<DocType name="Site Control"></DocType>
+			<DocType name="Community Linkages and Partnerships"></DocType>
+			<DocType name="Evaluation"></DocType>
+			<DocType name="Proposal"></DocType>
+			<!-- [Start] R7.7.0 QC9181 -->
+			<DocType name="Structured Proposal Form"></DocType>
+			<!-- [End] R7.7.0 QC9181 -->
+			<DocType name="Submitted VENDEX Memo"></DocType>
+			<DocType name="Substitute W9"></DocType>
+			<DocType name="VENDEX Certification of No Change"></DocType>
+			<DocType name="Community Board Correspondence"></DocType>
+			<DocType name="Work Sample"></DocType>
+			<DocType name="Brochure/Flyer"></DocType>
+			<DocType name="Proof of Group Purchasing Membership"></DocType>
+			<DocType name="Reference"></DocType>
+			<DocType name="Budget"></DocType>
+			<DocType name="Iran Divestment Act Compliance"></DocType>
+			<!-- Added Doc type IRS Determination Letter [501(c)3] as a part of 2.6.0 for implementing enhancement 5584  -->
+			<DocType name="IRS Determination Letter [501(c)3]"></DocType>
+		</DocumentCategory>
+	</organizationId>
+	<organizationId name="city_org">
+		<DocumentCategory name="Help">
+			<DocType name="Provider Help">
+				<HelpCategory name="Account Creation" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Alerts/Notifications" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Amendment" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Applications" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Budget (Provider)" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Budget Update" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Certification of Funds" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Contract (Provider)" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Contract Budget" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Document Vault" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Home" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Invoice (Provider)" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Modification" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Organization Information" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Payment" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Payment (Provider)" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Procurement Roadmap (Provider)" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Proposal and Award" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="General (Provider)" visibleTo="provider"></HelpCategory>
+			</DocType>
+			<DocType name="Agency Help">
+				<HelpCategory name="Agency Settings (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Alerts/Notifications" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Amendment" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Amendment (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Budget (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Budget Update" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Budget Update (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Certification of Funds" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Certification of Funds (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Contract (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Contract Budget" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Contract Budget (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Evaluation and Award" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Home (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Invoice" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Invoice (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Modification" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Modification (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Payment" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Payment (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Procurement Roadmap (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Tasks" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Tasks - Evaluation and Award" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="General (Agency)" visibleTo="agency"></HelpCategory>
+			</DocType>
+		</DocumentCategory>
+	</organizationId>
+	<organizationId name="provider_org">
+		<DocumentCategory name="Help">
+			<DocType name="Provider Help">
+				<HelpCategory name="Account Creation" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Alerts/Notifications" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Amendment" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Applications" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Budget (Provider)" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Budget Update" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Certification of Funds" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Contract (Provider)" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Contract Budget" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Document Vault" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Home" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Invoice (Provider)" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Modification" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Organization Information" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Payment" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Payment (Provider)" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Procurement Roadmap (Provider)" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="Proposal and Award" visibleTo="provider"></HelpCategory>
+				<HelpCategory name="General (Provider)" visibleTo="provider"></HelpCategory>
+			</DocType>
+		</DocumentCategory>
+	</organizationId>
+	<organizationId name="agency_org">
+		<DocumentCategory name="Help">
+			<DocType name="Agency Help">
+				<HelpCategory name="Agency Settings (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Alerts/Notifications" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Amendment" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Amendment (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Budget (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Budget Update" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Budget Update (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Certification of Funds" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Certification of Funds (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Contract (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Contract Budget" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Contract Budget (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Evaluation and Award" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Home (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Invoice" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Invoice (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Modification" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Modification (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Payment" visibleTo="both"></HelpCategory>
+				<HelpCategory name="Payment (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Procurement Roadmap (Agency)" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Tasks" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="Tasks - Evaluation and Award" visibleTo="agency"></HelpCategory>
+				<HelpCategory name="General (Agency)" visibleTo="agency"></HelpCategory>
+			</DocType>
+		</DocumentCategory>
+	</organizationId>
+	<Object name="alert">
+		<oraganizationType name="provider_org">
+			<DocType name="Account Request"></DocType>
+			<DocType name="Advance"></DocType>
+			<DocType name="Business Application"></DocType>
+			<DocType name="Contract Budget"></DocType>
+			<DocType name="Contract Budget Amendment"></DocType>
+			<DocType name="Contract Budget Modification"></DocType>
+			<DocType name="Contract Budget Update"></DocType>
+			<DocType name="Document Sharing"></DocType>
+			<DocType name="Filings"></DocType>
+			<DocType name="Invoice"></DocType>
+			<DocType name="Payment"></DocType>
+			<DocType name="Procurement"></DocType>
+			<DocType name="Service Application"></DocType>
+		</oraganizationType>
+		<oraganizationType name="agency_org">
+			<DocType name="Advance"></DocType>
+			<DocType name="Contract Amendment"></DocType>
+			<DocType name="Document Sharing" visibleTo="r1"></DocType>
+			<DocType name="Payment"></DocType>
+			<DocType name="Procurement"></DocType>
+		</oraganizationType>
+	</Object>
+</ROOT>

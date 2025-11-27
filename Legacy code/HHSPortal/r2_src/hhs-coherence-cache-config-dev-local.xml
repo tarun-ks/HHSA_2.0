@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+
+<!--
+	Note: This XML document is a Coherence Cache Configuration deployment 
+	descriptor that should only be use in the local dev environment.
+-->
+
+<!DOCTYPE cache-config SYSTEM "cache-config.dtd">
+
+<cache-config>
+
+	<caching-scheme-mapping>
+	
+		<!--
+			For locks, put it in the local cache scheme	with a
+			size limit of 50 objects and an expiry of 20 mins.
+		-->
+		<cache-mapping>
+			<cache-name>hhs-lock-ids</cache-name>
+			<scheme-name>local-cache</scheme-name>
+			<init-params>
+				<init-param>
+					<param-name>high-units</param-name>
+					<param-value>50</param-value>
+				</init-param>
+				<init-param>
+					<param-name>expiry-delay</param-name>
+					<param-value>20m</param-value>
+				</init-param>
+			</init-params>
+		</cache-mapping>
+
+		<!--
+			By default put everything in the local cache scheme
+			with no size limit and no expiry value.
+		-->
+		<cache-mapping>
+			<cache-name>*</cache-name>
+			<scheme-name>local-cache</scheme-name>
+		</cache-mapping>
+
+	</caching-scheme-mapping>
+
+	<caching-schemes>
+
+		<!-- Local caching scheme. -->
+		<local-scheme>
+			<scheme-name>local-cache</scheme-name>
+			<high-units>{high-units 0}</high-units>
+			<expiry-delay>{expiry-delay 0}</expiry-delay>
+		</local-scheme>
+
+	</caching-schemes>
+
+</cache-config>

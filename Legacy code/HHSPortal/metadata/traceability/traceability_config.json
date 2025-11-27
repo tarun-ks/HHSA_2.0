@@ -1,0 +1,97 @@
+{
+  "version": "1.0.0",
+  "description": "Traceability configuration for impact analysis and change tracking",
+  "traceability_engine": {
+    "change_tracking": {
+      "enabled": true,
+      "track_fields": [
+        "created_at",
+        "last_modified",
+        "created_by",
+        "last_modified_by",
+        "change_reason",
+        "change_type"
+      ],
+      "auto_timestamp": true,
+      "require_change_reason": true
+    },
+    "impact_analysis": {
+      "enabled": true,
+      "impact_levels": {
+        "critical": "Changes that break functionality",
+        "high": "Changes that affect multiple components",
+        "medium": "Changes that affect single components",
+        "low": "Changes with minimal impact"
+      },
+      "change_types": {
+        "reference_change": "Change to reference values",
+        "schema_change": "Change to data structure",
+        "field_change": "Change to field definitions",
+        "rule_change": "Change to business rules",
+        "ui_change": "Change to UI components"
+      }
+    },
+    "reference_mapping": {
+      "contract_statuses": {
+        "impact_level": "critical",
+        "dependent_files": [
+          "business_rules/business_rules.json",
+          "search/search_configuration.json",
+          "notifications/notifications.json"
+        ],
+        "validation_rules": [
+          "reference_exists",
+          "type_compatibility",
+          "no_circular_deps"
+        ]
+      },
+      "user_roles": {
+        "impact_level": "high",
+        "dependent_files": [
+          "security/permissions.json",
+          "business_rules/business_rules.json",
+          "notifications/notifications.json"
+        ],
+        "validation_rules": [
+          "reference_exists",
+          "permission_compatibility"
+        ]
+      }
+    },
+    "change_propagation": {
+      "direct_impact": "Files that directly reference the changed item",
+      "indirect_impact": "Files that reference files with direct impact",
+      "cascading_impact": "Multi-level dependency chains",
+      "breaking_changes": "Changes that require immediate attention"
+    },
+    "validation_rules": {
+      "reference_integrity": {
+        "enabled": true,
+        "validate_on_change": true,
+        "fail_on_missing_reference": true
+      },
+      "circular_dependency": {
+        "enabled": true,
+        "detect_cycles": true,
+        "max_depth": 10
+      },
+      "type_safety": {
+        "enabled": true,
+        "strict_types": true,
+        "validate_enum_values": true
+      }
+    },
+    "reporting": {
+      "impact_report": {
+        "format": "json",
+        "include_visualization": true,
+        "show_dependency_graph": true
+      },
+      "change_log": {
+        "format": "json",
+        "include_metadata": true,
+        "track_line_changes": true
+      }
+    }
+  }
+}

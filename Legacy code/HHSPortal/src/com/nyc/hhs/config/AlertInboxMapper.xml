@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.AlertInboxMapper">
+
+	<resultMap id="resultInboxAlert" type="com.nyc.hhs.model.AlertInboxBean">
+		<result property="msNotificationId" column="NOTIFICATION_ID" />
+		<result property="msNotificationName" column="NOTIFICATION_NAME" />
+		<result property="msNotificationRead" column="NOTIFICATION_READ" />
+		<result property="msNotificationDate" column="NOTIFICATION_DATE" />
+	</resultMap>
+
+	<resultMap id="selectedresultInboxAlert" type="com.nyc.hhs.model.AlertInboxBean">
+		<result property="msNotificationId" column="NOTIFICATION_ID" />
+		<result property="msNotificationName" column="NOTIFICATION_NAME" />
+		<result property="msNotificationDesc" column="NOTIFICATION_DESC" />
+		<result property="msNotificationDate" column="NOTIFICATION_DATE" />
+		<result property="msPermissionType" column="PERMISSION_TYPE" />
+		<result property="msPermissionLevel" column="PERMISSION_LEVEL" />
+		<!-- Added for 8577 -->
+		<result property="msEventId" column="EVENT_ID" />
+		<!-- defect 8577 End -->
+	</resultMap>
+
+	<resultMap id="resultInboxAlertCount" type="java.lang.Integer">
+		<result property="count" column="count" javaType="int" />
+	</resultMap>
+	 <!-- Modified as a part of release 2.7.0 to fix defect #5600 -->
+	<select id="selectAlertInboxList" parameterType="hashmap"
+            resultMap="resultInboxAlert">
+            SELECT NOTIFICATION_DATE,NOTIFICATION_ID,NOTIFICATION_NAME,NOTIFICATION_READ FROM ( SELECT ROWNUM
+            r,NOTIFICATION_DATE,NOTIFICATION_ID,NOTIFICATION_NAME,NOTIFICATION_READ
+            FROM ( SELECT
+            to_char(NOTIFICATION_DATE,'MM/dd/YYYY') as NOTIFICATION_DATE,NOTIFICATION_ID,NOTIFICATION_NAME,NOTIFICATION_READ
+            FROM USER_NOTIFICATION UN WHERE NOTIFICATION_TYPE =
+            #{asNotificationType} AND EMAIL_ID = #{asUserId} AND
+            <if test="orgType=='provider_org'">
+            NVL (un.organization_id, (select distinct ORGANIZATION_ID from STAFF_ORGANIZATION where STAFF_ID = un.email_id AND IS_BASE_ORGANIZATION = '1')) = #{asOrgId} and
+            </if>
+            NOTIFICATION_DATE &gt;= #{asFromDate, jdbcType=DATE}
+            AND NOTIFICATION_DATE &lt;= #{asToDate,jdbcType=DATE}
+            ORDER BY
+            to_date(NOTIFICATION_DATE,'mm/dd/yyyy') desc, NOTIFICATION_ID desc) ORDER
+            BY ROWNUM ) WHERE r BETWEEN
+            #{asStartNode}
+            AND
+            #{asEndNode}
+      </select>
+      <select id="selectAlertInboxListAll" parameterType="hashmap"
+            resultMap="resultInboxAlert">
+            SELECT NOTIFICATION_DATE,NOTIFICATION_ID,NOTIFICATION_NAME,NOTIFICATION_READ FROM ( SELECT ROWNUM
+            r,NOTIFICATION_DATE,NOTIFICATION_ID,NOTIFICATION_NAME,NOTIFICATION_READ
+            FROM ( SELECT
+            to_char(NOTIFICATION_DATE,'MM/dd/YYYY') as NOTIFICATION_DATE,NOTIFICATION_ID,NOTIFICATION_NAME,NOTIFICATION_READ
+            FROM USER_NOTIFICATION UN WHERE EMAIL_ID = #{asUserId} AND
+            <if test="orgType=='provider_org'">
+            NVL (un.organization_id, (select distinct ORGANIZATION_ID from STAFF_ORGANIZATION where STAFF_ID = un.email_id AND IS_BASE_ORGANIZATION = '1')) = #{asOrgId} and
+            </if>
+            NOTIFICATION_DATE &gt;= #{asFromDate, jdbcType=DATE}
+            AND NOTIFICATION_DATE &lt;= #{asToDate,jdbcType=DATE}
+            ORDER BY
+            to_date(NOTIFICATION_DATE,'mm/dd/yyyy') desc, NOTIFICATION_ID desc) ORDER
+            BY ROWNUM ) WHERE r BETWEEN
+            #{asStartNode}
+            AND
+            #{asEndNode}
+      </select>
+      <!-- Start : Updated in R5 -->
+      <select id="selectAlertInboxListCount" parameterType="hashmap"
+            resultMap="resultInboxAlertCount">
+            SELECT count(1) count FROM USER_NOTIFICATION UN 
+            <if test="orgType=='provider_org'">
+             	INNER JOIN STAFF_ORGANIZATION SO ON UN.EMAIL_ID = SO.STAFF_ID  AND SO.IS_BASE_ORGANIZATION = '1'
+            </if>
+            WHERE NOTIFICATION_TYPE = #{asNotificationType} AND EMAIL_ID = #{asUserId} AND NOTIFICATION_DATE &gt;= #{asFromDate, jdbcType=DATE}
+            AND NOTIFICATION_DATE &lt;= #{asToDate,jdbcType=DATE}
+            <if test="orgType=='provider_org'">
+            	AND UN.organization_id = #{asOrgId}
+            </if>
+      </select>
+      <select id="selectAlertInboxListCountAll" parameterType="hashmap"
+            resultMap="resultInboxAlertCount">
+            SELECT count(1) count FROM USER_NOTIFICATION UN 
+            <if test="orgType=='provider_org'">
+            	INNER JOIN STAFF_ORGANIZATION SO ON UN.EMAIL_ID = SO.STAFF_ID  AND SO.IS_BASE_ORGANIZATION = '1'
+			</if>
+            WHERE EMAIL_ID = #{asUserId} AND NOTIFICATION_DATE &gt;= #{asFromDate, jdbcType=DATE} AND NOTIFICATION_DATE &lt;= #{asToDate,jdbcType=DATE}
+            <if test="orgType=='provider_org'">
+            	AND UN.organization_id = #{asOrgId}
+            </if>
+      </select>
+	  <!-- End : Updated in R5 -->
+	<delete id="deleteSelectedAlertItem" parameterType="hashmap">
+		DELETE FROM
+		USER_NOTIFICATION WHERE NOTIFICATION_ID IN 
+		 <foreach item="items" index="index" collection="asNotificationIds"
+        open="(" separator="," close=")">
+          #{items}
+    	</foreach>
+		
+	</delete>
+	<!-- 
+	<select id="getSelectedAlertItem" parameterType="hashmap"
+		resultMap="selectedresultInboxAlert">
+		SELECT
+		NOTIFICATION_ID,NOTIFICATION_NAME,NOTIFICATION_DESC,to_char(NOTIFICATION_DATE,'MM/dd/YYYY') as NOTIFICATION_DATE
+		FROM USER_NOTIFICATION WHERE NOTIFICATION_ID= #{asNotificationId}
+	</select> -->
+	<!-- Updated as part of Release 3.1.3, Enhancement 6270 - Updating query to remove NOTIFICATION_DESC from Group By Clause -->
+	<select id="getSelectedAlertItem" parameterType="hashmap"
+		resultMap="selectedresultInboxAlert">
+		SELECT ou.EVENT_ID, ou.NOTIFICATION_ID, ou.NOTIFICATION_NAME, ou.NOTIFICATION_DESC, ou.NOTIFICATION_DATE, INR.PERMISSION_TYPE, INR. PERMISSION_LEVEL
+		FROM user_notification ou, 
+		(SELECT UN.EVENT_ID, LISTAGG(NAM.permission_type, ',') WITHIN GROUP (ORDER BY NAM.permission_type) AS PERMISSION_TYPE, LISTAGG(NAM.user_level, ',') WITHIN GROUP (ORDER BY NAM.user_level) AS PERMISSION_LEVEL
+		FROM notification_alert_master NAM, user_notification UN WHERE UN.NOTIFICATION_ID = #{asNotificationId}  AND UN.EVENT_ID IS NOT NULL
+		AND NAM.NOTIFICATION_ALERT_ID = UN.EVENT_ID GROUP BY EVENT_ID) INR
+		WHERE ou.EVENT_ID = INR.EVENT_ID
+		AND ou.NOTIFICATION_ID = #{asNotificationId}  
+		
+		UNION ALL
+		
+		SELECT UN.EVENT_ID,
+		NOTIFICATION_ID, NOTIFICATION_NAME, NOTIFICATION_DESC, NOTIFICATION_DATE,
+		'' AS PERMISSION_TYPE,
+		'' AS PERMISSION_LEVEL
+		FROM user_notification UN
+		WHERE UN.NOTIFICATION_ID = #{asNotificationId} 
+		AND 
+		UN.EVENT_ID is null
+	</select>
+	
+	
+	
+	<update id="putNotificationStatus" parameterType="hashmap">
+		UPDATE
+		USER_NOTIFICATION SET NOTIFICATION_READ ='Y' where NOTIFICATION_ID
+		=#{asNotificationId} 
+    </update>
+    <select id="getUserAccountCount" resultMap="resultInboxAlertCount" parameterType="string">
+    	SELECT count(1) as count FROM STAFF_ORGANIZATION WHERE
+		USER_STATUS = 'Pending' and ORGANIZATION_ID LIKE #{asOrgId}
+    </select>
+    <!--Start Added in R5 -->
+    <select id="getAlertBoxUnReadData" parameterType="hashmap" resultType="string">
+            SELECT COUNT(1)
+            	FROM USER_NOTIFICATION UN
+            <if test="asOrgType=='provider_org'">
+				INNER JOIN STAFF_ORGANIZATION SO ON UN.EMAIL_ID = SO.STAFF_ID  AND IS_BASE_ORGANIZATION = '1'
+            </if>
+            WHERE EMAIL_ID = #{asUserId} AND NOTIFICATION_READ = 'N'
+             <if test="asOrgType=='provider_org'">
+             	AND UN.ORGANIZATION_ID = #{asOrgId}
+             </if>
+      </select>
+      <!--End Added in R5 -->
+</mapper>
+
+

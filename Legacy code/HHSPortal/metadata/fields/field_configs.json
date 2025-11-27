@@ -1,0 +1,752 @@
+{
+  "version": "1.0.0",
+  "description": "Complete Contract Management Field Configurations with Legacy System Labels",
+  "contract_fields": {
+    "basic_information": {
+      "contract_id": {
+        "field_name": "contract_id",
+        "type": "text",
+        "label": "Contract ID",
+        "help_text": "Unique identifier for the contract",
+        "placeholder": "CON-001-2024",
+        "visible": true,
+        "editable": {
+          "type": "conditional",
+          "condition": "{{form.mode}} === 'create'",
+          "value": true,
+          "fallback": false
+        },
+        "required": true,
+        "max_length": 50,
+        "format": "uppercase",
+        "validation": "validation_rules.contract.fields.contract_id"
+      },
+      "title": {
+        "field_name": "title",
+        "type": "text",
+        "label": "Contract Title",
+        "help_text": "Enter a descriptive title for the contract",
+        "placeholder": "Enter contract title...",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "max_length": 255,
+        "min_length": 5,
+        "validation": "validation_rules.contract.fields.title"
+      },
+      "description": {
+        "field_name": "description",
+        "type": "textarea",
+        "label": "Description",
+        "help_text": "Detailed description of the contract scope and objectives",
+        "placeholder": "Enter detailed contract description...",
+        "visible": true,
+        "editable": true,
+        "required": false,
+        "max_length": 2000,
+        "rows": 4
+      }
+    },
+    "organization_references": {
+      "agency_id": {
+        "field_name": "agency_id",
+        "type": "select",
+        "label": "Agency",
+        "help_text": "Select the agency responsible for this contract",
+        "data_source": "data_sources.organizations",
+        "data_source_filter": {
+          "type": "AGENCY"
+        },
+        "visible": true,
+        "editable": {
+          "type": "conditional",
+          "condition": "{{contract.status}} in ['DRAFT', 'PENDING_CONFIGURATION']",
+          "value": true,
+          "fallback": false
+        },
+        "required": true,
+        "depends_on": {
+          "field": "program_id",
+          "clear_on_change": true,
+          "cascade": true
+        },
+        "validation": "validation_rules.contract.fields.agency_id"
+      },
+      "provider_id": {
+        "field_name": "provider_id",
+        "type": "select",
+        "label": "Provider",
+        "help_text": "Select the provider organization for this contract",
+        "data_source": "data_sources.organizations",
+        "data_source_filter": {
+          "type": "PROVIDER"
+        },
+        "visible": true,
+        "editable": {
+          "type": "conditional",
+          "condition": "{{contract.status}} in ['DRAFT', 'PENDING_CONFIGURATION']",
+          "value": true,
+          "fallback": false
+        },
+        "required": true,
+        "validation": "validation_rules.contract.fields.provider_id"
+      },
+      "program_id": {
+        "field_name": "program_id",
+        "type": "select",
+        "label": "Program",
+        "help_text": "Select the program this contract belongs to (optional)",
+        "data_source": "data_sources.programs",
+        "visible": true,
+        "editable": {
+          "type": "conditional",
+          "condition": "{{contract.status}} in ['DRAFT', 'PENDING_CONFIGURATION']",
+          "value": true,
+          "fallback": false
+        },
+        "required": false,
+        "depends_on": {
+          "field": "agency_id",
+          "clear_on_change": true,
+          "cascade": true
+        }
+      }
+    },
+    "contract_classification": {
+      "contract_type_id": {
+        "field_name": "contract_type_id",
+        "type": "select",
+        "label": "Contract Type",
+        "help_text": "Select the type of contract",
+        "data_source": "data_sources.contract_types",
+        "visible": true,
+        "editable": {
+          "type": "conditional",
+          "condition": "{{contract.status}} in ['DRAFT', 'PENDING_CONFIGURATION']",
+          "value": true,
+          "fallback": false
+        },
+        "required": true,
+        "validation": "validation_rules.contract.fields.contract_type_id"
+      },
+      "procurement_method_id": {
+        "field_name": "procurement_method_id",
+        "type": "select",
+        "label": "Procurement Method",
+        "help_text": "Method used to procure this contract",
+        "data_source": "data_sources.procurement_methods",
+        "visible": true,
+        "editable": {
+          "type": "conditional",
+          "condition": "{{contract.status}} in ['DRAFT', 'PENDING_CONFIGURATION']",
+          "value": true,
+          "fallback": false
+        },
+        "required": false
+      }
+    },
+    "financial_information": {
+      "award_amount": {
+        "field_name": "award_amount",
+        "type": "currency",
+        "label": "Contract Value",
+        "help_text": "Original award amount for this contract",
+        "placeholder": "0.00",
+        "visible": true,
+        "editable": {
+          "type": "role_based",
+          "roles": ["ACCO_MANAGER", "FINANCE_MANAGER"],
+          "conditions": {
+            "ACCO_MANAGER": "{{contract.status}} in ['DRAFT', 'PENDING_CONFIGURATION', 'PENDING_SUBMISSION', 'REGISTERED', 'SUSPENDED']",
+            "FINANCE_MANAGER": "{{contract.status}} in ['DRAFT', 'PENDING_CONFIGURATION', 'PENDING_SUBMISSION', 'REGISTERED', 'SUSPENDED']"
+          },
+          "fallback": false
+        },
+        "required": true,
+        "min_value": 0,
+        "max_value": 999999999.99,
+        "currency": "USD",
+        "validation": "validation_rules.contract.fields.award_amount"
+      },
+      "base_amount": {
+        "field_name": "base_amount",
+        "type": "currency",
+        "label": "Base Amount",
+        "help_text": "Base contract amount before amendments",
+        "placeholder": "0.00",
+        "visible": true,
+        "editable": {
+          "type": "role_based",
+          "roles": ["ACCO_MANAGER", "FINANCE_MANAGER"],
+          "conditions": {
+            "ACCO_MANAGER": "{{contract.status}} in ['DRAFT', 'PENDING_CONFIGURATION', 'PENDING_SUBMISSION', 'REGISTERED', 'SUSPENDED']",
+            "FINANCE_MANAGER": "{{contract.status}} in ['DRAFT', 'PENDING_CONFIGURATION', 'PENDING_SUBMISSION', 'REGISTERED', 'SUSPENDED']"
+          },
+          "fallback": false
+        },
+        "required": false,
+        "min_value": 0,
+        "max_value": 999999999.99,
+        "currency": "USD"
+      },
+      "current_contract_amount": {
+        "field_name": "current_contract_amount",
+        "type": "currency",
+        "label": "Current Contract Amount",
+        "help_text": "Current total contract amount including amendments",
+        "placeholder": "0.00",
+        "visible": {
+          "type": "role_based",
+          "roles": ["ACCO_MANAGER", "FINANCE_MANAGER"]
+        },
+        "editable": false,
+        "required": false,
+        "min_value": 0,
+        "max_value": 999999999.99,
+        "currency": "USD",
+        "computed": true,
+        "formula": "SUM({{contract.amendments.amendment_amount}})"
+      }
+    },
+    "contract_period": {
+      "start_date": {
+        "field_name": "start_date",
+        "type": "date",
+        "label": "Contract Start Date",
+        "help_text": "Date when the contract becomes effective",
+        "placeholder": "MM/DD/YYYY",
+        "visible": true,
+        "editable": {
+          "type": "conditional",
+          "condition": "{{contract.status}} in ['DRAFT', 'PENDING_CONFIGURATION', 'PENDING_SUBMISSION', 'REGISTERED', 'SUSPENDED']",
+          "value": true,
+          "fallback": false
+        },
+        "required": true,
+        "min_date": "{{today}}",
+        "max_date": "{{today + 365}}",
+        "validation": "validation_rules.contract.fields.start_date"
+      },
+      "end_date": {
+        "field_name": "end_date",
+        "type": "date",
+        "label": "Contract End Date",
+        "help_text": "Date when the contract expires",
+        "placeholder": "MM/DD/YYYY",
+        "visible": true,
+        "editable": {
+          "type": "conditional",
+          "condition": "{{contract.status}} in ['DRAFT', 'PENDING_CONFIGURATION', 'PENDING_SUBMISSION', 'REGISTERED', 'SUSPENDED']",
+          "value": true,
+          "fallback": false
+        },
+        "required": true,
+        "min_date": "{{contract.start_date}}",
+        "max_date": "{{contract.start_date + 3650}}",
+        "validation": "validation_rules.contract.fields.end_date"
+      }
+    },
+    "status_information": {
+      "status": {
+        "field_name": "status",
+        "type": "select",
+        "label": "Status",
+        "help_text": "Current status of the contract",
+        "data_source": "data_sources.contract_statuses",
+        "visible": true,
+        "editable": {
+          "type": "role_based",
+          "roles": ["ACCO_MANAGER", "FINANCE_MANAGER"],
+          "conditions": {
+            "ACCO_MANAGER": "{{contract.status}} in ['DRAFT', 'PENDING_CONFIGURATION', 'PENDING_SUBMISSION', 'REGISTERED', 'SUSPENDED']",
+            "FINANCE_MANAGER": "{{contract.status}} in ['DRAFT', 'PENDING_CONFIGURATION', 'PENDING_SUBMISSION', 'REGISTERED', 'SUSPENDED']"
+          },
+          "fallback": false
+        },
+        "required": true,
+        "default": "DRAFT"
+      }
+    }
+  },
+  "amendment_fields": {
+    "amendment_id": {
+      "field_name": "amendment_id",
+      "type": "text",
+      "label": "Amendment ID",
+      "help_text": "Unique identifier for the amendment",
+      "placeholder": "AMD-001-2024",
+      "visible": true,
+      "editable": {
+        "type": "conditional",
+        "condition": "{{form.mode}} === 'create'",
+        "value": true,
+        "fallback": false
+      },
+      "required": true,
+      "max_length": 50,
+      "format": "uppercase"
+    },
+    "amendment_type": {
+      "field_name": "amendment_type",
+      "type": "select",
+      "label": "Amendment Type",
+      "help_text": "Type of amendment being made",
+      "data_source": "data_sources.amendment_types",
+      "visible": true,
+      "editable": true,
+      "required": true
+    },
+    "amendment_amount": {
+      "field_name": "amendment_amount",
+      "type": "currency",
+      "label": "Amendment Amount",
+      "help_text": "Amount of the amendment",
+      "placeholder": "0.00",
+      "visible": true,
+      "editable": true,
+      "required": true,
+      "min_value": -999999999.99,
+      "max_value": 999999999.99,
+      "currency": "USD"
+    },
+    "amendment_date": {
+      "field_name": "amendment_date",
+      "type": "date",
+      "label": "Amendment Date",
+      "help_text": "Date when the amendment was made",
+      "placeholder": "MM/DD/YYYY",
+      "visible": true,
+      "editable": true,
+      "required": true,
+      "min_date": "{{contract.start_date}}",
+      "max_date": "{{today}}"
+    }
+  },
+  "workflow_fields": {
+    "workflow_definition": {
+      "workflow_id": {
+        "field_name": "workflow_id",
+        "type": "text",
+        "label": "Workflow ID",
+        "help_text": "Unique identifier for the workflow",
+        "visible": true,
+        "editable": false,
+        "required": true
+      },
+      "name": {
+        "field_name": "name",
+        "type": "text",
+        "label": "Workflow Name",
+        "help_text": "Name of the workflow",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "max_length": 255
+      },
+      "workflow_type": {
+        "field_name": "workflow_type",
+        "type": "select",
+        "label": "Workflow Type",
+        "help_text": "Type of workflow",
+        "data_source": "data_sources.workflow_types",
+        "visible": true,
+        "editable": true,
+        "required": true
+      },
+      "configuration": {
+        "field_name": "configuration",
+        "type": "textarea",
+        "label": "Configuration",
+        "help_text": "Workflow configuration JSON",
+        "visible": true,
+        "editable": true,
+        "required": false,
+        "rows": 10
+      }
+    },
+    "workflow_instance": {
+      "wob_number": {
+        "field_name": "wob_number",
+        "type": "text",
+        "label": "WOB Number",
+        "help_text": "Workflow object number",
+        "visible": true,
+        "editable": false,
+        "required": true
+      },
+      "status": {
+        "field_name": "status",
+        "type": "select",
+        "label": "Status",
+        "help_text": "Current status of the workflow",
+        "data_source": "data_sources.workflow_statuses",
+        "visible": true,
+        "editable": false,
+        "required": true
+      },
+      "current_step": {
+        "field_name": "current_step",
+        "type": "text",
+        "label": "Current Step",
+        "help_text": "Current step in the workflow",
+        "visible": true,
+        "editable": false,
+        "required": false
+      },
+      "assigned_to": {
+        "field_name": "assigned_to",
+        "type": "select",
+        "label": "Assigned To",
+        "help_text": "User assigned to the workflow",
+        "data_source": "data_sources.users",
+        "visible": true,
+        "editable": true,
+        "required": false
+      },
+      "properties": {
+        "field_name": "properties",
+        "type": "textarea",
+        "label": "Properties",
+        "help_text": "Workflow properties JSON",
+        "visible": true,
+        "editable": true,
+        "required": false,
+        "rows": 5
+      }
+    }
+  },
+  "document_fields": {
+    "document_type": {
+      "name": {
+        "field_name": "name",
+        "type": "text",
+        "label": "Document Type Name",
+        "help_text": "Name of the document type",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "max_length": 100
+      },
+      "category": {
+        "field_name": "category",
+        "type": "select",
+        "label": "Category",
+        "help_text": "Category of the document type",
+        "data_source": "data_sources.document_categories",
+        "visible": true,
+        "editable": true,
+        "required": true
+      },
+      "file_extensions": {
+        "field_name": "file_extensions",
+        "type": "text",
+        "label": "File Extensions",
+        "help_text": "Allowed file extensions (comma-separated)",
+        "visible": true,
+        "editable": true,
+        "required": false,
+        "placeholder": "pdf,doc,docx"
+      },
+      "max_file_size": {
+        "field_name": "max_file_size",
+        "type": "number",
+        "label": "Max File Size (MB)",
+        "help_text": "Maximum file size in megabytes",
+        "visible": true,
+        "editable": true,
+        "required": false,
+        "min_value": 1,
+        "max_value": 100
+      },
+      "is_required": {
+        "field_name": "is_required",
+        "type": "boolean",
+        "label": "Required",
+        "help_text": "Whether this document type is required",
+        "visible": true,
+        "editable": true,
+        "required": false,
+        "default": false
+      }
+    },
+    "document": {
+      "title": {
+        "field_name": "title",
+        "type": "text",
+        "label": "Document Title",
+        "help_text": "Title of the document",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "max_length": 255
+      },
+      "file_name": {
+        "field_name": "file_name",
+        "type": "text",
+        "label": "File Name",
+        "help_text": "Name of the uploaded file",
+        "visible": true,
+        "editable": false,
+        "required": true,
+        "max_length": 255
+      },
+      "file_path": {
+        "field_name": "file_path",
+        "type": "text",
+        "label": "File Path",
+        "help_text": "Path to the file in storage",
+        "visible": true,
+        "editable": false,
+        "required": true,
+        "max_length": 500
+      },
+      "file_size": {
+        "field_name": "file_size",
+        "type": "number",
+        "label": "File Size (bytes)",
+        "help_text": "Size of the file in bytes",
+        "visible": true,
+        "editable": false,
+        "required": true,
+        "min_value": 0
+      },
+      "mime_type": {
+        "field_name": "mime_type",
+        "type": "text",
+        "label": "MIME Type",
+        "help_text": "MIME type of the file",
+        "visible": true,
+        "editable": false,
+        "required": true,
+        "max_length": 100
+      },
+      "version": {
+        "field_name": "version",
+        "type": "number",
+        "label": "Version",
+        "help_text": "Version number of the document",
+        "visible": true,
+        "editable": false,
+        "required": true,
+        "min_value": 1
+      },
+      "is_current_version": {
+        "field_name": "is_current_version",
+        "type": "boolean",
+        "label": "Current Version",
+        "help_text": "Whether this is the current version",
+        "visible": true,
+        "editable": false,
+        "required": true,
+        "default": true
+      },
+      "status": {
+        "field_name": "status",
+        "type": "select",
+        "label": "Status",
+        "help_text": "Status of the document",
+        "data_source": "data_sources.document_statuses",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "default": "ACTIVE"
+      }
+    }
+  },
+  "status_fields": {
+    "contract_status": {
+      "code": {
+        "field_name": "code",
+        "type": "text",
+        "label": "Status Code",
+        "help_text": "Unique code for the status",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "max_length": 50
+      },
+      "name": {
+        "field_name": "name",
+        "type": "text",
+        "label": "Status Name",
+        "help_text": "Display name for the status",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "max_length": 100
+      },
+      "workflow_enabled": {
+        "field_name": "workflow_enabled",
+        "type": "boolean",
+        "label": "Workflow Enabled",
+        "help_text": "Whether workflow is enabled for this status",
+        "visible": true,
+        "editable": true,
+        "required": false,
+        "default": false
+      },
+      "color": {
+        "field_name": "color",
+        "type": "text",
+        "label": "Color",
+        "help_text": "Color code for the status",
+        "visible": true,
+        "editable": true,
+        "required": false,
+        "placeholder": "#FF0000"
+      }
+    },
+    "award_status": {
+      "code": {
+        "field_name": "code",
+        "type": "text",
+        "label": "Award Status Code",
+        "help_text": "Unique code for the award status",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "max_length": 50
+      },
+      "name": {
+        "field_name": "name",
+        "type": "text",
+        "label": "Award Status Name",
+        "help_text": "Display name for the award status",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "max_length": 100
+      }
+    },
+    "payment_status": {
+      "code": {
+        "field_name": "code",
+        "type": "text",
+        "label": "Payment Status Code",
+        "help_text": "Unique code for the payment status",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "max_length": 50
+      },
+      "name": {
+        "field_name": "name",
+        "type": "text",
+        "label": "Payment Status Name",
+        "help_text": "Display name for the payment status",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "max_length": 100
+      }
+    },
+    "budget_status": {
+      "code": {
+        "field_name": "code",
+        "type": "text",
+        "label": "Budget Status Code",
+        "help_text": "Unique code for the budget status",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "max_length": 50
+      },
+      "name": {
+        "field_name": "name",
+        "type": "text",
+        "label": "Budget Status Name",
+        "help_text": "Display name for the budget status",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "max_length": 100
+      }
+    },
+    "invoice_status": {
+      "code": {
+        "field_name": "code",
+        "type": "text",
+        "label": "Invoice Status Code",
+        "help_text": "Unique code for the invoice status",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "max_length": 50
+      },
+      "name": {
+        "field_name": "name",
+        "type": "text",
+        "label": "Invoice Status Name",
+        "help_text": "Display name for the invoice status",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "max_length": 100
+      }
+    }
+  },
+  "notification_fields": {
+    "template": {
+      "name": {
+        "field_name": "name",
+        "type": "text",
+        "label": "Template Name",
+        "help_text": "Name of the notification template",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "max_length": 100
+      },
+      "subject": {
+        "field_name": "subject",
+        "type": "text",
+        "label": "Subject",
+        "help_text": "Subject line for the notification",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "max_length": 255
+      },
+      "body": {
+        "field_name": "body",
+        "type": "textarea",
+        "label": "Body",
+        "help_text": "Body content of the notification",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "rows": 10
+      },
+      "template_type": {
+        "field_name": "template_type",
+        "type": "select",
+        "label": "Template Type",
+        "help_text": "Type of notification template",
+        "data_source": "data_sources.notification_template_types",
+        "visible": true,
+        "editable": true,
+        "required": true
+      },
+      "workflow_trigger": {
+        "field_name": "workflow_trigger",
+        "type": "select",
+        "label": "Workflow Trigger",
+        "help_text": "Workflow event that triggers this notification",
+        "data_source": "data_sources.workflow_triggers",
+        "visible": true,
+        "editable": true,
+        "required": false
+      }
+    }
+  },
+  "usage_notes": {
+    "field_configuration": "Field configurations define how form fields behave, including labels, validation, visibility, and editability rules",
+    "role_based_access": "Fields can have different labels, help text, and editability based on user roles",
+    "conditional_logic": "Fields can be shown/hidden or made editable/read-only based on form state and other field values",
+    "data_sources": "Fields can be populated from external data sources like databases or APIs",
+    "validation_rules": "Fields can have custom validation rules for data integrity",
+    "workflow_integration": "Fields integrate with workflow engine for automated business processes",
+    "document_management": "Fields support document upload, versioning, and metadata management",
+    "status_management": "Fields support status tracking and state transitions for contracts and related entities"
+  }
+}

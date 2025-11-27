@@ -1,0 +1,1137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transactions>
+
+	<transaction id="fetchProposalsIdsByProcurement_DB"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchProposalIdList">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="aoProposalIdList" type="java.util.List" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchProcurementSummary"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchProcurementSummary">
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="ProcurementSummary" type="com.nyc.hhs.model.Procurement" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchProposalDetails"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchProposalDetails">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="proposalDetailsBean" type="com.nyc.hhs.model.ProposalDetailsBean" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchInternalEvaluatorUsers"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchInternalEvaluatorUsers">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="internalEvaluatorList" type="java.util.List" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchExternalEvaluatorUsers"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchExternalEvaluatorUsers">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="externalEvaluatorList" type="java.util.List" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchMultipleProposalsDetails"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchMultipleProposalsDetails">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="proposalDetailsBeanList" type="java.util.List" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchMultipleProposalsDetailsByProposal"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchMultipleProposalsDetailsByProposal">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="proposalDetailsBeanList" type="java.util.List" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchMultipleContractDetails"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchMultipleContractsDetails">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="contractDetailsBeanList" type="java.util.List" />
+		</service>
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="">
+			<method name="updateMultipleContractsDetails">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="contractDetailsBeanList" type="java.util.List" />
+				<!--Start Added in R5 -->
+				<param name="loHMap" type="java.util.HashMap" />
+				<!--End Added in R5 -->
+			</method>
+			<!--Start Updated in R5 -->
+			<output name="lbUpdateFlag" type="java.lang.Boolean" />
+			<!--End Updated in R5 -->
+		</service>
+	</transaction>
+
+	<transaction id="fetchEvaluationReassignDetails"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchEvaluationReassignDetails">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="evaluationReassignDetailsBeanList" type="java.util.List" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchEvaluationStatusID"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchEvaluationStatusID">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="evaluationStatusID" type="java.lang.String" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchAcceptedProposalID"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchAcceptedProposalID">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="asProposalIds" type="java.util.List" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchReopenedEvaluationTaskIds"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchReopenedEvaluationTaskIds">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="evaluationIds" type="java.util.List" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchContractIdByProcurement"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchContractIdByProcurement">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="aoContractIdList" type="java.util.List" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchCountofSelectedProposals"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchCountofSelectedProposals">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="aoProposalCount" type="java.lang.Integer" />
+		</service>
+	</transaction>
+
+	<transaction id="findContractDetailsByContractIdForWF"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="findContractDetailsByContractIdForWF">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="aoFinancialWFBean" type="com.nyc.hhs.model.FinancialWFBean" />
+		</service>
+	</transaction>	
+
+	<transaction id="fetchEvaluationStatusIdsByEvaluatorDetails"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchEvaluationStatusIdsByEvaluatorDetails">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="evaluationIds" type="java.util.List" />
+		</service>
+	</transaction>
+
+	<transaction id="deleteEvaluationScore"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="deleteEvaluationScore">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="succes" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+
+	<transaction id="deleteEvaluationStatus"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="deleteEvaluationStatus">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="succes" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchProposalConfigDetails"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchProposalConfigDetails">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="evaluationStatusBeans" type="java.util.List" />
+		</service>
+	</transaction>
+
+	<transaction id="insertEvaluationStatus"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="insertEvaluationStatus">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="succes" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+
+	<transaction id="insertNotificationDetail"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service
+			classname="com.nyc.hhs.service.db.services.notification.NotificationService"
+			servicetype="">
+			<method name="processNotification">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loHmNotifyParam" type="java.util.HashMap"></param>
+				<param name="alertFlag" type="java.lang.Boolean" />
+			</method>
+			<output name="insertStatus" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+
+	<transaction id="insertAuditDetails" useslocaldbconnection="true">
+		<service classname="com.nyc.hhs.daomanager.service.HhsAuditService"
+			servicetype="">
+			<method name="hhsauditInsert">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="auditBean" type="com.nyc.hhs.model.HhsAuditBean" />
+				<param name="auditStatus" type="java.lang.Boolean" />
+			</method>
+			<output name="hhsaudit_result" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+
+	<transaction id="cancelEvaluationTask"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.EvaluationService"
+			servicetype="">
+			<method name="deleteEvaluationSettingData">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="procurementId" type="java.lang.String" />
+				<param name="evaluationPoolMappingId" type="java.lang.String" />
+			</method>
+			<output name="lbDeleteEvaluationFlag" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.EvaluationService"
+			servicetype="">
+			<method name="updateProposalStatus">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="procurementId" type="java.lang.String" />
+				<param name="userId" type="java.lang.String" />
+				<param name="evaluationPoolMappingId" type="java.lang.String" />
+			</method>
+			<output name="lbUpdateEvaluationFlag" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.CompetitionPoolService"
+			servicetype="">
+			<method name="updateEvalPoolMappingStatus">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoInputParam" type="java.util.Map" />
+			</method>
+			<output name="updatePoolMappingStatus" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.CompetitionPoolService"
+			servicetype="">
+			<method name="updateEvalGroupStatus">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoInputParam" type="java.util.Map" />
+			</method>
+			<output name="updateGrpStatus" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.CompetitionPoolService"
+			servicetype="">
+			<method name="updateProcurementStatusBasedOnGroup">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoInputParam" type="java.util.Map" />
+			</method>
+			<output name="updateProcurementStatus" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.CompetitionPoolService"
+			servicetype="">
+			<method name="fetchRfpReleasedBeforeR4Flag">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="procurementId" type="java.lang.String" />
+			</method>
+			<output name="rfpReleaseBeforeR4Flag" type="java.lang.String" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchReviewLevels" useslocaldbconnection="true"
+		usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.AgencySettingService"
+			servicetype="">
+			<method name="fetchReviewLevels">
+				<param name="asAgencyId" type="java.lang.String" />
+				<param name="aiReviewProcId" type="java.lang.Integer" />
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+			</method>
+			<output name="aiReviewLevels" type="java.lang.Integer" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchEvaluationStatusIdReturned"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="">
+			<method name="fetchEvaluationStatusIdReturned">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="aoEvalIdList" type="java.util.List" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchAcceleratorComments"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="">
+			<method name="fetchAcceleratorComments">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="asAccComments" type="java.lang.String" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchAgencyComments"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="">
+			<method name="fetchAgencyComments">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="asAgencyComments" type="java.lang.String" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchEvaluatorIdsEvaluation"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="">
+			<method name="fetchEvaluatorIdsEvaluation">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="evaluatorIds" type="java.util.List" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchEvaluatorIdsReviewScore"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="">
+			<method name="fetchEvaluatorIdsReviewScore">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="evaluatorIds" type="java.util.List" />
+		</service>
+	</transaction>
+
+	<transaction id="insertLineItemsForContractConfigTasks"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.ContractBudgetService"
+			servicetype="">
+			<method name="insertStandardRowsSubBudgetLevel">
+				<param name="aoTaskDetailsBean" type="com.nyc.hhs.model.TaskDetailsBean" />
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+			</method>
+			<output name="lbresult" type="java.lang.Boolean" />
+		</service>
+		<!-- Start:Added in R7 for Cost Center -->
+		<service classname="com.nyc.hhs.daomanager.service.ContractBudgetService"
+			servicetype="">
+			<method name="insertServiceAndCostCenter">
+				<param name="aoTaskDetailsBean" type="com.nyc.hhs.model.TaskDetailsBean" />
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+			</method>
+			<output name="lbresult" type="java.lang.Boolean" />
+		</service>
+		<!-- End:Added in R7 for Cost Center -->
+	</transaction>
+
+	<transaction id="createReplicaForBudgetReviewTasks"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+
+		<service classname="com.nyc.hhs.daomanager.service.ContractBudgetService"
+			servicetype="">
+			<method name="createReplicaOfBudget">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoTaskDetailsBean" type="com.nyc.hhs.model.TaskDetailsBean" />
+				<param name="aoBudgetStatus" type="java.lang.String" />
+			</method>
+			<output name="abFinalFinish" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+
+	<transaction id="mergeBudgetForModificationReviewTasks"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<!-- Added service for R7 -->
+		<service
+			classname="com.nyc.hhs.daomanager.service.ContractBudgetModificationService"
+			servicetype="">
+			<method name="generateModificationBudget">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoTaskDetailsBean" type="com.nyc.hhs.model.TaskDetailsBean" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="lbConvertedXml" type="java.lang.String" />
+		</service>
+		<!-- End service for R7 -->
+		<service
+			classname="com.nyc.hhs.daomanager.service.ContractBudgetModificationService"
+			servicetype="">
+			<method name="mergeBudgetLineItemsForModification">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoTaskDetailsBean" type="com.nyc.hhs.model.TaskDetailsBean" />
+				<param name="aoBudgetStatus" type="java.lang.String" />
+			</method>
+			<output name="abFinalFinish" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsService" servicetype="">
+			<method name="updateYtdAndRemainingAmountInLineItems">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="asBudgetId" type="java.lang.String" />
+				<param name="lbMergeFlag" type="java.lang.Boolean" />
+				<!-- This service updated for Release 3.12.0 enhancement 6644-->
+				<param name="asUserId" type="java.lang.String" />
+			</method>
+			<output name="lbSuccessfullyUpdatedLineItems" type="java.lang.Boolean"/>
+		</service>
+		<!-- Added service for R7 -->
+		<service
+			classname="com.nyc.hhs.daomanager.service.ContractBudgetModificationService"
+			servicetype="">
+			<method name="uploadModificationBudgetData">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoTaskDetailsBean" type="com.nyc.hhs.model.TaskDetailsBean" />
+				<param name="aoFilenetSession" type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="lbConvertedXml" type="java.lang.String" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="asDocId" type="java.lang.String" />
+		</service>	
+		<!-- End service for R7 -->
+	</transaction>
+
+	<transaction id="mergeBudgetForUpdateReviewTasks"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service
+			classname="com.nyc.hhs.daomanager.service.ContractBudgetModificationService"
+			servicetype="">
+			<method name="mergeBudgetLineItemsForUpdate">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoTaskDetailsBean" type="com.nyc.hhs.model.TaskDetailsBean" />
+				<param name="aoBudgetStatus" type="java.lang.String" />
+			</method>
+			<output name="abFinalFinish" type="java.lang.Boolean" />
+		</service>
+		
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsService" servicetype="">
+			<method name="updateYtdAndRemainingAmountInLineItems">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="asBudgetId" type="java.lang.String" />
+				<param name="lbMergeFlag" type="java.lang.Boolean" />
+				<!-- This service updated for Release 3.12.0 enhancement 6644-->
+				<param name="asUserId" type="java.lang.String" />
+			</method>
+			<output name="lbSuccessfullyUpdatedLineItems" type="java.lang.Boolean"/>
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsService" servicetype="">
+			<!--Start QC 9592 R 8.10  -->
+			<!-- <method name="updateYtdAndRemainingAmountInBudgetAndSubBudget"> -->
+			<method name="updateYtdAndRemainingAmountInBudgetAndSubBudgetBase">
+			<!--End QC 9592 R 8.10  -->
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="asBudgetId" type="java.lang.String" />
+				<param name="lbMergeFlag" type="java.lang.Boolean" />
+				<!-- This service updated for Release 3.12.0 enhancement 6644-->
+				<param name="asUserId" type="java.lang.String" />
+			</method>
+			<output name="lbSuccessfullyUpdatedSubBudget" type="java.lang.Boolean"/>
+		</service>
+	</transaction>
+
+	<transaction id="mergeBudgetForAmendmentReviewTasks"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		
+		<service
+			classname="com.nyc.hhs.daomanager.service.ContractBudgetModificationService"
+			servicetype="">
+			<method name="mergeBudgetLineItemsForAmendment">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoTaskDetailsBean" type="com.nyc.hhs.model.TaskDetailsBean" />
+				<param name="aoBudgetStatus" type="java.lang.String" />
+				<param name="aiRowCount" type="java.lang.Integer" />
+			</method>
+			<output name="abFinalFinish" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsService" servicetype="">
+			<method name="updateYtdAndRemainingAmountInLineItems">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="asBudgetId" type="java.lang.String" />
+				<param name="lbMergeFlag" type="java.lang.Boolean" />
+				<!-- This service updated for Release 3.12.0 enhancement 6644-->
+				<param name="asUserId" type="java.lang.String" />
+			</method>
+			<output name="lbSuccessfullyUpdatedLineItems" type="java.lang.Boolean"/>
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsService" servicetype="">
+			<method name="updateYtdAndRemainingAmountInBudgetAndSubBudget">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="asBudgetId" type="java.lang.String" />
+				<param name="lbMergeFlag" type="java.lang.Boolean" />
+				<!-- This service updated for Release 3.12.0 enhancement 6644-->
+				<param name="asUserId" type="java.lang.String" />
+			</method>
+			<output name="lbSuccessfullyUpdatedSubBudget" type="java.lang.Boolean"/>
+		</service>
+		
+	</transaction>	
+
+	<transaction id="deleteEvaluatorData"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="">
+			<method name="deleteEvaluatorData">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="succes" type="java.lang.Boolean" />
+		</service>
+	<!-- Service added as a part of release 3.6.0 defect 5905 - Start -->
+		<service classname="com.nyc.hhs.daomanager.service.EvaluationService"
+			servicetype="">
+			<method name="updateEvalProgressStatus">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="evaluationPoolMappingId" type="java.lang.String" />
+			</method>
+			<output name="updateEvalProgressFlag" type="java.lang.Boolean" />
+		</service>
+	<!-- Service added as a part of release 3.6.0 defect 5905 - End -->
+	</transaction>
+
+	<transaction id="suspendAllFinancialTasks"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service
+			classname="com.nyc.hhs.service.filenetmanager.p8services.P8ProcessServiceForSolicitationFinancials"
+			servicetype="">
+			<method name="suspendALLFinancialTask">
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="loAuditList" type="java.util.List" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.HhsAuditService"
+			servicetype="">
+			<method name="hhsMultiAuditInsert">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loAuditList" type="java.util.List" />
+				<param name="lbAuditTrue" type="java.lang.Boolean" />
+			</method>
+			<output name="hhsaudit_result" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+
+	<transaction id="unSuspendALLFinancialTasks"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service
+			classname="com.nyc.hhs.service.filenetmanager.p8services.P8ProcessServiceForSolicitationFinancials"
+			servicetype="">
+			<method name="unSuspendALLFinancialTask">
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+				<output name="loAuditList" type="java.util.List" />
+		</service>
+			<service classname="com.nyc.hhs.daomanager.service.HhsAuditService"
+			servicetype="">
+			<method name="hhsMultiAuditInsert">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loAuditList" type="java.util.List" />
+				<param name="lbAuditTrue" type="java.lang.Boolean" />
+			</method>
+			<output name="hhsaudit_result" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+
+	<transaction id="updateModifiedFlag" useslocaldbconnection="true"
+		usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="">
+			<method name="updateModifiedFlag">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="succes" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchAssignments" useslocaldbconnection="true"
+		usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchAssignments">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="asAssignmentList" type="java.util.List" />
+		</service>
+	</transaction>
+
+	<transaction id="insertIntoPayment" useslocaldbconnection="true"
+		usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="">
+			<method name="insertIntoPayment">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="paymentId" type="java.lang.String" />
+		</service>
+	</transaction>
+
+	<transaction id="insertIntoPaymentAllocation"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="">
+			<method name="insertIntoPaymentAllocation">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="succes" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+
+	<transaction id="updateProcessFlagOnPayment"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="">
+			<method name="updateProcessFlagOnPayment">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="succes" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchFisalYearId" useslocaldbconnection="true"
+		usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="">
+			<method name="fetchFisalYearId">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="asFiscalYearId" type="java.lang.Integer" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchBudgetId" useslocaldbconnection="true"
+		usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="">
+			<method name="fetchBudgetId">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="budgetId" type="java.lang.String" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchInvoiceNumber" useslocaldbconnection="true"
+		usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="">
+			<method name="fetchInvoiceNumber">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="invoiceNumber" type="java.lang.String" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchAdvanceNumber" useslocaldbconnection="true"
+		usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="">
+			<method name="fetchAdvanceNumber">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="advanceNumber" type="java.lang.String" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchAmount" useslocaldbconnection="true"
+		usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="">
+			<method name="fetchAmount">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="amount" type="java.lang.Double" />
+		</service>
+	</transaction>
+
+	<transaction id="insertOldSubBudgetLineItemsZeroCopy"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.ContractBudgetService"
+			servicetype="">
+			<method name="createReplicaOfBudgetNewFY">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoTaskDetailsBean" type="com.nyc.hhs.model.TaskDetailsBean" />
+			</method>
+			<output name="abInsertStatus" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+
+	<transaction id="fetchRequiredInformation"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchProcurementSummary">
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="ProcurementSummary" type="com.nyc.hhs.model.Procurement" />
+		</service>
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchRequiredProposalsDetails">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="proposalDetailsBeanList" type="java.util.List" />
+		</service>
+	</transaction>
+	
+	<transaction id="fetchBaseBudIdFromModBudId"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="system">
+			<method name="fetchBaseBudIdFromModBudId">
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="parentBudgetId" type="java.util.HashMap" />
+		</service>
+	</transaction>
+	
+	<transaction id="fetchRfpReleasedBeforeR4Flag" useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.CompetitionPoolService"
+			servicetype="">
+			<method name="fetchRfpReleasedBeforeR4Flag">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="procurementId" type="java.lang.String" />
+			</method>
+			<output name="rfpReleaseBeforeR4Flag" type="java.lang.String" />
+		</service>
+	</transaction>
+	
+	<transaction id="insertTaskAudit" useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.TaskAuditService"
+			servicetype="">
+			<method name="insertAuditForLaunchWorkflow">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="auditBean" type="com.nyc.hhs.model.HhsAuditBean" />
+			</method>
+			<output name="taskAuditStatus" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+	
+	<transaction id="insertMultipleTaskAudit" useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.HhsAuditService"
+			servicetype="">
+			<method name="hhsMultiAuditInsert">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="auditBeanList" type="java.util.List" />
+				<param name="auditStatus" type="java.lang.Boolean" />
+			</method>
+			<output name="hhsaudit_result" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.TaskAuditService"
+			servicetype="">
+			<method name="insertAuditForMultipleLaunchWorkflow">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="auditBeanList" type="java.util.List" />
+			</method>
+			<output name="taskAuditStatus" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+	
+	<!-- Transaction added as a part of release 3.4.0 defect 6453 - Start -->
+	<transaction id="fetchProcurementStatus" useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="">
+			<method name="fetchProcurementStatus">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="procurementStatus" type="java.lang.Integer" />
+		</service>
+	</transaction>
+	<!-- Transaction added as a part of release 3.4.0 defect 6453 - end -->
+	
+	<!-- Transaction added as a part of release 3.6.0 defect 5905 - Start -->
+	<transaction id="getAllEvalProgressStatusFlag" useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.EvaluationService"
+			servicetype="">
+			<method name="getAllEvalProgressStatusFlag">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="evaluationPoolMappingId" type="java.lang.String" />
+			</method>
+			<output name="evalProgressStatusFlag" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+	<!-- Transaction added as a part of release 3.6.0 defect 5905 - Start -->
+	
+	<!-- Transaction added as a part of release 3.8.0 enhancement 6534 - Start -->
+	<transaction id="updateReviewInProgressFlag" useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.AgencySettingService"
+			servicetype="">
+			<method name="updateReviewInProgressFlag">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="reqPropsMap" type="java.util.Map" />
+			</method>
+			<output name="updateFlag" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+	<!-- Transaction added as a part of release 3.8.0 enhancement 6534 - end -->
+	
+	
+	<!-- Transaction added as a part of Release5 Start -->
+	<transaction id="insertPsrTaskAudit" useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.HhsAuditService"
+			servicetype="">
+			<method name="hhsMultiAuditInsert">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="auditBeanList" type="java.util.List" />
+				<param name="updateFlag" type="java.lang.Boolean" />
+			</method>
+			<output name="hhsaudit_result" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+	
+	<transaction id="fetchNegotiationsContractsDetails"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.component.HHSComponentP8Service"
+			servicetype="">
+			<method name="fetchNegotiationContractDetails">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHashMap" type="java.util.HashMap" />
+			</method>
+			<output name="aoContractBean" type="com.nyc.hhs.model.ContractDetailsBean" />
+		</service>
+	</transaction>
+	
+	<transaction id="finishConfigureAwardContracts"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.ConfigurationService"
+			servicetype="">
+			<method name="updateBudgetStatusToPendSub">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="evaluationPoolMappingId" type="java.lang.String" />
+			</method>
+			<output name="updateProposalStatus" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+	
+		<transaction id="getAssigneeDBDetails"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.UserRoleService"
+			servicetype="">
+			<method name="fetchAssigneeListDetails">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="entityId" type="java.lang.String" />
+				<param name="taskType" type="java.lang.String" />
+				<param name="taskLevel" type="java.lang.String" />
+			</method>
+			<output name="taskDetailsBean" type="com.nyc.hhs.model.TaskDetailsBean" />
+		</service>
+	</transaction>
+	
+		<transaction id="updateFilenetAssigneeDetails" usesdbconnection="false"
+		usesfilenetconnection="true">
+		<service
+			classname="com.nyc.hhs.service.filenetmanager.p8services.P8ProcessService"
+			servicetype="">
+			<method name="updateDefaultAssignee">
+				<param name="aoUserSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="wobNumber" type="java.lang.String" />
+				<param name="lolaunchWorkflowMap" type="java.util.HashMap" />
+			</method>
+			<output name="launchWorkflowOutput" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+	
+	<transaction id="applicationSettingDB_batch"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.ApplicationService"
+			servicetype="">
+			<method name="getApplicationSettingFromDB">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+			</method>
+			<output name="loAppliocationSettingMap" type="java.util.List" />
+		</service>
+	</transaction>
+	<!-- Added service for R7 -->
+	<transaction id="applicationSettingDB_BulkNew"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.ApplicationService"
+			servicetype="">
+			<method name="getApplicationSettingFromDB">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+			</method>
+			<output name="loAppliocationSettingMap" type="java.util.List" />
+		</service>
+	</transaction>
+	<!-- Added for Release 7 -->
+	<transaction id="getPreprocessingClassFromApplicationSetting"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.ApplicationService"
+			servicetype="">
+			<method name="getPreprocessingClassFromApplicationSetting">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="taskType" type="java.lang.String" />
+			</method>
+			<output name="loProcessingClass" type="java.lang.String" />
+		</service>
+	</transaction>
+	
+	<transaction id="getDefaultAssignmentForReturnForRevision"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.UserRoleService"
+			servicetype="">
+			<method name="getDefaultAssignmentForReturnForRevision">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="asEntityId" type="java.lang.String" />
+				<param name="asQueryId" type="java.lang.String" />
+				<param name="taskReviewProcessId" type="java.lang.Integer" />
+			</method>
+			<output name="loDefaultAssignment" type="com.nyc.hhs.model.DefaultAssignment" />
+		</service>
+	</transaction>
+	<transaction id="checkAutoApprovalThreshold" usesdbconnection="true"
+		usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.AgencySettingService"
+			servicetype="">
+			<method name="getRequiredProperties">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHashMap" type="java.util.HashMap" />
+				<param name="asBudgetId" type="java.lang.String" />
+			</method>
+			<output name="aoHashMap" type="java.util.HashMap" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.ContractBudgetModificationService"
+			servicetype="">
+			<method name="fetchBudgetsForModificationAutoApproval">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHashMap" type="java.util.HashMap" />
+			</method>
+			<output name="lbIsAutoApproved" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+	<transaction id="checkAutoApprovalForUpdate" usesdbconnection="true"
+		usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.ContractBudgetModificationService"
+			servicetype="">
+			<method name="checkBudgetsForUpdateAutoApproval">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHashMap" type="java.util.HashMap" />
+			</method>
+			<output name="lbIsAutoApproved" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+	<transaction id="getAutoApproverUserNameForAgency" usesdbconnection="true"
+		usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.ContractBudgetModificationService"
+			servicetype="">
+			<method name="getAutoApproverUserNameForAgency">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+			</method>
+			<output name="asUserName" type="java.lang.String" />
+		</service>
+	</transaction>
+	<transaction id="isUpdateBudgetAutoApproval"
+		usesdbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.ContractBudgetModificationService"
+			servicetype="">
+			<method name="checkAutoApprovalForContractConfigurationUpdateTask">
+				<param name="aoFilenetSession" type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoTaskDetailsBean" type="com.nyc.hhs.model.TaskDetailsBean" />
+				<param name="asContractId" type="java.lang.String" />
+			</method>
+			<output name="lbValid" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+	<transaction id="launchWFContractUpdateForCheckAutoUpdate" usesdbconnection="true"
+		usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.TabLevelCommentsService"
+			servicetype="">
+			<method name="fetchUserCommentsForTabLevelAuditProvider">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loAuditList" type="java.util.List" />
+				<param name="auditBean" type="com.nyc.hhs.model.HhsAuditBean" />
+				<param name="loTabLevelCommentsMap" type="java.util.Map" />
+				<param name="aoHMWFRequiredProps" type="java.util.HashMap" />
+			</method>
+			<output name="loAuditList_final" type="java.util.List" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.HhsAuditService"
+			servicetype="">
+			<method name="deleteFromUserComment">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="auditBean" type="com.nyc.hhs.model.HhsAuditBean" />
+				<param name="lbAuthStatusFlag" type="java.lang.Boolean" />
+			</method>
+			<output name="hhsaudit_result" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.HhsAuditService"
+			servicetype="">
+			<method name="hhsMultiAuditInsert">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="loAuditList_final" type="java.util.List" />
+				<param name="lbAuditTrue" type="java.lang.Boolean" />
+			</method>
+			<output name="hhsaudit_result" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.ContractBudgetService"
+			servicetype="">
+			<method name="setContractBudgetStatus">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHMWFRequiredProps" type="java.util.HashMap" />
+			</method>
+			<output name="updateStatus" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="getFinancialWFProperty">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHMWFRequiredProps" type="java.util.HashMap" />
+			</method>
+			<output name="aoHMWFRequiredProps" type="java.util.HashMap" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.TaskService"
+			servicetype="">
+			<method name="launchFinancialWorkflow">
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHMWFRequiredProps" type="java.util.HashMap" />
+				<param name="lbAuthStatusFlag" type="java.lang.Boolean" />
+			</method>
+			<output name="auditBean" type="com.nyc.hhs.model.HhsAuditBean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.TaskAuditService"
+			servicetype="">
+			<method name="insertAuditForLaunchWorkflow">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="auditBean" type="com.nyc.hhs.model.HhsAuditBean" />
+			</method>
+			<output name="taskAuditStatus" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.HhsAuditService"
+			servicetype="">
+			<method name="hhsauditInsert">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="auditBean" type="com.nyc.hhs.model.HhsAuditBean" />
+				<param name="lbAuthStatusFlag" type="java.lang.Boolean" />
+			</method>
+			<output name="hhsaudit_result" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+	<transaction id="setAuditForAutoApproval" usesdbconnection="true"
+		usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.TaskAuditService"
+			servicetype="">
+			<method name="insertAuditForReassignAndFinish">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoTaskDetailsBean" type="com.nyc.hhs.model.TaskDetailsBean" />
+				<param name="lbAuditTrue" type="java.lang.Boolean" />
+			</method>
+			<output name="taskAuditStatus" type="java.lang.Boolean" />
+		</service>
+		</transaction>
+	<!-- End Release 7 -->
+	
+	
+	<!-- //** [Start] QC 8963 R 8.10 AL311 provider notification alert missing agency name  -->
+	
+	<transaction id="fetchAgencyNameFromBudget"
+		usesdbconnection="true" usesfilenetconnection="false">
+		<service
+			classname="com.nyc.hhs.service.db.services.notification.NotificationService"
+			servicetype="">
+			<method name="fetchAgencyNameFromBudget">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoEntityId" type="java.lang.String"></param>
+			</method>
+			<output name="agencyName" type="java.lang.String" />
+		</service>
+	</transaction>
+	
+	<!-- //** [End] QC 8963 R 8.10 AL311 provider notification alert missing agency name  -->
+</transactions>

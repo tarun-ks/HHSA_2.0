@@ -1,0 +1,355 @@
+{
+  "version": "2.0.0",
+  "description": "Workflow Business Rules - WF301-WF316 from System",
+  "business_rules": {
+    "contract_validation": {
+      "id": "contract_validation",
+      "name": "Contract Validation",
+      "description": "Business rules for contract validation from system",
+      "version": "1.0.0",
+      "is_active": true,
+      "created_by": "system",
+      "created_at": "2024-01-01T00:00:00Z",
+      "rules": [
+        {
+          "id": "contract_id_format",
+          "name": "Contract ID Format",
+          "description": "Contract ID must follow legacy format: CONTRACT-YYYY-NNNN",
+          "expression": "{{contract.contract_id}} =~ /^CONTRACT-\\d{4}-\\d{4}$/",
+          "error_message": "Contract ID must follow format: CONTRACT-YYYY-NNNN",
+          "severity": "error",
+          "category": "validation"
+        },
+        {
+          "id": "contract_type_required",
+          "name": "Contract Type Required",
+          "description": "Contract type must be specified",
+          "expression": "{{contract.contract_type_id}} != null && {{contract.contract_type_id}} != ''",
+          "error_message": "Contract type is required",
+          "severity": "error",
+          "category": "validation"
+        },
+        {
+          "id": "contract_status_transition",
+          "name": "Contract Status Transition",
+          "description": "Contract status transitions must follow legacy rules",
+          "expression": "{{contract.status_id}} in [59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69]",
+          "error_message": "Invalid contract status transition",
+          "severity": "error",
+          "category": "validation"
+        },
+        {
+          "id": "contract_budget_amount",
+          "name": "Contract Budget Amount",
+          "description": "Contract budget amount must be positive",
+          "expression": "{{contract.budget_amount}} > 0",
+          "error_message": "Contract budget amount must be greater than zero",
+          "severity": "error",
+          "category": "validation"
+        },
+        {
+          "id": "contract_agency_required",
+          "name": "Contract Agency Required",
+          "description": "Contract must have an agency assigned",
+          "expression": "{{contract.agency_id}} != null && {{contract.agency_id}} != ''",
+          "error_message": "Contract agency is required",
+          "severity": "error",
+          "category": "validation"
+        },
+        {
+          "id": "contract_provider_required",
+          "name": "Contract Provider Required",
+          "description": "Contract must have a provider assigned",
+          "expression": "{{contract.provider_id}} != null && {{contract.provider_id}} != ''",
+          "error_message": "Contract provider is required",
+          "severity": "error",
+          "category": "validation"
+        }
+      ]
+    },
+    "amendment_rules": {
+      "id": "amendment_rules",
+      "name": "Amendment Rules",
+      "description": "Business rules for contract amendments from system",
+      "version": "1.0.0",
+      "is_active": true,
+      "created_by": "system",
+      "created_at": "2024-01-01T00:00:00Z",
+      "rules": [
+        {
+          "id": "amendment_amount_validation",
+          "name": "Amendment Amount Validation",
+          "description": "Amendment amount must be positive and not exceed contract budget",
+          "expression": "{{amendment.amount}} > 0 && {{amendment.amount}} <= {{contract.budget_amount}}",
+          "error_message": "Amendment amount must be positive and not exceed contract budget",
+          "severity": "error",
+          "category": "validation"
+        },
+        {
+          "id": "amendment_date_validation",
+          "name": "Amendment Date Validation",
+          "description": "Amendment date must be after contract start date",
+          "expression": "{{amendment.amendment_date}} >= {{contract.start_date}}",
+          "error_message": "Amendment date must be after contract start date",
+          "severity": "error",
+          "category": "validation"
+        },
+        {
+          "id": "amendment_status_validation",
+          "name": "Amendment Status Validation",
+          "description": "Amendment status must be valid",
+          "expression": "{{amendment.status_id}} in [70, 71, 72, 73, 74]",
+          "error_message": "Invalid amendment status",
+          "severity": "error",
+          "category": "validation"
+        },
+        {
+          "id": "amendment_justification_required",
+          "name": "Amendment Justification Required",
+          "description": "Amendment must have justification for amount changes",
+          "expression": "{{amendment.justification}} != null && {{amendment.justification}} != ''",
+          "error_message": "Amendment justification is required",
+          "severity": "error",
+          "category": "validation"
+        }
+      ]
+    },
+    "workflow_rules": {
+      "id": "workflow_rules",
+      "name": "Workflow Rules",
+      "description": "Business rules for workflow execution from system",
+      "version": "1.0.0",
+      "is_active": true,
+      "created_by": "system",
+      "created_at": "2024-01-01T00:00:00Z",
+      "rules": [
+        {
+          "id": "workflow_launch_conditions",
+          "name": "Workflow Launch Conditions",
+          "description": "Workflow can only be launched if contract is in valid state",
+          "expression": "{{contract.status_id}} in [59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69]",
+          "error_message": "Workflow cannot be launched for this contract status",
+          "severity": "error",
+          "category": "workflow"
+        },
+        {
+          "id": "workflow_assignment_conditions",
+          "name": "Workflow Assignment Conditions",
+          "description": "Workflow tasks must be assigned to valid users",
+          "expression": "{{workflow.assigned_to}} != null && {{workflow.assigned_to}} != ''",
+          "error_message": "Workflow task must be assigned to a valid user",
+          "severity": "error",
+          "category": "workflow"
+        },
+        {
+          "id": "workflow_timeout_conditions",
+          "name": "Workflow Timeout Conditions",
+          "description": "Workflow tasks must be completed within timeout period",
+          "expression": "{{workflow.created_at}} + {{workflow.timeout_hours}} * 3600 > {{current_timestamp}}",
+          "error_message": "Workflow task has exceeded timeout period",
+          "severity": "warning",
+          "category": "workflow"
+        },
+        {
+          "id": "workflow_approval_conditions",
+          "name": "Workflow Approval Conditions",
+          "description": "Workflow approval requires proper permissions",
+          "expression": "{{user.role}} in ['ACCO_MANAGER', 'FINANCE_MANAGER', 'PROVIDER_ADMIN']",
+          "error_message": "User does not have permission to approve workflow",
+          "severity": "error",
+          "category": "workflow"
+        }
+      ]
+    },
+    "budget_rules": {
+      "id": "budget_rules",
+      "name": "Budget Rules",
+      "description": "Business rules for budget management from system",
+      "version": "1.0.0",
+      "is_active": true,
+      "created_by": "system",
+      "created_at": "2024-01-01T00:00:00Z",
+      "rules": [
+        {
+          "id": "budget_amount_validation",
+          "name": "Budget Amount Validation",
+          "description": "Budget amount must be positive and within limits",
+          "expression": "{{budget.amount}} > 0 && {{budget.amount}} <= 10000000",
+          "error_message": "Budget amount must be positive and within limits",
+          "severity": "error",
+          "category": "validation"
+        },
+        {
+          "id": "budget_year_validation",
+          "name": "Budget Year Validation",
+          "description": "Budget year must be current or future year",
+          "expression": "{{budget.year}} >= {{current_year}}",
+          "error_message": "Budget year must be current or future year",
+          "severity": "error",
+          "category": "validation"
+        },
+        {
+          "id": "budget_status_validation",
+          "name": "Budget Status Validation",
+          "description": "Budget status must be valid",
+          "expression": "{{budget.status_id}} in [82, 83, 84, 85, 86, 87, 88, 89, 90]",
+          "error_message": "Invalid budget status",
+          "severity": "error",
+          "category": "validation"
+        }
+      ]
+    },
+    "payment_rules": {
+      "id": "payment_rules",
+      "name": "Payment Rules",
+      "description": "Business rules for payment processing from system",
+      "version": "1.0.0",
+      "is_active": true,
+      "created_by": "system",
+      "created_at": "2024-01-01T00:00:00Z",
+      "rules": [
+        {
+          "id": "payment_amount_validation",
+          "name": "Payment Amount Validation",
+          "description": "Payment amount must be positive and not exceed contract budget",
+          "expression": "{{payment.amount}} > 0 && {{payment.amount}} <= {{contract.budget_amount}}",
+          "error_message": "Payment amount must be positive and not exceed contract budget",
+          "severity": "error",
+          "category": "validation"
+        },
+        {
+          "id": "payment_status_validation",
+          "name": "Payment Status Validation",
+          "description": "Payment status must be valid",
+          "expression": "{{payment.status_id}} in [75, 76, 77, 78, 79, 80]",
+          "error_message": "Invalid payment status",
+          "severity": "error",
+          "category": "validation"
+        },
+        {
+          "id": "payment_date_validation",
+          "name": "Payment Date Validation",
+          "description": "Payment date must be after contract start date",
+          "expression": "{{payment.payment_date}} >= {{contract.start_date}}",
+          "error_message": "Payment date must be after contract start date",
+          "severity": "error",
+          "category": "validation"
+        }
+      ]
+    },
+    "invoice_rules": {
+      "id": "invoice_rules",
+      "name": "Invoice Rules",
+      "description": "Business rules for invoice processing from system",
+      "version": "1.0.0",
+      "is_active": true,
+      "created_by": "system",
+      "created_at": "2024-01-01T00:00:00Z",
+      "rules": [
+        {
+          "id": "invoice_amount_validation",
+          "name": "Invoice Amount Validation",
+          "description": "Invoice amount must be positive and not exceed contract budget",
+          "expression": "{{invoice.amount}} > 0 && {{invoice.amount}} <= {{contract.budget_amount}}",
+          "error_message": "Invoice amount must be positive and not exceed contract budget",
+          "severity": "error",
+          "category": "validation"
+        },
+        {
+          "id": "invoice_status_validation",
+          "name": "Invoice Status Validation",
+          "description": "Invoice status must be valid",
+          "expression": "{{invoice.status_id}} in [91, 92, 93, 94, 95, 96, 97, 98, 99]",
+          "error_message": "Invalid invoice status",
+          "severity": "error",
+          "category": "validation"
+        },
+        {
+          "id": "invoice_number_validation",
+          "name": "Invoice Number Validation",
+          "description": "Invoice number must be unique and follow format",
+          "expression": "{{invoice.invoice_number}} != null && {{invoice.invoice_number}} != ''",
+          "error_message": "Invoice number is required",
+          "severity": "error",
+          "category": "validation"
+        }
+      ]
+    }
+  },
+  "rule_engine": {
+    "engine_type": "system_rule_engine",
+    "version": "1.0.0",
+    "supports_async": true,
+    "supports_parallel": true,
+    "supports_conditional": true,
+    "supports_loops": true,
+    "supports_functions": true,
+    "supports_variables": true,
+    "supports_system_integration": true
+  },
+  "rule_categories": [
+    {
+      "id": "validation",
+      "name": "Validation Rules",
+      "description": "Rules for data validation and integrity",
+      "color": "#3B82F6",
+      "icon": "check-circle"
+    },
+    {
+      "id": "workflow",
+      "name": "Workflow Rules",
+      "description": "Rules for workflow execution and state transitions",
+      "color": "#10B981",
+      "icon": "workflow"
+    },
+    {
+      "id": "business",
+      "name": "Business Rules",
+      "description": "Rules for business logic and processes",
+      "color": "#F59E0B",
+      "icon": "briefcase"
+    },
+    {
+      "id": "security",
+      "name": "Security Rules",
+      "description": "Rules for security and access control",
+      "color": "#EF4444",
+      "icon": "shield"
+    }
+  ],
+  "rule_severity_levels": [
+    {
+      "id": "error",
+      "name": "Error",
+      "description": "Critical errors that prevent execution",
+      "color": "#EF4444",
+      "icon": "x-circle"
+    },
+    {
+      "id": "warning",
+      "name": "Warning",
+      "description": "Warnings that should be addressed",
+      "color": "#F59E0B",
+      "icon": "exclamation-triangle"
+    },
+    {
+      "id": "info",
+      "name": "Info",
+      "description": "Informational messages",
+      "color": "#3B82F6",
+      "icon": "information-circle"
+    }
+  ],
+  "metadata": {
+    "created_at": "2024-01-01T00:00:00Z",
+    "created_by": "system",
+    "version": "2.0.0",
+    "description": "Workflow business rules from system",
+    "tags": ["business_rules", "workflow", "validation"],
+    "dependencies": [
+      "schema/objects.json",
+      "schema/references.json",
+      "security/roles.json"
+    ]
+  }
+}

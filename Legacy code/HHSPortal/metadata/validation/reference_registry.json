@@ -1,0 +1,106 @@
+{
+  "version": "1.0.0",
+  "description": "Auto-generated reference registry after successful validation",
+  "auto_generated": true,
+  "generated_at": "2024-01-01T00:00:00Z",
+  "reference_registry": {
+    "contract_statuses": {
+      "source_file": "apps/contract/metadata/schema/references.json",
+      "valid_ids": [
+        "REGISTERED",
+        "PENDING_APPROVAL",
+        "PENDING_COF",
+        "APPROVED",
+        "REJECTED",
+        "EXPIRED",
+        "CANCELLED"
+      ],
+      "referenced_by": [
+        "apps/contract/metadata/business_rules/business_rules.json",
+        "apps/contract/metadata/search/search_configuration.json"
+      ]
+    },
+    "user_roles": {
+      "source_file": "apps/contract/metadata/schema/references.json",
+      "valid_ids": [
+        "ACCO_MANAGER",
+        "FINANCE_MANAGER",
+        "PROGRAM_MANAGER",
+        "CONTRACT_OWNER",
+        "VIEWER"
+      ],
+      "referenced_by": [
+        "apps/contract/metadata/business_rules/business_rules.json",
+        "apps/contract/metadata/documents/document_management.json",
+        "apps/contract/metadata/notifications/notifications.json"
+      ]
+    },
+    "notification_channels": {
+      "source_file": "apps/contract/metadata/schema/references.json",
+      "valid_ids": [
+        "EMAIL",
+        "SMS",
+        "PUSH",
+        "IN_APP",
+        "SLACK",
+        "TEAMS"
+      ],
+      "referenced_by": [
+        "apps/contract/metadata/notifications/notifications.json"
+      ]
+    },
+    "contract_types": {
+      "source_file": "apps/contract/metadata/schema/references.json",
+      "valid_ids": [
+        "CT1",
+        "CT2",
+        "CT3",
+        "CT4"
+      ],
+      "referenced_by": [
+        "apps/contract/metadata/search/search_configuration.json"
+      ]
+    },
+    "organization_types": {
+      "source_file": "apps/contract/metadata/schema/references.json",
+      "valid_ids": [
+        "AGENCY",
+        "PROVIDER",
+        "VENDOR"
+      ],
+      "referenced_by": [
+        "apps/contract/metadata/search/search_configuration.json"
+      ]
+    },
+    "pages": {
+      "source_file": "apps/contract/metadata/pages/pages.json",
+      "valid_ids": [
+        "contract_dashboard",
+        "contract_list",
+        "contract_create",
+        "contract_edit",
+        "contract_details",
+        "amendment_create",
+        "amendment_list",
+        "amendment_details",
+        "contract_financials",
+        "contract_history",
+        "my_contracts",
+        "contract_reports",
+        "contract_summary_report",
+        "contract_financial_report",
+        "contract_status_report",
+        "contract_export"
+      ],
+      "referenced_by": []
+    },
+    "amendment_statuses": {
+      "source_file": "auto-discovered",
+      "valid_ids": [],
+      "referenced_by": [
+        "apps/contract/metadata/search/search_configuration.json"
+      ],
+      "status": "missing_definition"
+    }
+  }
+}

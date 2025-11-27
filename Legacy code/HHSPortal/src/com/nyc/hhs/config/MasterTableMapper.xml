@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.MasterTableMapper">
+ <resultMap id="resultCityUserDetails" type="com.nyc.hhs.model.StaffDetails">
+  <result property="msStaffFirstName" column="FIRST_NAME" />
+  <result property="msStaffLastName" column="LAST_NAME" />
+  <result property="msStaffId" column="USER_ID" />
+  <result property="msStaffEmail" column="EMAIL_ID" />
+  <result property="msStaffRole" column="USER_ROLE" />
+  <result property="msUserType" column="USER_TYPE" />
+   <result property="msOrganisationName" column="ORGANIZATION_NAME" />
+      <result property="msUserSubRole" column="OVERSIGHT_FLAG" />
+ </resultMap>
+
+ <select id="fetchStatusMasterData" resultType="string">
+  SELECT STATUS FROM STATUS_MASTER WHERE STATUS_TYPE=#{lsStatusType}
+ </select>
+     
+ <!-- Query Change made as a part of Enhancement #6280 for Release 3.3.0  -->    
+ <select id="fetchCityUserDetails" parameterType="hashmap" resultMap="resultCityUserDetails">
+     SELECT FIRST_NAME,LAST_NAME,USER_ID,EMAIL_ID,USER_ROLE,USER_TYPE,ORGANIZATION_NAME ,  OVERSIGHT_FLAG
+     FROM CITY_USER_DETAILS WHERE ACTIVE_FLAG='1' 
+     order by FIRST_NAME asc,LAST_NAME asc
+ </select>
+ 
+ 
+	<!-- Start: QC 8914 ReadOnlyRole R7.2.0 -->  
+	<select id="fetchCityAgencyUserOversightFlag" parameterType="String" resultType="String">
+	   SELECT OVERSIGHT_FLAG  
+	   FROM CITY_USER_DETAILS
+	   WHERE USER_ID = #{asUserId}
+ 	</select>
+ 	<!-- End: QC 8914 ReadOnlyRole R7.2.0 -->
+ 
+ 	<!-- [Start] R9.6.4 QC9701 -->
+	<resultMap type="com.nyc.hhs.model.ActionStatusBean" id="ActionStatusData">
+		<result property="agencyId" column="AGENCY_ID" />
+		<result property="submitInvoice" column="SUBMIT_INVOICE" />
+		<result property="budgetMod" column="BUDGET_MOD" />
+		<result property="cancelMod" column="CANCEL_MOD" />
+		<result property="requestAdvance" column="REQUEST_ADVANCE" />
+		<result property="updateBudgetTemp" column="UPDATE_BUDGET_TEMP" />
+		<result property="initiateAdvance" column="INITIATE_ADVANCE" />
+		<result property="updateContractConf" column="UPDATE_CONTRACT_CONF" />
+		<result property="amendContract" column="AMEND_CONTRACT" />
+		<result property="suspendContract" column="SUSPEND_CONTRACT" />
+		<result property="closeContract" column="CLOSE_CONTRACT" />
+		<result property="flagContract" column="FLAG_CONTRACT" />
+		<result property="cancelAmendment" column="CANCEL_AMENDMENT" />
+		<result property="cancelContract" column="CANCEL_CONTRACT" />
+		<result property="deleteContract" column="DELETE_CONTRACT" />
+		<result property="updateContractinfo" column="UPDATE_CONTRACTINFO" />
+		<result property="newFiscalYear" column="NEW_FISCAL_YEAR" />
+		<result property="deleteInvoice" column="DELETE_INVOICE" />
+		<result property="withdrawInvoice" column="WITHDRAW_INVOICE" />
+		<result property="markAsRegistered" column="MARK_AS_REGISTERED" />
+		<result property="returnPayment" column="RETURN_PAYMENT" />
+		<result property="returnPaymentCancel" column="RETURN_PAYMENT_CANCEL" />
+		<result property="downloadForRegistration" column="DOWNLOAD_FOR_REGISTRATION" />
+		<result property="cancelAndMerge" column="CANCEL_MERGE" />
+		<result property="createdByUserid" column="CREATED_BY_USERID" />
+		<result property="createdDate" column="CREATED_DATE" />
+		<result property="modifiedByUserid" column="MODIFIED_BY_USERID" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+<!-- [Start] QC9720  -->
+		<result property="notice" column="NOTICE" />
+<!-- [End] QC9720  -->
+	</resultMap>
+    <update id="updateActionStatus" parameterType="com.nyc.hhs.model.ActionStatusBean" >
+	MERGE INTO ACTIONSTATUS ACST
+	Using (
+        SELECT  #{agencyId} as AGENCY_ID , #{submitInvoice} as SUBMIT_INVOICE, #{budgetMod} as BUDGET_MOD, #{cancelMod} as CANCEL_MOD, #{requestAdvance} as REQUEST_ADVANCE,
+                #{updateBudgetTemp} as UPDATE_BUDGET_TEMP, #{initiateAdvance} as INITIATE_ADVANCE, #{updateContractConf} as UPDATE_CONTRACT_CONF,  #{amendContract} as AMEND_CONTRACT,
+                #{suspendContract} as SUSPEND_CONTRACT, #{closeContract} as CLOSE_CONTRACT,  #{flagContract} as FLAG_CONTRACT, #{cancelAmendment} as CANCEL_AMENDMENT, #{cancelContract} as CANCEL_CONTRACT,
+                #{deleteContract} as DELETE_CONTRACT, #{updateContractinfo} as UPDATE_CONTRACTINFO, #{newFiscalYear} as NEW_FISCAL_YEAR, #{deleteInvoice} as DELETE_INVOICE, #{withdrawInvoice} as WITHDRAW_INVOICE,
+                #{markAsRegistered} as MARK_AS_REGISTERED,  #{returnPayment} as RETURN_PAYMENT,  #{returnPaymentCancel} as RETURN_PAYMENT_CANCEL,  #{downloadForRegistration} as DOWNLOAD_FOR_REGISTRATION, 
+                #{cancelAndMerge}  as CANCEL_MERGE ,
+                #{modifiedByUserid} as MODIFIED_BY_USERID ,  #{createdByUserid} as CREATED_BY_USERID
+        FROM    DUAL
+	) Tmp
+	ON 	( ACST.AGENCY_ID = tmp.AGENCY_ID )
+	WHEN MATCHED THEN
+	Update Set ACST.SUBMIT_INVOICE  = tmp.SUBMIT_INVOICE
+              ,ACST.BUDGET_MOD   =  tmp.BUDGET_MOD
+              ,ACST.CANCEL_MOD   = tmp.CANCEL_MOD
+              ,ACST.REQUEST_ADVANCE    = tmp.REQUEST_ADVANCE
+              ,ACST.UPDATE_BUDGET_TEMP   = tmp.UPDATE_BUDGET_TEMP
+              ,ACST.INITIATE_ADVANCE   = tmp.INITIATE_ADVANCE
+              ,ACST.UPDATE_CONTRACT_CONF   = tmp.UPDATE_CONTRACT_CONF
+              ,ACST.AMEND_CONTRACT   = tmp.AMEND_CONTRACT
+              ,ACST.SUSPEND_CONTRACT   = tmp.SUSPEND_CONTRACT
+              ,ACST.CLOSE_CONTRACT   = tmp.CLOSE_CONTRACT
+              ,ACST.FLAG_CONTRACT   = tmp.FLAG_CONTRACT
+              ,ACST.CANCEL_AMENDMENT   = tmp.CANCEL_AMENDMENT
+              ,ACST.CANCEL_CONTRACT   = tmp.CANCEL_CONTRACT
+              ,ACST.DELETE_CONTRACT   = tmp.DELETE_CONTRACT
+              ,ACST.UPDATE_CONTRACTINFO   = tmp.UPDATE_CONTRACTINFO
+              ,ACST.NEW_FISCAL_YEAR   = tmp.NEW_FISCAL_YEAR
+              
+              ,ACST.DELETE_INVOICE    = tmp.DELETE_INVOICE
+              ,ACST.WITHDRAW_INVOICE   = tmp.WITHDRAW_INVOICE
+              
+              ,ACST.MARK_AS_REGISTERED   = tmp.MARK_AS_REGISTERED
+              ,ACST.RETURN_PAYMENT   = tmp.RETURN_PAYMENT
+              ,ACST.RETURN_PAYMENT_CANCEL   = tmp.RETURN_PAYMENT_CANCEL
+              ,ACST.DOWNLOAD_FOR_REGISTRATION   = tmp.DOWNLOAD_FOR_REGISTRATION
+              ,ACST.CANCEL_MERGE   = tmp.CANCEL_MERGE
+              
+              ,ACST.MODIFIED_BY_USERID   = tmp.MODIFIED_BY_USERID
+              ,ACST.MODIFIED_DATE   = SYSTIMESTAMP
+   	WHEN NOT MATCHED THEN
+     INSERT(   ACST.AGENCY_ID, ACST.SUBMIT_INVOICE, ACST.BUDGET_MOD, ACST.CANCEL_MOD, ACST.REQUEST_ADVANCE,
+               ACST.UPDATE_BUDGET_TEMP, ACST.INITIATE_ADVANCE, ACST.UPDATE_CONTRACT_CONF, ACST.AMEND_CONTRACT,
+               ACST.SUSPEND_CONTRACT, ACST.CLOSE_CONTRACT, ACST.FLAG_CONTRACT, ACST.CANCEL_AMENDMENT, ACST.CANCEL_CONTRACT,
+               ACST.DELETE_CONTRACT, ACST.UPDATE_CONTRACTINFO, ACST.NEW_FISCAL_YEAR, ACST.DELETE_INVOICE,ACST.WITHDRAW_INVOICE,
+               ACST.MARK_AS_REGISTERED,  ACST.RETURN_PAYMENT, ACST.RETURN_PAYMENT_CANCEL, ACST.DOWNLOAD_FOR_REGISTRATION, ACST.CANCEL_MERGE, 
+               ACST.CREATED_BY_USERID , ACST.CREATED_DATE , ACST.MODIFIED_BY_USERID , ACST.MODIFIED_DATE ) 
+      VALUES(  Tmp.AGENCY_ID, Tmp.SUBMIT_INVOICE, Tmp.BUDGET_MOD, Tmp.CANCEL_MOD, Tmp.REQUEST_ADVANCE,
+               Tmp.UPDATE_BUDGET_TEMP, Tmp.INITIATE_ADVANCE, Tmp.UPDATE_CONTRACT_CONF, Tmp.AMEND_CONTRACT,
+               Tmp.SUSPEND_CONTRACT, Tmp.CLOSE_CONTRACT, Tmp.FLAG_CONTRACT,Tmp.CANCEL_AMENDMENT, Tmp.CANCEL_CONTRACT,
+               Tmp.DELETE_CONTRACT, Tmp.UPDATE_CONTRACTINFO , Tmp.NEW_FISCAL_YEAR , Tmp.DELETE_INVOICE,Tmp.WITHDRAW_INVOICE,
+               Tmp.MARK_AS_REGISTERED,  Tmp.RETURN_PAYMENT,  Tmp.RETURN_PAYMENT_CANCEL,  Tmp.DOWNLOAD_FOR_REGISTRATION, tmp.CANCEL_MERGE,
+               Tmp.CREATED_BY_USERID , SYSTIMESTAMP , Tmp.MODIFIED_BY_USERID , SYSTIMESTAMP
+      )
+	</update>
+
+
+	<select id="getActionStatusByAgency" parameterType="String" resultMap="ActionStatusData">
+	select  AGENCY_ID, SUBMIT_INVOICE,BUDGET_MOD,CANCEL_MOD,REQUEST_ADVANCE,UPDATE_BUDGET_TEMP,
+            INITIATE_ADVANCE,UPDATE_CONTRACT_CONF,AMEND_CONTRACT,SUSPEND_CONTRACT,CLOSE_CONTRACT,
+            FLAG_CONTRACT,CANCEL_AMENDMENT,CANCEL_CONTRACT,DELETE_CONTRACT,
+            UPDATE_CONTRACTINFO,NEW_FISCAL_YEAR, DELETE_INVOICE , WITHDRAW_INVOICE ,
+            MARK_AS_REGISTERED, RETURN_PAYMENT, RETURN_PAYMENT_CANCEL, DOWNLOAD_FOR_REGISTRATION, CANCEL_MERGE,
+            CREATED_BY_USERID,to_char(CREATED_DATE,'MM/DD/YYYY') as CREATED_DATE,MODIFIED_BY_USERID,
+            to_char(MODIFIED_DATE,'MM/DD/YYYY') as MODIFIED_DATE 
+			<!-- [Start] QC9720  -->
+            , NOTICE
+			<!-- [End] QC9720  -->
+     from   ACTIONSTATUS
+     where  AGENCY_ID = #{agencyId}
+	</select>
+
+	<select id="getActionStatusAll"  resultMap="ActionStatusData">
+	select  AGENCY_ID, SUBMIT_INVOICE,BUDGET_MOD,CANCEL_MOD,REQUEST_ADVANCE,UPDATE_BUDGET_TEMP,
+            INITIATE_ADVANCE,UPDATE_CONTRACT_CONF,AMEND_CONTRACT,SUSPEND_CONTRACT,CLOSE_CONTRACT,
+            FLAG_CONTRACT,CANCEL_AMENDMENT,CANCEL_CONTRACT,DELETE_CONTRACT,
+            UPDATE_CONTRACTINFO,NEW_FISCAL_YEAR, DELETE_INVOICE , WITHDRAW_INVOICE ,
+            MARK_AS_REGISTERED,RETURN_PAYMENT, RETURN_PAYMENT_CANCEL, DOWNLOAD_FOR_REGISTRATION, CANCEL_MERGE,
+            CREATED_BY_USERID, to_char(CREATED_DATE,'MM/DD/YYYY') as CREATED_DATE, MODIFIED_BY_USERID,
+            to_char(MODIFIED_DATE,'MM/DD/YYYY') as MODIFIED_DATE
+			<!-- [Start] QC9720  -->
+            , NOTICE
+			<!-- [End] QC9720  -->
+     from   ACTIONSTATUS
+     order  by AGENCY_ID
+	</select>
+
+	<update id="updateActionStatusProvider" parameterType="com.nyc.hhs.model.ActionStatusBean" >
+	MERGE INTO ACTIONSTATUS_PROVIDER ACST
+	Using (
+        SELECT  #{agencyId} as AGENCY_ID , #{providerId} as PROVIDER_ID , #{submitInvoice} as SUBMIT_INVOICE, #{budgetMod} as BUDGET_MOD, #{cancelMod} as CANCEL_MOD, #{requestAdvance} as REQUEST_ADVANCE,
+                #{updateBudgetTemp} as UPDATE_BUDGET_TEMP, #{initiateAdvance} as INITIATE_ADVANCE, #{updateContractConf} as UPDATE_CONTRACT_CONF,  #{amendContract} as AMEND_CONTRACT,
+                #{suspendContract} as SUSPEND_CONTRACT, #{closeContract} as CLOSE_CONTRACT,  #{flagContract} as FLAG_CONTRACT, #{cancelAmendment} as CANCEL_AMENDMENT, #{cancelContract} as CANCEL_CONTRACT,
+                #{deleteContract} as DELETE_CONTRACT, #{updateContractinfo} as UPDATE_CONTRACTINFO, #{newFiscalYear} as NEW_FISCAL_YEAR, #{deleteInvoice} as DELETE_INVOICE, #{withdrawInvoice} as WITHDRAW_INVOICE,
+                #{markAsRegistered} as MARK_AS_REGISTERED,  #{returnPayment} as RETURN_PAYMENT,  #{returnPaymentCancel} as RETURN_PAYMENT_CANCEL,  #{downloadForRegistration} as DOWNLOAD_FOR_REGISTRATION, 
+                #{cancelAndMerge}  as CANCEL_MERGE ,
+                #{modifiedByUserid} as MODIFIED_BY_USERID ,  #{createdByUserid} as CREATED_BY_USERID
+        FROM    DUAL
+	) Tmp
+	ON 	( ACST.PROVIDER_ID = tmp.PROVIDER_ID and  ACST.AGENCY_ID = tmp.AGENCY_ID)
+	WHEN MATCHED THEN
+	Update Set ACST.SUBMIT_INVOICE  = tmp.SUBMIT_INVOICE
+              ,ACST.BUDGET_MOD   =  tmp.BUDGET_MOD
+              ,ACST.CANCEL_MOD   = tmp.CANCEL_MOD
+              ,ACST.REQUEST_ADVANCE    = tmp.REQUEST_ADVANCE
+              ,ACST.UPDATE_BUDGET_TEMP   = tmp.UPDATE_BUDGET_TEMP
+              ,ACST.INITIATE_ADVANCE   = tmp.INITIATE_ADVANCE
+              ,ACST.UPDATE_CONTRACT_CONF   = tmp.UPDATE_CONTRACT_CONF
+              ,ACST.AMEND_CONTRACT   = tmp.AMEND_CONTRACT
+              ,ACST.SUSPEND_CONTRACT   = tmp.SUSPEND_CONTRACT
+              ,ACST.CLOSE_CONTRACT   = tmp.CLOSE_CONTRACT
+              ,ACST.FLAG_CONTRACT   = tmp.FLAG_CONTRACT
+              ,ACST.CANCEL_AMENDMENT   = tmp.CANCEL_AMENDMENT
+              ,ACST.CANCEL_CONTRACT   = tmp.CANCEL_CONTRACT
+              ,ACST.DELETE_CONTRACT   = tmp.DELETE_CONTRACT
+              ,ACST.UPDATE_CONTRACTINFO   = tmp.UPDATE_CONTRACTINFO
+              ,ACST.NEW_FISCAL_YEAR   = tmp.NEW_FISCAL_YEAR
+              
+              ,ACST.DELETE_INVOICE    = tmp.DELETE_INVOICE
+              ,ACST.WITHDRAW_INVOICE   = tmp.WITHDRAW_INVOICE
+              
+              ,ACST.MARK_AS_REGISTERED   = tmp.MARK_AS_REGISTERED
+              ,ACST.RETURN_PAYMENT   = tmp.RETURN_PAYMENT
+              ,ACST.RETURN_PAYMENT_CANCEL   = tmp.RETURN_PAYMENT_CANCEL
+              ,ACST.DOWNLOAD_FOR_REGISTRATION   = tmp.DOWNLOAD_FOR_REGISTRATION
+              ,ACST.CANCEL_MERGE   = tmp.CANCEL_MERGE
+              
+              ,ACST.MODIFIED_BY_USERID   = tmp.MODIFIED_BY_USERID
+              ,ACST.MODIFIED_DATE   = SYSTIMESTAMP
+   	WHEN NOT MATCHED THEN
+     INSERT(   ACST.AGENCY_ID, ACST.SUBMIT_INVOICE, ACST.BUDGET_MOD, ACST.CANCEL_MOD, ACST.REQUEST_ADVANCE,
+               ACST.UPDATE_BUDGET_TEMP, ACST.INITIATE_ADVANCE, ACST.UPDATE_CONTRACT_CONF, ACST.AMEND_CONTRACT,
+               ACST.SUSPEND_CONTRACT, ACST.CLOSE_CONTRACT, ACST.FLAG_CONTRACT, ACST.CANCEL_AMENDMENT, ACST.CANCEL_CONTRACT,
+               ACST.DELETE_CONTRACT, ACST.UPDATE_CONTRACTINFO, ACST.NEW_FISCAL_YEAR, ACST.DELETE_INVOICE,ACST.WITHDRAW_INVOICE,
+               ACST.MARK_AS_REGISTERED,  ACST.RETURN_PAYMENT, ACST.RETURN_PAYMENT_CANCEL, ACST.DOWNLOAD_FOR_REGISTRATION, ACST.CANCEL_MERGE, 
+               ACST.CREATED_BY_USERID , ACST.CREATED_DATE , ACST.MODIFIED_BY_USERID , ACST.MODIFIED_DATE ) 
+      VALUES(  Tmp.AGENCY_ID, Tmp.SUBMIT_INVOICE, Tmp.BUDGET_MOD, Tmp.CANCEL_MOD, Tmp.REQUEST_ADVANCE,
+               Tmp.UPDATE_BUDGET_TEMP, Tmp.INITIATE_ADVANCE, Tmp.UPDATE_CONTRACT_CONF, Tmp.AMEND_CONTRACT,
+               Tmp.SUSPEND_CONTRACT, Tmp.CLOSE_CONTRACT, Tmp.FLAG_CONTRACT,Tmp.CANCEL_AMENDMENT, Tmp.CANCEL_CONTRACT,
+               Tmp.DELETE_CONTRACT, Tmp.UPDATE_CONTRACTINFO , Tmp.NEW_FISCAL_YEAR , Tmp.DELETE_INVOICE,Tmp.WITHDRAW_INVOICE,
+               Tmp.MARK_AS_REGISTERED,  Tmp.RETURN_PAYMENT,  Tmp.RETURN_PAYMENT_CANCEL,  Tmp.DOWNLOAD_FOR_REGISTRATION, tmp.CANCEL_MERGE,
+               Tmp.CREATED_BY_USERID , SYSTIMESTAMP , Tmp.MODIFIED_BY_USERID , SYSTIMESTAMP
+      )
+	</update>
+
+
+	<select id="getActionStatusByProvider" parameterType="String" resultMap="ActionStatusData">
+	select  AGENCY_ID,PROVIDER_ID, SUBMIT_INVOICE, BUDGET_MOD, CANCEL_MOD, REQUEST_ADVANCE,
+			UPDATE_BUDGET_TEMP, INITIATE_ADVANCE, UPDATE_CONTRACT_CONF, AMEND_CONTRACT,
+			SUSPEND_CONTRACT,CLOSE_CONTRACT,FLAG_CONTRACT,CANCEL_AMENDMENT,CANCEL_CONTRACT,
+			DELETE_CONTRACT,UPDATE_CONTRACTINFO,NEW_FISCAL_YEAR,DELETE_INVOICE,WITHDRAW_INVOICE,
+			MARK_AS_REGISTERED,RETURN_PAYMENT_CANCEL,RETURN_PAYMENT,DOWNLOAD_FOR_REGISTRATION,CANCEL_MERGE,
+            CREATED_BY_USERID,  to_char(CREATED_DATE,'MM/DD/YYYY') as CREATED_DATE,
+            MODIFIED_BY_USERID, to_char(MODIFIED_DATE,'MM/DD/YYYY') as MODIFIED_DATE
+            <!-- [Start] QC9720  -->
+            , NOTICE
+			<!-- [End] QC9720  -->
+     from   ACTIONSTATUS_PROVIDER
+     where  AGENCY_ID = #{agencyId}
+       and  PROVIDER_ID = #{providerId}
+	</select>
+
+	<select id="getActionStatusProviderAll"  resultMap="ActionStatusData">
+	select  AGENCY_ID,PROVIDER_ID, SUBMIT_INVOICE, BUDGET_MOD, CANCEL_MOD, REQUEST_ADVANCE,
+			UPDATE_BUDGET_TEMP, INITIATE_ADVANCE, UPDATE_CONTRACT_CONF, AMEND_CONTRACT,
+			SUSPEND_CONTRACT,CLOSE_CONTRACT,FLAG_CONTRACT,CANCEL_AMENDMENT,CANCEL_CONTRACT,
+			DELETE_CONTRACT,UPDATE_CONTRACTINFO,NEW_FISCAL_YEAR,DELETE_INVOICE,WITHDRAW_INVOICE,
+			MARK_AS_REGISTERED,RETURN_PAYMENT_CANCEL,RETURN_PAYMENT,DOWNLOAD_FOR_REGISTRATION,CANCEL_MERGE,
+            CREATED_BY_USERID,  to_char(CREATED_DATE,'MM/DD/YYYY') as CREATED_DATE, 
+            MODIFIED_BY_USERID, to_char(MODIFIED_DATE,'MM/DD/YYYY') as MODIFIED_DATE
+            <!-- [Start] QC9720  -->
+            , NOTICE
+			<!-- [End] QC9720  -->
+            
+     from   ACTIONSTATUS_PROVIDER
+     where  PROVIDER_ID = #{providerId}
+     order  by AGENCY_ID
+	</select>
+	<!-- [End] R9.6.4 QC9701 -->
+ 
+</mapper>
+

@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--/var/lib/jenkins/workspace/HHSportal/Deploy/deploy.xml-->
+<project basedir="." default="deployArtifacts" name="HHSPortal">
+
+	<property environment="env" />
+	<property name="target" value="1.6" />
+	<property name="source" value="1.6" />
+	<property name="build_path" value="/opt/builds/HHSPortal" />
+	<property name="jenkins.local" value="DEV" />
+	
+	<!-- property file -->
+	<property file="deploy${ENV_NAME}.properties" />
+	<property file="deployProvider${ENV_NAME}.properties"  prefix="prv"/>
+	<property name="deployProvider" value="true" />
+	<property name="copySCP" value="false" />
+	<property name="verifyDeploy" value="true" />
+	<property name="needVerification" value="false" />
+
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
+	<tstamp>
+		<format property="TimeStamp" pattern="yyyyMMdd:hhmmss" locale="en"/>
+	</tstamp>
+	<tstamp>
+		<format property="TODAY_DATE" pattern="MM/dd/yy" locale="en"/>
+	</tstamp>
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+		<classpath>
+			<pathelement location="/opt/apptier/apache-ant-1.10.2/lib/jsch-0.1.54.jar" />
+			<pathelement location="/opt/apptier/apache-ant-1.10.2/lib/ant-contrib-1.0b3.jar" />
+			<pathelement location="/opt/apptier/apache-ant-1.10.2/lib/svnant-1.3.jar" />
+		</classpath>
+	</taskdef>
+
+	<path id="svnant.classpath">
+		<fileset dir="/opt/apptier/apache-ant-1.10.2/lib">
+			<include name="svnant-1.3.jar"/>
+			<include name="svnclientadapter-1.3.jar"/>
+			<include name="svnkit-1.7.8.jar"/>
+			<include name="svnkit-javahl.jar"/>
+			<include name="ant-contrib-1.0b3.jar"/>
+		</fileset>
+	</path>
+
+	<typedef resource="org/tigris/subversion/svnant/svnantlib.xml" uri="antlib:org.tigris.subversion.svnant"
+                classpathref="svnant.classpath" />
+
+<!--	<taskdef name="svn" classname="org.tigris.subversion.svnant.SvnTask"   />
+-->
+
+	<propertyregex
+                property="artifact.number"
+                input="${ARTIFACT}"
+                regexp="Artifacts(.*)$"
+                select="\1"/>
+	<echo>Artifact Number :: ${artifact.number}</echo>
+
+	<echo>Today Date :: ${TODAY_DATE}</echo>
+
+	<if>
+		<equals arg1="${ENV_NAME}" arg2="DEV"/>
+		<then>
+			<var name="deployProvider" value="false" />
+		</then>
+		<elseif>
+			<equals arg1="${ENV_NAME}" arg2="TRN"/>
+			<then>
+				<var name="deployProvider" value="false" />
+			</then>
+		</elseif>
+		<elseif>
+			<equals arg1="${ENV_NAME}" arg2="TST"/>
+			<then>
+				<var name="deployProvider" value="false" />
+			</then>
+		</elseif>
+		<elseif>
+			<equals arg1="${ENV_NAME}" arg2="DV3"/>
+			<then>
+				<var name="jenkins.local" value="DV3" />
+			</then>
+		</elseif>
+		<elseif>
+			<equals arg1="${ENV_NAME}" arg2="TS2"/>
+			<then>
+				<var name="jenkins.local" value="TS2" />
+			</then>
+		</elseif>
+		<elseif>
+			<equals arg1="${ENV_NAME}" arg2="UAT"/>
+			<then>
+				<var name="jenkins.local" value="UAT" />
+			</then>
+		</elseif>
+		<elseif>
+			<equals arg1="${ENV_NAME}" arg2="STG"/>
+			<then>
+				<var name="jenkins.local" value="STG" />
+				<var name="copySCP" value="true" />
+				<var name="needVerification" value="true"/>
+			</then>
+		</elseif>
+		<elseif>
+			<equals arg1="${ENV_NAME}" arg2="PRD"/>
+			<then>
+				<var name="jenkins.local" value="STG" />
+				<var name="copySCP" value="true" />
+				<var name="needVerification" value="true"/>
+			</then>
+		</elseif>
+	</if>
+
+	<if>
+		<equals arg1="${needVerification}" arg2="true"/>
+		<then>
+			<var name="verifyDeploy" value="false" />
+			
+			<propertyregex
+                property="verify.environment"
+                input="${VERIFY_ENV}"
+				regexp="(.*)-(.*)$"
+                select="\1"/>
+			<echo>verify.environment :: ${verify.environment}</echo>
+			<propertyregex
+                property="verify.date"
+                input="${VERIFY_ENV}"
+                regexp="(.*)-(.*)$"
+                select="\2"/>
+			<echo>verify.date :: ${verify.date}</echo>
+			<!-- check Environment -->
+			<if>
+				<equals arg1="${verify.environment}" arg2="${ENV_NAME}"/>
+				<then>
+					<!-- check Date -->
+					<if>
+						<equals arg1="${verify.date}" arg2="${TODAY_DATE}"/>
+						<then>
+							<var name="verifyDeploy" value="true" />
+							<echo>Start DEPLOYMENT - ENVIRONMENT an DATE are VERIFIED!</echo> 
+						</then>
+						<else>
+							<echo>Exit DEPLOYMENT - DATE is NOT VERIFIED!</echo>
+							<fail>Exit DEPLOYMENT - DATE is NOT VERIFIED!</fail>
+						</else>
+					</if>
+				</then>
+				<else>
+					<echo>Exit DEPLOYMENT - ENVIRONMENT is NOT VERIFIED!</echo>
+					<fail>Exit DEPLOYMENT - ENVIRONMENT is NOT VERIFIED!</fail>
+				</else>
+			</if>
+			<echo>verifyDeploy :: ${verifyDeploy}</echo>
+		</then>
+	</if>
+
+	<condition property="if.provider.true">
+		<equals arg1="${deployProvider}" arg2="true" />
+	</condition>
+
+	<condition property="if.deploy.true">
+		<equals arg1="${verifyDeploy}" arg2="true" />
+	</condition>
+	
+	<echo>verifyDeploy   :: ${verifyDeploy}</echo>
+	<property name="jenkins.ArtifactPath" value="${build_path}/${SVN_BUILD_NUMBER}/${jenkins.local}/${ARTIFACT}" />
+	<target name="deployArtifacts" if="${if.deploy.true}">
+		<echo>================== Start Deploy =============================</echo> 
+		<echo>property_file  :: ${name}</echo> 
+		<echo>deployProvider ::  ${deployProvider}</echo> 
+		<echo> Environment   :: ${ENV_NAME} || property :: ${name} || jenkins.local :: ${jenkins.local} || Build Number :: ${SVN_BUILD_NUMBER}</echo>
+		<echo>Arifacts location on Jenkins :: ${jenkins.ArtifactPath}</echo>
+		<echo>copySCP        :: ${copySCP}</echo>
+		<echo>if.deploy.true :: ${if.deploy.true}</echo>
+
+		<if>
+			<equals arg1="${copySCP}" arg2="true"/>
+			<then>
+				<!--    <antcall target="copyArtifactsToAdminServerSCP"/> -->
+				<antcall target="copyArtifactsToAdminServerSCP_Provider"/>
+			</then>
+		</if>
+        <if>
+			<equals arg1="${deploybatch}" arg2="true"/>
+			<then>
+                 <echo message="deploy Batch: ${deploybatch}"/>
+                 <antcall target="deployBatchJar"/>
+			</then>
+        </if>
+        <if>
+			<equals arg1="${deploycomponent}" arg2="true"/>
+			<then>
+                 <antcall target="deployComponentJar"/>
+                 <echo message="deploy component: ${deploycomponent}"/>
+			</then>
+        </if>
+        <if>
+			<equals arg1="${deployear}" arg2="true"/>
+			<then>
+                 <echo message="deploy Ear : ${deployear}"/>
+                 <antcall target="deployappEAR"/>
+			</then>
+        </if>
+
+
+	</target>
+
+
+	<!-- copy artifacts from Jenkins server to Admin server -->
+	<target name="copyArtifactsToAdminServerSCP" depends="verifyArtifacts" if="${all.artifacts.found}">
+		<echo>Artifacts are present on Jenkins Server.</echo>
+		<echo>host: ${host.ADMIN.server}</echo>
+		<sshexec host="${host.ADMIN.server}"
+                  username="${admin.username}"
+                  keyfile="${user.home}/.ssh/id_rsa"
+                  command="mkdir -p ${jenkins.ArtifactPath}"
+                  trust="true"/>
+
+		<scp todir="${admin.username}@${host.ADMIN.server}:${jenkins.ArtifactPath}" trust="true">
+			<fileset dir="${jenkins.ArtifactPath}">
+				<include name="HHSPortalEAR.ear"/>
+			</fileset>
+		</scp>
+
+		<echo>Artifacts were copied from Jenkins to Admin server.</echo>
+
+	</target>
+
+	<target name="copyArtifactsToAdminServerSCP_Provider" depends="verifyArtifacts" if="${all.artifacts.found}">
+		<antcall target="copyArtifactsToProviderServerSCP"/>
+	</target>
+	<!-- copy artifacts from Jenkins server to Propvider Admin server -->
+	<target name="copyArtifactsToProviderServerSCP" if="${if.provider.true}">
+
+		<echo>Artifacts are present on Provider Jenkins Server.</echo>
+		<echo>host: ${prv.host.ADMIN.server}</echo>
+		<sshexec host="${prv.host.ADMIN.server}"
+                  username="${prv.admin.username}"
+                  keyfile="${user.home}/.ssh/id_rsa"
+                  command="mkdir -p ${jenkins.ArtifactPath}"
+                  trust="true"/>
+
+		<scp todir="${prv.admin.username}@${prv.host.ADMIN.server}:${jenkins.ArtifactPath}" keyfile="${user.home}/.ssh/id_rsa" trust="true">
+			<fileset dir="${jenkins.ArtifactPath}">
+				<include name="HHSPortalEAR.ear"/>
+			</fileset>
+		</scp>
+
+		<echo>Artifacts were copied from Jenkins to Provider Admin server.</echo>
+
+	</target>
+
+
+	<target name="verifyArtifacts">
+		<condition property="all.artifacts.found">
+			<and>
+				<available file="${jenkins.ArtifactPath}/HHSPortalEAR.ear"  property="ear.found"/>
+				<available file="${jenkins.ArtifactPath}/HHS_Batch.jar"     property="batch.found"/>
+				<available file="${jenkins.ArtifactPath}/HHS_Component.jar" property="component.found"/>
+			</and>
+		</condition>
+                <echo>all.artifacts.found :: ${all.artifacts.found}</echo>
+	</target>
+
+	<!-- Deploying Application EAR File  -->
+	<target name="deployappEAR">
+
+		<echo   message="${ENV_NAME} equal ${devenv} current build is ${SVN_BUILD_NUMBER}" />
+		<trycatch>
+			<try>
+				<parallel>
+					<antcall target="deployEAR"/>
+					<antcall target="deployProviderEAR"/>
+				</parallel>
+			</try>
+		</trycatch>
+	</target>
+
+	<!--Deployment of New EAR File-->
+	<!-- password="${prv.admin.password}" -->
+	<target name="deployEAR">
+		<sshexec host="${host.ADMIN.server}"
+                        username="${admin.username}"
+                        keyfile="${user.home}/.ssh/id_rsa"
+                        command="${EAR.deploy} ${SVN_BUILD_NUMBER} ${artifact.number}"
+                        trust="true"/>
+	</target>
+
+	<target name="deployProviderEAR" if="${if.provider.true}">
+		<sshexec host="${prv.host.ADMIN.server}"
+                        username="${prv.admin.username}"
+                        keyfile="${user.home}/.ssh/id_rsa"
+                        command="${prv.EAR.deploy} ${SVN_BUILD_NUMBER} ${artifact.number}"
+                        trust="true"/>
+	</target>
+
+	<!--Deploy Batch file-->
+	<target name="deployBatchJar">
+		<sshexec host="${host.ADMIN.server}"
+                        username="${admin.username}"
+                        keyfile="${user.home}/.ssh/id_rsa"
+                        command="${BATCHfile.deploy} ${SVN_BUILD_NUMBER} ${artifact.number}"
+                        trust="true"/>
+	</target>
+
+	<!--Deployment of Component Jar-->
+	<target name="deployComponentJar">
+		<sshexec host="${host.ADMIN.server}"
+                        username="${admin.username}"
+                        keyfile="${user.home}/.ssh/id_rsa"
+                        command="${CMfile.deploy} ${SVN_BUILD_NUMBER} ${artifact.number}"
+                        trust="true"/>
+	</target>
+
+</project>

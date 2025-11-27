@@ -1,0 +1,1050 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.nyc.hhs.service.db.services.application.PaymentModuleMapper">
+
+	<resultMap id="contractInfo" type="com.nyc.hhs.model.ContractList">
+		<result property="contractAgencyName" column="AGENCY_NAME" />
+		<result property="agencyId" column="AGENCY_ID" />
+		<result property="contractTitle" column="PROCUREMENT_TITLE" />
+		<result property="provider" column="ORGANIZATION_LEGAL_NAME" />
+		<result property="procEpin" column="PROCEPIN" />
+		<result property="awardEpin" column="AWRDEPIN" />
+		<result property="extCT" column="EXT_CT_NUMBER" />
+		<result property="contractStartDate" column="CONTRACT_START_DATE" />
+		<result property="contractEndDate" column="CONTRACT_END_DATE" />
+		<result property="contractValue" column="CONTRACT_AMOUNT" />
+		<result property="programName" column="PROGRAM_NAME" />
+		<result property="budgetStatus" column="STATUS" />
+		<!-- Start : R6 Changes to get total approved returned payment amount and count of returned payments for particular budget-->
+		<result property="noOfReturnedPayments" column="NO_OF_RETURNED_PAYMENTS"/>
+		<!-- Defect fix 8606-->
+		<result property="returnedPaymentAmount" column="TOTAL_RETURNED_AMOUNT"></result>
+		<!-- End : R6 Changes to get total approved returned payment amount and count of returned payments for particular budget-->
+	</resultMap>
+	
+<!-- Updated for R6: Apt Interface new Epin validation -->
+	<select id="fetchContractInfoForPayment" parameterType="hashmap"
+		resultMap="contractInfo">
+		SELECT NYC_AGENCY_DETAILS.AGENCY_NAME,
+		(
+		CASE
+		WHEN CONTRACT.PROCUREMENT_TITLE IS NOT NULL
+		THEN CONTRACT.PROCUREMENT_TITLE
+		ELSE CONTRACT.CONTRACT_TITLE
+		END) AS PROCUREMENT_TITLE,
+		CONTRACT.AGENCY_ID,
+		CONTRACT.PARENT_CONTRACT_ID,
+		ORGANIZATION.ORGANIZATION_LEGAL_NAME,
+		( CASE WHEN CONTRACT_SOURCE_MASTER.CONTRACT_SOURCE in ('APT_Contract')
+		THEN (select
+		PROCUREMENT_AWARD_EPIN AS PROC_EPIN
+		FROM
+		REF_APT_EPIN_MASTER
+		where
+		REF_APT_EPIN_ID =(select PROCUREMENT_EPIN_ID from REF_APT_EPIN_MASTER
+		where
+		REF_APT_EPIN_ID = (select REF_APT_EPIN_ID from CONTRACT where CONTRACT_ID= #{contractId})))
+		ELSE
+		PROCUREMENT.EPIN
+		END
+		) AS PROCEPIN,
+		CONTRACT.EXT_EPIN AS AWRDEPIN,
+		NVL(CONTRACT.EXT_CT_NUMBER, 'Not
+		Registered') AS EXT_CT_NUMBER,
+		CONTRACT.CONTRACT_START_DATE,
+		CONTRACT.CONTRACT_END_DATE,
+		CONTRACT.CONTRACT_AMOUNT,
+		CONTRACT.CONTRACT_TYPE_ID,
+		PROGRAM_MASTER.PROGRAM_NAME,
+		STATUS_MASTER_R2_R3.STATUS
+		<!-- Start : R6 Changes to get total approved returned payment amount and count of returned payments for particular budget-->
+		,(SELECT count(RETURN_PAYMENT_ID) FROM RETURN_PAYMENT WHERE BUDGET_ID = #{budgetId}) AS NO_OF_RETURNED_PAYMENTS
+		<!-- Defect fix 8606-->
+		,(SELECT NVL(SUM(CHECK_AMOUNT),0) FROM RETURN_PAYMENT WHERE BUDGET_ID = (SELECT PARENT_ID from BUDGET where
+		budget_id =
+		#{budgetId}) and status_id in (187,186)) AS TOTAL_RETURNED_AMOUNT
+		<!-- End : R6 Changes to get total approved returned payment amount and count of returned payments for particular budget-->
+		FROM CONTRACT
+		INNER JOIN CONTRACT_SOURCE_MASTER
+		ON CONTRACT.CONTRACT_SOURCE_ID =
+		CONTRACT_SOURCE_MASTER.CONTRACT_SOURCE_ID
+		LEFT JOIN NYC_AGENCY_DETAILS
+		ON NYC_AGENCY_DETAILS.AGENCY_ID = CONTRACT.AGENCY_ID
+		LEFT JOIN ORGANIZATION
+		ON ORGANIZATION.ORGANIZATION_ID =CONTRACT.ORGANIZATION_ID
+		LEFT JOIN PROGRAM_MASTER
+		ON PROGRAM_MASTER.PROGRAM_ID = CONTRACT.PROGRAM_ID
+		LEFT JOIN PROCUREMENT
+		ON PROCUREMENT.PROCUREMENT_ID = CONTRACT.PROCUREMENT_ID
+		LEFT JOIN BUDGET
+		ON BUDGET.CONTRACT_ID = CONTRACT.CONTRACT_ID
+		LEFT JOIN STATUS_MASTER_R2_R3
+		ON STATUS_MASTER_R2_R3.STATUS_ID = BUDGET.STATUS_ID
+		WHERE CONTRACT.CONTRACT_ID = #{contractId}
+		AND BUDGET.BUDGET_ID = #{budgetId}
+		</select>
+
+	<resultMap id="fyBudgetInfo" type="com.nyc.hhs.model.BudgetDetails">
+		<result property="startDate" column="BUDGET_START_DATE" />
+		<result property="endDate" column="BUDGET_END_DATE" />
+		<result property="approvedBudget" column="FISCAL_YEAR_AMOUNT" />
+	</resultMap>
+
+	<select id="fetchFyBudgetSummary" parameterType="hashmap"
+		resultMap="fyBudgetInfo">
+		SELECT BUDGET.BUDGET_START_DATE,
+		BUDGET.BUDGET_END_DATE,
+		BUDGET.FISCAL_YEAR_AMOUNT
+		FROM BUDGET
+		WHERE BUDGET.BUDGET_ID =
+		#{budgetId}
+		AND
+		BUDGET.CONTRACT_ID = #{contractId}
+	</select>
+
+
+	<select id="getInvoiceAmount" parameterType="hashmap"
+		resultType="BigDecimal">
+		SELECT NVL(SUM(INVOICE_AMOUNT),'0') FROM INVOICE_DETAILS
+		WHERE
+		INVOICE_ID IN (
+		SELECT
+		INVOICE.INVOICE_ID
+		FROM BUDGET
+		INNER JOIN
+		INVOICE ON INVOICE.BUDGET_ID = BUDGET.BUDGET_ID
+		WHERE
+		INVOICE.STATUS_ID
+		IN (72,73)
+		AND BUDGET.BUDGET_ID =
+		#{budgetId}
+		AND
+		BUDGET.CONTRACT_ID =
+		#{contractId}
+		)
+		AND ENTRY_TYPE_ID NOT IN ('11','14')
+    </select>
+
+	<select id="fetchInvFyBudgetActualPaid" parameterType="java.lang.String"
+		resultType="BigDecimal">
+		Select NVL(sum(PAYMENT_AMOUNT),0) from Payment where
+		BUDGET_ID=
+		#{asBudgetId} AND STATUS_ID='65'
+	</select>
+
+	<resultMap id="sessionInfo" type="com.nyc.hhs.model.CBGridBean">
+		<result property="contractID" column="CONTRACT_ID" />
+		<result property="contractBudgetID" column="BUDGET_ID" />
+		<result property="procurementID" column="PROCUREMENT_ID" />
+		<result property="fiscalYearID" column="FISCAL_YEAR_ID" />
+		<result property="budgetTypeId" column="BUDGET_TYPE_ID" />
+		<result property="budgetStatusId" column="BUDGET_STATUS_ID" />
+		<result property="contractStatusId" column="CONTRACT_STATUS_ID" />
+	</resultMap>
+
+	<select id="getCbGridDataForSession" parameterType="hashmap"
+		resultMap="sessionInfo">
+		SELECT
+		CONTRACT.CONTRACT_ID,
+		BUDGET.BUDGET_ID,
+		CONTRACT.PROCUREMENT_ID,
+		BUDGET.FISCAL_YEAR_ID,
+		BUDGET.BUDGET_TYPE_ID,
+		BUDGET.STATUS_ID as
+		BUDGET_STATUS_ID,
+		CONTRACT.STATUS_ID as
+		CONTRACT_STATUS_ID
+		FROM CONTRACT
+		INNER JOIN BUDGET ON
+		BUDGET.CONTRACT_ID
+		= CONTRACT.CONTRACT_ID
+		INNER JOIN STATUS_MASTER_R2_R3 ON
+		STATUS_MASTER_R2_R3.STATUS_ID =
+		BUDGET.STATUS_ID
+		WHERE
+		CONTRACT.CONTRACT_ID = #{contractId}
+		AND
+		BUDGET.BUDGET_ID = #{budgetId}
+	</select>
+
+	<resultMap id="assignmentInfo" type="com.nyc.hhs.model.AssignmentsSummaryBean">
+		<result property="id" column="ID" />
+		<result property="assignmentAmount" column="ASSIGNMENT_AMOUNT" />
+	</resultMap>
+	<select id="fetchAdvanceAssignmentAmount" resultMap="assignmentInfo"
+		parameterType="com.nyc.hhs.model.CBGridBean">
+		SELECT DISTINCT ASSIGNMENT.ASSIGNMENT_id AS
+		ID,ADVANCE_ASSIGNMENT.ASSIGNMENT_AMOUNT AS ASSIGNMENT_AMOUNT
+		FROM
+		ASSIGNMENT
+		LEFT JOIN ADVANCE_ASSIGNMENT ON
+		ADVANCE_ASSIGNMENT.ASSIGNMENT_ID=
+		ASSIGNMENT.ASSIGNMENT_id
+		LEFT JOIN
+		BUDGET_ADVANCE ON
+		BUDGET_ADVANCE.BUDGET_ADVANCE_ID=ADVANCE_ASSIGNMENT.BUDGET_ADVANCE_ID
+		where BUDGET_ADVANCE.BUDGET_ADVANCE_ID = #{budgetAdvanceId}
+
+
+
+		<!-- SELECT DISTINCT ASSIGNMENT.ASSIGNMENT_id||'_'||BUDGET_ADVANCE.BUDGET_ADVANCE_ID 
+			||'_'|| NVL(ADVANCE_ASSIGNMENT.ADVANCE_ASSIGNMENT_ID,'0') AS ID, REF_VENDOR_V.LGL_NM, 
+			NVL(ADVANCE_ASSIGNMENT.ASSIGNMENT_AMOUNT,'0') as CURRENT_ASSIGNED_AMOUNT, 
+			NVL(SUM(ADVANCE_ASSIGNMENT.ASSIGNMENT_AMOUNT),'0') AS YTD_AMOUNT FROM ASSIGNMENT 
+			INNER JOIN REF_VENDOR_V ON REF_VENDOR_V.VEND_CUST_CD = ASSIGNMENT.VEND_CUST_CD 
+			left join BUDGET_ADVANCE ON BUDGET_ADVANCE.BUDGET_ID = ASSIGNMENT.BUDGET_ID 
+			left JOIN ADVANCE_ASSIGNMENT ON ADVANCE_ASSIGNMENT.ASSIGNMENT_ID = ASSIGNMENT.ASSIGNMENT_ID 
+			AND BUDGET_ADVANCE.BUDGET_ADVANCE_ID = ADVANCE_ASSIGNMENT.BUDGET_ADVANCE_ID 
+			where BUDGET_ADVANCE.budget_advance_number = #{budgetAdvanceId} and BUDGET_ADVANCE.BUDGET_ID 
+			= #{contractBudgetID} group by ASSIGNMENT.ASSIGNMENT_id, BUDGET_ADVANCE.BUDGET_ADVANCE_ID, 
+			ADVANCE_ASSIGNMENT.ADVANCE_ASSIGNMENT_ID, REF_VENDOR_V.LGL_NM, ADVANCE_ASSIGNMENT.ASSIGNMENT_AMOUNT -->
+	</select>
+
+	<update id="updatePaymentAssignmentDetails" parameterType="HashMap">
+		UPDATE ADVANCE_ASSIGNMENT
+		SET ASSIGNMENT_AMOUNT =
+		#{lineItemInvoiceAmt},
+		modified_date=CURRENT_TIMESTAMP,
+		MODIFIED_BY_USERID = #{modifyByAgency,jdbcType=VARCHAR}
+		WHERE
+		ASSIGNMENT_ID = #{id} AND BUDGET_ADVANCE_ID = #{budgetAdvanceId} AND
+		BUDGET_ID = #{contractBudgetID}
+	</update>
+
+	<insert id="insertPaymentAssignmentDetails" parameterType="HashMap">
+		INSERT
+		INTO ADVANCE_ASSIGNMENT
+		(
+		ADVANCE_ASSIGNMENT_ID,
+		BUDGET_ADVANCE_ID,
+		BUDGET_ID,
+		ASSIGNMENT_AMOUNT,
+		CREATED_BY_USERID,
+		CREATED_DATE,
+		MODIFIED_BY_USERID,
+		MODIFIED_DATE,
+		ASSIGNMENT_ID
+		)
+		VALUES
+		(
+		SEQ_ADVANCE_ASSIGNMENT_ID.nextval,
+		#{budgetAdvanceId},
+		#{contractBudgetID},
+		#{lineItemInvoiceAmt},
+		#{modifyByAgency},
+		SYSTIMESTAMP,
+		#{modifyByAgency},
+		SYSTIMESTAMP,
+		#{id}
+		)
+	</insert>
+
+
+	<select id="fetchCountPaymentAssignment" parameterType="HashMap"
+		resultType="java.lang.Integer">
+		select count(*)
+		from ADVANCE_ASSIGNMENT
+		INNER JOIN
+		BUDGET_ADVANCE ON BUDGET_ADVANCE.BUDGET_ADVANCE_ID =
+		ADVANCE_ASSIGNMENT.BUDGET_ADVANCE_ID
+		where
+		ADVANCE_ASSIGNMENT.ASSIGNMENT_AMOUNT > 0 AND
+		ADVANCE_ASSIGNMENT.ASSIGNMENT_ID= #{assignmentId}
+		AND
+		ADVANCE_ASSIGNMENT.BUDGET_ID = #{contractBudgetID} and
+		BUDGET_ADVANCE.STATUS_ID='93'
+	</select>
+
+	<delete id="delAdvanceAssignment" parameterType="com.nyc.hhs.model.AssignmentsSummaryBean">
+		DELETE
+		FROM
+		ADVANCE_ASSIGNMENT
+		WHERE
+		BUDGET_ID = #{contractBudgetID}
+		AND
+		ASSIGNMENT_ID = #{id}
+     </delete>
+
+  <!-- Result modified as a part of release 3.1.0 for enhancement 6023  -->	
+	<resultMap id="paymentHeaderDetails" type="com.nyc.hhs.model.PaymentBean">
+		<result property="paymentId" column="PAYMENT_ID" />
+		<result property="agencyCode" column="AGENCY_ID" />
+		<result property="paymentVoucherNo" column="PAYMENT_VOUCHER_NUM" />
+		<result property="budgetFYId" column="BUDGET_FISCAL_YEAR_ID" />
+		<result property="fiscalYearId" column="FISCAL_YEAR_ID" />
+		<result property="period" column="PERIOD" />
+		<result property="workflowId" column="WOB_NUMBER" />
+		<result property="invoiceNo" column="INVOICE_NUMBER" />
+		<result property="invoiceSubmittedDate" column="INVOICE_SUBMITTED_DATE" />
+		<result property="invoiceApprovedDate" column="INVOICE_APPROVED_DATE" />
+		<result property="invoiceStartDate" column="INVOICE_START_DATE" />
+		<result property="invoiceEndDate" column="INVOICE_END_DATE" />
+		<result property="vendorCode" column="VENDOR_TYPE" />
+		<result property="vendorAddrCode" column="VENDOR_ADDRESS_ID" />
+		<result property="payeeName" column="PAYEE_NAME" />
+		<result property="payeeVendorCode" column="PAYEE_VENDOR_ID" />
+		<result property="payeeVendorAddrCode" column="PAYEE_VENDOR_ADDRESS_ID" />
+		<result property="checkNum" column="CHECK_EFT_NUM" />
+		<result property="disbursementDate" column="DISBURSEMENT_DATE" />
+		<result property="paymentAmount" column="PAYMENT_AMOUNT" />
+		<result property="invoiceId" column="INVOICE_ID" />
+		<result property="rejectedDate" column="INVOICE_REJECTED_DATE" />
+		<result property="paymentStatus" column="PAYMENT_STATUS_ID" />
+	</resultMap>
+  
+  <!-- Query modified as a part of Release 3.6.0   -->
+  <!-- Query modified as a part of release 3.1.0 for enhancement 6023  -->	
+  <!-- Made changes in this query for Enhancement 6424  and Release 3.3.0 -->
+	<select id="getPaymentHeaderDetails" parameterType="hashmap"
+		resultMap="paymentHeaderDetails">
+		  SELECT pay.PAYMENT_ID,
+		  (SELECT agency_code FROM nyc_agency_details WHERE agency_id = pay.AGENCY_ID
+		  ) AS AGENCY_ID,
+		  pay.PAYMENT_VOUCHER_NUM,
+		  pay.BUDGET_FISCAL_YEAR_ID,
+		  pay.FISCAL_YEAR_ID,
+		  pay.PERIOD,
+		  pay.PAYEE_NAME,
+		  pay.PAYEE_VENDOR_ID,
+		  pay.PAYEE_VENDOR_ADDRESS_ID,
+		  pay.CHECK_EFT_NUM,
+		  TO_CHAR(pay.DISBURSEMENT_DATE, 'MM/DD/YYYY') AS DISBURSEMENT_DATE,
+		  pay.VENDOR_ADDRESS_ID,
+		  (
+		   select distinct VEND_CUST_CD from REF_CONTRACTS_V where DOC_CD||DOC_DEPT_CD||DOC_ID = (select ext_ct_number from contract where contract_id=#{contractId})
+		    and rownum = '1'
+			  <!-- SELECT distinct REF_VENDOR_V.VEND_CUST_CD
+			     FROM REF_VENDOR_V, ORGANIZATION, contract, ref_vendor_t 
+			    WHERE REF_VENDOR_V.TIN =ORGANIZATION.EIN_ID_NN
+			    and   ORGANIZATION.ORGANIZATION_ID=contract.organization_id
+			    and  contract.contract_id=#{contractId}
+	        and  ref_vendor_v.vend_cust_cd =ref_vendor_t.vend_cust_cd
+	        and ref_vendor_t.PRVNT_NEW_SPND_IND = 0
+	        and rownum = '1' -->
+		  ) AS VENDOR_TYPE,
+		  pay.PAYMENT_AMOUNT,
+		  pay.INVOICE_ID,
+		  inv.INVOICE_NUMBER,
+		 TO_CHAR(inv.INVOICE_SUBMITTED_DATE, 'MM/DD/YYYY') AS INVOICE_SUBMITTED_DATE,
+		 TO_CHAR(inv.INVOICE_APPROVED_DATE, 'MM/DD/YYYY')  AS INVOICE_APPROVED_DATE ,
+		 TO_CHAR(inv.INVOICE_START_DATE, 'MM/DD/YYYY')     AS INVOICE_START_DATE,   
+		 TO_CHAR(inv.INVOICE_END_DATE, 'MM/DD/YYYY')       AS INVOICE_END_DATE,
+		 TO_CHAR(inv.INVOICE_REJECTED_DATE, 'MM/DD/YYYY')       AS INVOICE_REJECTED_DATE,
+		 pay.STATUS_ID AS PAYMENT_STATUS_ID
+		   FROM PAYMENT pay
+		  INNER JOIN INVOICE inv
+		  ON inv.invoice_id = pay.invoice_id
+		  WHERE pay.payment_id = #{paymentId}
+		  AND (pay.DELETE_FLAG   != 1 OR pay.STATUS_ID='159')
+	</select>
+	
+  <!-- Changes reverted for Enhancement 6405 as a part of Release 3.3.1. -->
+  <!-- Made changes in this query for Enhancement 6405 and Release 3.3.0 -->
+  <!-- Query modified as a part of release 3.1.0 for enhancement 6023  -->	
+	<select id="getPaymentReviewHeaderDetails" parameterType="hashmap"
+		resultMap="paymentHeaderDetails">
+		select PAYMENT_ID, AGENCY_ID, PAYMENT_VOUCHER_NUM,
+		BUDGET_FISCAL_YEAR_ID, FISCAL_YEAR_ID, PERIOD,
+		PAYEE_NAME,
+		PAYEE_VENDOR_ID, PAYEE_VENDOR_ADDRESS_ID, CHECK_EFT_NUM,
+		DISBURSEMENT_DATE,
+		VENDOR_ADDRESS_ID, VENDOR_TYPE, PAYMENT_AMOUNT,
+		INVOICE_ID, INVOICE_NUMBER,
+		INVOICE_SUBMITTED_DATE,
+		INVOICE_APPROVED_DATE, INVOICE_START_DATE,
+		INVOICE_END_DATE,
+		PAYMENT_STATUS_ID
+		from (
+		select pay.PAYMENT_ID as PAYMENT_ID,
+		(select agency_code from
+		nyc_agency_details where agency_id = pay.AGENCY_ID) as AGENCY_ID,
+		pay.PAYMENT_VOUCHER_NUM as PAYMENT_VOUCHER_NUM,
+		pay.BUDGET_FISCAL_YEAR_ID as BUDGET_FISCAL_YEAR_ID,
+		pay.FISCAL_YEAR_ID
+		as FISCAL_YEAR_ID,
+		pay.PERIOD as PERIOD,
+		pay.PAYEE_NAME as PAYEE_NAME,
+		pay.PAYEE_VENDOR_ID as PAYEE_VENDOR_ID,
+		pay.PAYEE_VENDOR_ADDRESS_ID as
+		PAYEE_VENDOR_ADDRESS_ID,
+		pay.CHECK_EFT_NUM as CHECK_EFT_NUM,
+		TO_CHAR(pay.DISBURSEMENT_DATE,'MM/DD/YYYY') as DISBURSEMENT_DATE,
+		pay.VENDOR_ADDRESS_ID as VENDOR_ADDRESS_ID,
+		(
+		select distinct VEND_CUST_CD from REF_CONTRACTS_V where DOC_CD||DOC_DEPT_CD||DOC_ID = (select ext_ct_number from contract where contract_id=#{contractId})
+		 and rownum = '1'
+		<!-- SELECT distinct REF_VENDOR_V.VEND_CUST_CD
+        FROM REF_VENDOR_V, ORGANIZATION, contract,REF_VENDOR_t
+      	WHERE REF_VENDOR_V.TIN =ORGANIZATION.EIN_ID_NN
+      	and   ORGANIZATION.ORGANIZATION_ID=contract.organization_id
+      	and  contract.contract_id=#{contractId}
+      	and  ref_vendor_v.vend_cust_cd =ref_vendor_t.vend_cust_cd
+        and ref_vendor_t.PRVNT_NEW_SPND_IND = 0
+        and rownum = '1' -->
+        ) as VENDOR_TYPE,
+		pay.PAYMENT_AMOUNT as
+		PAYMENT_AMOUNT,
+		pay.INVOICE_ID as INVOICE_ID,
+		inv.INVOICE_NUMBER as
+		INVOICE_NUMBER,
+		TO_CHAR(inv.INVOICE_SUBMITTED_DATE,'MM/DD/YYYY') as
+		INVOICE_SUBMITTED_DATE,
+		TO_CHAR(inv.INVOICE_APPROVED_DATE,'MM/DD/YYYY') as
+		INVOICE_APPROVED_DATE,
+		TO_CHAR(inv.INVOICE_START_DATE,'MM/DD/YYYY') as
+		INVOICE_START_DATE,
+		TO_CHAR(inv.INVOICE_END_DATE,'MM/DD/YYYY') as
+		INVOICE_END_DATE,
+		pay.STATUS_ID AS PAYMENT_STATUS_ID
+		from PAYMENT pay
+		inner join INVOICE inv on
+		inv.invoice_id = pay.invoice_id
+		where pay.invoice_id =
+		#{invoiceId} and
+		pay.DELETE_FLAG != 1 order by
+		payment_voucher_num) where rownum = 1
+	</select>
+
+
+	<select id="getPaymentVoucherNum" parameterType="hashmap"
+		resultMap="paymentHeaderDetails">
+		select PAYMENT_ID, PAYMENT_VOUCHER_NUM, PERIOD, PAYEE_NAME,
+		PAYEE_VENDOR_ID,
+		PAYEE_VENDOR_ADDRESS_ID
+		from PAYMENT where INVOICE_ID =
+		#{invoiceId} and DELETE_FLAG != 1 order by payment_voucher_num
+	</select>
+
+
+	<resultMap id="paymentLineDetails" type="com.nyc.hhs.model.BudgetDetails">
+		<result property="startDate" column="BUDGET_START_DATE" />
+		<result property="endDate" column="BUDGET_END_DATE" />
+		<result property="approvedBudget" column="FISCAL_YEAR_AMOUNT" />
+		<result property="ytdInvoicedAmount" column="INVOICE_AMOUNT" />
+	</resultMap>
+
+	<!-- Query modified as a part of release 7 for defect 6777 -Added entry_type_id not in (11,14) -->
+	<select id="fetchPaymentFyBudgetSummary" parameterType="hashmap"
+		resultMap="paymentLineDetails">
+		SELECT Distinct BUDGET.BUDGET_ID,
+		BUDGET.BUDGET_START_DATE,
+		BUDGET.BUDGET_END_DATE,
+		BUDGET.FISCAL_YEAR_AMOUNT,
+		nvl((select
+		sum(invoice_amount) from invoice_details where invoice_id in (select
+		INVOICE_ID from INVOICE where BUDGET_ID = #{budgetId} and STATUS_ID IN
+		(72,73) and entry_type_id not in (11,14))),'0') AS INVOICE_AMOUNT
+		FROM
+		BUDGET
+		LEFT OUTER JOIN INVOICE ON
+		INVOICE.BUDGET_ID = BUDGET.BUDGET_ID AND
+		INVOICE.STATUS_ID IN (72,73)
+		LEFT OUTER JOIN INVOICE_DETAILS ON
+		INVOICE_DETAILS.INVOICE_ID =
+		INVOICE.INVOICE_ID
+		WHERE BUDGET.BUDGET_ID = #{budgetId}
+	</select>
+
+
+	<select id="fetchPaymentFyBudgetActualPaid" parameterType="java.lang.String"
+		resultType="BigDecimal">
+		SELECT NVL(sum(PAYMENT_AMOUNT),0) as PAYMENT_AMOUNT FROM
+		PAYMENT WHERE STATUS_ID = 65
+		AND BUDGET_ID = #{budgetId} AND
+		DELETE_FLAG != 1
+	</select>
+
+	<select id="fetchTotalInvoiceAmount" parameterType="java.lang.String"
+		resultType="BigDecimal">
+		select
+		NVL(sum(invoice_amount),0) as TOTAL_INVOICE_AMOUNT
+		from invoice_details where invoice_id=(select
+		INVOICE_ID from PAYMENT
+		where PAYMENT_ID = #{paymentId}) AND ENTRY_TYPE_ID NOT IN ('11','14')
+	</select>
+
+<!-- Query modified as a part of release 3.1.0 for enhancement 6023  -->
+	<select id="fetchTotalPaymentAmount" parameterType="java.lang.String"
+		resultType="BigDecimal">
+		SELECT NVL(PAYMENT_AMOUNT,0) as PAYMENT_AMOUNT FROM PAYMENT
+		WHERE PAYMENT_ID =
+		#{paymentId} and (DELETE_FLAG != 1 OR STATUS_ID='159')
+	</select>
+
+	<update id="setAdvanceStatusForReviewTask" parameterType="java.util.Map">
+		UPDATE
+		BUDGET_ADVANCE SET STATUS_ID = #{statusId},MODIFIED_BY_USERID
+		=#{modifyBy},
+		MODIFIED_DATE=current_timestamp,
+		MODIFIED_BY_STAFFID =
+		null
+		WHERE BUDGET_ID = #{budgetId}
+		AND CONTRACT_ID = #{contractId}
+		AND
+		BUDGET_ADVANCE_ID = #{budgetAdvanceId}
+	</update>
+
+<!-- Query required for enhancement 6023 as a part of 3.1.0 -->	
+	<update id="setAdvanceStatusForInterfaceReviewTask" parameterType="java.util.Map">
+		UPDATE
+		BUDGET_ADVANCE SET STATUS_ID = #{statusId},MODIFIED_BY_USERID
+		=#{modifyBy},DELETE_FLAG = 1,
+		MODIFIED_DATE=current_timestamp,
+		MODIFIED_BY_STAFFID =
+		null,
+		REQUEST_REJECTED_DATE=current_timestamp
+		WHERE BUDGET_ID = #{budgetId}
+		AND CONTRACT_ID = #{contractId}
+		AND
+		BUDGET_ADVANCE_ID = #{budgetAdvanceId}
+	</update>
+
+	<update id="deleteBudgetAdvance" parameterType="java.util.Map">
+		UPDATE
+		BUDGET_ADVANCE SET DELETE_FLAG = 1,MODIFIED_BY_USERID
+		=#{modifyBy},
+		MODIFIED_DATE=current_timestamp,
+		MODIFIED_BY_STAFFID =
+		null
+		WHERE
+		BUDGET_ID = #{budgetId}
+		AND CONTRACT_ID = #{contractId}
+		AND
+		BUDGET_ADVANCE_ID = #{budgetAdvanceId}
+	</update>
+
+	<!-- START || Changes for enhancement 6487 for Release 3.12.0 -->
+	<select id="fetchPaymentAmount" parameterType="java.util.Map" resultType="map">
+		SELECT PAYMENT_ID, PAYMENT_AMOUNT FROM PAYMENT 
+		WHERE BUDGET_ID
+		= #{budgetId}
+		AND
+		CONTRACT_ID = #{contractId}
+		AND DELETE_FLAG = 0
+		<if test="invoiceId != null and invoiceId !=''">
+			AND invoice_id = #{invoiceId}
+		</if>
+		<if test="budgetAdvanceId != null and budgetAdvanceId !=''">
+			AND budget_advance_id = #{budgetAdvanceId}
+		</if>
+	</select>
+
+	<update id="setPaymentStatus" parameterType="java.util.Map">
+	<!-- [Start] QC 6663  add LAST_UPDATE_DATE   -->
+		UPDATE PAYMENT SET
+		STATUS_ID = #{statusId},
+			MODIFIED_BY_USERID=#{modifyBy},
+			PERIOD = #{period},
+			MODIFIED_DATE=SYSTIMESTAMP,
+			<if test="paymentValue != null and paymentValue !='' and paymentValue == 0">
+			DISBURSEMENT_DATE=SYSTIMESTAMP,
+			</if>
+			PROCESS_FLAG=1,
+			PAYMENT_APPROVED_DATE  =  SYSTIMESTAMP,
+			LAST_UPDATE_DATE       =  SYSTIMESTAMP
+		WHERE BUDGET_ID        =  #{budgetId}
+		AND   CONTRACT_ID = #{contractId}
+		AND   DELETE_FLAG = 0
+		<if test="invoiceId != null and invoiceId !=''">
+			AND invoice_id = #{invoiceId}
+		</if>
+		<if test="budgetAdvanceId != null and budgetAdvanceId !=''">
+			AND budget_advance_id = #{budgetAdvanceId}
+		</if>
+		<if test="paymentId != null and paymentId !=''">
+			AND PAYMENT_ID = #{paymentId}
+		</if>
+		<!-- [End] QC 6663  add LAST_UPDATE_DATE   -->
+	</update>
+	<!-- END || Changes for enhancement 6487 for Release 3.12.0 -->
+	
+	<update id="setInvoiceStatus" parameterType="java.util.Map">
+		UPDATE INVOICE SET
+		STATUS_ID = #{statusId},MODIFIED_BY_USERID
+		=#{modifyBy},
+		MODIFIED_DATE=current_timestamp,
+		MODIFIED_BY_STAFFID =
+		null
+		WHERE
+		BUDGET_ID = #{budgetId}
+		AND CONTRACT_ID = #{contractId}
+		AND INVOICE_ID =
+		#{invoiceId}
+	</update>
+	
+<!-- Query required for enhancement 6023 as a part of 3.1.0 -->	
+	<update id="setInterfaceInvoiceStatus" parameterType="java.util.Map">
+		UPDATE INVOICE SET
+		STATUS_ID = #{statusId},MODIFIED_BY_USERID
+		=#{modifyBy},
+		MODIFIED_DATE=current_timestamp,
+		DELETE_FLAG=1,
+		MODIFIED_BY_STAFFID =
+		null,
+		INVOICE_REJECTED_DATE=current_timestamp
+		WHERE
+		BUDGET_ID = #{budgetId}
+		AND CONTRACT_ID = #{contractId}
+		AND INVOICE_ID =
+		#{invoiceId}
+	</update>
+	
+<!-- Query required for enhancement 6023 as a part of 3.1.0 -->		
+	<update id="deletePaymentRecords" parameterType="java.util.Map">
+		UPDATE PAYMENT
+		SET DELETE_FLAG = 1,MODIFIED_BY_USERID
+		=#{modifyBy},
+		MODIFIED_DATE=current_timestamp
+		WHERE BUDGET_ID = #{budgetId}
+		AND
+		CONTRACT_ID = #{contractId}
+		<if test="invoiceId != null and invoiceId !=''">
+			AND invoice_id = #{invoiceId}
+		</if>
+		<if test="budgetAdvanceId != null and budgetAdvanceId !=''">
+			AND budget_advance_id = #{budgetAdvanceId}
+		</if>
+	</update>
+	
+<!-- Query required for enhancement 6023 as a part of 3.1.0 -->	
+	<update id="deleteInterfacePaymentRecords" parameterType="java.util.Map">
+		UPDATE PAYMENT
+		SET DELETE_FLAG = 1,MODIFIED_BY_USERID
+		=#{modifyBy},
+		STATUS_ID='159',
+		MODIFIED_DATE=current_timestamp
+		WHERE BUDGET_ID = #{budgetId}
+		AND
+		CONTRACT_ID = #{contractId} AND DELETE_FLAG='0'
+		<if test="invoiceId != null and invoiceId !=''">
+			AND invoice_id = #{invoiceId}
+		</if>
+		<if test="budgetAdvanceId != null and budgetAdvanceId !=''">
+			AND budget_advance_id = #{budgetAdvanceId}
+		</if>
+	</update>
+
+
+
+	<!-- Query modified to fetch from Payment allocation for enhancement 6515 release 3.6.0 -->
+	<!-- Queries for Payment Chart of allocation screen start -->
+
+	<resultMap id="PaymentChartOfAllocationList" type="com.nyc.hhs.model.PaymentChartOfAllocation">
+		<result property="id" column="PAYMENT_ALLOCATION_ID" />
+		<result property="paymentId" column="PAYMENT_ID" />
+		<result property="commodityLine" column="COMMODITY_LINE_NEW" />
+		<result property="commodityLineCode" column="COMMODITY_LINE" />
+		<result property="actgLn" column="ACCOUNTING_LINE" />
+		<result property="paymentChartOfAccount" column="CHART_OF_ACCOUNT" />
+		<result property="reportingCategory" column="REPORTING_CATEGORY" />
+		<result property="fmsEncumbrance" column="LINE_AMOUNT" />
+		<result property="ammount" column="ACTUALS" />
+		<result property="remainingEncumbrance" column="REMAINING_AMOUNT" />
+		<result property="paymentAmount" column="PAYMENT_AMOUNT" />
+		<result property="createdDate" column="CREATED_DATE" />
+		<result property="createdByUserId" column="CREATED_BY_USERID" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+		<result property="modifiedByUserId" column="MODIFIED_BY_USERID" />
+		<result property="bfy" column="BFY" />
+
+	</resultMap>
+	
+	<!-- Query modified sort accounting lines corresponding to fiscal year (FY_DC) as a part of enhancement 6536 release 3.8.0 -->
+	<!-- Query modified to fetch from Payment allocation for enhancement 6515 release 3.6.0 -->
+	<!-- Query changed as a part of release 3.2.0 for defect 6419  -->	
+	<!-- Updated in R7: Defect 7211 (Payment Chart of Accounts Allocation Remaining Encumbrance not calculating correctly once payment is Approved/Disbursed on screen S344/S345.) -->
+	<select id="paymentCOFFetch" parameterType="java.util.Map"
+		resultMap="PaymentChartOfAllocationList">
+		select
+		(p4.PAYMENT_ALLOCATION_ID || '-' || p4.COMMODITY_LINE
+		|| '-' || p4.ACCOUNTING_LINE) as PAYMENT_ALLOCATION_ID,
+		nvl((p4.LINE_AMOUNT - nvl(p3.Remaining_Amount,0)),0)as REMAINING_AMOUNT,
+		p4.LINE_AMOUNT,
+		p4.PAYMENT_ID,
+		p4.COMMODITY_LINE,
+		(p4.CL_NUMBER ||
+		'-' || CL_CODE || '-' || LN_DESCRIPTION || '-' || p4.CL_DESCRIPTION ) as
+		COMMODITY_LINE_NEW,
+		(UNIT_OF_APPROPRIATION || '-' || BUDGET_CODE || '-'
+		|| OBJECT_CODE ||'-' || SUB_OBJECT_CODE
+		||'-' || REPORTING_CATEGORY)
+		as
+		CHART_OF_ACCOUNT,
+		p4.ACCOUNTING_LINE,
+		ACTUALS,
+		PAYMENT_AMOUNT,
+		CREATED_DATE,
+		CREATED_BY_USERID,
+		MODIFIED_DATE,MODIFIED_BY_USERID,
+		BFY from
+		payment_allocation p4
+		Left JOIN
+		(
+		select
+		(sum(p1.PAYMENT_AMOUNT)) as
+		Remaining_Amount,
+		p1.COMMODITY_LINE,
+		p1.ACCOUNTING_LINE,
+		p1.CL_DESCRIPTION
+		from
+		payment_allocation p1
+		right outer JOIN
+		( select
+		COMMODITY_LINE,
+		ACCOUNTING_LINE,
+		CL_DESCRIPTION
+		from payment_allocation
+		where PAYMENT_ID = #{paymentId}) p2
+		on
+		(p1.COMMODITY_LINE =
+		p2.COMMODITY_LINE
+		and p1.ACCOUNTING_LINE =
+		p2.ACCOUNTING_LINE
+		and
+		p1.CL_DESCRIPTION =
+		p2.CL_DESCRIPTION)
+		where p1.PAYMENT_ID in
+		(select
+		PAYMENT_ID
+		from payment
+		<!--Added in R7-To Fix Defect #7211(fetching previous date hour(4PM)) -->
+		WHERE (STATUS_ID = 63
+		OR (STATUS_ID = 64 AND PROCESS_FLAG = 1)
+		OR (STATUS_ID = 64 and PROCESS_FLAG = 0	
+		AND PAYMENT_APPROVED_DATE > TO_DATE(to_char(SYSDATE-1, 'yyyy-MM-dd')|| #{prevDateHour},'yyyy-MM-dd HH24:MI:SS')))
+		<!-- where (status_id IN (63,64)) -->
+		and DELETE_FLAG !=
+		1
+		and CONTRACT_ID = #{contractID}
+		and BUDGET_FISCAL_YEAR_ID
+		in
+		( select
+		BUDGET_FISCAL_YEAR_ID from payment where PAYMENT_ID =
+		#{paymentId})
+		)
+		group by p1.COMMODITY_LINE,
+		p1.ACCOUNTING_LINE,p1.CL_DESCRIPTION
+		) p3
+		on
+		(p4.COMMODITY_LINE =
+		p3.COMMODITY_LINE
+		and
+		p4.ACCOUNTING_LINE =
+		p3.ACCOUNTING_LINE
+		and p4.CL_DESCRIPTION =
+		p3.CL_DESCRIPTION)
+		where
+		p4.PAYMENT_ID
+		=#{paymentId}
+		order by
+		CREATED_DATE, BFY
+	</select>
+
+	<update id="paymentCOFEdit" parameterType="com.nyc.hhs.model.PaymentChartOfAllocation">
+		UPDATE
+		payment_allocation SET
+		PAYMENT_AMOUNT = #{paymentAmount}, MODIFIED_DATE
+		= current_timestamp,MODIFIED_BY_USERID =
+		#{modifyByAgency}
+		WHERE
+		PAYMENT_ALLOCATION_ID = #{id}
+	</update>
+
+
+    <!-- Updated in R7: Defect 7211 (Payment Chart of Accounts Allocation Remaining Encumbrance not calculating correctly once payment is Approved/Disbursed on screen S344/S345.) -->
+	<select id="paymentCOFReaminingAmountFetch" parameterType="com.nyc.hhs.model.PaymentChartOfAllocation"
+		resultType="BigDecimal">
+		select 
+		(select p3.line_amount from payment_allocation p3 where p3.payment_allocation_id = #{id} )-(SUM(p1.PAYMENT_AMOUNT)) 
+		FROM payment_allocation p1, payment p
+		WHERE p1.COMMODITY_LINE = #{commodityLineCode} 
+		AND p1.ACCOUNTING_LINE = #{actgLn} 
+		and p1.PAYMENT_ID=p.payment_id
+		<!-- and ((p.status_id = 63  and p.process_flag=0) or (p.status_id= 64 and p.process_flag=1)) -->
+		AND (p.STATUS_ID = 63
+		OR (p.STATUS_ID = 64 AND p.PROCESS_FLAG = 1)
+		OR (p.STATUS_ID = 64 and p.PROCESS_FLAG = 0	
+		AND p.PAYMENT_APPROVED_DATE > TO_DATE(to_char(SYSDATE-1, 'yyyy-MM-dd')|| #{prevDateHour},'yyyy-MM-dd HH24:MI:SS')))
+		AND p.DELETE_FLAG != 1
+		and p.payment_id= p1.payment_id
+		AND p.CONTRACT_ID = #{contractID}
+		GROUP BY 
+		p1.COMMODITY_LINE ,
+		p1.ACCOUNTING_LINE
+	</select>
+
+	<select id="getPaymentVoucherList" parameterType="com.nyc.hhs.model.TaskDetailsBean"
+		resultMap="advancePaymentHeaderDetails">
+		SELECT payment_id, PAYMENT_VOUCHER_NUM FROM payment
+		WHERE
+		delete_flag !=
+		1
+		<if test="invoiceId != null and invoiceId !=''">
+			AND invoice_id = #{invoiceId}
+			</if>
+		<if test="budgetAdvanceId != null and budgetAdvanceId !=''">
+			AND budget_advance_id = #{budgetAdvanceId}
+			</if>
+	</select>
+
+
+
+	<select id="getCoASumAmount" parameterType="String" resultType="BigDecimal">
+		SELECT
+		NVL(sum(payment_amount), 0)
+		FROM payment_allocation
+		WHERE
+		payment_id = #{asPaymentVoucherNo}
+	</select>
+
+	<select id="getTotalPaymentAmount" parameterType="String"
+		resultType="BigDecimal">
+		SELECT
+		NVL(payment_amount, 0)
+		FROM payment
+		WHERE
+		payment_id =
+		#{asPaymentVoucherNo}
+		AND delete_flag != 1
+	</select>
+
+	<!-- Queries for Payment Chart of allocation screen end -->
+
+	<!-- Queries for Advance payment screen start -->
+
+	<resultMap id="advancePaymentHeaderDetails" type="com.nyc.hhs.model.PaymentBean">
+		<result property="paymentId" column="PAYMENT_ID" />
+		<result property="agencyCode" column="AGENCY_ID" />
+		<result property="paymentVoucherNo" column="PAYMENT_VOUCHER_NUM" />
+		<result property="budgetFYId" column="BUDGET_FISCAL_YEAR_ID" />
+		<result property="fiscalYearId" column="FISCAL_YEAR_ID" />
+		<result property="period" column="PERIOD" />
+		<result property="budgetAdvanceId" column="BUDGET_ADVANCE_ID" />
+		<result property="budgetAdvanceNumber" column="BUDGET_ADVANCE_NUMBER" />
+		<result property="advanceDescription" column="ADVANCE_DESCRIPTION" />
+		<result property="advanceRequestDate" column="REQUEST_DATE" />
+		<result property="advanceApprovedDate" column="REQUEST_APPROVED_DATE" />
+		<result property="vendorCode" column="VENDOR_TYPE" />
+		<result property="vendorAddrCode" column="VENDOR_ADDRESS_ID" />
+		<result property="payeeName" column="PAYEE_NAME" />
+		<result property="payeeVendorCode" column="PAYEE_VENDOR_ID" />
+		<result property="payeeVendorAddrCode" column="PAYEE_VENDOR_ADDRESS_ID" />
+		<result property="checkNum" column="CHECK_EFT_NUM" />
+		<result property="disbursementDate" column="DISBURSEMENT_DATE" />
+		<result property="paymentAmount" column="PAYMENT_AMOUNT" />
+		<result property="rejectedDate" column="REQUEST_REJECTED_DATE" />
+		<result property="paymentStatus" column="PAYMENT_STATUS_ID" />
+	</resultMap>
+
+ 	<!-- Query modified as a part of Release 3.6.0   -->
+	<!-- Made changes in this query for Enhancement 6424 and Release 3.3.0 -->
+	<select id="getAdvancePaymentHeaderDetails" parameterType="hashmap"
+		resultMap="advancePaymentHeaderDetails">
+		select pay.PAYMENT_ID,
+		(select agency_code from
+		nyc_agency_details where agency_id = pay.AGENCY_ID) as AGENCY_ID,
+		pay.PAYMENT_VOUCHER_NUM,
+		pay.BUDGET_FISCAL_YEAR_ID,
+		pay.FISCAL_YEAR_ID,
+		pay.PERIOD,
+		pay.PAYEE_NAME,
+		pay.PAYEE_VENDOR_ID,
+		pay.PAYEE_VENDOR_ADDRESS_ID,
+		pay.CHECK_EFT_NUM,
+		TO_CHAR(pay.DISBURSEMENT_DATE,'MM/DD/YYYY') as DISBURSEMENT_DATE,
+		pay.VENDOR_ADDRESS_ID,
+	 	(
+	 	select distinct VEND_CUST_CD from REF_CONTRACTS_V where DOC_CD||DOC_DEPT_CD||DOC_ID = (select ext_ct_number from contract where contract_id=#{contractId})
+	 	 and rownum = '1'
+	 	<!--  SELECT distinct REF_VENDOR_V.VEND_CUST_CD
+        FROM REF_VENDOR_V, ORGANIZATION, contract,REF_VENDOR_t
+      	WHERE REF_VENDOR_V.TIN =ORGANIZATION.EIN_ID_NN
+      	and   ORGANIZATION.ORGANIZATION_ID=contract.organization_id
+      	and  contract.contract_id=#{contractId}
+      	and  ref_vendor_v.vend_cust_cd =ref_vendor_t.vend_cust_cd
+        and ref_vendor_t.PRVNT_NEW_SPND_IND = 0
+        and rownum = '1'-->
+      	)
+	    as
+		VENDOR_TYPE,
+		pay.PAYMENT_AMOUNT,
+		advance.BUDGET_ADVANCE_ID,
+		advance.BUDGET_ADVANCE_NUMBER,
+		advance.ADVANCE_DESCRIPTION,
+		TO_CHAR(advance.REQUEST_DATE,'MM/DD/YYYY') as
+		REQUEST_DATE,
+		TO_CHAR(advance.MODIFIED_DATE,'MM/DD/YYYY') as
+		REQUEST_APPROVED_DATE,
+		TO_CHAR(advance.REQUEST_REJECTED_DATE,'MM/DD/YYYY') as
+		REQUEST_REJECTED_DATE,
+		pay.STATUS_ID AS PAYMENT_STATUS_ID
+		from PAYMENT pay
+		inner join BUDGET_ADVANCE advance
+		on
+		advance.BUDGET_ADVANCE_ID =
+		pay.BUDGET_ADVANCE_ID
+		where pay.payment_id
+		=
+		#{paymentId} and
+		(pay.DELETE_FLAG != 1 OR pay.status_id ='159')
+	</select>
+
+ 	<!-- Query modified as a part of Release 3.6.0   -->
+	<!-- Made changes in this query for Enhancement 6424 and Release 3.3.0 -->
+	<select id="getAdvancePaymentReviewHeaderDetails" parameterType="hashmap"
+		resultMap="advancePaymentHeaderDetails">
+		select PAYMENT_ID, AGENCY_ID, PAYMENT_VOUCHER_NUM,
+		BUDGET_FISCAL_YEAR_ID, FISCAL_YEAR_ID,
+		PERIOD, PAYEE_NAME,
+		PAYEE_VENDOR_ID, PAYEE_VENDOR_ADDRESS_ID, CHECK_EFT_NUM,
+		DISBURSEMENT_DATE,
+		VENDOR_ADDRESS_ID, VENDOR_TYPE, PAYMENT_AMOUNT,
+		INVOICE_ID, BUDGET_ADVANCE_ID,
+		BUDGET_ADVANCE_NUMBER,
+		ADVANCE_DESCRIPTION, REQUEST_DATE,
+		REQUEST_APPROVED_DATE,
+		PAYMENT_STATUS_ID
+		from ( select
+		pay.PAYMENT_ID as PAYMENT_ID,
+		(select agency_code from
+		nyc_agency_details where agency_id = pay.AGENCY_ID) as AGENCY_ID,
+		pay.PAYMENT_VOUCHER_NUM as PAYMENT_VOUCHER_NUM,
+		pay.BUDGET_FISCAL_YEAR_ID as BUDGET_FISCAL_YEAR_ID,
+		pay.FISCAL_YEAR_ID
+		as FISCAL_YEAR_ID,
+		pay.PERIOD as PERIOD,
+		pay.PAYEE_NAME as PAYEE_NAME,
+		pay.PAYEE_VENDOR_ID as PAYEE_VENDOR_ID,
+		pay.PAYEE_VENDOR_ADDRESS_ID as
+		PAYEE_VENDOR_ADDRESS_ID,
+		pay.CHECK_EFT_NUM as CHECK_EFT_NUM,
+		TO_CHAR(pay.DISBURSEMENT_DATE,'MM/DD/YYYY') as DISBURSEMENT_DATE,
+		pay.VENDOR_ADDRESS_ID as VENDOR_ADDRESS_ID,
+		(
+		select distinct VEND_CUST_CD from REF_CONTRACTS_V where DOC_CD||DOC_DEPT_CD||DOC_ID = (select ext_ct_number from contract where contract_id=#{contractId})
+		 and rownum = '1'
+		<!--  select distinct REF_VENDOR_V.VEND_CUST_CD from
+		REF_VENDOR_V,REF_VENDOR_t where TIN =
+		(select EIN_ID_NN from ORGANIZATION where
+		ORGANIZATION_ID =
+		( select organization_id from contract where
+		contract_id=#{contractId}))
+     	and  ref_vendor_v.vend_cust_cd =ref_vendor_t.vend_cust_cd
+        and ref_vendor_t.PRVNT_NEW_SPND_IND = 0
+        and rownum = '1'-->
+		) as VENDOR_TYPE,
+		pay.PAYMENT_AMOUNT as
+		PAYMENT_AMOUNT,
+		pay.INVOICE_ID as INVOICE_ID,
+		advance.BUDGET_ADVANCE_ID
+		as BUDGET_ADVANCE_ID,
+		advance.BUDGET_ADVANCE_NUMBER as
+		BUDGET_ADVANCE_NUMBER,
+		advance.ADVANCE_DESCRIPTION as
+		ADVANCE_DESCRIPTION,
+		TO_CHAR(advance.REQUEST_DATE,'MM/DD/YYYY') as
+		REQUEST_DATE,
+		TO_CHAR(advance.MODIFIED_DATE,'MM/DD/YYYY') as
+		REQUEST_APPROVED_DATE,
+		pay.STATUS_ID AS PAYMENT_STATUS_ID
+		from PAYMENT pay
+		inner join BUDGET_ADVANCE advance
+		on
+		advance.BUDGET_ADVANCE_ID =
+		pay.BUDGET_ADVANCE_ID
+		where
+		pay.BUDGET_ADVANCE_ID =
+		#{budgetAdvanceId} and pay.DELETE_FLAG != 1
+		order by
+		payment_voucher_num) where rownum = 1
+	</select>
+
+	<select id="getAdvancePaymentVoucherList" parameterType="hashmap"
+		resultMap="advancePaymentHeaderDetails">
+		select PAYMENT_ID, PAYMENT_VOUCHER_NUM, PERIOD, PAYEE_NAME,
+		PAYEE_VENDOR_ID,
+		PAYEE_VENDOR_ADDRESS_ID
+		from PAYMENT where
+		BUDGET_ADVANCE_ID =
+		#{budgetAdvanceId} and DELETE_FLAG != 1 order by
+		payment_voucher_num
+	</select>
+
+	<select id="fetchTotalAdvanceAmount" parameterType="java.lang.String"
+		resultType="BigDecimal">
+		select
+		NVL(sum(AMOUNT),0) as TOTAL_ADVANCE_AMOUNT from
+		BUDGET_ADVANCE where BUDGET_ADVANCE_ID=(select
+		BUDGET_ADVANCE_ID from
+		PAYMENT where PAYMENT_ID = #{paymentId})
+	</select>
+
+	<select id="fetchAdvanceAndAssignment" parameterType="com.nyc.hhs.model.TaskDetailsBean"
+		resultType="map">
+		select BA.AMOUNT AS ADVANCE_AMOUNT,
+		NVL(SUM(AA.ASSIGNMENT_AMOUNT),0) AS
+		ASSIGNMENT_AMOUNT from
+		BUDGET_ADVANCE BA
+		Left outer Join ADVANCE_ASSIGNMENT AA ON
+		AA.BUDGET_ADVANCE_ID =
+		BA.BUDGET_ADVANCE_ID
+		where
+		BA.BUDGET_ADVANCE_ID=#{budgetAdvanceId} group by BA.AMOUNT 
+	</select>
+	<update id="setPeriod" parameterType="java.util.Map">
+		<!-- [Start] QC 6663  add LAST_UPDATE_DATE   -->
+		UPDATE PAYMENT 
+		SET MODIFIED_BY_USERID =#{modifyBy},
+		    PERIOD = #{period},
+		    MODIFIED_DATE      =  SYSTIMESTAMP,
+		    LAST_UPDATE_DATE   =  SYSTIMESTAMP
+		WHERE BUDGET_ID = #{budgetId}
+		AND   CONTRACT_ID = #{contractId}
+		AND   DELETE_FLAG = 0
+		<if test="invoiceId != null and invoiceId !=''">
+			AND invoice_id = #{invoiceId}
+		</if>
+		<if test="budgetAdvanceId != null and budgetAdvanceId !=''">
+			AND budget_advance_id = #{budgetAdvanceId}
+		</if>
+		<!-- [End] QC 6663  add LAST_UPDATE_DATE   -->
+	</update>
+	<select id="fetchAdvanceDescForTaskHeader" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		select ADVANCE_DESCRIPTION from BUDGET_ADVANCE where
+		budget_advance_id = #{asBudgetAdvanceId}
+		
+	</select>
+	
+  <!-- Query added as a part of release 3.1.0 for enhancement 6023  -->	
+	<select id="fetchCommaSeparatedVoucherList" parameterType="java.util.Map"
+	resultType="java.lang.String">
+	SELECT LISTAGG(PAYMENT_VOUCHER_NUM, ',') WITHIN GROUP (
+       ORDER BY PAYMENT_ID) AS PAYMENT_VOUCHER_LIST FROM payment
+	WHERE
+	delete_flag !=
+	1
+	<if test="invoiceId != null and invoiceId !=''">
+		AND invoice_id = #{invoiceId}
+	</if>
+	<if test="budgetAdvanceId != null and budgetAdvanceId !=''">
+		AND budget_advance_id = #{budgetAdvanceId}
+	</if>
+	</select>
+	
+	
+	<select id="fetchAgencyDetails" parameterType="java.util.Map"
+		resultType="map">
+		select first_name||' '||last_name as AgencyUserName, email_id as AgencyUserEmailId from city_user_details where user_id=#{asAgencyUserId}
+	</select>
+	
+	<!-- query added as a part of release 3.12.0 enhancement 6578  -->
+	<select id="fetchBatchInProgressFlag" parameterType="string" resultType="string">
+		select BATCH_IN_PROGRESS_FLAG from payment where PAYMENT_ID=#{paymentId}
+	</select>
+ 
+</mapper>

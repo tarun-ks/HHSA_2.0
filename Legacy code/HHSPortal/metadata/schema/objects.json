@@ -1,0 +1,543 @@
+{
+  "version": "1.0.0",
+  "description": "Complete Contract Management Schema - All entities and relationships",
+  "objects": [
+    {
+      "name": "Contract",
+      "display_name": "Contract",
+      "description": "Core contract entity with comprehensive financial and lifecycle management",
+      "table_name": "contracts",
+      "fields": [
+        {"name": "id", "type": "uuid", "required": true, "primary_key": true, "auto_generate": true},
+        {"name": "contract_id", "type": "string", "required": true, "unique": true, "max_length": 50, "display_name": "Contract ID", "validation": {"pattern": "^\\d{0,22}$"}},
+        {"name": "title", "type": "string", "required": true, "max_length": 255, "display_name": "Contract Title"},
+        {"name": "description", "type": "text", "display_name": "Description"},
+        
+        {"name": "agency_id", "type": "uuid", "required": true, "foreign_key": "organizations.id", "display_name": "Agency"},
+        {"name": "provider_id", "type": "uuid", "required": true, "foreign_key": "organizations.id", "display_name": "Provider"},
+        {"name": "program_id", "type": "uuid", "foreign_key": "programs.id", "display_name": "Program"},
+        
+        {"name": "contract_type_id", "type": "uuid", "required": true, "foreign_key": "contract_types.id", "display_name": "Contract Type", "validation": {"pattern": "^\\d{0,22}$"}},
+        {"name": "contract_type_description", "type": "string", "max_length": 100, "display_name": "Contract Type Description"},
+        {"name": "procurement_method_id", "type": "uuid", "foreign_key": "procurement_methods.id", "display_name": "Procurement Method"},
+        {"name": "status_id", "type": "uuid", "required": true, "foreign_key": "contract_statuses.id", "display_name": "Status"},
+        
+        {"name": "award_amount", "type": "decimal", "precision": 15, "scale": 2, "default_value": 0, "display_name": "Award Amount"},
+        {"name": "base_amount", "type": "decimal", "required": true, "precision": 15, "scale": 2, "default_value": 0, "display_name": "Base Amount"},
+        {"name": "amendment_amount", "type": "decimal", "required": true, "precision": 15, "scale": 2, "default_value": 0, "display_name": "Amendment Amount"},
+        {"name": "current_contract_amount", "type": "decimal", "required": true, "precision": 15, "scale": 2, "default_value": 0, "display_name": "Current Contract Amount"},
+        {"name": "total_encumbered_amount", "type": "decimal", "precision": 15, "scale": 2, "default_value": 0, "display_name": "Total Encumbered Amount"},
+        {"name": "total_paid_amount", "type": "decimal", "precision": 15, "scale": 2, "default_value": 0, "display_name": "Total Paid Amount"},
+        {"name": "currency", "type": "string", "required": true, "max_length": 3, "default_value": "USD", "display_name": "Currency"},
+        
+        {"name": "start_date", "type": "date", "required": true, "display_name": "Start Date"},
+        {"name": "end_date", "type": "date", "required": true, "display_name": "End Date"},
+        {"name": "created_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Created Date"},
+        {"name": "updated_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Updated Date"},
+        
+        {"name": "external_ct_number", "type": "string", "max_length": 100, "display_name": "External CT Number"},
+        {"name": "award_epin", "type": "string", "max_length": 100, "display_name": "Award EPIN"},
+        
+        {"name": "parent_contract_id", "type": "uuid", "foreign_key": "contracts.id", "display_name": "Parent Contract"},
+        {"name": "parent_contract_title", "type": "string", "max_length": 255, "display_name": "Parent Contract Title"},
+        {"name": "parent_contract_amount", "type": "string", "max_length": 50, "display_name": "Parent Contract Amount"},
+        {"name": "parent_contract_start_date", "type": "date", "display_name": "Parent Contract Start Date"},
+        {"name": "parent_contract_end_date", "type": "date", "display_name": "Parent Contract End Date"},
+        {"name": "parent_ext_ct_number", "type": "string", "max_length": 100, "display_name": "Parent External CT Number"},
+        {"name": "procurement_id", "type": "uuid", "display_name": "Procurement ID"},
+        
+        {"name": "fms_contract_start_date", "type": "date", "display_name": "FMS Contract Start Date"},
+        {"name": "fms_contract_end_date", "type": "date", "display_name": "FMS Contract End Date"},
+        {"name": "fms_contract_amount", "type": "string", "max_length": 50, "display_name": "FMS Contract Amount"},
+        {"name": "fms_contract_amount_after_merge", "type": "string", "max_length": 50, "display_name": "FMS Contract Amount After Merge"},
+        
+        {"name": "contract_start_fiscal_year", "type": "integer", "display_name": "Contract Start Fiscal Year"},
+        {"name": "contract_end_fiscal_year", "type": "integer", "display_name": "Contract End Fiscal Year"},
+        {"name": "total_fiscal_years_count", "type": "integer", "display_name": "Total Fiscal Years Count"},
+        {"name": "fms_contract_start_fiscal_year", "type": "integer", "display_name": "FMS Contract Start Fiscal Year"},
+        {"name": "fms_contract_end_fiscal_year", "type": "integer", "display_name": "FMS Contract End Fiscal Year"},
+        {"name": "fms_total_fiscal_years_count", "type": "integer", "display_name": "FMS Total Fiscal Years Count"},
+        
+        {"name": "discrepancy_flag", "type": "string", "max_length": 10, "default_value": "0", "display_name": "Discrepancy Flag"},
+        {"name": "discrepancy_in_contract_amount", "type": "boolean", "default_value": false, "display_name": "Discrepancy in Contract Amount"},
+        {"name": "discrepancy_in_start_date", "type": "boolean", "default_value": false, "display_name": "Discrepancy in Start Date"},
+        {"name": "discrepancy_in_end_date", "type": "boolean", "default_value": false, "display_name": "Discrepancy in End Date"},
+        
+        {"name": "batch_run_needed", "type": "boolean", "default_value": true, "display_name": "Batch Run Needed"},
+        {"name": "amend_affected_budget_id", "type": "string", "max_length": 50, "display_name": "Amendment Affected Budget ID"},
+        {"name": "budget_start_year", "type": "string", "max_length": 10, "display_name": "Budget Start Year"},
+        
+        {"name": "user_name", "type": "string", "max_length": 100, "display_name": "User Name"},
+        {"name": "user_id", "type": "string", "max_length": 50, "display_name": "User ID"},
+        {"name": "staff_id", "type": "string", "max_length": 50, "display_name": "Staff ID"},
+        {"name": "access_flag", "type": "string", "max_length": 10, "display_name": "Access Flag"},
+        {"name": "email", "type": "string", "max_length": 255, "display_name": "Email"},
+        {"name": "permission_level", "type": "string", "max_length": 50, "display_name": "Permission Level"},
+        {"name": "contract_restriction_id", "type": "string", "max_length": 50, "display_name": "Contract Restriction ID"},
+        
+        {"name": "created_by", "type": "uuid", "required": true, "foreign_key": "users.id", "display_name": "Created By"},
+        {"name": "updated_by", "type": "uuid", "required": true, "foreign_key": "users.id", "display_name": "Updated By"},
+        {"name": "version", "type": "integer", "required": true, "default_value": 1, "display_name": "Version"}
+      ],
+      "relationships": [
+        {"name": "agency", "type": "belongsTo", "target": "Organization", "foreign_key": "agency_id", "required": true},
+        {"name": "provider", "type": "belongsTo", "target": "Organization", "foreign_key": "provider_id", "required": true},
+        {"name": "program", "type": "belongsTo", "target": "Program", "foreign_key": "program_id"},
+        {"name": "contract_type", "type": "belongsTo", "target": "ContractType", "foreign_key": "contract_type_id", "required": true},
+        {"name": "procurement_method", "type": "belongsTo", "target": "ProcurementMethod", "foreign_key": "procurement_method_id"},
+        {"name": "status", "type": "belongsTo", "target": "ContractStatus", "foreign_key": "status_id", "required": true},
+        {"name": "parent_contract", "type": "belongsTo", "target": "Contract", "foreign_key": "parent_contract_id"},
+        {"name": "amendments", "type": "hasMany", "target": "ContractAmendment", "foreign_key": "contract_id"},
+        {"name": "created_by_user", "type": "belongsTo", "target": "User", "foreign_key": "created_by", "required": true},
+        {"name": "updated_by_user", "type": "belongsTo", "target": "User", "foreign_key": "updated_by", "required": true}
+      ],
+      "indexes": [
+        {"fields": ["contract_id"], "unique": true},
+        {"fields": ["agency_id"]},
+        {"fields": ["provider_id"]},
+        {"fields": ["status_id"]},
+        {"fields": ["created_date"]},
+        {"fields": ["updated_date"]},
+        {"fields": ["award_epin"]},
+        {"fields": ["agency_id", "status_id"]},
+        {"fields": ["provider_id", "status_id"]},
+        {"fields": ["created_by"]}
+      ],
+      "constraints": [
+        {"type": "check", "expression": "base_amount >= 0 AND amendment_amount >= 0"},
+        {"type": "check", "expression": "end_date > start_date"},
+        {"type": "check", "expression": "current_contract_amount = base_amount + amendment_amount"}
+      ]
+    },
+    {
+      "name": "Organization",
+      "display_name": "Organization",
+      "description": "Agencies, providers, and city organizations",
+      "table_name": "organizations",
+      "fields": [
+        {"name": "id", "type": "uuid", "required": true, "primary_key": true, "auto_generate": true},
+        {"name": "name", "type": "string", "required": true, "max_length": 255, "display_name": "Name"},
+        {"name": "legal_name", "type": "string", "required": true, "max_length": 255, "display_name": "Legal Name"},
+        {"name": "type", "type": "string", "required": true, "max_length": 50, "display_name": "Type", "enum": ["AGENCY", "PROVIDER", "CITY"]},
+        {"name": "ein_tin", "type": "string", "max_length": 20, "display_name": "EIN/TIN"},
+        {"name": "duns_number", "type": "string", "max_length": 20, "display_name": "DUNS Number"},
+        {"name": "address_line1", "type": "string", "max_length": 255, "display_name": "Address Line 1"},
+        {"name": "address_line2", "type": "string", "max_length": 255, "display_name": "Address Line 2"},
+        {"name": "city", "type": "string", "max_length": 100, "display_name": "City"},
+        {"name": "state", "type": "string", "max_length": 50, "display_name": "State"},
+        {"name": "zip_code", "type": "string", "max_length": 20, "display_name": "ZIP Code"},
+        {"name": "country", "type": "string", "max_length": 50, "default_value": "USA", "display_name": "Country"},
+        {"name": "phone", "type": "string", "max_length": 20, "display_name": "Phone"},
+        {"name": "email", "type": "string", "max_length": 255, "display_name": "Email"},
+        {"name": "website", "type": "string", "max_length": 255, "display_name": "Website"},
+        {"name": "is_active", "type": "boolean", "required": true, "default_value": true, "display_name": "Active"},
+        {"name": "created_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Created Date"},
+        {"name": "updated_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Updated Date"}
+      ],
+      "relationships": [
+        {"name": "users", "type": "hasMany", "target": "User", "foreign_key": "organization_id"},
+        {"name": "programs", "type": "hasMany", "target": "Program", "foreign_key": "agency_id"},
+        {"name": "agency_contracts", "type": "hasMany", "target": "Contract", "foreign_key": "agency_id"},
+        {"name": "provider_contracts", "type": "hasMany", "target": "Contract", "foreign_key": "provider_id"}
+      ],
+      "indexes": [
+        {"fields": ["type"]},
+        {"fields": ["is_active"]},
+        {"fields": ["name"]},
+        {"fields": ["ein_tin"]},
+        {"fields": ["duns_number"]}
+      ]
+    },
+    {
+      "name": "User",
+      "display_name": "User",
+      "description": "System users with authentication and role management",
+      "table_name": "users",
+      "fields": [
+        {"name": "id", "type": "uuid", "required": true, "primary_key": true, "auto_generate": true},
+        {"name": "email", "type": "string", "required": true, "unique": true, "max_length": 255, "display_name": "Email"},
+        {"name": "first_name", "type": "string", "required": true, "max_length": 100, "display_name": "First Name"},
+        {"name": "last_name", "type": "string", "required": true, "max_length": 100, "display_name": "Last Name"},
+        {"name": "organization_id", "type": "uuid", "required": true, "foreign_key": "organizations.id", "display_name": "Organization"},
+        {"name": "role", "type": "string", "required": true, "max_length": 50, "display_name": "Role"},
+        {"name": "is_active", "type": "boolean", "required": true, "default_value": true, "display_name": "Active"},
+        {"name": "last_login", "type": "timestamp", "display_name": "Last Login"},
+        {"name": "created_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Created Date"},
+        {"name": "updated_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Updated Date"}
+      ],
+      "relationships": [
+        {"name": "organization", "type": "belongsTo", "target": "Organization", "foreign_key": "organization_id", "required": true},
+        {"name": "created_contracts", "type": "hasMany", "target": "Contract", "foreign_key": "created_by"},
+        {"name": "updated_contracts", "type": "hasMany", "target": "Contract", "foreign_key": "updated_by"}
+      ],
+      "indexes": [
+        {"fields": ["email"], "unique": true},
+        {"fields": ["organization_id"]},
+        {"fields": ["role"]},
+        {"fields": ["is_active"]}
+      ]
+    },
+    {
+      "name": "Program",
+      "display_name": "Program",
+      "description": "Agency programs for contract categorization",
+      "table_name": "programs",
+      "fields": [
+        {"name": "id", "type": "uuid", "required": true, "primary_key": true, "auto_generate": true},
+        {"name": "code", "type": "string", "required": true, "unique": true, "max_length": 50, "display_name": "Program Code"},
+        {"name": "name", "type": "string", "required": true, "max_length": 255, "display_name": "Program Name"},
+        {"name": "description", "type": "text", "display_name": "Description"},
+        {"name": "agency_id", "type": "uuid", "required": true, "foreign_key": "organizations.id", "display_name": "Agency"},
+        {"name": "is_active", "type": "boolean", "required": true, "default_value": true, "display_name": "Active"},
+        {"name": "created_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Created Date"}
+      ],
+      "relationships": [
+        {"name": "agency", "type": "belongsTo", "target": "Organization", "foreign_key": "agency_id", "required": true},
+        {"name": "contracts", "type": "hasMany", "target": "Contract", "foreign_key": "program_id"}
+      ],
+      "indexes": [
+        {"fields": ["code"], "unique": true},
+        {"fields": ["agency_id"]},
+        {"fields": ["is_active"]}
+      ]
+    },
+    {
+      "name": "ProcurementMethod",
+      "display_name": "Procurement Method",
+      "description": "Methods used for contract procurement",
+      "table_name": "procurement_methods",
+      "fields": [
+        {"name": "id", "type": "uuid", "required": true, "primary_key": true, "auto_generate": true},
+        {"name": "code", "type": "string", "required": true, "unique": true, "max_length": 50, "display_name": "Method Code"},
+        {"name": "name", "type": "string", "required": true, "max_length": 100, "display_name": "Method Name"},
+        {"name": "description", "type": "text", "display_name": "Description"},
+        {"name": "is_active", "type": "boolean", "required": true, "default_value": true, "display_name": "Active"},
+        {"name": "created_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Created Date"}
+      ],
+      "relationships": [
+        {"name": "contracts", "type": "hasMany", "target": "Contract", "foreign_key": "procurement_method_id"}
+      ],
+      "indexes": [
+        {"fields": ["code"], "unique": true},
+        {"fields": ["is_active"]}
+      ]
+    },
+    {
+      "name": "ContractType",
+      "display_name": "Contract Type",
+      "description": "Types of contracts (CT1, CTR, CT2, etc.)",
+      "table_name": "contract_types",
+      "fields": [
+        {"name": "id", "type": "uuid", "required": true, "primary_key": true, "auto_generate": true},
+        {"name": "code", "type": "string", "required": true, "unique": true, "max_length": 50, "display_name": "Type Code"},
+        {"name": "name", "type": "string", "required": true, "max_length": 100, "display_name": "Type Name"},
+        {"name": "description", "type": "text", "display_name": "Description"},
+        {"name": "is_active", "type": "boolean", "required": true, "default_value": true, "display_name": "Active"},
+        {"name": "created_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Created Date"}
+      ],
+      "relationships": [
+        {"name": "contracts", "type": "hasMany", "target": "Contract", "foreign_key": "contract_type_id"}
+      ],
+      "indexes": [
+        {"fields": ["code"], "unique": true},
+        {"fields": ["is_active"]}
+      ]
+    },
+    {
+      "name": "ContractStatus",
+      "display_name": "Contract Status",
+      "description": "Contract lifecycle statuses with workflow management",
+      "table_name": "contract_statuses",
+      "fields": [
+        {"name": "id", "type": "uuid", "required": true, "primary_key": true, "auto_generate": true},
+        {"name": "code", "type": "string", "required": true, "unique": true, "max_length": 50, "display_name": "Status Code"},
+        {"name": "name", "type": "string", "required": true, "max_length": 100, "display_name": "Status Name"},
+        {"name": "description", "type": "text", "display_name": "Description"},
+        {"name": "is_active", "type": "boolean", "required": true, "default_value": true, "display_name": "Active"},
+        {"name": "sort_order", "type": "integer", "required": true, "display_name": "Sort Order"},
+        {"name": "color", "type": "string", "max_length": 7, "display_name": "Color Code"},
+        {"name": "workflow_enabled", "type": "boolean", "required": true, "default_value": true, "display_name": "Workflow Enabled"},
+        {"name": "created_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Created Date"}
+      ],
+      "relationships": [
+        {"name": "contracts", "type": "hasMany", "target": "Contract", "foreign_key": "status_id"}
+      ],
+      "indexes": [
+        {"fields": ["code"], "unique": true},
+        {"fields": ["sort_order"]},
+        {"fields": ["is_active"]}
+      ]
+    },
+    {
+      "name": "AwardStatus",
+      "display_name": "Award Status",
+      "description": "Award status codes",
+      "table_name": "award_statuses",
+      "fields": [
+        {"name": "id", "type": "uuid", "required": true, "primary_key": true, "auto_generate": true},
+        {"name": "code", "type": "string", "required": true, "unique": true, "max_length": 50, "display_name": "Award Status Code"},
+        {"name": "name", "type": "string", "required": true, "max_length": 100, "display_name": "Award Status Name"},
+        {"name": "description", "type": "text", "display_name": "Description"},
+        {"name": "is_active", "type": "boolean", "required": true, "default_value": true, "display_name": "Active"},
+        {"name": "sort_order", "type": "integer", "required": true, "display_name": "Sort Order"},
+        {"name": "created_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Created Date"}
+      ],
+      "relationships": [],
+      "indexes": [
+        {"fields": ["code"], "unique": true},
+        {"fields": ["sort_order"]},
+        {"fields": ["is_active"]}
+      ]
+    },
+    {
+      "name": "PaymentStatus",
+      "display_name": "Payment Status",
+      "description": "Payment status codes",
+      "table_name": "payment_statuses",
+      "fields": [
+        {"name": "id", "type": "uuid", "required": true, "primary_key": true, "auto_generate": true},
+        {"name": "code", "type": "string", "required": true, "unique": true, "max_length": 50, "display_name": "Payment Status Code"},
+        {"name": "name", "type": "string", "required": true, "max_length": 100, "display_name": "Payment Status Name"},
+        {"name": "description", "type": "text", "display_name": "Description"},
+        {"name": "is_active", "type": "boolean", "required": true, "default_value": true, "display_name": "Active"},
+        {"name": "sort_order", "type": "integer", "required": true, "display_name": "Sort Order"},
+        {"name": "created_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Created Date"}
+      ],
+      "relationships": [],
+      "indexes": [
+        {"fields": ["code"], "unique": true},
+        {"fields": ["sort_order"]},
+        {"fields": ["is_active"]}
+      ]
+    },
+    {
+      "name": "BudgetStatus",
+      "display_name": "Budget Status",
+      "description": "Budget status codes",
+      "table_name": "budget_statuses",
+      "fields": [
+        {"name": "id", "type": "uuid", "required": true, "primary_key": true, "auto_generate": true},
+        {"name": "code", "type": "string", "required": true, "unique": true, "max_length": 50, "display_name": "Budget Status Code"},
+        {"name": "name", "type": "string", "required": true, "max_length": 100, "display_name": "Budget Status Name"},
+        {"name": "description", "type": "text", "display_name": "Description"},
+        {"name": "is_active", "type": "boolean", "required": true, "default_value": true, "display_name": "Active"},
+        {"name": "sort_order", "type": "integer", "required": true, "display_name": "Sort Order"},
+        {"name": "created_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Created Date"}
+      ],
+      "relationships": [],
+      "indexes": [
+        {"fields": ["code"], "unique": true},
+        {"fields": ["sort_order"]},
+        {"fields": ["is_active"]}
+      ]
+    },
+    {
+      "name": "InvoiceStatus",
+      "display_name": "Invoice Status",
+      "description": "Invoice status codes",
+      "table_name": "invoice_statuses",
+      "fields": [
+        {"name": "id", "type": "uuid", "required": true, "primary_key": true, "auto_generate": true},
+        {"name": "code", "type": "string", "required": true, "unique": true, "max_length": 50, "display_name": "Invoice Status Code"},
+        {"name": "name", "type": "string", "required": true, "max_length": 100, "display_name": "Invoice Status Name"},
+        {"name": "description", "type": "text", "display_name": "Description"},
+        {"name": "is_active", "type": "boolean", "required": true, "default_value": true, "display_name": "Active"},
+        {"name": "sort_order", "type": "integer", "required": true, "display_name": "Sort Order"},
+        {"name": "created_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Created Date"}
+      ],
+      "relationships": [],
+      "indexes": [
+        {"fields": ["code"], "unique": true},
+        {"fields": ["sort_order"]},
+        {"fields": ["is_active"]}
+      ]
+    },
+    {
+      "name": "ContractAmendment",
+      "display_name": "Contract Amendment",
+      "description": "Contract amendments and modifications",
+      "table_name": "contract_amendments",
+      "fields": [
+        {"name": "id", "type": "uuid", "required": true, "primary_key": true, "auto_generate": true},
+        {"name": "contract_id", "type": "uuid", "required": true, "foreign_key": "contracts.id", "display_name": "Contract"},
+        {"name": "amendment_number", "type": "integer", "required": true, "display_name": "Amendment Number"},
+        {"name": "title", "type": "string", "required": true, "max_length": 255, "display_name": "Amendment Title"},
+        {"name": "description", "type": "text", "display_name": "Description"},
+        {"name": "amendment_amount", "type": "decimal", "required": true, "precision": 15, "scale": 2, "default_value": 0, "display_name": "Amendment Amount"},
+        {"name": "amendment_start_date", "type": "date", "display_name": "Amendment Start Date"},
+        {"name": "amendment_end_date", "type": "date", "display_name": "Amendment End Date"},
+        {"name": "effective_date", "type": "date", "required": true, "display_name": "Effective Date"},
+        {"name": "reason", "type": "text", "display_name": "Reason"},
+        {"name": "amendment_epin", "type": "string", "max_length": 100, "display_name": "Amendment EPIN"},
+        {"name": "status", "type": "string", "required": true, "max_length": 50, "default_value": "DRAFT", "display_name": "Status"},
+        {"name": "created_by", "type": "uuid", "required": true, "foreign_key": "users.id", "display_name": "Created By"},
+        {"name": "created_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Created Date"}
+      ],
+      "relationships": [
+        {"name": "contract", "type": "belongsTo", "target": "Contract", "foreign_key": "contract_id", "required": true},
+        {"name": "created_by_user", "type": "belongsTo", "target": "User", "foreign_key": "created_by", "required": true}
+      ],
+      "indexes": [
+        {"fields": ["contract_id", "amendment_number"], "unique": true},
+        {"fields": ["contract_id"]},
+        {"fields": ["status"]},
+        {"fields": ["effective_date"]},
+        {"fields": ["created_by"]}
+      ]
+    },
+    {
+      "name": "WorkflowDefinition",
+      "display_name": "Workflow Definition",
+      "description": "Process Engine workflow definitions - WF301-WF316",
+      "table_name": "workflow_definitions",
+      "fields": [
+        {"name": "id", "type": "uuid", "required": true, "primary_key": true, "auto_generate": true},
+        {"name": "workflow_id", "type": "string", "required": true, "unique": true, "max_length": 100, "display_name": "Workflow ID"},
+        {"name": "name", "type": "string", "required": true, "max_length": 255, "display_name": "Workflow Name"},
+        {"name": "description", "type": "text", "display_name": "Description"},
+        {"name": "workflow_type", "type": "string", "required": true, "max_length": 50, "display_name": "Workflow Type"},
+        {"name": "is_active", "type": "boolean", "required": true, "default_value": true, "display_name": "Active"},
+        {"name": "version", "type": "string", "required": true, "max_length": 20, "default_value": "1.0.0", "display_name": "Version"},
+        {"name": "configuration", "type": "json", "display_name": "Workflow Configuration"},
+        {"name": "filenet_integration", "type": "boolean", "required": true, "default_value": true, "display_name": "FileNet Integration"},
+        {"name": "created_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Created Date"},
+        {"name": "updated_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Updated Date"}
+      ],
+      "relationships": [
+        {"name": "workflow_instances", "type": "hasMany", "target": "WorkflowInstance", "foreign_key": "workflow_definition_id"}
+      ],
+      "indexes": [
+        {"fields": ["workflow_id"], "unique": true},
+        {"fields": ["workflow_type"]},
+        {"fields": ["is_active"]}
+      ]
+    },
+    {
+      "name": "WorkflowInstance",
+      "display_name": "Workflow Instance",
+      "description": "Active workflow instances from Process Engine",
+      "table_name": "workflow_instances",
+      "fields": [
+        {"name": "id", "type": "uuid", "required": true, "primary_key": true, "auto_generate": true},
+        {"name": "workflow_definition_id", "type": "uuid", "required": true, "foreign_key": "workflow_definitions.id", "display_name": "Workflow Definition"},
+        {"name": "wob_number", "type": "string", "required": true, "unique": true, "max_length": 100, "display_name": "WOB Number"},
+        {"name": "status", "type": "string", "required": true, "max_length": 50, "display_name": "Status"},
+        {"name": "current_step", "type": "string", "max_length": 100, "display_name": "Current Step"},
+        {"name": "assigned_to", "type": "uuid", "foreign_key": "users.id", "display_name": "Assigned To"},
+        {"name": "contract_id", "type": "uuid", "foreign_key": "contracts.id", "display_name": "Contract"},
+        {"name": "properties", "type": "json", "display_name": "Workflow Properties"},
+        {"name": "started_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Started Date"},
+        {"name": "completed_date", "type": "timestamp", "display_name": "Completed Date"},
+        {"name": "created_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Created Date"}
+      ],
+      "relationships": [
+        {"name": "workflow_definition", "type": "belongsTo", "target": "WorkflowDefinition", "foreign_key": "workflow_definition_id", "required": true},
+        {"name": "assigned_user", "type": "belongsTo", "target": "User", "foreign_key": "assigned_to"},
+        {"name": "contract", "type": "belongsTo", "target": "Contract", "foreign_key": "contract_id"}
+      ],
+      "indexes": [
+        {"fields": ["wob_number"], "unique": true},
+        {"fields": ["workflow_definition_id"]},
+        {"fields": ["status"]},
+        {"fields": ["assigned_to"]},
+        {"fields": ["contract_id"]},
+        {"fields": ["started_date"]}
+      ]
+    },
+    {
+      "name": "DocumentType",
+      "display_name": "Document Type",
+      "description": "Document types for file management",
+      "table_name": "document_types",
+      "fields": [
+        {"name": "id", "type": "uuid", "required": true, "primary_key": true, "auto_generate": true},
+        {"name": "name", "type": "string", "required": true, "max_length": 255, "display_name": "Document Type Name"},
+        {"name": "display_name", "type": "string", "required": true, "max_length": 255, "display_name": "Display Name"},
+        {"name": "description", "type": "text", "display_name": "Description"},
+        {"name": "category", "type": "string", "required": true, "max_length": 100, "display_name": "Category"},
+        {"name": "file_extensions", "type": "json", "display_name": "Allowed File Extensions"},
+        {"name": "max_file_size", "type": "integer", "display_name": "Max File Size (bytes)"},
+        {"name": "is_required", "type": "boolean", "required": true, "default_value": false, "display_name": "Required"},
+        {"name": "is_active", "type": "boolean", "required": true, "default_value": true, "display_name": "Active"},
+        {"name": "sort_order", "type": "integer", "required": true, "display_name": "Sort Order"},
+        {"name": "foldername", "type": "string", "max_length": 255, "display_name": "Folder Name"},
+        {"name": "document_class", "type": "string", "max_length": 100, "display_name": "Document Class"},
+        {"name": "sample_flag", "type": "string", "max_length": 10, "display_name": "Sample Flag"},
+        {"name": "display_in_app", "type": "boolean", "default_value": true, "display_name": "Display in App"},
+        {"name": "upload_flag", "type": "boolean", "default_value": true, "display_name": "Upload Flag"},
+        {"name": "is_masked", "type": "boolean", "default_value": false, "display_name": "Is Masked"},
+        {"name": "original_doc_type", "type": "string", "max_length": 100, "display_name": "Original Document Type"},
+        {"name": "created_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Created Date"}
+      ],
+      "relationships": [
+        {"name": "documents", "type": "hasMany", "target": "Document", "foreign_key": "document_type_id"}
+      ],
+      "indexes": [
+        {"fields": ["category"]},
+        {"fields": ["is_active"]},
+        {"fields": ["sort_order"]}
+      ]
+    },
+    {
+      "name": "Document",
+      "display_name": "Document",
+      "description": "Documents managed by FileNet P8 replacement system - Legacy field mappings from FileNet P8",
+      "table_name": "documents",
+      "fields": [
+        {"name": "id", "type": "uuid", "required": true, "primary_key": true, "auto_generate": true},
+        {"name": "document_type_id", "type": "uuid", "required": true, "foreign_key": "document_types.id", "display_name": "Document Type"},
+        {"name": "title", "type": "string", "required": true, "max_length": 255, "display_name": "Document Title"},
+        {"name": "file_name", "type": "string", "required": true, "max_length": 255, "display_name": "File Name"},
+        {"name": "file_path", "type": "string", "required": true, "max_length": 500, "display_name": "File Path"},
+        {"name": "file_size", "type": "integer", "required": true, "display_name": "File Size (bytes)"},
+        {"name": "mime_type", "type": "string", "required": true, "max_length": 100, "display_name": "MIME Type"},
+        {"name": "version", "type": "integer", "required": true, "default_value": 1, "display_name": "Version"},
+        {"name": "is_current_version", "type": "boolean", "required": true, "default_value": true, "display_name": "Current Version"},
+        {"name": "contract_id", "type": "uuid", "foreign_key": "contracts.id", "display_name": "Contract"},
+        {"name": "organization_id", "type": "uuid", "foreign_key": "organizations.id", "display_name": "Organization"},
+        {"name": "status", "type": "string", "required": true, "max_length": 50, "default_value": "DRAFT", "display_name": "Status"},
+        {"name": "created_by", "type": "uuid", "required": true, "foreign_key": "users.id", "display_name": "Created By"},
+        {"name": "created_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Created Date"},
+        {"name": "updated_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Updated Date"}
+      ],
+      "relationships": [
+        {"name": "document_type", "type": "belongsTo", "target": "DocumentType", "foreign_key": "document_type_id", "required": true},
+        {"name": "contract", "type": "belongsTo", "target": "Contract", "foreign_key": "contract_id"},
+        {"name": "organization", "type": "belongsTo", "target": "Organization", "foreign_key": "organization_id"},
+        {"name": "created_by_user", "type": "belongsTo", "target": "User", "foreign_key": "created_by", "required": true}
+      ],
+      "indexes": [
+        {"fields": ["document_type_id"]},
+        {"fields": ["contract_id"]},
+        {"fields": ["organization_id"]},
+        {"fields": ["status"]},
+        {"fields": ["created_by"]},
+        {"fields": ["created_date"]},
+        {"fields": ["is_current_version"]}
+      ]
+    },
+    {
+      "name": "NotificationTemplate",
+      "display_name": "Notification Template",
+      "description": "Email and notification templates for workflow notifications",
+      "table_name": "notification_templates",
+      "fields": [
+        {"name": "id", "type": "uuid", "required": true, "primary_key": true, "auto_generate": true},
+        {"name": "name", "type": "string", "required": true, "unique": true, "max_length": 100, "display_name": "Template Name"},
+        {"name": "subject", "type": "string", "required": true, "max_length": 255, "display_name": "Email Subject"},
+        {"name": "body", "type": "text", "required": true, "display_name": "Email Body"},
+        {"name": "template_type", "type": "string", "required": true, "max_length": 50, "display_name": "Template Type"},
+        {"name": "workflow_trigger", "type": "string", "max_length": 100, "display_name": "Workflow Trigger"},
+        {"name": "is_active", "type": "boolean", "required": true, "default_value": true, "display_name": "Active"},
+        {"name": "created_date", "type": "timestamp", "required": true, "auto_generate": true, "display_name": "Created Date"}
+      ],
+      "relationships": [],
+      "indexes": [
+        {"fields": ["name"], "unique": true},
+        {"fields": ["template_type"]},
+        {"fields": ["workflow_trigger"]},
+        {"fields": ["is_active"]}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+<taskAudit>
+	<taskType value="Advance Payment Review" entityName="Payment" />
+	<taskType value="Advance Payment Request" entityName="Payment" />
+	<taskType value="Amendment Certification of Funds" entityName="Certification of Funds" />	
+	<taskType value="Contract Budget Amendment Review" entityName="Budget" />
+	<taskType value="Contract Budget Modification Review" entityName="Budget" />
+	<taskType value="Contract Budget Review" entityName="Budget" />
+	<taskType value="Contract Budget Update Review" entityName="Budget" />
+	<taskType value="Contract Certification of Funds" entityName="Certification of Funds" />
+	<taskType value="Contract Configuration" entityName="Contract" />
+	<taskType value="Contract Configuration Amendment" entityName="Contract" />
+	<taskType value="Contract Configuration Update" entityName="Contract" />
+	<taskType value="Invoice Review" entityName="Invoice" />
+	<taskType value="New Fiscal Year Configuration" entityName="Budget" />
+	<taskType value="Payment Review" entityName="Payment" />
+</taskAudit>

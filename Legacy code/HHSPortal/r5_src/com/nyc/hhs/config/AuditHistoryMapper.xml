@@ -1,0 +1,659 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.AuditHistoryMapper">
+
+	<resultMap id="auditList" type="com.nyc.hhs.model.ApplicationAuditBean">
+		<result property="msEntityType" column="ENTITY_TYPE" />
+		<result property="msEventname" column="EVENT_NAME" />
+		<result property="msData" column="DATA" />
+		<result property="msUserid" column="USER_ID" />
+		<result property="msAuditDate" column="AUDIT_DATE" />
+		<result property="msOrgId" column="ORGANIZATION_ID" />
+		<result property="msEventtype" column="EVENT_TYPE" />
+		<result property="msEntityIdentifier" column="ENTITY_IDENTIFIER" />
+		<result property="msFilingPeriod" column="filingPeriod" />
+		<result property="msEntityId" column="ENTITY_ID" />
+	</resultMap>
+	
+	
+	<!-- Made changes for Emergency Build 4.0.1 defect 8365 -->
+	<select id="fetchOrganizationFilingsAuditViewFilingDropDown" parameterType="com.nyc.hhs.model.ApplicationAuditBean"
+		resultType="String">
+	SELECT
+	  distinct
+	    filingPeriod
+	    from
+	    (
+
+	SELECT
+	    case when ENTITY_ID ='Business Application: Filings' and  EVENT_NAME = 'Status Changed' then 
+    	(select document_id from document where business_application_id = application_id and section_id = 'filings' and document_type='CHAR 500 + 990 + Audit'
+		and rownum=1) else ENTITY_ID end ENTITY_ID,
+			ENTITY_TYPE ,
+			EVENT_NAME ,
+			DATA ,
+	    USER_ID,
+		AUDIT_DATE ,
+			ORGANIZATION_ID,
+			EVENT_TYPE ,
+			ENTITY_IDENTIFIER,
+	    application_id,
+	    filingPeriod,
+      rownum rn
+	    from
+	    (
+		SELECT
+	    distinct ENTITY_ID ,
+			ENTITY_TYPE ,
+			EVENT_NAME ,
+			DATA ,
+	    USER_ID,
+		AUDIT_DATE ,
+			ORGANIZATION_ID,
+			EVENT_TYPE ,
+			ENTITY_IDENTIFIER,
+	    application_id,
+	    filingPeriod
+	    from
+	    (
+	
+	 SELECT
+    a.ENTITY_ID ,
+		a.ENTITY_TYPE ,
+		a.EVENT_NAME ,
+		a.DATA ,
+		b.FIRST_NAME
+		||' '
+		||b.MIDDLE_INITIAL
+		||' '
+		||b.LAST_NAME AS USER_ID,
+		a.AUDIT_DATE ,
+		a.ORGANIZATION_ID,
+		a.EVENT_TYPE ,
+		a.ENTITY_IDENTIFIER,
+    a.application_id,
+    filingPeriod
+		FROM
+		APPLICATION_AUDIT a
+		INNER JOIN staff_city_user_details b
+		ON a.user_id =
+		b.user_id
+   left join 
+  (SELECT 	
+		to_char(to_date(start_month,'mm'),'mm')||'/'||
+		to_char(to_date(start_year,'yy'),'yy') || ' - ' || 
+		to_char(to_date(end_month,'mm'),'mm')||'/'||
+		to_char(to_date(end_year,'yy'),'yy') filingPeriod,
+    document_id,
+    a.ENTITY_ID ,
+    a.application_id
+		from doc_lapsing_rules_trans,APPLICATION_AUDIT a
+		where 
+    a.entity_id = doc_lapsing_rules_trans.document_id
+   and  a.Organization_id =#{msOrgId} and
+		document_type in ('CHAR 500 + 990 + Audit','CHAR500')
+  	and 	a.SECTION_ID = 'filings'
+		and		a.ORGANIZATION_ID = #{msOrgId}
+		AND a.entity_type ='Document') b
+    on  a.application_id = b.application_id
+		WHERE
+		(a.SECTION_ID = 'filings' or a.section_id in (select
+		business_application_id from
+		business_application where
+		organization_id=#{msOrgId}) or a.section_id
+		is null)
+		and
+		a.ORGANIZATION_ID = #{msOrgId}
+		and a.EVENT_TYPE! ='Snapshot'
+      and (a.entity_type in ( 'Section','Business Review Application')
+       or ( a.entity_type = 'Document' ) 
+         or (a.entity_identifier in ( 'Business Application: Filings' ,'Business Application' )) )
+	      
+	      
+	      union all
+	      
+		SELECT DISTINCT
+					  CASE
+					    WHEN a.entity_type ='New Filing'
+					    AND data LIKE '%Verified%'
+					    THEN a.ENTITY_ID
+					    ELSE NULL
+					  END ENTITY_ID,
+					  a.ENTITY_TYPE ,
+					  a.EVENT_NAME ,
+					  a.DATA ,
+					  b.FIRST_NAME
+					  ||' '
+					  ||b.MIDDLE_INITIAL
+					  ||' '
+					  ||b.LAST_NAME AS USER_ID,
+					  a.AUDIT_DATE ,
+					  a.ORGANIZATION_ID,
+					  a.EVENT_TYPE ,
+					  a.ENTITY_IDENTIFIER,
+					  NULL AS application_id,
+					      decode(start_month,null,null, to_char(to_date(start_month,'mm'),'mm')||'/'||
+			to_char(to_date(start_year,'yy'),'yy') || ' - ' || 
+			to_char(to_date(end_month,'mm'),'mm')||'/'||
+			to_char(to_date(end_year,'yy'),'yy')) filingPeriod
+					FROM GENERAL_AUDIT a
+					LEFT JOIN staff_city_user_details b
+					ON a.user_id = b.user_id
+					LEFT JOIN doc_lapsing_rules_trans
+					ON doc_lapsing_rules_trans.Organization_id = a.Organization_id
+					AND a.entity_id                            = doc_lapsing_rules_trans.document_id
+					AND doc_lapsing_rules_trans.document_type IN ('CHAR 500 + 990 + Audit','CHAR500')
+					WHERE a.Organization_id                    =#{msOrgId}
+					AND ( a.entity_identifier                 IN ('New Filing')) 
+	    )  
+	     where audit_Date is not null 
+	   ORDER BY AUDIT_DATE DESC
+	      
+		)
+	  )   where filingPeriod is not null
+	</select>
+
+	<!-- Made changes for Emergency Build 4.0.1 defect 8365 -->
+	<select id="fetchOrganizationFilingsAuditView" parameterType="com.nyc.hhs.model.ApplicationAuditBean"
+		resultMap="auditList">
+			SELECT
+	    ENTITY_ID,
+			ENTITY_TYPE ,
+			EVENT_NAME ,
+			DATA ,
+	    USER_ID,
+		AUDIT_DATE ,
+			ORGANIZATION_ID,
+			EVENT_TYPE ,
+			ENTITY_IDENTIFIER,
+	    application_id,
+	      nvl(filingPeriod,'N/A') filingPeriod
+	    from
+	    (
+
+SELECT
+	    case when ENTITY_ID ='Business Application: Filings' and  EVENT_NAME = 'Status Changed' then 
+    	(select document_id from document where business_application_id = application_id and section_id = 'filings' and document_type='CHAR 500 + 990 + Audit'
+		and rownum=1) 
+		when ENTITY_TYPE ='Document' and  ( data like  '%Returned%' and data not like  '%Verified%') then null
+		else ENTITY_ID end ENTITY_ID,
+			ENTITY_TYPE ,
+			EVENT_NAME ,
+			DATA ,
+	    USER_ID,
+		AUDIT_DATE ,
+			ORGANIZATION_ID,
+			EVENT_TYPE ,
+			ENTITY_IDENTIFIER,
+	    application_id,
+	    filingPeriod,
+      rownum rn
+	    from
+	    (
+		SELECT
+	    distinct ENTITY_ID ,
+			ENTITY_TYPE ,
+			EVENT_NAME ,
+			DATA ,
+	    USER_ID,
+		AUDIT_DATE ,
+			ORGANIZATION_ID,
+			EVENT_TYPE ,
+			ENTITY_IDENTIFIER,
+	    application_id,
+	    filingPeriod
+	    from
+	    (
+	
+	 SELECT
+    a.ENTITY_ID ,
+		a.ENTITY_TYPE ,
+		a.EVENT_NAME ,
+		a.DATA ,
+		b.FIRST_NAME
+		||' '
+		||b.MIDDLE_INITIAL
+		||' '
+		||b.LAST_NAME AS USER_ID,
+		a.AUDIT_DATE ,
+		a.ORGANIZATION_ID,
+		a.EVENT_TYPE ,
+		a.ENTITY_IDENTIFIER,
+    a.application_id,
+    filingPeriod
+		FROM
+		APPLICATION_AUDIT a
+		INNER JOIN staff_city_user_details b
+		ON a.user_id =
+		b.user_id
+   left join 
+  (SELECT 	
+		to_char(to_date(start_month,'mm'),'mm')||'/'||
+		to_char(to_date(start_year,'yy'),'yy') || ' - ' || 
+		to_char(to_date(end_month,'mm'),'mm')||'/'||
+		to_char(to_date(end_year,'yy'),'yy') filingPeriod,
+    document_id,
+    a.ENTITY_ID ,
+    a.application_id
+		from doc_lapsing_rules_trans,APPLICATION_AUDIT a
+		where 
+    a.entity_id = doc_lapsing_rules_trans.document_id
+   and  a.Organization_id =#{msOrgId} and
+		document_type in ('CHAR 500 + 990 + Audit','CHAR500')
+  	and 	a.SECTION_ID = 'filings'
+		and		a.ORGANIZATION_ID = #{msOrgId}
+		AND a.entity_type ='Document') b
+    on  a.application_id = b.application_id
+		WHERE
+		(a.SECTION_ID = 'filings' or a.section_id in (select
+		business_application_id from
+		business_application where
+		organization_id=#{msOrgId}) or a.section_id
+		is null)
+		and
+		a.ORGANIZATION_ID = #{msOrgId}
+		and a.EVENT_TYPE! ='Snapshot'
+      and (a.entity_type in ( 'Section','Business Review Application')
+       or ( a.entity_type = 'Document' ) 
+         or (a.entity_identifier in ( 'Business Application: Filings' ,'Business Application' )) )
+	      
+	      union all
+	      
+		SELECT DISTINCT
+		  CASE
+		    WHEN a.entity_type ='New Filing'
+		    AND data LIKE '%Verified%'
+		    THEN a.ENTITY_ID
+		    ELSE NULL
+		  END ENTITY_ID,
+		  a.ENTITY_TYPE ,
+		  a.EVENT_NAME ,
+		  a.DATA ,
+		  b.FIRST_NAME
+		  ||' '
+		  ||b.MIDDLE_INITIAL
+		  ||' '
+		  ||b.LAST_NAME AS USER_ID,
+		  a.AUDIT_DATE ,
+		  a.ORGANIZATION_ID,
+		  a.EVENT_TYPE ,
+		  a.ENTITY_IDENTIFIER,
+		  NULL AS application_id,
+		      decode(start_month,null,null, to_char(to_date(start_month,'mm'),'mm')||'/'||
+			to_char(to_date(start_year,'yy'),'yy') || ' - ' || 
+			to_char(to_date(end_month,'mm'),'mm')||'/'||
+			to_char(to_date(end_year,'yy'),'yy')) filingPeriod
+		FROM GENERAL_AUDIT a
+		LEFT JOIN staff_city_user_details b
+		ON a.user_id = b.user_id
+		LEFT JOIN doc_lapsing_rules_trans
+		ON doc_lapsing_rules_trans.Organization_id = a.Organization_id
+		AND a.entity_id                            = doc_lapsing_rules_trans.document_id
+		AND doc_lapsing_rules_trans.document_type IN ('CHAR 500 + 990 + Audit','CHAR500')
+		WHERE a.Organization_id                    =#{msOrgId}
+		AND ( a.entity_identifier                 IN ('New Filing')) 
+	    )  
+	     where audit_date is not null 
+	      <if test="activefilingssFrom != null and activefilingssFrom !=''">
+				AND AUDIT_DATE &gt;
+				#{activefilingssFrom,
+				jdbcType=DATE}
+			</if>
+			<if test="activefilingssTo != null and activefilingssTo !=''">
+				AND AUDIT_DATE &lt;
+				#{activefilingssTo,
+				jdbcType=DATE}
+			</if>
+			<if test="filingPeriodToMonth != null and filingPeriodToMonth !=''">
+			AND filingPeriod =
+				#{filingPeriodToMonth,
+				jdbcType=DATE}
+			</if>
+	ORDER BY AUDIT_DATE DESC
+	      
+		)
+	  ) 	where rn BETWEEN #{startNode} AND
+			#{endNode} 
+	</select>
+
+
+	<!-- Made changes for Emergency Build 4.0.1 defect 8365 -->
+	<select id="fetchOrganizationFilingsAuditViewCount"
+		parameterType="com.nyc.hhs.model.ApplicationAuditBean" resultType="int">
+				SELECT
+	   count(1)
+	    from
+	    (
+
+SELECT
+	    case when ENTITY_ID ='Business Application: Filings' and  EVENT_NAME = 'Status Changed' then 
+    	(select document_id from document where business_application_id = application_id and section_id = 'filings' and document_type='CHAR 500 + 990 + Audit'
+		and rownum=1) else ENTITY_ID end ENTITY_ID,
+			ENTITY_TYPE ,
+			EVENT_NAME ,
+			DATA ,
+	    USER_ID,
+		AUDIT_DATE ,
+			ORGANIZATION_ID,
+			EVENT_TYPE ,
+			ENTITY_IDENTIFIER,
+	    application_id,
+	    filingPeriod,
+      rownum rn
+	    from
+	    (
+		SELECT
+	    distinct ENTITY_ID ,
+			ENTITY_TYPE ,
+			EVENT_NAME ,
+			DATA ,
+	    USER_ID,
+		AUDIT_DATE ,
+			ORGANIZATION_ID,
+			EVENT_TYPE ,
+			ENTITY_IDENTIFIER,
+	    application_id,
+	    filingPeriod
+	    from
+	    (
+	
+	 SELECT
+    a.ENTITY_ID ,
+		a.ENTITY_TYPE ,
+		a.EVENT_NAME ,
+		a.DATA ,
+		b.FIRST_NAME
+		||' '
+		||b.MIDDLE_INITIAL
+		||' '
+		||b.LAST_NAME AS USER_ID,
+		a.AUDIT_DATE ,
+		a.ORGANIZATION_ID,
+		a.EVENT_TYPE ,
+		a.ENTITY_IDENTIFIER,
+    a.application_id,
+    filingPeriod
+		FROM
+		APPLICATION_AUDIT a
+		INNER JOIN staff_city_user_details b
+		ON a.user_id =
+		b.user_id
+  left join 
+  (SELECT 	
+		to_char(to_date(start_month,'mm'),'mm')||'/'||
+		to_char(to_date(start_year,'yy'),'yy') || ' - ' || 
+		to_char(to_date(end_month,'mm'),'mm')||'/'||
+		to_char(to_date(end_year,'yy'),'yy') filingPeriod,
+    document_id,
+    a.ENTITY_ID ,
+    a.application_id
+		from doc_lapsing_rules_trans,APPLICATION_AUDIT a
+		where 
+    a.entity_id = doc_lapsing_rules_trans.document_id
+   and  a.Organization_id =#{msOrgId} and
+		document_type in ('CHAR 500 + 990 + Audit','CHAR500')
+  	and 	a.SECTION_ID = 'filings'
+		and		a.ORGANIZATION_ID = #{msOrgId}
+		AND a.entity_type ='Document') b
+    on  a.application_id = b.application_id
+		WHERE
+		(a.SECTION_ID = 'filings' or a.section_id in (select
+		business_application_id from
+		business_application where
+		organization_id=#{msOrgId}) or a.section_id
+		is null)
+		and
+		a.ORGANIZATION_ID = #{msOrgId}
+		and a.EVENT_TYPE! ='Snapshot'
+      and (a.entity_type in ( 'Section','Business Review Application')
+       or ( a.entity_type = 'Document' ) 
+         or (a.entity_identifier in ( 'Business Application: Filings' ,'Business Application' )) )
+	      
+	      
+	      union all
+	      
+			SELECT DISTINCT
+			  CASE
+			    WHEN a.entity_type ='New Filing'
+			    AND data LIKE '%Verified%'
+			    THEN a.ENTITY_ID
+			    ELSE NULL
+			  END ENTITY_ID,
+			  a.ENTITY_TYPE ,
+			  a.EVENT_NAME ,
+			  a.DATA ,
+			  b.FIRST_NAME
+			  ||' '
+			  ||b.MIDDLE_INITIAL
+			  ||' '
+			  ||b.LAST_NAME AS USER_ID,
+			  a.AUDIT_DATE ,
+			  a.ORGANIZATION_ID,
+			  a.EVENT_TYPE ,
+			  a.ENTITY_IDENTIFIER,
+			  NULL AS application_id,
+			      decode(start_month,null,null, to_char(to_date(start_month,'mm'),'mm')||'/'||
+			to_char(to_date(start_year,'yy'),'yy') || ' - ' || 
+			to_char(to_date(end_month,'mm'),'mm')||'/'||
+			to_char(to_date(end_year,'yy'),'yy')) filingPeriod
+			FROM GENERAL_AUDIT a
+			LEFT JOIN staff_city_user_details b
+			ON a.user_id = b.user_id
+			LEFT JOIN doc_lapsing_rules_trans
+			ON doc_lapsing_rules_trans.Organization_id = a.Organization_id
+			AND a.entity_id                            = doc_lapsing_rules_trans.document_id
+			AND doc_lapsing_rules_trans.document_type IN ('CHAR 500 + 990 + Audit','CHAR500')
+			WHERE a.Organization_id                    =#{msOrgId}
+			AND ( a.entity_identifier                 IN ('New Filing')) 
+	    )  
+	     where audit_date is not null 
+	      <if test="activefilingssFrom != null and activefilingssFrom !=''">
+				AND AUDIT_DATE &gt;
+				#{activefilingssFrom,
+				jdbcType=DATE}
+			</if>
+			<if test="activefilingssTo != null and activefilingssTo !=''">
+				AND AUDIT_DATE &lt;
+				#{activefilingssTo,
+				jdbcType=DATE}
+			</if>
+			<if test="filingPeriodToMonth != null and filingPeriodToMonth !=''">
+			AND filingPeriod =
+				#{filingPeriodToMonth,
+				jdbcType=DATE}
+			</if>
+	ORDER BY AUDIT_DATE DESC
+	      
+		)
+	  ) 
+	</select>
+
+
+	<select id="getFilingsInformationHomePage" parameterType="string"
+		resultType="map">
+ 	select 
+ 	
+	(select count(organization_id) from doc_lapsing_rules_master where organization_id = #{asOrgId}) IS_FILING,
+ 	decode(prev_apprvd_bapp_corp_struc_id,null,corporate_structure_id,prev_apprvd_bapp_corp_struc_id) corporate_structure,
+            org_exempt as EXEMPT_FROM_FILING,
+            decode(APPROVED_BUSINESS_APP_COUNT,0,'N/A', REGISTRATION_TYPE) as REGISTRATION_TYPE,
+            DUE_DATE,
+		    decode(APPROVED_BUSINESS_APP_COUNT,0,'N/A',to_char(DUE_DATE,'MM/DD/YYYY') ) as DUE_DATE_TO_DISPLAY,
+		    APPROVED_BUSINESS_APP_COUNT,
+		    decode(prev_apprvd_bapp_entity_id,null,entity_type_id,prev_apprvd_bapp_entity_id) entity_type,
+           decode(APPROVED_BUSINESS_APP_COUNT,0,'N/A',(SELECT last_Approved_date
+	      	FROM
+		(SELECT TO_CHAR(modified_Date ,'mm/dd/yyyy') last_Approved_date
+		FROM DOC_LAPSING_RULES_trans
+		WHERE proc_Status in ('Approved','Verified')
+		and document_type like '%CHAR 500 + 990 + Audit%'
+        and ORGANIZATION_ID =#{asOrgId}
+		ORDER BY created_date DESC
+		)
+		WHERE rownum =1
+		)) as last_Approved_date,
+		((SELECT proc_status from (SELECT proc_status
+		FROM DOC_LAPSING_RULES_trans
+        where ORGANIZATION_ID =#{asOrgId}
+		ORDER BY created_date DESC
+		)
+		WHERE rownum =1
+		)) as proc_status,
+    	decode(APPROVED_BUSINESS_APP_COUNT,0,'N/A',
+      (SELECT 
+		last_approved_period
+		FROM
+		(SELECT 
+		TO_CHAR( to_date(start_month
+		|| '-'
+		||start_year
+		|| '-01','mm-yy-dd'),'mm/dd/yyyy')
+		|| ' to '
+		|| TO_CHAR ( LAST_DAY(to_date(end_month
+		|| '-'
+		||end_year
+		|| '-01','mm-yy-dd')),'mm/dd/yyyy') last_approved_period
+		FROM DOC_LAPSING_RULES_trans
+		WHERE proc_Status in ('Approved','Verified')
+		and document_type like '%CHAR 500 + 990 + Audit%'
+    and ORGANIZATION_ID =#{asOrgId}
+		ORDER BY created_date DESC
+		)
+		WHERE rownum =1
+		)) as last_approved_period,
+    
+    
+    
+          (SELECT 
+		end_year
+		FROM
+		(SELECT 
+		
+	to_char(to_date(end_year,'yy'),'yy') end_year
+		FROM doc_lapsing_rules_master
+		WHERE  document_type like '%CHAR 500 + 990 + Audit%'
+    and ORGANIZATION_ID =#{asOrgId}
+		ORDER BY created_date DESC
+		)
+		WHERE rownum =1
+		) as FY
+    
+    
+    
+	,nvl(to_char(nvl(last_uploaded_date,(select modified_date from ( select modified_date from document where document_id is not null and organization_id = #{asOrgId} and document_type='CHAR 500 + 990 + Audit' order by created_date desc ) where rownum=1)),'MM/DD/YYYY'),'N/A')
+   last_uploaded_date,application_status
+    from 
+    (
+      select  corporate_structure_id,application_status,org_exempt,REGISTRATION_TYPE,DUE_DATE, prev_apprvd_bapp_corp_struc_id,
+     last_uploaded_date,entity_type_id,prev_apprvd_bapp_entity_id,
+    APPROVED_BUSINESS_APP_COUNT
+     from (
+     select  corporate_structure_id,application_status,org_exempt,REGISTRATION_TYPE,DUE_DATE, prev_apprvd_bapp_corp_struc_id,
+     last_uploaded_date,entity_type_id,prev_apprvd_bapp_entity_id,
+    APPROVED_BUSINESS_APP_COUNT,bappCreatedDate,rownum
+     from (
+    select  corporate_structure_id,application_status,org_exempt,REGISTRATION_TYPE,DUE_DATE, prev_apprvd_bapp_corp_struc_id,
+    doc_lapsing_rules_master.modified_date last_uploaded_date,entity_type_id,prev_apprvd_bapp_entity_id,
+    (select count(1) from business_application where application_status = 'Approved' and organization_id =#{asOrgId})
+    APPROVED_BUSINESS_APP_COUNT,business_application.created_date bappCreatedDate
+    from organization , business_application,filing_form,doc_lapsing_rules_master
+     where organization.organization_id =#{asOrgId}
+     and business_application.organization_id (+)= organization.organization_id
+     and filing_form.business_application_id (+)= business_application.business_application_id
+     and doc_lapsing_rules_master.organization_id (+)= organization.organization_id
+     order by  
+     (case when application_status = 'Approved' then 1 else 0 end) desc, 
+     business_application.created_date desc
+     )
+     )
+     )
+     where rownum =1 
+	</select>
+
+	<resultMap id="commentsList" type="com.nyc.hhs.model.CommentsHistoryBean">
+		<result property="taskName" column="EVENT_TYPE" />
+		<result property="action" column="EVENT_NAME" />
+		<result property="detail" column="DATA" />
+		<result property="user" column="USER_NAME" />
+		<result property="auditDate" column="AUDIT_DATE" />
+	</resultMap>
+
+
+	<select id="fetchProposalTaskHistory" parameterType="hashmap"
+		resultMap="commentsList">
+		SELECT EVENT_NAME,
+		DATA ,
+		USER_NAME ,
+		AUDIT_DATE ,
+		EVENT_TYPE
+		FROM
+		(SELECT A.EVENT_NAME,
+		A.EVENT_TYPE ,
+		A.DATA ,
+		A.AUDIT_DATE ,
+		DECODE(B.FIRST_NAME
+		||' '
+		||B.LAST_NAME, ' ', 'N/A',B.FIRST_NAME
+		||' '
+		||B.LAST_NAME) AS USER_NAME
+		FROM AGENCY_AUDIT A
+		LEFT OUTER JOIN
+		CITY_USER_DETAILS B
+		ON A.CREATED_BY_USERID = B.USER_ID
+		WHERE A.ENTITY_ID
+		=#{proposalId}
+		AND A.ENTITY_TYPE =#{ENTITY_TYPE}
+		AND A.EVENT_TYPE NOT
+		LIKE 'TLC_%'
+		AND A.EVENT_NAME != 'TLC: Highlight Tab'
+
+		UNION ALL
+
+		SELECT
+		A.EVENT_NAME,
+		A.EVENT_TYPE ,
+		A.DATA ,
+		A.AUDIT_DATE ,
+		B.FIRST_NAME
+		||' '
+		||B.LAST_NAME AS USER_NAME
+		FROM ACCELERATOR_AUDIT A
+		LEFT OUTER JOIN
+		CITY_USER_DETAILS B
+		ON A.CREATED_BY_USERID = B.USER_ID
+		WHERE A.ENTITY_ID
+		=#{proposalId}
+		AND A.ENTITY_TYPE =#{ENTITY_TYPE}
+
+		UNION ALL
+
+		SELECT
+		C.EVENT_NAME,
+		C.EVENT_TYPE ,
+		C.DATA ,
+		C.AUDIT_DATE ,
+		D.FIRST_NAME
+		||' '
+		||D.MIDDLE_INITIAL
+		||' '
+		||D.LAST_NAME AS USER_NAME
+		FROM PROVIDER_AUDIT C
+		LEFT OUTER JOIN STAFF_DETAILS D
+		ON C.CREATED_BY_USERID = D.STAFF_ID
+		WHERE C.ENTITY_ID =#{proposalId}
+		AND ( C.ENTITY_TYPE =#{ENTITY_TYPE})
+		AND C.EVENT_TYPE NOT LIKE 'TLC_%'
+		)
+		ORDER BY AUDIT_DATE DESC,
+		event_type
+		DESC
+	</select>
+	
+<insert id="exportAllTask" parameterType="hashmap" >
+		Insert into bulk_task_export (EXPORT_REQUEST_ID,STATUS_ID,ORG_TYPE,USER_ROLE,MODIFIED_BY_USER_ID,CREATED_BY_USER_ID,MODIFIED_DATE,CREATED_DATE,USER_ORG_TYPE,FILE_PATH)
+		 values (SEQ_EXPORT_REQUEST_ID.nextval,#{statusId},#{userOrgType},#{userRRole},#{userId},#{userId},SYSTIMESTAMP,SYSTIMESTAMP,#{orgType},null) 
+</insert>
+</mapper>

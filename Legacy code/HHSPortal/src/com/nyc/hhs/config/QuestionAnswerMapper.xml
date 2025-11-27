@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.QuestionAnswerMapper">
+
+	<insert id="insertFormInformation" parameterType="hashmap">
+		INSERT INTO ${TABLE} (${COLUMN}) 
+		VALUES
+		${VALUESFORCOLUMN}
+	</insert>
+	
+	<update id="updateFormInfo" parameterType="hashmap">
+		update ${TABLE} set ${VALUESTOUPDATE}, FORM_ID = #{FORM_ID}
+		WHERE ${asWhere}
+	</update>
+	
+	<insert id="insertSubSectionDetails" parameterType="hashmap">
+		INSERT INTO SUB_SECTION_SUMMARY (ORGANIZATION_ID, FORM_NAME, FORM_VERSION, BUSINESS_APPLICATION_ID, SECTION_ID, 
+		USER_ID, FORM_ID, CREATED_DATE, CREATED_BY, MODIFIED_DATE, MODIFIED_BY, SUB_SECTION_STATUS, SUB_SECTION_ID,SUB_SECTION_SUMMARY_ID) 
+		VALUES 
+		(#{ORGANIZATION_ID},#{FORM_NAME},#{FORM_VERSION},#{BUSINESS_APPLICATION_ID,jdbcType=VARCHAR},#{SECTION_ID},
+		#{USER_ID},#{FORM_ID},#{SUBMISSION_DATE}, #{SUBMITTED_BY},#{SUBMISSION_DATE}, #{SUBMITTED_BY}, #{SUB_SECTION_STATUS}, #{SUB_SECTION_ID},SEQ_SUB_SECTION_SUMMARY_ID.NEXTVAL)
+	</insert>
+	
+	<update id="updateSubSectionDetails" parameterType="hashmap">
+		update SUB_SECTION_SUMMARY set MODIFIED_DATE = #{MODIFIED_DATE}, MODIFIED_BY= #{MODIFIED_BY}, SUB_SECTION_STATUS = #{asStatus}  
+		WHERE ORGANIZATION_ID = #{orgId}
+		AND SUB_SECTION_ID = #{subSecId}
+		AND SECTION_ID = #{sectionId}
+		    <if test="bappId != null">
+		      AND FORM_NAME = #{formName}
+		      AND FORM_VERSION = #{formVersion}
+		    </if>
+		    <if test="orgTable != null ">
+		      AND BUSINESS_APPLICATION_ID = #{bussAppId}
+		    </if>
+	</update>
+	
+	<select id="getFormDetails" parameterType="hashmap" resultType="hashmap">	
+	   SELECT  * FROM ${TABLE} WHERE ${asWhere}
+	</select>
+	
+	<select id="getCorpStructureValue" parameterType="hashmap" resultType="hashmap">	
+	   SELECT CORPORATE_STRUCTURE_ID FROM ORGANIZATION WHERE ORGANIZATION_ID = #{asOrgId} AND rownum = 1
+	</select>
+	
+	<select id="getFormDetailsOfOrg" parameterType="hashmap" resultType="map">
+		SELECT FORM_ID, FORM_NAME, FORM_VERSION FROM SUB_SECTION_SUMMARY 
+		WHERE ORGANIZATION_ID = #{asOrgId} AND BUSINESS_APPLICATION_ID = #{asBuisAppId} 
+		AND SECTION_ID = #{section} AND SUB_SECTION_ID = #{subSection}
+		AND rownum = 1
+	</select>
+</mapper>

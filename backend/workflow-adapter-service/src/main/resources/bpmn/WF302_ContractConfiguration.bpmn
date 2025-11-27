@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                   xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                   xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                   xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+                   xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   id="Definitions_1"
+                   targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="ContractConfiguration" name="Contract Configuration Workflow" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_ContractConfiguration" name="Contract Created">
+      <bpmn:outgoing>Flow_ToConfigurationTask</bpmn:outgoing>
+    </bpmn:startEvent>
+    
+    <bpmn:userTask id="UserTask_ConfigureCOA" name="Configure Chart of Accounts">
+      <bpmn:extensionElements>
+        <zeebe:assignee>=initiator</zeebe:assignee>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_ToConfigurationTask</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToReview</bpmn:outgoing>
+    </bpmn:userTask>
+    
+    <bpmn:userTask id="UserTask_ManagerReview" name="Manager Review">
+      <bpmn:extensionElements>
+        <zeebe:candidateGroups>FINANCE_MANAGER,ACCO_MANAGER</zeebe:candidateGroups>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_ToReview</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToGateway</bpmn:outgoing>
+    </bpmn:userTask>
+    
+    <bpmn:exclusiveGateway id="Gateway_ApprovalDecision" name="Approved?">
+      <bpmn:incoming>Flow_ToGateway</bpmn:incoming>
+      <bpmn:outgoing>Flow_Approved</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Rejected</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    
+    <bpmn:serviceTask id="ServiceTask_LaunchCOF" name="Launch COF Workflow">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="launch-cof-workflow" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Approved</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToEnd</bpmn:outgoing>
+    </bpmn:serviceTask>
+    
+    <bpmn:serviceTask id="ServiceTask_UpdateStatus" name="Update Contract Status">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="update-contract-status" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Rejected</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToEndRejected</bpmn:outgoing>
+    </bpmn:serviceTask>
+    
+    <bpmn:endEvent id="EndEvent_Approved" name="Configuration Approved">
+      <bpmn:incoming>Flow_ToEnd</bpmn:incoming>
+    </bpmn:endEvent>
+    
+    <bpmn:endEvent id="EndEvent_Rejected" name="Configuration Rejected">
+      <bpmn:incoming>Flow_ToEndRejected</bpmn:incoming>
+    </bpmn:endEvent>
+    
+    <bpmn:sequenceFlow id="Flow_ToConfigurationTask" sourceRef="StartEvent_ContractConfiguration" targetRef="UserTask_ConfigureCOA" />
+    <bpmn:sequenceFlow id="Flow_ToReview" sourceRef="UserTask_ConfigureCOA" targetRef="UserTask_ManagerReview" />
+    <bpmn:sequenceFlow id="Flow_ToGateway" sourceRef="UserTask_ManagerReview" targetRef="Gateway_ApprovalDecision" />
+    <bpmn:sequenceFlow id="Flow_Approved" name="Approved" sourceRef="Gateway_ApprovalDecision" targetRef="ServiceTask_LaunchCOF">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=approved = true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_Rejected" name="Rejected" sourceRef="Gateway_ApprovalDecision" targetRef="ServiceTask_UpdateStatus">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=approved = false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_ToEnd" sourceRef="ServiceTask_LaunchCOF" targetRef="EndEvent_Approved" />
+    <bpmn:sequenceFlow id="Flow_ToEndRejected" sourceRef="ServiceTask_UpdateStatus" targetRef="EndEvent_Rejected" />
+  </bpmn:process>
+  
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="ContractConfiguration">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_ContractConfiguration">
+        <dc:Bounds x="179" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_ConfigureCOA" bpmnElement="UserTask_ConfigureCOA">
+        <dc:Bounds x="270" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_ManagerReview" bpmnElement="UserTask_ManagerReview">
+        <dc:Bounds x="430" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_ApprovalDecision_di" bpmnElement="Gateway_ApprovalDecision" isMarkerVisible="true">
+        <dc:Bounds x="592" y="92" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_LaunchCOF" bpmnElement="ServiceTask_LaunchCOF">
+        <dc:Bounds x="700" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_UpdateStatus" bpmnElement="ServiceTask_UpdateStatus">
+        <dc:Bounds x="700" y="200" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_Approved" bpmnElement="EndEvent_Approved">
+        <dc:Bounds x="862" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_Rejected" bpmnElement="EndEvent_Rejected">
+        <dc:Bounds x="862" y="222" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_ToConfigurationTask_di" bpmnElement="Flow_ToConfigurationTask">
+        <di:waypoint x="215" y="117" />
+        <di:waypoint x="270" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToReview_di" bpmnElement="Flow_ToReview">
+        <di:waypoint x="370" y="117" />
+        <di:waypoint x="430" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToGateway_di" bpmnElement="Flow_ToGateway">
+        <di:waypoint x="530" y="117" />
+        <di:waypoint x="592" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Approved_di" bpmnElement="Flow_Approved">
+        <di:waypoint x="642" y="117" />
+        <di:waypoint x="700" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Rejected_di" bpmnElement="Flow_Rejected">
+        <di:waypoint x="617" y="142" />
+        <di:waypoint x="617" y="240" />
+        <di:waypoint x="700" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToEnd_di" bpmnElement="Flow_ToEnd">
+        <di:waypoint x="800" y="117" />
+        <di:waypoint x="862" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToEndRejected_di" bpmnElement="Flow_ToEndRejected">
+        <di:waypoint x="800" y="240" />
+        <di:waypoint x="862" y="240" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
+
+

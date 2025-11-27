@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+
+<!--
+	Note: This XML document is a Coherence Cache Configuration deployment 
+	descriptor that should only be use in the Coherence clustered dev environment.
+-->
+
+<!DOCTYPE cache-config SYSTEM "cache-config.dtd">
+
+<cache-config>
+
+	<caching-scheme-mapping>
+
+		<!--
+			All pre-loaded configurations on application startup that do not change
+			are stored in the local cache scheme.
+		-->
+		<cache-mapping>
+			<cache-name>hhs-config</cache-name>
+			<scheme-name>local-cache</scheme-name>
+		</cache-mapping>
+
+		<!--
+			All configurations that are updateable (i.e. taxonomy and provider list)
+			and need to be kept in sync between multiple Coherence clusters will be kept
+			in the near cache scheme which is backed by a distributed cache.
+		-->
+		<cache-mapping>
+			<cache-name>hhs-config-sync</cache-name>
+			<scheme-name>near-cache</scheme-name>
+		</cache-mapping>
+
+		<!--
+			All locks that need to be shared within a Coherence cluster will be kept in the
+			distributed cache.
+		-->
+		<cache-mapping>
+			<cache-name>hhs-lock-ids</cache-name>
+			<scheme-name>distributed-cache</scheme-name>
+		</cache-mapping>
+
+		<!--
+			If any new cache regions are added, by default they would be put into the distributed
+			cache scheme, although it should be evaluated if this is the correct location for them
+			and configure them accordingly
+		-->
+		<cache-mapping>
+			<cache-name>*</cache-name>
+			<scheme-name>distributed-cache</scheme-name>
+		</cache-mapping>
+
+	</caching-scheme-mapping>
+
+	<caching-schemes>
+
+		<!--
+			Local caching scheme.
+			Since this is used to store required application configurations that do not change,
+			there is no size limit and it is set to never expire.
+		-->
+		<local-scheme>
+			<scheme-name>local-cache</scheme-name>
+			<high-units>{high-units 0}</high-units>
+			<expiry-delay>{expiry-delay 0}</expiry-delay>
+		</local-scheme>
+
+		<!--
+			Distributed caching scheme.
+			Since this is used to store locks that can expire, the expiry is set to
+			1 hour (3x session timeout) just so the cache can automatically cleanse
+			itself. Also, the size is set to 512 MB to ensure that the the cache size
+			doesn't grow too large and cause an the Coherence server to run out of
+			memory.
+			NOTE: The expiry and size may have to be tweaked based on production data
+			reports. 
+		-->
+		<distributed-scheme>
+			<scheme-name>distributed-cache</scheme-name>
+			<service-name>DistributedCache</service-name>
+			<backing-map-scheme>
+				<local-scheme>
+					<high-units>{high-units 512m}</high-units>
+					<unit-calculator>BINARY</unit-calculator>
+					<expiry-delay>{expiry-delay 1h}</expiry-delay>
+				</local-scheme>
+			</backing-map-scheme>
+			<autostart>true</autostart>
+		</distributed-scheme>
+
+		<!--
+			Near caching scheme.
+			Since this is used to store taxonomy and provider list data that will never be
+			removed (although updatable), the cache is set to never expire. In the front cache,
+			the size is limited to 50 objects, and are using the distributed cache for the back cache.
+		-->
+		<near-scheme>
+			<scheme-name>near-cache</scheme-name>
+			<front-scheme>
+				<local-scheme>
+					<high-units>{front-high-units 50}</high-units>
+					<expiry-delay>{front-expiry-delay 0}</expiry-delay>
+				</local-scheme>
+			</front-scheme>
+			<back-scheme>
+				<distributed-scheme>
+					<service-name>NearDistributedCache</service-name>
+					<backing-map-scheme>
+						<local-scheme>
+							<high-units>{back-high-units 512m}</high-units>
+							<unit-calculator>BINARY</unit-calculator>
+							<expiry-delay>{back-expiry-delay 0}</expiry-delay>
+						</local-scheme>
+					</backing-map-scheme>
+					<autostart>true</autostart>
+				</distributed-scheme>
+			</back-scheme>
+			<invalidation-strategy>present</invalidation-strategy>
+			<autostart>true</autostart>
+		</near-scheme>
+
+	</caching-schemes>
+
+</cache-config>

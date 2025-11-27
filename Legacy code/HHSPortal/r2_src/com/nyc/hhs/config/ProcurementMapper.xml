@@ -1,0 +1,4494 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.ProcurementMapper">
+
+	<resultMap id="procurementList" type="com.nyc.hhs.model.Procurement">
+		<result property="procurementId" column="Procurement_Id" />
+		<result property="procurementTitle" column="Procurement_Title" />
+		<result property="procurementEpin" column="EPIN" />
+		<result property="agencyId" column="Agency_ID" />
+		<result property="procurementStatus" column="Status" />
+		<result property="releaseDate" column="Upd_RFP_Release_Date1" />
+		<result property="proposalDueDate" column="Upd_Proposal_Due_Date1" />
+		<result property="contractStartDate" column="Upd_Contract_Start_Date1" />
+	</resultMap>
+
+	<select id="fetchActiveProcurements" parameterType="com.nyc.hhs.model.Procurement"
+		resultMap="procurementList">
+		select * from (select Procurement_Id, Procurement_Title, EPIN,
+		Agency_ID, Status, Status_ID, 
+		Upd_RFP_Release_Date1,
+		Upd_Proposal_Due_Date1,
+		Upd_Contract_Start_Date1,
+		rownum as rn
+		from
+		(SELECT
+		PRO.Procurement_Id,
+		PRO.Procurement_Title,
+		PRO.EPIN,
+		PRO.Agency_ID,
+		to_char(PRO.Upd_RFP_Release_Date,'MM/dd/YYYY') as
+		Upd_RFP_Release_Date1,
+		decode(PRO.IS_OPEN_ENDED_RFP, '1' , '----',
+		to_char(PRO.Upd_Proposal_Due_Date,'MM/dd/YYYY')) as
+		Upd_Proposal_Due_Date1,
+		decode(PRO.IS_OPEN_ENDED_RFP, '1' , '----',
+		to_char(PRO.Upd_Contract_Start_Date,'MM/dd/YYYY')) as
+		Upd_Contract_Start_Date1,
+		STAT.Status,
+		STAT.Status_ID FROM PROCUREMENT
+		PRO INNER JOIN
+		STATUS_MASTER_R2_R3 STAT
+		ON
+		PRO.Status_ID =
+		STAT.Status_ID
+		<if test="serviceName != null">
+			INNER JOIN PROCUREMENT_SERVICES PROSER
+			ON
+			PRO.Procurement_Id = PROSER.Procurement_Id 
+		</if>
+		WHERE
+		lower(PRO.Procurement_Title) LIKE
+		lower(#{procurementTitle})
+		<if test="agencyId != null">
+			AND PRO.Agency_ID = #{agencyId}
+		</if>
+		<!-- Begin R 7.2.0 QC 8914 For Observer role, exclude DRAFT -->
+		<if test="roleCurrent != null and roleCurrent == 'OBSERVER'">
+			AND PRO.STATUS_ID != 1
+		</if>
+		<!-- End R 7.2.0 QC 8914 For Observer role, exclude DRAFT -->
+		<if test="procurementStatusList != null">
+			AND PRO.Status_ID IN
+			<foreach item="items" index="index" collection="procurementStatusList"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach>
+		</if>
+		<if test="isOpenEndedRFP != null and isOpenEndedRFP != 0">
+			AND PRO.IS_OPEN_ENDED_RFP = 1
+		</if>
+		<if test="procurementStatusList == null">
+			AND PRO.Status_ID NOT IN (7,8)
+		</if>
+		<if test="serviceName != null">
+			AND PROSER.Element_Id = #{serviceName}
+		</if>
+		<if test="procurementEpin != null">
+			AND PRO.EPIN = #{procurementEpin}
+		</if>
+		<if test="programName != null">
+			AND PRO.Program_Id = #{programName}
+		</if>
+		<if test="releaseDateFrom != null and releaseDateTo != null">
+			AND Upd_RFP_Release_Date BETWEEN #{releaseDateFrom,
+			jdbcType=TIMESTAMP} AND #{releaseDateTo, jdbcType=TIMESTAMP}
+		</if>
+		<if test="proposalDueDateFrom != null and proposalDueDateTo != null">
+			AND Upd_Proposal_Due_Date BETWEEN
+			#{proposalDueDateFrom,
+			jdbcType=TIMESTAMP} AND #{proposalDueDateTo,
+			jdbcType=TIMESTAMP}
+		</if>
+		<if test="contractStartDateFrom != null and contractStartDateTo != null">
+			AND Upd_Contract_Start_Date BETWEEN
+			#{contractStartDateFrom, jdbcType=TIMESTAMP} AND
+			#{contractStartDateTo,
+			jdbcType=TIMESTAMP}
+		</if>
+		ORDER BY
+		<choose>
+			<when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+			<otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+		</choose>
+		<if test="secondSort != null and secondSort != ''">
+			<choose>
+				<when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+				<otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+			</choose>
+		</if>
+		)a ) b WHERE rn
+		BETWEEN #{startNode} AND
+		#{endNode}
+	</select>
+
+	<select id="getProcurementCount" parameterType="com.nyc.hhs.model.Procurement"
+		resultType="int">
+		SELECT count(1) count FROM PROCUREMENT PRO INNER JOIN
+		STATUS_MASTER_R2_R3 STAT ON
+		PRO.Status_ID =
+		STAT.Status_ID
+		<if test="serviceName != null">
+			INNER JOIN PROCUREMENT_SERVICES PROSER
+			ON
+			PRO.Procurement_Id = PROSER.Procurement_Id 
+		</if>
+		WHERE
+		lower(PRO.Procurement_Title) LIKE
+		lower(#{procurementTitle})
+		<if test="agencyId != null">
+			AND PRO.Agency_ID = #{agencyId}
+		</if>
+		<if test="procurementStatusList != null">
+			AND PRO.Status_ID IN
+			<foreach item="items" index="index" collection="procurementStatusList"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach>
+		</if>
+		<if test="isOpenEndedRFP != null and isOpenEndedRFP != 0">
+			AND PRO.IS_OPEN_ENDED_RFP = 1
+		</if>
+		<if test="procurementStatusList == null">
+			AND PRO.Status_ID NOT IN (7,8)
+		</if>
+		<if test="serviceName != null">
+			AND PROSER.Element_Id = #{serviceName}
+		</if>
+		<if test="procurementEpin != null">
+			AND PRO.EPIN = #{procurementEpin}
+		</if>
+		<if test="programName != null">
+			AND PRO.Program_Id = #{programName}
+		</if>
+		<if test="releaseDateFrom != null and releaseDateTo != null">
+			AND Upd_RFP_Release_Date BETWEEN #{releaseDateFrom,
+			jdbcType=TIMESTAMP} AND #{releaseDateTo, jdbcType=TIMESTAMP}
+		</if>
+		<if test="proposalDueDateFrom != null and proposalDueDateTo != null">
+			AND Upd_Proposal_Due_Date BETWEEN
+			#{proposalDueDateFrom,
+			jdbcType=TIMESTAMP} AND #{proposalDueDateTo,
+			jdbcType=TIMESTAMP}
+		</if>
+		<if test="contractStartDateFrom != null and contractStartDateTo != null">
+			AND Upd_Contract_Start_Date BETWEEN
+			#{contractStartDateFrom, jdbcType=TIMESTAMP} AND
+			#{contractStartDateTo,
+			jdbcType=TIMESTAMP}
+		</if>
+	</select>
+
+	<resultMap id="programList" type="com.nyc.hhs.model.Procurement">
+		<result property="programName" column="PROGRAM_NAME" />
+		<result property="programId" column="PROGRAM_ID" />
+	</resultMap>
+
+	<select id="getProgramNameList" parameterType="String"
+		resultMap="programList">
+		SELECT P.PROGRAM_NAME, A.PROGRAM_ID FROM PROGRAM_MASTER P,
+		AGENCY_PROGRAM_MAPPING A
+		WHERE A.AGENCY_ID = #{lsNycAgency}
+		AND
+		A.PROGRAM_ID = P.PROGRAM_ID 
+		AND P.ACTIVE_FLAG=1
+		order by lower(PROGRAM_NAME)
+	</select>
+
+	<resultMap id="acceleratorList" type="com.nyc.hhs.model.StaffDetails">
+		<result property="msStaffFirstName" column="NAME" />
+		<result property="msStaffId" column="USER_ID" />
+	</resultMap>
+
+
+<!-- [Start] QC9077 remove Staff role out of result -->
+	<select id="getAcceleratorUserList" parameterType="String"
+		resultMap="acceleratorList">
+		SELECT    FIRST_NAME || ' ' || LAST_NAME as NAME, USER_ID 
+		  FROM    CITY_USER_DETAILS 
+		  WHERE   USER_TYPE = #{asUserType} 
+		    and   user_role NOT IN ( 'system', 'staff' ) 
+		    and   active_flag = 1 
+		  order   by   lower(NAME)
+	</select>
+<!-- [End] QC9077 remove Staff role out of result -->
+	
+	<select id="getAgencyUserList" parameterType="String" resultMap="acceleratorList">
+		SELECT FIRST_NAME || ' ' || LAST_NAME as NAME, USER_ID FROM
+		CITY_USER_DETAILS WHERE ORGANIZATION_NAME=#{asAgencyId} and
+		active_flag = 1 order by lower(NAME)
+	</select>
+
+	<resultMap id="epinDetails" type="com.nyc.hhs.model.EPinDetailBean">
+		<result property="epinId" column="PROCUREMENT_EPIN" />
+		<result property="procurementStartDate" column="PROCUREMENT_START_DATE" />
+		<result property="agencyDiv" column="AGENCY_DIVISION" />
+		<result property="agencyId" column="AGENCY_ID" />
+		<result property="projProg" column="PROJECT_PROGRAM" />
+		<result property="description" column="DESCRIPTION" />
+		<result property="refAptEpinId" column="REF_APT_EPIN_ID" />
+	</resultMap>
+
+	<!-- R6 EPIN Validation changes start -->
+	<select id="fetchEpinDetails" parameterType="HashMap" resultMap="epinDetails">
+		SELECT
+		PROCUREMENT_EPIN,TO_CHAR(PROCUREMENT_START_DATE,'MM/DD/YYYY') AS
+		PROCUREMENT_START_DATE,AGENCY_DIVISION,AGENCY_ID,PROJECT_PROGRAM,DESCRIPTION,REF_APT_EPIN_ID
+		FROM VW_PROCUREMENT_EPIN WHERE
+		PROCUREMENT_EPIN=#{ePinId} AND UPPER(AGENCY_DIVISION)=UPPER(#{agencyId})
+	</select>
+	<!-- R6 EPIN Validation changes ends -->
+	<resultMap id="fetchProcProv" type="com.nyc.hhs.model.Procurement">
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="procurementDescription" column="PROCUREMENT_DESCRIPTION" />
+		<result property="estNumberOfContracts" column="ESTIMATED_NUM_CONTRACTS" />
+		<result property="estProcurementValue" column="ESTIMATED_PROCUREMENT_VALUE" />
+		<result property="linkToConceptReport" column="LINK_TO_CONCEPT_REPORT" />
+		<result property="rfpReleaseDateUpdated" column="Upd_RFP_Release_Date" />
+		<result property="preProposalConferenceDateUpdated" column="UPD_PRE_PROPOSAL_CONF_DATE" />
+		<result property="proposalDueDateUpdated" column="Upd_Proposal_Due_Date" />
+		<result property="contractStartDateUpdated" column="Upd_Contract_Start_Date" />
+		<result property="contractEndDateUpdated" column="UPD_CONTRACT_END_DATE" />
+		<result property="agencyName" column="AGENCY_NAME" />
+		<result property="programName" column="PROGRAM_NAME" />
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<!-- R5 code starts here -->
+		<result property="pcofConctractStartDate" column="PCOF_CONTRACT_START_DATE" />
+		<result property="pcofConctractEndDate" column="PCOF_CONTRACT_END_DATE" />
+		<result property="isOpenEndedRFP" column="IS_OPEN_ENDED_RFP" />
+		<result property="approvedAmount" column="approved_amount" />
+		<result property="psrConctractStartDate" column="PSR_APPROVED_START_DATE" />
+		<result property="psrConctractEndDate" column="PSR_APPROVED_END_DATE" />
+		<result property="psrApprovedAmount" column="PSR_APPROVED_AMOUNT" />
+		<!-- R5 code ends here -->
+	</resultMap>
+
+	<select id="fetchProcurementSummaryProvider" parameterType="String"
+		resultMap="fetchProcProv">
+		Select C.PROCUREMENT_TITLE,
+		C.PROCUREMENT_ID,
+		C.PROCUREMENT_DESCRIPTION,
+		C.ESTIMATED_NUM_CONTRACTS,
+		C.ESTIMATED_PROCUREMENT_VALUE,
+		C.LINK_TO_CONCEPT_REPORT,
+		C.Upd_RFP_Release_Date,
+		C.UPD_PRE_PROPOSAL_CONF_DATE,
+		C.Upd_Proposal_Due_Date,
+		C.Upd_Contract_Start_Date,
+		C.UPD_CONTRACT_END_DATE,
+		A.AGENCY_NAME,
+		B.PROGRAM_NAME
+		from
+		NYC_AGENCY_DETAILS A, PROGRAM_MASTER
+		B, PROCUREMENT
+		C
+		WHERE
+		C.AGENCY_ID =
+		A.AGENCY_ID and C.PROGRAM_ID =
+		B.PROGRAM_ID and
+		C.PROCUREMENT_ID =
+		#{asProcurementId}
+	</select>
+
+	<insert id="insertNewProcurementDetails">
+		INSERT INTO PROCUREMENT (PROCUREMENT_ID,
+		PROCUREMENT_TITLE,
+		EPIN, STATUS_ID, AGENCY_ID, PROGRAM_ID,
+		ACCELERATOR_PRMRY_CONTACT_ID,
+		ACCELERATOR_SECNDRY_CONTACT_ID,
+		AGENCY_PRIMARY_CONTACT_ID,
+		AGENCY_SECONDARY_CONTACT_ID,
+		AGENCY_EMAIL_CONTACT,
+		PROCUREMENT_DESCRIPTION, ESTIMATED_NUM_CONTRACTS,
+		ESTIMATED_PROCUREMENT_VALUE, LINK_TO_CONCEPT_REPORT,
+		PLND_RFP_RELEASE_DATE, Upd_RFP_Release_Date,
+			PLND_PRE_PROPOSAL_CONF_DATE, UPD_PRE_PROPOSAL_CONF_DATE,
+			PLND_PROPOSAL_DUE_DATE, Upd_Proposal_Due_Date,
+			PLND_FRST_DRAFT_RFP_DATE, UPD_FRST_DRAFT_RFP_DATE,
+			PLND_FINALIZE_RFP_DATE, UPD_FINALIZE_RFP_DATE,
+			PLND_EVALUATOR_TRANING_DATE, UPD_EVALUATOR_TRAINING_DATE,
+			PLND_FST_RND_EVAL_CMPLT_DATE, UPD_FST_RND_EVAL_CMPLT_DATE,
+			PLND_FINALIZE_EVAL_DATE, UPD_FINALIZE_EVAL_DATE,
+			PLND_AWARD_SELECTION_DATE, UPD_AWARD_SELECTION_DATE,
+			PLND_CONTRACT_START_DATE, Upd_Contract_Start_Date,
+			PLND_CONTRACT_END_DATE, UPD_CONTRACT_END_DATE,
+		LAST_MODIFIED_DATE,
+		LAST_PUBLISHED_DATE, CREATED_DATE,
+		CREATED_BY_USERID, MODIFIED_DATE,
+		MODIFIED_BY_USERID,
+		RFP_RELEASE_USERID,
+		RFP_RELEASE_DATE,
+		LAST_PUBLISHED_USERID,
+		LAST_MODIFIED_USERID, SERVICE_FILTER,
+		SERVICE_UNITS_REQUIRED, IS_OPEN_ENDED_RFP,
+		<!-- Start R5 Added -->
+		PCOF_PSR_VERSION_NUMBER, GENERATE_NEW_TASK,
+		<!-- End R5 Added -->
+		<!-- Start R6 Added -->
+		REF_APT_EPIN_ID
+		<!-- End R6 Added -->
+		)
+		VALUES(SEQ_PROCUREMENT_ID.NEXTVAL, trim(#{procurementTitle,
+		jdbcType=VARCHAR}),
+		#{procurementEpin, jdbcType=VARCHAR}, #{status,
+		jdbcType=VARCHAR},
+		#{agencyId, jdbcType=VARCHAR}, #{programName,
+		jdbcType=VARCHAR},
+		#{accPrimaryContact, jdbcType=VARCHAR},
+		#{accSecondaryContact,
+		jdbcType=VARCHAR},
+		#{agecncyPrimaryContact,
+		jdbcType=VARCHAR}, #{agecncySecondaryContact, jdbcType=VARCHAR},
+		trim(#{email, jdbcType=VARCHAR}), trim(#{procurementDescription,
+		jdbcType=VARCHAR}),
+		#{estNumberOfContracts, jdbcType=VARCHAR},
+		#{estProcurementValue, jdbcType=VARCHAR},
+		trim(#{linkToConceptReport,jdbcType=VARCHAR}), 
+		to_date(#{rfpReleaseDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{rfpReleaseDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{preProposalConferenceDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{preProposalConferenceDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{proposalDueDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+			to_date(#{proposalDueDateUpdated,jdbcType=VARCHAR}, 'MM/dd/YYYY HH:MI:SS'),
+		to_date(#{firstRFPEvalDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{firstRFPEvalDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{finalRFPEvalDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{finalRFPEvalDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{evaluatorTrainingDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{evaluatorTrainingDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{firstEvalCompletionDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{firstEvalCompletionDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{finalEvalCompletionDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{finalEvalCompletionDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{awardSelectionDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{awardSelectionDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{contractStartDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{contractStartDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{contractEndDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{contractEndDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		sysdate,
+		#{lastPublishDate, jdbcType=DATE}, sysdate,
+		#{createdBy,
+		jdbcType=VARCHAR}, sysdate,
+		#{modifiedBy, jdbcType=VARCHAR},
+		#{rfpReleaseUserId,
+		jdbcType=VARCHAR},
+		#{lastPublishDate,
+		jdbcType=DATE}, #{lastPublishedByUser, jdbcType=VARCHAR},
+		#{modifiedBy, jdbcType=VARCHAR},
+		'1', #{serviceUnitRequiredFlag},
+		#{isOpenEndedRFP},
+		<!-- Start R5 Added -->
+		<!-- Added PCOF_PSR_VERSION_NUMBER(Version Number) Zero on Add Procurement -->
+		'0', '0',
+		<!-- End R5 Added -->
+		<!-- R6 Added REF_APT_EPIN_ID on add procurement -->
+		#{refEpinId, jdbcType=NUMERIC}
+		<!-- End R6 changes -->
+		)
+	</insert>
+
+	<select id="getStatusId" parameterType="HashMap" resultType="int">
+		SELECT STATUS_ID FROM STATUS_MASTER_R2_R3 WHERE STATUS = #{status} AND
+		PROCESS_TYPE
+		= #{processType}
+	</select>
+
+
+
+	<resultMap id="procurementDocsDetails" type="com.nyc.hhs.model.ExtendedDocument">
+		<result property="documentType" column="DOCUMENT_TYPE" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+		<result property="status" column="procurement_status" />
+		<result property="documentId" column="DOCUMENT_IDENTIFIER_ID" />
+		<result property="procurementStatusId" column="STATUS_ID" />
+		<result property="addendumType" column="is_addendum" />
+		<result property="documentStatus" column="DOC_STATUS" />
+		<result property="organizationType" column="ORGTYPE" />
+		<result property="referenceDocSeqNo" column="DOC_REFRENCE_ID" />
+	</resultMap>
+	<!-- changed in build 2.6.0, defect id 5667 -->
+	<select id="fetchRfpReleaseDocsDetails" parameterType="com.nyc.hhs.model.ExtendedDocument"
+		resultMap="procurementDocsDetails">
+		SELECT
+		DOC_REFRENCE_ID,DOCUMENT_IDENTIFIER_ID,DOCUMENT_TYPE,MODIFIED_DATE,RFP_DOCUMENT_ID,IS_ADDENDUM,sortOrder,DOC_STATUS,procurement_status,ORGTYPE,STATUS_ID,rn
+		FROM
+		(SELECT
+		DOC_REFRENCE_ID,DOCUMENT_IDENTIFIER_ID,DOCUMENT_TYPE,MODIFIED_DATE,RFP_DOCUMENT_ID,IS_ADDENDUM,sortOrder,DOC_STATUS,procurement_status,#{organizationType}
+		as ORGTYPE,STATUS_ID,rownum as rn from(SELECT
+		DOC_REFRENCE_ID,DOCUMENT_IDENTIFIER_ID,DOCUMENT_TYPE,MODIFIED_DATE,RFP_DOCUMENT_ID,IS_ADDENDUM
+		,sortOrder,DOC_STATUS,procurement_status,STATUS_ID FROM
+		(SELECT RFPDOC.RFP_DOCUMENT_ID as
+		DOC_REFRENCE_ID,RFPDOC.DOCUMENT_IDENTIFIER_ID,RFPDOC.DOCUMENT_TYPE,TO_CHAR(RFPDOC.MODIFIED_DATE,'MM/DD/YYYY')
+		AS MODIFIED_DATE,RFPDOC.RFP_DOCUMENT_ID,'0' as IS_ADDENDUM, '0' as
+		sortOrder,ST.STATUS AS DOC_STATUS,ST1.STATUS as
+		procurement_status,PR.STATUS_ID FROM
+		RFP_DOCUMENT RFPDOC,STATUS_MASTER_R2_R3 ST,PROCUREMENT PR,STATUS_MASTER_R2_R3 ST1
+		WHERE RFPDOC.PROCUREMENT_ID=#{procurementId} AND
+		RFPDOC.STATUS_ID=ST.STATUS_ID AND PR.STATUS_ID=ST1.STATUS_ID AND
+		RFPDOC.PROCUREMENT_ID=PR.PROCUREMENT_ID AND
+		RFPDOC.DOCUMENT_TYPE='Request for Proposals (RFP)' AND
+		RFP_DOC_FLAG='1'
+		<if test="organizationType != null and organizationType != 'provider_org'">
+		AND DOC_DELETE_FLAG = #{docDeleteFlag}
+		</if>
+		ORDER BY RFPDOC.MODIFIED_DATE DESC)
+		UNION ALL
+		SELECT
+		DOC_REFRENCE_ID,DOCUMENT_IDENTIFIER_ID,DOCUMENT_TYPE,MODIFIED_DATE,RFP_DOCUMENT_ID,IS_ADDENDUM
+		,sortOrder,DOC_STATUS,procurement_status,STATUS_ID FROM
+		(SELECT RFPADDDOC.ADDM_RFP_DOCUMENT_ID AS
+		DOC_REFRENCE_ID,RFPADDDOC.DOCUMENT_IDENTIFIER_ID,RFPADDDOC.DOCUMENT_TYPE,TO_CHAR(RFPADDDOC.MODIFIED_DATE,'MM/DD/YYYY')
+		AS MODIFIED_DATE,RFPADDDOC.ADDM_RFP_DOCUMENT_ID AS RFP_DOCUMENT_ID,'1'
+		AS IS_ADDENDUM , '1' as sortOrder,ST1.STATUS AS DOC_STATUS,ST.STATUS
+		AS procurement_status,PR.STATUS_ID
+		FROM PRCRMNT_ADDM_RFP_DOCUMENT
+		RFPADDDOC,STATUS_MASTER_R2_R3 ST,PROCUREMENT PR,STATUS_MASTER_R2_R3
+		ST1 WHERE RFPADDDOC.PROCUREMENT_ID=#{procurementId} AND
+		RFPADDDOC.STATUS_ID=ST1.STATUS_ID AND PR.STATUS_ID=ST.STATUS_ID AND
+		RFPADDDOC.PROCUREMENT_ID=PR.PROCUREMENT_ID AND
+		RFPADDDOC.DOCUMENT_TYPE='Request for Proposals (RFP)'
+		order by
+		MODIFIED_DATE DESC)
+		UNION ALL
+		SELECT
+		DOC_REFRENCE_ID,DOCUMENT_IDENTIFIER_ID,DOCUMENT_TYPE,MODIFIED_DATE,RFP_DOCUMENT_ID,IS_ADDENDUM
+		,sortOrder,DOC_STATUS,procurement_status,STATUS_ID FROM
+		(SELECT RFPDOC.RFP_DOCUMENT_ID as DOC_REFRENCE_ID,
+		RFPDOC.DOCUMENT_IDENTIFIER_ID,RFPDOC.DOCUMENT_TYPE,TO_CHAR(RFPDOC.MODIFIED_DATE,'MM/DD/YYYY')
+		AS MODIFIED_DATE, RFPDOC.RFP_DOCUMENT_ID,'0' AS is_addendum, '2' AS
+		sortOrder,ST.STATUS AS DOC_STATUS,ST1.STATUS AS
+		procurement_status,PR.STATUS_ID FROM RFP_DOCUMENT
+		RFPDOC,STATUS_MASTER_R2_R3 ST,PROCUREMENT PR,STATUS_MASTER_R2_R3 ST1
+		WHERE RFPDOC.PROCUREMENT_ID=#{procurementId} AND
+		RFPDOC.STATUS_ID=ST.STATUS_ID AND PR.STATUS_ID=ST1.STATUS_ID AND
+		RFPDOC.PROCUREMENT_ID=PR.PROCUREMENT_ID AND
+		RFPDOC.DOCUMENT_TYPE='Addenda' AND RFP_DOC_FLAG='1'
+		<if test="organizationType != null and organizationType != 'provider_org'">
+		AND DOC_DELETE_FLAG = #{docDeleteFlag}
+		</if>
+		ORDER BY RFPDOC.MODIFIED_DATE DESC)
+		UNION ALL
+		SELECT
+		DOC_REFRENCE_ID,DOCUMENT_IDENTIFIER_ID,DOCUMENT_TYPE,MODIFIED_DATE,RFP_DOCUMENT_ID,IS_ADDENDUM
+		,sortOrder,DOC_STATUS,procurement_status,STATUS_ID FROM
+		(SELECT RFPADDDOC.ADDM_RFP_DOCUMENT_ID AS
+		DOC_REFRENCE_ID,RFPADDDOC.DOCUMENT_IDENTIFIER_ID,RFPADDDOC.DOCUMENT_TYPE,TO_CHAR(RFPADDDOC.MODIFIED_DATE,'MM/DD/YYYY')
+		AS MODIFIED_DATE,RFPADDDOC.ADDM_RFP_DOCUMENT_ID AS RFP_DOCUMENT_ID,'1'
+		AS is_addendum , '3' as sortOrder,ST1.STATUS AS DOC_STATUS,ST.STATUS
+		as procurement_status,PR.STATUS_ID
+		FROM PRCRMNT_ADDM_RFP_DOCUMENT
+		RFPADDDOC,STATUS_MASTER_R2_R3 ST,PROCUREMENT PR,STATUS_MASTER_R2_R3
+		ST1 WHERE RFPADDDOC.PROCUREMENT_ID=#{procurementId} AND
+		RFPADDDOC.STATUS_ID=ST1.STATUS_ID AND PR.STATUS_ID=ST.STATUS_ID AND
+		RFPADDDOC.PROCUREMENT_ID=PR.PROCUREMENT_ID AND
+		RFPADDDOC.DOCUMENT_TYPE='Addenda'
+		ORDER BY MODIFIED_DATE DESC)
+		UNION ALL
+		SELECT
+		DOC_REFRENCE_ID,DOCUMENT_IDENTIFIER_ID,DOCUMENT_TYPE,MODIFIED_DATE,RFP_DOCUMENT_ID,IS_ADDENDUM
+		,sortOrder,DOC_STATUS,procurement_status,STATUS_ID FROM
+		(SELECT RFPDOC.RFP_DOCUMENT_ID as DOC_REFRENCE_ID,
+		RFPDOC.DOCUMENT_IDENTIFIER_ID,RFPDOC.DOCUMENT_TYPE,TO_CHAR(RFPDOC.MODIFIED_DATE,'MM/DD/YYYY')
+		AS MODIFIED_DATE,RFPDOC.RFP_DOCUMENT_ID,'0' as is_addendum, '4' as
+		sortOrder,ST.STATUS AS DOC_STATUS,ST1.STATUS as
+		procurement_status,PR.STATUS_ID
+		FROM RFP_DOCUMENT
+		RFPDOC,STATUS_MASTER_R2_R3 ST,PROCUREMENT PR,STATUS_MASTER_R2_R3 ST1
+		WHERE RFPDOC.PROCUREMENT_ID=#{procurementId} AND
+		RFPDOC.STATUS_ID=ST.STATUS_ID
+		AND PR.STATUS_ID=ST1.STATUS_ID AND
+		RFPDOC.PROCUREMENT_ID=PR.PROCUREMENT_ID AND
+		RFPDOC.DOCUMENT_TYPE!='Request for Proposals (RFP)' AND
+		RFPDOC.DOCUMENT_TYPE!='Addenda'
+		AND RFP_DOC_FLAG='1'
+		<if test="organizationType != null and organizationType != 'provider_org'">
+		AND DOC_DELETE_FLAG = #{docDeleteFlag}
+		</if>
+		ORDER BY RFPDOC.MODIFIED_DATE DESC,RFPDOC.DOCUMENT_TYPE ASC)
+		UNION ALL
+		SELECT
+		DOC_REFRENCE_ID,DOCUMENT_IDENTIFIER_ID,DOCUMENT_TYPE,MODIFIED_DATE,RFP_DOCUMENT_ID,IS_ADDENDUM
+		,sortOrder,DOC_STATUS,procurement_status,STATUS_ID FROM
+		(SELECT RFPADDDOC.ADDM_RFP_DOCUMENT_ID AS
+		DOC_REFRENCE_ID,RFPADDDOC.DOCUMENT_IDENTIFIER_ID,RFPADDDOC.DOCUMENT_TYPE,TO_CHAR(RFPADDDOC.MODIFIED_DATE,'MM/DD/YYYY')
+		as MODIFIED_DATE,RFPADDDOC.ADDM_RFP_DOCUMENT_ID AS RFP_DOCUMENT_ID,'1'
+		as is_addendum , '5' as sortOrder,ST1.STATUS AS DOC_STATUS,ST.STATUS
+		as procurement_status,PR.STATUS_ID
+		FROM PRCRMNT_ADDM_RFP_DOCUMENT
+		RFPADDDOC,STATUS_MASTER_R2_R3 ST,PROCUREMENT PR,STATUS_MASTER_R2_R3
+		ST1 WHERE RFPADDDOC.PROCUREMENT_ID=#{procurementId} AND
+		RFPADDDOC.STATUS_ID=ST1.STATUS_ID AND PR.STATUS_ID=ST.STATUS_ID AND
+		RFPADDDOC.PROCUREMENT_ID=PR.PROCUREMENT_ID AND
+		RFPADDDOC.DOCUMENT_TYPE!='Request for Proposals (RFP)' AND
+		RFPADDDOC.DOCUMENT_TYPE!='Addenda' order by MODIFIED_DATE
+		DESC,RFPADDDOC.DOCUMENT_TYPE ASC))a order by sortOrder)b
+	</select>
+	
+	<!-- Created as part of Release 3.1.0 for Enhancement 6024 -->
+	<select id="fetchRfpDocsDetailsForTasks" parameterType="com.nyc.hhs.model.ExtendedDocument"
+		resultMap="procurementDocsDetails">
+		SELECT DOC_REFRENCE_ID,DOCUMENT_IDENTIFIER_ID,DOCUMENT_TYPE,MODIFIED_DATE,RFP_DOCUMENT_ID,IS_ADDENDUM,sortOrder,DOC_STATUS,procurement_status,ORGTYPE,STATUS_ID,rn
+		FROM		
+		(		
+		SELECT DOC_REFRENCE_ID,DOCUMENT_IDENTIFIER_ID,DOCUMENT_TYPE,MODIFIED_DATE,RFP_DOCUMENT_ID,IS_ADDENDUM,sortOrder,DOC_STATUS,procurement_status,#{organizationType}
+		as ORGTYPE,STATUS_ID,rownum as rn from
+		(
+		SELECT
+		DOC_REFRENCE_ID,DOCUMENT_IDENTIFIER_ID,DOCUMENT_TYPE,MODIFIED_DATE,RFP_DOCUMENT_ID,IS_ADDENDUM
+		,sortOrder,DOC_STATUS,procurement_status,STATUS_ID FROM
+		(SELECT RFPDOC.RFP_DOCUMENT_ID as
+		DOC_REFRENCE_ID,RFPDOC.DOCUMENT_IDENTIFIER_ID,RFPDOC.DOCUMENT_TYPE,TO_CHAR(RFPDOC.MODIFIED_DATE,'MM/DD/YYYY')
+		AS MODIFIED_DATE,RFPDOC.RFP_DOCUMENT_ID,'0' as IS_ADDENDUM, '0' as
+		sortOrder,ST.STATUS AS DOC_STATUS,ST1.STATUS as
+		procurement_status,PR.STATUS_ID FROM
+		RFP_DOCUMENT RFPDOC,EVALUATION_GROUP EG,PROPOSAL_CONFIG PC,STATUS_MASTER_R2_R3 ST,PROCUREMENT PR,STATUS_MASTER_R2_R3 ST1
+		WHERE RFPDOC.PROCUREMENT_ID=#{procurementId} AND
+		RFPDOC.STATUS_ID=ST.STATUS_ID AND PR.STATUS_ID=ST1.STATUS_ID AND
+		RFPDOC.PROCUREMENT_ID=PR.PROCUREMENT_ID AND
+		RFPDOC.PROCUREMENT_ID=EG.PROCUREMENT_ID AND
+		EG.PROCUREMENT_ID = PC.PROCUREMENT_ID AND
+		EG.EVALUATION_GROUP_ID = PC.EVALUATION_GROUP_ID AND
+		PC.PROPOSAL_ID = #{proposalId} AND
+		RFPDOC.VERSION_NUMBER &lt;= EG.VERSION_NUMBER_RFP_DOC AND 
+		RFPDOC.DOCUMENT_TYPE='Request for Proposals (RFP)' AND
+		RFP_DOC_FLAG='1'
+		<if test="organizationType != null and organizationType != 'provider_org'">
+		AND DOC_DELETE_FLAG = #{docDeleteFlag}
+		</if>
+		ORDER BY RFPDOC.MODIFIED_DATE DESC)
+			
+		UNION ALL
+		
+		SELECT
+		DOC_REFRENCE_ID,DOCUMENT_IDENTIFIER_ID,DOCUMENT_TYPE,MODIFIED_DATE,RFP_DOCUMENT_ID,IS_ADDENDUM
+		,sortOrder,DOC_STATUS,procurement_status,STATUS_ID FROM
+		(SELECT RFPDOC.RFP_DOCUMENT_ID as DOC_REFRENCE_ID,
+		RFPDOC.DOCUMENT_IDENTIFIER_ID,RFPDOC.DOCUMENT_TYPE,TO_CHAR(RFPDOC.MODIFIED_DATE,'MM/DD/YYYY')
+		AS MODIFIED_DATE, RFPDOC.RFP_DOCUMENT_ID,'0' AS is_addendum, '2' AS
+		sortOrder,ST.STATUS AS DOC_STATUS,ST1.STATUS AS
+		procurement_status,PR.STATUS_ID FROM RFP_DOCUMENT
+		RFPDOC,EVALUATION_GROUP EG,PROPOSAL_CONFIG PC,STATUS_MASTER_R2_R3 ST,PROCUREMENT PR,STATUS_MASTER_R2_R3 ST1
+		WHERE RFPDOC.PROCUREMENT_ID=#{procurementId} AND
+		RFPDOC.STATUS_ID=ST.STATUS_ID AND PR.STATUS_ID=ST1.STATUS_ID AND
+		RFPDOC.PROCUREMENT_ID=PR.PROCUREMENT_ID AND
+		RFPDOC.PROCUREMENT_ID=EG.PROCUREMENT_ID AND
+		EG.PROCUREMENT_ID = PC.PROCUREMENT_ID AND
+		EG.EVALUATION_GROUP_ID = PC.EVALUATION_GROUP_ID AND
+		PC.PROPOSAL_ID = #{proposalId} AND
+		RFPDOC.VERSION_NUMBER &lt;= EG.VERSION_NUMBER_RFP_DOC AND 
+		RFPDOC.DOCUMENT_TYPE='Addenda' AND RFP_DOC_FLAG='1'
+		<if test="organizationType != null and organizationType != 'provider_org'">
+		AND DOC_DELETE_FLAG = #{docDeleteFlag}
+		</if>
+		ORDER BY RFPDOC.MODIFIED_DATE DESC)
+		
+		UNION ALL
+		
+		SELECT
+		DOC_REFRENCE_ID,DOCUMENT_IDENTIFIER_ID,DOCUMENT_TYPE,MODIFIED_DATE,RFP_DOCUMENT_ID,IS_ADDENDUM
+		,sortOrder,DOC_STATUS,procurement_status,STATUS_ID FROM
+		(SELECT RFPDOC.RFP_DOCUMENT_ID as DOC_REFRENCE_ID,
+		RFPDOC.DOCUMENT_IDENTIFIER_ID,RFPDOC.DOCUMENT_TYPE,TO_CHAR(RFPDOC.MODIFIED_DATE,'MM/DD/YYYY')
+		AS MODIFIED_DATE,RFPDOC.RFP_DOCUMENT_ID,'0' as is_addendum, '4' as
+		sortOrder,ST.STATUS AS DOC_STATUS,ST1.STATUS as
+		procurement_status,PR.STATUS_ID
+		FROM RFP_DOCUMENT
+		RFPDOC,EVALUATION_GROUP EG,PROPOSAL_CONFIG PC,STATUS_MASTER_R2_R3 ST,PROCUREMENT PR,STATUS_MASTER_R2_R3 ST1
+		WHERE RFPDOC.PROCUREMENT_ID=#{procurementId} AND
+		RFPDOC.STATUS_ID=ST.STATUS_ID
+		AND PR.STATUS_ID=ST1.STATUS_ID AND
+		RFPDOC.PROCUREMENT_ID=PR.PROCUREMENT_ID AND
+		RFPDOC.PROCUREMENT_ID=EG.PROCUREMENT_ID AND
+		EG.PROCUREMENT_ID = PC.PROCUREMENT_ID AND
+		EG.EVALUATION_GROUP_ID = PC.EVALUATION_GROUP_ID AND
+		PC.PROPOSAL_ID = #{proposalId} AND
+		RFPDOC.VERSION_NUMBER &lt;= EG.VERSION_NUMBER_RFP_DOC AND 
+		RFPDOC.DOCUMENT_TYPE!='Request for Proposals (RFP)' AND
+		RFPDOC.DOCUMENT_TYPE!='Addenda'
+		AND RFP_DOC_FLAG='1'
+		<if test="organizationType != null and organizationType != 'provider_org'">
+		AND DOC_DELETE_FLAG = #{docDeleteFlag}
+		</if>
+		ORDER BY RFPDOC.MODIFIED_DATE DESC,RFPDOC.DOCUMENT_TYPE ASC)
+
+		)a order by sortOrder)b
+	</select>
+	
+	<resultMap id="providerProcurementList" type="com.nyc.hhs.model.Procurement">
+		<result property="procurementId" column="Procurement_Id" />
+		<result property="procurementTitle" column="Procurement_Title" />
+		<result property="agencyId" column="Agency_ID" />
+		<result property="procurementStatus" column="Procurement_status" />
+		<result property="providerStatus" column="Provider_Status" />
+		<result property="releaseDate" column="Upd_RFP_Release_Date1" />
+		<result property="proposalDueDate" column="Upd_Proposal_Due_Date1" />
+		<result property="contractStartDate" column="Upd_Contract_Start_Date1" />
+		<result property="isFavorite" column="IS_FAVORITE" />
+	</resultMap>
+
+	<select id="fetchActiveProcurementsForProvider" parameterType="com.nyc.hhs.model.Procurement"
+		resultMap="providerProcurementList">
+		Select * from 
+            (Select Procurement_Id, Procurement_title, Agency_Id, Upd_RFP_Release_Date1, 
+		Upd_Proposal_Due_Date1, Upd_Contract_Start_Date1, Provider_Status,
+		Procurement_status, rownum as rn, IS_FAVORITE from
+            (Select Procurement_Id, Procurement_title, Agency_Id,  
+            to_char(Upd_RFP_Release_Date,'MM/dd/YYYY') as Upd_RFP_Release_Date1, 
+		decode(IS_OPEN_ENDED_RFP, '1' , '----',
+		to_char(Upd_Proposal_Due_Date,'MM/dd/YYYY')) as
+		Upd_Proposal_Due_Date1,
+		decode(IS_OPEN_ENDED_RFP, '1' , '----', to_char(Upd_Contract_Start_Date,'MM/dd/YYYY')) as
+		Upd_Contract_Start_Date1,
+		stm.status as Provider_Status, stm1.status as Procurement_status, IS_FAVORITE
+		from
+            (Select Procurement_Id, Procurement_title, Agency_Id, IS_OPEN_ENDED_RFP,
+            Upd_RFP_Release_Date, 
+            Upd_Proposal_Due_Date, Upd_Contract_Start_Date, 
+            Provider_Status, Procurement_status, IS_FAVORITE from 
+            (Select Proc.Procurement_Id, Proc.Procurement_title, proc.IS_OPEN_ENDED_RFP,
+            Proc.Agency_Id, Upd_RFP_Release_Date, 
+		Upd_Proposal_Due_Date, Upd_Contract_Start_Date, DECODE(proc.status_id, 5, 4, proc.status_id)
+		as
+		Procurement_status, NVL(ProcProv.provider_status_id,DECODE(Proc.status_id, 2, 10, 3, 10,
+		16)) AS Provider_Status,
+            nvl(pf.procurement_id, -1) as IS_FAVORITE 
+            from (select procurement_id from procurement_favorites 
+                  where organization_id = #{organizationId}) pf, 
+            Procurement proc,  
+            (SELECT abc.procurement_id, abc.provider_status_id
+        FROM procurement_provider abc, procurement p
+        WHERE abc.organization_id = #{organizationId}
+            and abc.procurement_id = p.procurement_id
+		and ((p.status_id = 3 and (abc.eligibility_flag = 1 or
+		(abc.provider_status_id not in (10,16))))
+		or (p.status_id != 3 and (abc.eligibility_flag = 1 or
+		abc.restrict_submit = 1)))
+            ) ProcProv
+            <if test="serviceName != null">
+                  , PROCUREMENT_SERVICES PROSER
+            </if>
+            where
+            pf.procurement_id(+) = proc.procurement_id
+            and proc.procurement_id = procprov.procurement_id(+)
+            and lower(Proc.Procurement_Title) LIKE lower(#{procurementTitle})
+		AND ((#{isFavoriteDisplayed} = 'true' and PROC.procurement_id in (select
+		procurement_id from procurement_favorites
+                                    where organization_id = #{organizationId}))
+                                    OR
+                                    (#{isFavoriteDisplayed} = 'false'))
+            <if test="serviceName != null">                       
+			and Proc.Procurement_Id = PROSER.Procurement_Id AND PROSER.Element_Id =
+			#{serviceName}
+            </if>
+            <if test="agencyId != null">
+                  AND Proc.Agency_ID = #{agencyId}
+            </if>
+            <if test="isOpenEndedRFP != null and isOpenEndedRFP != 0">
+                  AND PROc.IS_OPEN_ENDED_RFP = 1
+            </if>
+            <if test="programName != null">
+                  AND Proc.Program_Id = #{programName}
+            </if>
+            <if test="procurementStatusList != null">
+                  AND proc.status_id IN
+                  <foreach item="items" index="index" collection="procurementStatusList"
+                        open="(" separator="," close=")">
+                        #{items}
+            </foreach>
+            </if>
+            <if test="procurementStatusList == null">
+                  AND proc.Status_ID NOT IN (1,7,8)
+            </if>
+            <if test="previousStatus != null">
+			AND ((proc.status_id = 7 and proc.prev_status_id != #{previousStatus})
+			or proc.status_id != 7)
+            </if>
+            <if test="releaseDateFrom != null and releaseDateTo != null">
+                  AND Upd_RFP_Release_Date BETWEEN #{releaseDateFrom,
+                  jdbcType=TIMESTAMP} AND #{releaseDateTo, jdbcType=TIMESTAMP}
+            </if>
+            <if test="proposalDueDateFrom != null and proposalDueDateTo != null">
+                  AND Upd_Proposal_Due_Date BETWEEN
+                  #{proposalDueDateFrom,
+                  jdbcType=TIMESTAMP} AND #{proposalDueDateTo,
+                  jdbcType=TIMESTAMP}
+            </if>
+            <if test="contractStartDateFrom != null and contractStartDateTo != null">
+                  AND Upd_Contract_Start_Date BETWEEN
+                  #{contractStartDateFrom, jdbcType=TIMESTAMP} AND
+                  #{contractStartDateTo,
+                  jdbcType=TIMESTAMP}
+            </if>
+		)
+            <if test="providerStatusList != null">
+                  where Provider_Status IN
+                  <foreach item="items" index="index" collection="providerStatusList"
+                        open="(" separator="," close=")">
+                        #{items}
+            </foreach>
+            </if>
+                        ) a, status_master_r2_r3 stm, status_master_r2_r3 stm1  
+                  where stm.status_id = a.provider_status and
+                  stm1.status_id = a.procurement_status  
+                              order
+                        by
+                        <choose>
+                              <when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+                              <otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+                        </choose>
+                        <if test="secondSort != null">
+                              <choose>
+                                    <when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+                                    <otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+                              </choose>
+                        </if>
+                        )
+            b) c where rn
+            BETWEEN #{startNode} AND
+            #{endNode}
+	</select>
+
+	<select id="getProcurementCountForProvider" parameterType="com.nyc.hhs.model.Procurement"
+		resultType="int">
+		Select count(1) as count from
+		(Select Proc.Procurement_Id,
+		NVL(ProcProv.provider_status_id ,decode(proc.status_id,2,10, 3, 10,
+		16))
+		as
+		Provider_Status from Procurement proc left join
+		   (SELECT abc.procurement_id, abc.provider_status_id
+        FROM procurement_provider abc, procurement p
+        WHERE abc.organization_id = #{organizationId}
+            and abc.procurement_id = p.procurement_id
+		and ((p.status_id = 3 and (abc.eligibility_flag = 1 or
+		(abc.provider_status_id not in (10,16))))
+		or (p.status_id != 3 and (abc.eligibility_flag = 1 or
+		abc.restrict_submit = 1)))
+            ) ProcProv
+		on
+		proc.procurement_id = procprov.procurement_id
+		<if test="serviceName != null">
+			, PROCUREMENT_SERVICES PROSER
+		</if>
+		where
+		lower(Proc.Procurement_Title) LIKE lower(#{procurementTitle})
+		AND
+		((#{isFavoriteDisplayed} = 'true' and PROC.procurement_id in (select
+		procurement_id from procurement_favorites
+						where organization_id = #{organizationId}))
+						OR
+						(#{isFavoriteDisplayed} = 'false'))
+		<if test="serviceName != null">				
+			and Proc.Procurement_Id = PROSER.Procurement_Id AND PROSER.Element_Id =
+			#{serviceName}
+		</if>
+		<if test="agencyId != null">
+			AND Proc.Agency_ID = #{agencyId}
+		</if>
+		<if test="programName != null">
+			AND Proc.Program_Id = #{programName}
+		</if>
+		<if test="isOpenEndedRFP != null and isOpenEndedRFP != 0">
+			AND PROc.IS_OPEN_ENDED_RFP = 1
+		</if>
+		<if test="procurementStatusList != null">
+			AND proc.status_id IN
+			<foreach item="items" index="index" collection="procurementStatusList"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach>
+		</if>
+		<if test="procurementStatusList == null">
+			AND proc.Status_ID NOT IN (1,7,8)
+		</if>
+		<if test="previousStatus != null">
+			AND ((proc.status_id = 7 and proc.prev_status_id !=
+			#{previousStatus}) or proc.status_id != 7)
+		</if>
+		<if test="releaseDateFrom != null and releaseDateTo != null">
+			AND Upd_RFP_Release_Date BETWEEN #{releaseDateFrom,
+			jdbcType=TIMESTAMP} AND #{releaseDateTo, jdbcType=TIMESTAMP}
+		</if>
+		<if test="proposalDueDateFrom != null and proposalDueDateTo != null">
+			AND Upd_Proposal_Due_Date BETWEEN
+			#{proposalDueDateFrom,
+			jdbcType=TIMESTAMP} AND #{proposalDueDateTo,
+			jdbcType=TIMESTAMP}
+		</if>
+		<if test="contractStartDateFrom != null and contractStartDateTo != null">
+			AND Upd_Contract_Start_Date BETWEEN
+			#{contractStartDateFrom, jdbcType=TIMESTAMP} AND
+			#{contractStartDateTo,
+			jdbcType=TIMESTAMP}
+		</if>
+		)
+		<if test="providerStatusList != null">
+			where Provider_Status IN
+			<foreach item="items" index="index" collection="providerStatusList"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach>
+		</if>
+	</select>
+
+	<!-- 	changes for r5 starts -->
+	<resultMap id="procurementDetails" type="com.nyc.hhs.model.Procurement">
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<result property="previousStatus" column="PREV_STATUS_ID" />
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="procurementEpin" column="EPIN" />
+		<result property="status" column="STATUS_ID" />
+		<result property="agencyId" column="AGENCY_ID" />
+		<result property="agencyName" column="AGENCY_NAME" />
+		<result property="programName" column="PROGRAM_NAME" />
+		<result property="programId" column="PROGRAM_ID" />
+		<result property="procurementStatus" column="STATUS" />
+		<result property="accPrimaryContact" column="ACCELERATOR_PRMRY_CONTACT_ID" />
+		<result property="accSecondaryContact" column="ACCELERATOR_SECNDRY_CONTACT_ID" />
+		<result property="agecncyPrimaryContact" column="AGENCY_PRIMARY_CONTACT_ID" />
+		<result property="agecncySecondaryContact" column="AGENCY_SECONDARY_CONTACT_ID" />
+		<result property="email" column="AGENCY_EMAIL_CONTACT" />
+		<result property="procurementDescription" column="PROCUREMENT_DESCRIPTION" />
+		<result property="estNumberOfContracts" column="ESTIMATED_NUM_CONTRACTS" />
+		<result property="estProcurementValue" column="ESTIMATED_PROCUREMENT_VALUE" />
+		<result property="linkToConceptReport" column="LINK_TO_CONCEPT_REPORT" />
+		<result property="rfpReleaseDatePlanned" column="PLND_RFP_RELEASE_DATE" />
+		<result property="rfpReleaseDateUpdated" column="UPD_RFP_RELEASE_DATE" />
+		<result property="preProposalConferenceDatePlanned" column="PLND_PRE_PROPOSAL_CONF_DATE" />
+		<result property="preProposalConferenceDateUpdated" column="UPD_PRE_PROPOSAL_CONF_DATE" />
+		<result property="proposalDueDatePlanned" column="PLND_PROPOSAL_DUE_DATE" />
+		<result property="proposalDueDateUpdated" column="UPD_PROPOSAL_DUE_DATE" />
+		<result property="firstRFPEvalDatePlanned" column="PLND_FRST_DRAFT_RFP_DATE" />
+		<result property="firstRFPEvalDateUpdated" column="UPD_FRST_DRAFT_RFP_DATE" />
+		<result property="finalRFPEvalDatePlanned" column="PLND_FINALIZE_RFP_DATE" />
+		<result property="finalRFPEvalDateUpdated" column="UPD_FINALIZE_RFP_DATE" />
+		<result property="evaluatorTrainingDatePlanned" column="PLND_EVALUATOR_TRANING_DATE" />
+		<result property="evaluatorTrainingDateUpdated" column="UPD_EVALUATOR_TRAINING_DATE" />
+		<result property="firstEvalCompletionDatePlanned" column="PLND_FST_RND_EVAL_CMPLT_DATE" />
+		<result property="firstEvalCompletionDateUpdated" column="UPD_FST_RND_EVAL_CMPLT_DATE" />
+		<result property="finalEvalCompletionDatePlanned" column="PLND_FINALIZE_EVAL_DATE" />
+		<result property="finalEvalCompletionDateUpdated" column="UPD_FINALIZE_EVAL_DATE" />
+		<result property="awardSelectionDatePlanned" column="PLND_AWARD_SELECTION_DATE" />
+		<result property="awardSelectionDateUpdated" column="UPD_AWARD_SELECTION_DATE" />
+		<result property="contractStartDatePlanned" column="PLND_CONTRACT_START_DATE" />
+		<result property="contractStartDateUpdated" column="UPD_CONTRACT_START_DATE" />
+		<result property="contractEndDatePlanned" column="PLND_CONTRACT_END_DATE" />
+		<result property="contractEndDateUpdated" column="UPD_CONTRACT_END_DATE" />
+		<result property="agencyName" column="AGENCY_NAME" />
+		<result property="lastUpdatedDate" column="LAST_MODIFIED_DATE" />
+		<result property="lastUpdatedUser" column="NAME" />
+		<result property="lastPublishDate" column="LAST_PUBLISHED_DATE" />
+		<result property="lastPublishedByUser" column="LAST_PUBLISHED_USERID" />
+		<result property="submissionCloseDate" column="SUBMISSION_CLOSE_DATE" />
+		<result property="rfpReleaseDate" column="RFP_RELEASE_DATE" />
+		<result property="awardId" column="AWARD_ID" />
+		<result property="agencyPrimaryContactName" column="AGENCYPRIMARYCONTACTNAME" />
+		<result property="agencySecondaryContactName" column="AGENCYSECONDARYCONTACTNAME" />
+		<result property="accPrimaryContactName" column="ACCPRIMARYCONTACTNAME" />
+		<result property="accSecondaryContactName" column="ACCSECONDARYCONTACTNAME" />
+		<result property="accPrimaryEmail" column="ACC_PRIMARY_EMAIL_ID" />
+		<result property="accSecondaryEmail" column="ACC_SECONDARY_EMAIL_ID" />
+		<result property="agencyPrimaryEmail" column="AGENCY_PRIMARY_EMAIL_ID" />
+		<result property="agencySecondaryEmail" column="AGENCY_SECONDARY_EMAIL_ID" />
+		<result property="serviceUnitRequiredFlag" column="SERVICE_UNITS_REQUIRED" />
+		<result property="isOpenEndedRFP" column="IS_OPEN_ENDED_RFP" />
+		<result property="psrFlag" column="PDF_FLAG" />
+		<result property="generateTaskFlag" column="GENERATE_NEW_TASK" />
+		<result property="psrDetailsId" column="PSR_DETAILS_ID" />
+		<!-- R6 emergency build added a new column in fetch query defect-8646-->
+		<result property="refEpinId" column="REF_APT_EPIN_ID" />
+	</resultMap>
+
+	<!-- R6 emergency build added a new column REF_APT_EPIN_ID in fetch query defect-8646-->
+	<select id="getProcurementSummary" parameterType="int"
+		resultMap="procurementDetails">
+		SELECT P.PROCUREMENT_ID, N.AGENCY_NAME, p.IS_OPEN_ENDED_RFP,
+		P.PREV_STATUS_ID,
+		P.PROCUREMENT_TITLE,
+		P.EPIN,
+		P.REF_APT_EPIN_ID,
+		P.STATUS_ID, P.AGENCY_ID, P.PROGRAM_ID,
+		PM.PROGRAM_NAME, S.STATUS,
+		P.ACCELERATOR_PRMRY_CONTACT_ID,
+		P.ACCELERATOR_SECNDRY_CONTACT_ID,
+		P.AGENCY_PRIMARY_CONTACT_ID,
+		P.AGENCY_SECONDARY_CONTACT_ID,
+		P.AGENCY_EMAIL_CONTACT,
+		P.PROCUREMENT_DESCRIPTION,
+		P.ESTIMATED_NUM_CONTRACTS,
+		P.ESTIMATED_PROCUREMENT_VALUE,
+		P.LINK_TO_CONCEPT_REPORT,
+		P.PLND_RFP_RELEASE_DATE,
+		P.UPD_RFP_RELEASE_DATE,
+		P.PLND_PRE_PROPOSAL_CONF_DATE,
+		P.UPD_PRE_PROPOSAL_CONF_DATE,
+		P.PLND_PROPOSAL_DUE_DATE,
+		P.UPD_PROPOSAL_DUE_DATE,
+		P.PLND_FRST_DRAFT_RFP_DATE,
+		P.UPD_FRST_DRAFT_RFP_DATE,
+		P.PLND_FINALIZE_RFP_DATE,
+		P.UPD_FINALIZE_RFP_DATE,
+		P.PLND_EVALUATOR_TRANING_DATE,
+		P.UPD_EVALUATOR_TRAINING_DATE,
+		P.PLND_FST_RND_EVAL_CMPLT_DATE,
+		P.UPD_FST_RND_EVAL_CMPLT_DATE,
+		P.PLND_FINALIZE_EVAL_DATE,
+		P.UPD_FINALIZE_EVAL_DATE,
+		P.PLND_AWARD_SELECTION_DATE,
+		P.UPD_AWARD_SELECTION_DATE,
+		P.PLND_CONTRACT_START_DATE,
+		P.UPD_CONTRACT_START_DATE,
+		P.LAST_PUBLISHED_DATE,
+		P.PLND_CONTRACT_END_DATE,
+		P.UPD_CONTRACT_END_DATE,
+		N.AGENCY_NAME,
+		P.LAST_MODIFIED_DATE,
+		P.LAST_PUBLISHED_USERID,
+		P.RFP_RELEASE_DATE,
+		P.SERVICE_UNITS_REQUIRED,
+	    C3.EMAIL_ID AS ACC_PRIMARY_EMAIL_ID,
+	    C4.EMAIL_ID AS ACC_SECONDARY_EMAIL_ID,
+        C1.EMAIL_ID AS AGENCY_PRIMARY_EMAIL_ID,
+	    C2.EMAIL_ID AS AGENCY_SECONDARY_EMAIL_ID,
+		C.FIRST_NAME || ' '|| C.LAST_NAME AS
+		NAME,
+	    C1.FIRST_NAME || ' '|| C1.LAST_NAME AS AGENCYPRIMARYCONTACTNAME,
+	    C2.FIRST_NAME || ' '|| C2.LAST_NAME AS AGENCYSECONDARYCONTACTNAME,
+	    C3.FIRST_NAME || ' '|| C3.LAST_NAME AS ACCPRIMARYCONTACTNAME,
+	    C4.FIRST_NAME || ' '|| C4.LAST_NAME AS ACCSECONDARYCONTACTNAME,
+		(decode(p.IS_OPEN_ENDED_RFP, 0, (select SUBMISSION_CLOSE_DATE from
+		evaluation_group where procurement_id = p.procurement_id), null))
+		SUBMISSION_CLOSE_DATE,
+		PSR.PDF_FLAG, p.GENERATE_NEW_TASK, PSR.PSR_DETAILS_ID
+		FROM
+		PROCUREMENT P left OUTER JOIN PSR_DETAILS psr on P.PROCUREMENT_ID = PSR.PROCUREMENT_ID AND P.PCOF_PSR_VERSION_NUMBER = PSR.VERSION_NUMBER,
+		STATUS_MASTER_R2_R3
+		S,PROGRAM_MASTER PM,NYC_AGENCY_DETAILS N,CITY_USER_DETAILS C,
+		CITY_USER_DETAILS C1,CITY_USER_DETAILS C2,CITY_USER_DETAILS
+		C3,CITY_USER_DETAILS C4
+		WHERE
+		P.PROCUREMENT_ID = #{asProcurementId}
+		AND P.STATUS_ID = S.STATUS_ID AND P.PROGRAM_ID = PM.PROGRAM_ID 
+		AND P.AGENCY_ID= N.AGENCY_ID
+		AND	P.MODIFIED_BY_USERID = C.USER_ID
+	    AND P.AGENCY_PRIMARY_CONTACT_ID = C1.USER_ID
+	    AND P.AGENCY_SECONDARY_CONTACT_ID = C2.USER_ID
+	    AND P.ACCELERATOR_PRMRY_CONTACT_ID = C3.USER_ID
+	    AND P.ACCELERATOR_SECNDRY_CONTACT_ID = C4.USER_ID
+	</select>
+	<!-- 	changes for r5 ends -->
+	<select id="getProcurementId" parameterType="String" resultType="String">
+		SELECT SEQ_PROCUREMENT_ID.currval PROCUREMENT_ID FROM DUAL
+	</select>
+
+	<select id="checkExistingProcurement" parameterType="com.nyc.hhs.model.StaffDetails"
+		resultType="int">
+		SELECT PROCUREMENT_ID FROM PROCUREMENT WHERE EPIN =
+		#{procurementEpin} and rownum = 1
+	</select>
+
+	<update id="updateProcurementDetails" parameterType="com.nyc.hhs.model.StaffDetails">
+		UPDATE
+		PROCUREMENT SET
+		PROCUREMENT_TITLE = trim(#{procurementTitle,
+		jdbcType=VARCHAR}),
+		EPIN = #{procurementEpin,
+		jdbcType=VARCHAR},
+		STATUS_ID = #{status, jdbcType=VARCHAR}, AGENCY_ID = #{agencyId,
+		jdbcType=VARCHAR},
+		PROGRAM_ID = #{programName, jdbcType=VARCHAR},
+		ACCELERATOR_PRMRY_CONTACT_ID = #{accPrimaryContact,
+		jdbcType=VARCHAR},
+		ACCELERATOR_SECNDRY_CONTACT_ID = #{accSecondaryContact,
+		jdbcType=VARCHAR},
+		AGENCY_PRIMARY_CONTACT_ID = #{agecncyPrimaryContact,
+		jdbcType=VARCHAR},
+		AGENCY_SECONDARY_CONTACT_ID =
+		#{agecncySecondaryContact,
+		jdbcType=VARCHAR},
+		AGENCY_EMAIL_CONTACT =
+		trim(#{email, jdbcType=VARCHAR}),
+		PROCUREMENT_DESCRIPTION =
+		trim(#{procurementDescription, jdbcType=VARCHAR}),
+		ESTIMATED_NUM_CONTRACTS =
+		#{estNumberOfContracts, jdbcType=VARCHAR},
+		ESTIMATED_PROCUREMENT_VALUE
+		= #{estProcurementValue,
+		jdbcType=VARCHAR},
+		LINK_TO_CONCEPT_REPORT =
+		trim(#{linkToConceptReport,
+		jdbcType=VARCHAR}),
+		Upd_RFP_Release_Date =
+		to_date(#{rfpReleaseDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		UPD_PRE_PROPOSAL_CONF_DATE =
+		to_date(#{preProposalConferenceDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		Upd_Proposal_Due_Date = to_date(#{proposalDueDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		UPD_FRST_DRAFT_RFP_DATE = to_date(#{firstRFPEvalDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		UPD_FINALIZE_RFP_DATE = to_date(#{finalRFPEvalDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		UPD_EVALUATOR_TRAINING_DATE =
+		to_date(#{evaluatorTrainingDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		UPD_FST_RND_EVAL_CMPLT_DATE =
+		to_date(#{firstEvalCompletionDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		UPD_FINALIZE_EVAL_DATE =
+		to_date(#{finalEvalCompletionDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		UPD_AWARD_SELECTION_DATE = to_date(#{awardSelectionDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		Upd_Contract_Start_Date = to_date(#{contractStartDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		UPD_CONTRACT_END_DATE = to_date(#{contractEndDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		LAST_MODIFIED_DATE = sysdate,
+		MODIFIED_BY_USERID =
+		#{modifiedBy, jdbcType=VARCHAR},
+		LAST_MODIFIED_USERID =
+		#{modifiedBy,
+		jdbcType=VARCHAR},
+		MODIFIED_DATE = sysdate,
+		SERVICE_UNITS_REQUIRED =
+		#{serviceUnitRequiredFlag},
+		IS_OPEN_ENDED_RFP = #{isOpenEndedRFP}
+		WHERE
+		PROCUREMENT_ID =
+		#{procurementId}
+	</update>
+
+	<update id="updateDraftProcurementDetails" parameterType="com.nyc.hhs.model.StaffDetails">
+		UPDATE
+		PROCUREMENT SET
+		PROCUREMENT_TITLE = trim(#{procurementTitle,
+		jdbcType=VARCHAR}),
+		EPIN = #{procurementEpin,
+		jdbcType=VARCHAR},
+		<!-- R6 Added REF_APT_EPIN_ID on add procurement -->
+		REF_APT_EPIN_ID = #{refEpinId,
+		jdbcType=VARCHAR},
+		STATUS_ID = #{status, jdbcType=VARCHAR}, AGENCY_ID = #{agencyId,
+		jdbcType=VARCHAR},
+		PROGRAM_ID = #{programName, jdbcType=VARCHAR},
+		ACCELERATOR_PRMRY_CONTACT_ID = #{accPrimaryContact,
+		jdbcType=VARCHAR},
+		ACCELERATOR_SECNDRY_CONTACT_ID = #{accSecondaryContact,
+		jdbcType=VARCHAR},
+		AGENCY_PRIMARY_CONTACT_ID = #{agecncyPrimaryContact,
+		jdbcType=VARCHAR},
+		AGENCY_SECONDARY_CONTACT_ID =
+		#{agecncySecondaryContact,
+		jdbcType=VARCHAR},
+		AGENCY_EMAIL_CONTACT =
+		trim(#{email, jdbcType=VARCHAR}),
+		PROCUREMENT_DESCRIPTION =
+		trim(#{procurementDescription, jdbcType=VARCHAR}),
+		ESTIMATED_NUM_CONTRACTS =
+		#{estNumberOfContracts, jdbcType=VARCHAR},
+		ESTIMATED_PROCUREMENT_VALUE
+		= #{estProcurementValue,
+		jdbcType=VARCHAR},
+		LINK_TO_CONCEPT_REPORT =
+		trim(#{linkToConceptReport,
+		jdbcType=VARCHAR}),
+		PLND_RFP_RELEASE_DATE =
+		to_date(#{rfpReleaseDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		Upd_RFP_Release_Date =
+		to_date(#{rfpReleaseDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+			PLND_PRE_PROPOSAL_CONF_DATE =
+		to_date(#{preProposalConferenceDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+			UPD_PRE_PROPOSAL_CONF_DATE =
+		to_date(#{preProposalConferenceDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+			PLND_PROPOSAL_DUE_DATE = 
+			to_date(#{proposalDueDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY HH:MI:SS'),
+			Upd_Proposal_Due_Date = 
+			to_date(#{proposalDueDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY HH:MI:SS'),
+			PLND_FRST_DRAFT_RFP_DATE =
+			to_date(#{firstRFPEvalDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY HH:MI:SS'),
+			UPD_FRST_DRAFT_RFP_DATE =
+			to_date(#{firstRFPEvalDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY HH:MI:SS'),
+			PLND_FINALIZE_RFP_DATE =
+			to_date(#{finalRFPEvalDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY HH:MI:SS'),
+			UPD_FINALIZE_RFP_DATE =
+			to_date(#{finalRFPEvalDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY HH:MI:SS'),
+			PLND_EVALUATOR_TRANING_DATE =
+		to_date(#{evaluatorTrainingDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+			UPD_EVALUATOR_TRAINING_DATE =
+		to_date(#{evaluatorTrainingDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+			PLND_FST_RND_EVAL_CMPLT_DATE =
+		to_date(#{firstEvalCompletionDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+			UPD_FST_RND_EVAL_CMPLT_DATE =
+		to_date(#{firstEvalCompletionDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+			PLND_FINALIZE_EVAL_DATE =
+		to_date(#{finalEvalCompletionDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+			UPD_FINALIZE_EVAL_DATE =
+		to_date(#{finalEvalCompletionDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+			PLND_AWARD_SELECTION_DATE =
+			to_date(#{awardSelectionDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY HH:MI:SS'),
+			UPD_AWARD_SELECTION_DATE =
+			to_date(#{awardSelectionDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY HH:MI:SS'),
+			PLND_CONTRACT_START_DATE =
+			to_date(#{contractStartDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY HH:MI:SS'),
+			Upd_Contract_Start_Date =
+			to_date(#{contractStartDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY HH:MI:SS'),
+			PLND_CONTRACT_END_DATE =
+			to_date(#{contractEndDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY HH:MI:SS'),
+			UPD_CONTRACT_END_DATE =
+			to_date(#{contractEndDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY HH:MI:SS'),
+		LAST_MODIFIED_DATE = sysdate,
+		MODIFIED_BY_USERID =
+		#{modifiedBy, jdbcType=VARCHAR},
+		LAST_MODIFIED_USERID =
+		#{modifiedBy,
+		jdbcType=VARCHAR},
+		MODIFIED_DATE =
+		sysdate,
+		SERVICE_UNITS_REQUIRED =
+		#{serviceUnitRequiredFlag},
+		IS_OPEN_ENDED_RFP = #{isOpenEndedRFP}
+		WHERE
+		PROCUREMENT_ID =
+		#{procurementId}
+	</update>
+
+	<resultMap id="procurementCOFDetails" type="com.nyc.hhs.model.ProcurementCOF">
+		<result property="procurementCOFId" column="PROCUREMENT_CERT_OF_FUNDS_ID" />
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="procurementValue" column="ESTIMATED_PROCUREMENT_VALUE" />
+		<result property="contractStartDate" column="CONTRACT_START_DATE" />
+		<result property="contractEndDate" column="CONTRACT_END_DATE" />
+		<result property="contractValue" column="CONTRACT_AMOUNT" />
+		<result property="procurementStatus" column="STATUS" />
+		<result property="agencyName" column="AGENCY_NAME" />
+		<result property="agencyId" column="AGENCY_ID" />
+	</resultMap>
+
+	<select id="fetchProcurementCOFDetails" parameterType="String"
+		resultMap="procurementCOFDetails">
+		SELECT
+		PR.PROCUREMENT_TITLE,PR.ESTIMATED_PROCUREMENT_VALUE,TO_CHAR(PR.UPD_CONTRACT_START_DATE,
+		'MM/DD/YYYY') AS CONTRACT_START_DATE,
+		TO_CHAR(PR.UPD_CONTRACT_END_DATE,'MM/DD/YYYY' ) AS CONTRACT_END_DATE
+		,ST.STATUS,Agn.AGENCY_ID,Agn.AGENCY_NAME
+		FROM PROCUREMENT
+		PR,STATUS_MASTER_R2_R3 ST,NYC_AGENCY_DETAILS Agn WHERE
+		PR.PROCUREMENT_ID
+		=#{asProcurementId} AND ST.STATUS_ID = PR.STATUS_ID
+		AND PR.AGENCY_ID=Agn.AGENCY_ID
+	</select>
+
+	<select id="getProcurementStatus" parameterType="String"
+		resultType="String">
+		select status from STATUS_MASTER_R2_R3 st,procurement pr
+		where
+		st.status_id = pr.status_id and pr.procurement_id =
+		#{asProcurementId}
+	</select>
+
+	<select id="getElementIdList" parameterType="String" resultType="String">
+		select element_id from
+		(SELECT ELEMENT_ID, 1 data FROM
+		PRCRMNT_ADDM_SERVICES WHERE
+		PROCUREMENT_ID =
+		#{asProcurementId,jdbcType=VARCHAR}
+		UNION ALL
+		SELECT ELEMENT_ID, 0 data
+		FROM
+		PROCUREMENT_SERVICES WHERE PROCUREMENT_ID =
+		#{asProcurementId,jdbcType=VARCHAR}) dataFromTables
+		where data =
+		decode((select count(1) FROM PRCRMNT_ADDM_SERVICES
+		WHERE
+		PROCUREMENT_ID
+		= #{asProcurementId,jdbcType=VARCHAR}), 0, 0, 1)
+	</select>
+
+	<select id="checkIfUserOfSameAgency" parameterType="Map"
+		resultType="int">
+		SELECT count(*)
+		FROM PROCUREMENT pro, CITY_USER_DETAILS city
+		WHERE pro.PROCUREMENT_ID = #{asProcurementId} AND
+		pro.AGENCY_ID =
+		city.ORGANIZATION_NAME AND
+		city.USER_ID = #{asAgencyUserId} AND
+		lower(city.USER_TYPE) = 'agency_org'
+	</select>
+	
+	<select id="checkIfAwardApproved" parameterType="Map"
+		resultType="int">
+		SELECT count(*)
+		FROM Award
+		WHERE PROCUREMENT_ID =
+		#{asProcurementId} AND
+		AWARD_APPROVAL_DATE is not null
+	</select>
+	
+	<select id="checkIfAwardApprovedForEvalPool" parameterType="Map"
+		resultType="int">
+		SELECT count(*)
+		FROM Award
+		WHERE EVALUATION_POOL_MAPPING_ID =
+		#{evaluationPoolMappingId} AND
+		AWARD_APPROVAL_DATE is not null
+	</select>
+	
+	<select id="getProcurementDetailsForNavE8" parameterType="Map"
+		resultType="int">
+		select count(*)
+		from EVALUATION_POOL_MAPPING epm,
+		proposal_config pc
+		where epm.Procurement_Id = #{asProcurementId} and
+		pc.organization_id = #{ORGANIZATION_ID} and
+		epm.status_id =
+		#{COMPETITION_POOL_SELECTIONS_MADE} and
+		pc.evaluation_group_id =
+		epm.evaluation_group_id and
+		pc.competition_pool_id =
+		epm.competition_pool_id and
+		pc.PROPOSAL_STATUS_ID =
+		#{asStatusProposalSelectedId}
+	</select>
+	
+	<select id="getProcurementDetailsForNavE7" parameterType="Map"
+		resultType="int">
+		select count(*)
+		from procurement_provider pro
+		where
+		pro.Procurement_Id = #{asProcurementId} and
+		(pro.eligibility_flag = 1
+		or pro.restrict_submit = 1)and
+		pro.organization_id = #{ORGANIZATION_ID}
+	</select>
+
+	<select id="getProcurementDetailsForNavE6" parameterType="Map"
+		resultType="int">
+		SELECT count(*)
+		FROM STAFF_ORGANIZATION staff,
+		proposal_config pc, award, contract
+		WHERE
+		pc.PROCUREMENT_ID =
+		#{asProcurementId} AND
+		((pc.PROCUREMENT_ID = award.PROCUREMENT_ID and
+		award.AWARD_REVIEW_STATUS_ID != #{AWARD_STATUS_CANCELLED})
+			OR
+		(pc.PROCUREMENT_ID = contract.PROCUREMENT_ID and
+		contract.ORGANIZATION_ID = #{ORGANIZATION_ID} and contract.STATUS_ID =
+		#{CONTRACT_CANCELLED}))AND
+		pc.ORGANIZATION_ID = staff.ORGANIZATION_ID
+		AND
+		staff.STAFF_ID = #{asProviderUserId} AND
+		pc.PROPOSAL_STATUS_ID =
+		#{asStatusProposalSelectedId} 
+	</select>
+	
+	<select id="getProcurementDetailsForNavE5" parameterType="Map"
+		resultType="int">
+		select count(*)
+		from procurement proc, proposal_config pc
+		where
+		proc.procurement_id = #{asProcurementId} and 
+		proc.procurement_id = pc.procurement_id and
+		((proc.status_id = #{PROCUREMENT_RELEASED} AND
+		pc.proposal_status_id = #{PROPOSAL_DRAFT})
+			OR pc.proposal_status_id = #{PROPOSAL_RETURNED_FOR_REVISION} ) and
+		pc.proposal_id = #{asProposalId}
+	</select>
+
+	<!-- changed in build 2.6.0, defect id 5667 -->
+	<insert id="insertRfpDocumentDetails">
+		INSERT INTO RFP_DOCUMENT
+		(RFP_DOCUMENT_ID,DOCUMENT_IDENTIFIER_ID,PROCUREMENT_ID,DOCUMENT_CATEGORY,DOCUMENT_TYPE,STATUS_ID,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,MODIFIED_BY_USERID,RFP_DOC_FLAG,
+		DOC_DELETE_FLAG)
+		VALUES(SEQ_RFP_DOC_ID.NEXTVAL,#{documentId},#{procurementId},#{DOC_CATEGORY},#{DOC_TYPE},#{statusId},SYSDATE,#{userId},SYSDATE,#{userId},'1','0')
+	</insert>
+
+	<insert id="insertAdendumDocumentDetails">
+		INSERT INTO PRCRMNT_ADDM_RFP_DOCUMENT
+		(ADDM_RFP_DOCUMENT_ID,DOCUMENT_IDENTIFIER_ID,PROCUREMENT_ID,DOCUMENT_CATEGORY,DOCUMENT_TYPE,STATUS_ID,
+		CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,MODIFIED_BY_USERID)
+		VALUES(SEQ_ACCELERATOR_AUDIT_ID.NEXTVAL,#{documentId,
+		jdbcType=VARCHAR},#{procurementId, jdbcType=VARCHAR},
+		#{DOC_CATEGORY,
+		jdbcType=VARCHAR},#{DOC_TYPE, jdbcType=VARCHAR},
+		#{statusId,
+		jdbcType=VARCHAR},SYSDATE,
+		#{userId,
+		jdbcType=VARCHAR},SYSDATE,#{userId, jdbcType=VARCHAR})
+	</insert>
+	
+	<resultMap id="selectedServicesList" type="com.nyc.hhs.model.SelectedServicesBean">
+		<!-- <result property="procurementServiceId" column="Procurement_Service_Id" 
+			/> -->
+		<!-- <result property="procurementServiceId" column="PROCUREMENT_ADD_SERVICE_ID" 
+			/> -->
+		<result property="elementId" column="ELEMENT_ID" />
+	</resultMap>
+
+	<select id="fetchServiceElementId" parameterType="String"
+		resultMap="selectedServicesList">
+		SELECT ELEMENT_ID FROM PROCUREMENT_SERVICES WHERE
+		PROCUREMENT_ID =
+		#{asProcurementId,jdbcType=VARCHAR}
+	</select>
+
+	<select id="fetchElementId" parameterType="String" resultMap="selectedServicesList">
+		Select element_id from
+		(SELECT ELEMENT_ID, 1 data FROM
+		PRCRMNT_ADDM_SERVICES WHERE PROCUREMENT_ID =
+		#{asProcurementId,jdbcType=VARCHAR}
+		UNION
+		SELECT ELEMENT_ID, 0 data FROM
+		PROCUREMENT_SERVICES WHERE PROCUREMENT_ID =
+		#{asProcurementId,jdbcType=VARCHAR}) dataFromTables
+		where data =
+		decode((select count(1) FROM PRCRMNT_ADDM_SERVICES WHERE
+		PROCUREMENT_ID = #{asProcurementId,jdbcType=VARCHAR}), 0, 0, 1)
+	</select>
+
+	<resultMap id="approvedProvidersList" type="com.nyc.hhs.model.ApprovedProvidersBean">
+		<result property="organizationId" column="ORGANIZATION_ID" />
+		<result property="organizationLegalName" column="ORGANIZATION_LEGAL_NAME" />
+		<result property="baExpDate" column="EXPIRATION_DATE" />
+		<result property="filingExpDate" column="DUE_DATE" />
+	</resultMap>
+
+	<select id="fetchApprovedProvidersList" parameterType="map"
+		resultMap="approvedProvidersList">
+		Select
+		distinct orgDetails.ORGANIZATION_ID,
+		orgDetails.ORGANIZATION_LEGAL_NAME,
+		doc.DUE_DATE, br.EXPIRATION_DATE,
+		br.BUSINESS_APPLICATION_ID
+		From
+		(
+			SELECT distinct org.ORGANIZATION_ID, org.ORGANIZATION_LEGAL_NAME
+			FROM
+			SERVICE_APPLICATION saa, 
+			(select * from SUPERSEDING_STATUS where (entity_id,TIMESTAMP) in 
+		(select entity_id, max(TIMESTAMP) from SUPERSEDING_STATUS where
+		ENTITY_TYPE='Service Application' group by entity_id)
+		   	) ss,
+			(select * from SUPERSEDING_STATUS where (entity_id,TIMESTAMP) in 
+		(select entity_id, max(TIMESTAMP) from SUPERSEDING_STATUS where
+		ENTITY_TYPE='Business Application' group by entity_id)
+		    ) ssba, 
+		    ORGANIZATION org,
+		(select ORGANIZATION_ID, business_application_id, APPLICATION_STATUS from
+		(select ORGANIZATION_ID, business_application_id,
+		RANK() OVER (PARTITION BY ORGANIZATION_ID ORDER BY CREATED_DATE desc) rank,
+		APPLICATION_STATUS
+				from BUSINESS_APPLICATION
+				where EXPIRATION_DATE IS NOT NULL)
+				where rank = 1) br
+			where
+			saa.ELEMENT_ID IN
+			<foreach item="items" index="index" collection="elementIdList"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+			and org.organization_status in ('Approved', 'Conditionally Approved')
+			and saa.SERVICE_APPLICATION_ID = ss.ENTITY_ID(+)
+			and br.BUSINESS_APPLICATION_ID = ssba.ENTITY_ID(+)
+		and (ss.STATUS = 'Conditionally Approved' OR (ss.STATUS is null and
+		saa.SERVICE_STATUS IN ('Approved')))
+		and (ssba.STATUS = 'Conditionally Approved' OR (ssba.STATUS is null and
+		br.APPLICATION_STATUS IN ('Approved')))
+			and br.BUSINESS_APPLICATION_ID = saa.BUSINESS_APPLICATION_ID
+			and org.ORGANIZATION_ID = br.ORGANIZATION_ID
+			and org.ORGANIZATION_ID = saa.ORGANIZATION_ID
+			<if test="type == 'and'">
+				group by org.ORGANIZATION_ID, org.ORGANIZATION_LEGAL_NAME
+				having count(0) = ${size}
+			</if>
+		) orgDetails, DOC_LAPSING_RULES_MASTER doc,
+		(select ORGANIZATION_ID,
+		business_application_id, EXPIRATION_DATE from (select ORGANIZATION_ID,
+		business_application_id,EXPIRATION_DATE,
+				RANK() OVER (PARTITION BY ORGANIZATION_ID ORDER BY CREATED_DATE desc) rank
+				from BUSINESS_APPLICATION
+				where EXPIRATION_DATE IS NOT NULL)
+				where rank = 1) br
+		Where
+		(doc.ORGANIZATION_ID is null OR doc.UPLOAD_ORDER =
+		'1')
+		and doc.ORGANIZATION_ID(+) = orgDetails.ORGANIZATION_ID
+		and
+		br.ORGANIZATION_ID = orgDetails.ORGANIZATION_ID
+		ORDER BY
+		<choose>
+			<when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+			<otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+		</choose>
+		<if test="secondSort != null">
+			, lower(${secondSort}) ${secondSortType}
+		</if>
+	</select>
+	
+	<select id="fetchApprovedProvidersListReleased" parameterType="map"
+		resultMap="approvedProvidersList">
+		Select
+		distinct orgDetails.ORGANIZATION_ID,
+		orgDetails.ORGANIZATION_LEGAL_NAME,
+		doc.DUE_DATE, br.EXPIRATION_DATE,
+		br.BUSINESS_APPLICATION_ID
+		From
+		(
+			Select
+			distinct org.ORGANIZATION_ID, org.ORGANIZATION_LEGAL_NAME
+			From
+		ORGANIZATION org, PROCUREMENT_PROVIDER pro, SERVICE_APPLICATION saa,
+		BUSINESS_APPLICATION br, procurement_provider_service pps
+			where
+			pro.procurement_id = #{procurementId} and
+			pro.eligibility_flag = 1 and
+			( pro.restrict_submit is null or pro.restrict_submit = 0) and
+			pro.ORGANIZATION_ID = org.ORGANIZATION_ID and
+			br.ORGANIZATION_ID = org.ORGANIZATION_ID
+			<if test="type == 'or'">
+				and saa.ORGANIZATION_ID = org.ORGANIZATION_ID
+				and saa.service_application_id = pps.service_application_id
+				and pro.procurement_provider_id = pps.procurement_provider_id
+				and pps.element_id IN
+				<foreach item="items" index="index" collection="elementIdList"
+					open="(" separator="," close=")">
+					#{items}
+				</foreach>
+		</if>
+		) orgDetails, DOC_LAPSING_RULES_MASTER doc,
+		(select ORGANIZATION_ID,
+		business_application_id, EXPIRATION_DATE from (select ORGANIZATION_ID,
+		business_application_id,EXPIRATION_DATE,
+		RANK() OVER (PARTITION BY
+		ORGANIZATION_ID ORDER BY CREATED_DATE desc) rank
+		from
+		BUSINESS_APPLICATION
+		where EXPIRATION_DATE IS NOT NULL)
+		where rank = 1)
+		br
+		Where
+		(doc.ORGANIZATION_ID is null OR doc.UPLOAD_ORDER = '1')
+		and
+		doc.ORGANIZATION_ID(+) = orgDetails.ORGANIZATION_ID
+		and
+		br.ORGANIZATION_ID = orgDetails.ORGANIZATION_ID
+		ORDER BY
+		<choose>
+			<when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+			<otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+		</choose>
+		<if test="secondSort != null">
+			, lower(${secondSort}) ${secondSortType}
+		</if>
+	</select>
+
+	<select id="fetchApprovedProvidersListProvider" parameterType="map"
+		resultMap="approvedProvidersList">
+		Select
+		distinct org.ORGANIZATION_ID, org.ORGANIZATION_LEGAL_NAME
+		From
+		ORGANIZATION org, PROCUREMENT_PROVIDER pro, SERVICE_APPLICATION saa,
+		(select * from SUPERSEDING_STATUS where (entity_id,TIMESTAMP) in 
+		(select entity_id, max(TIMESTAMP) from SUPERSEDING_STATUS where
+		ENTITY_TYPE='Service Application' group by entity_id)) ss,
+		(select *
+		from SUPERSEDING_STATUS where (entity_id,TIMESTAMP) in
+		(select entity_id, max(TIMESTAMP) from SUPERSEDING_STATUS where
+		ENTITY_TYPE='Business Application' group by entity_id)) ssba,
+	    DOC_LAPSING_RULES_MASTER doc,
+		BUSINESS_APPLICATION br
+		where
+		pro.procurement_id = #{procurementId}
+		and pro.eligibility_flag = 1
+		and (
+		pro.restrict_submit is null or pro.restrict_submit = 0)
+		and pro.ORGANIZATION_ID = org.ORGANIZATION_ID
+		<if test="type == 'or'">
+			and saa.ORGANIZATION_ID = org.ORGANIZATION_ID
+			and saa.ELEMENT_ID IN
+			<foreach item="items" index="index" collection="elementIdList"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+			and saa.SERVICE_APPLICATION_ID = ss.ENTITY_ID(+)
+			and (ss.STATUS =
+			'Conditionally Approved' OR (ss.STATUS is null and saa.SERVICE_STATUS
+			IN ('Approved')))
+			and ((ssba.STATUS = 'Conditionally Approved') OR
+			(ssba.STATUS is null and br.APPLICATION_STATUS IN ('Approved')))
+	        and saa.BUSINESS_APPLICATION_ID = ssba.ENTITY_ID(+)
+		</if>
+		and (doc.ORGANIZATION_ID is null OR doc.UPLOAD_ORDER = '1')
+		and
+		doc.ORGANIZATION_ID(+) = saa.ORGANIZATION_ID
+		and br.ORGANIZATION_ID =
+		saa.ORGANIZATION_ID
+		and ((org.organization_status not in ('Withdrawn',
+		'Suspended', 'Rejected') and pro.status_id in (1,2,3)) or
+		pro.status_id not in (1,2,3))
+		ORDER BY
+		<choose>
+			<when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+			<otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+		</choose>
+		<if test="secondSort != null">
+			, lower(${secondSort}) ${secondSortType}
+		</if>
+	</select>
+	
+	<select id="fetchApprovedProvidersListAfterRelease"
+		parameterType="map" resultMap="approvedProvidersList">
+		Select distinct org.ORGANIZATION_ID, org.ORGANIZATION_LEGAL_NAME,
+		doc.DUE_DATE, br.EXPIRATION_DATE,
+		br.BUSINESS_APPLICATION_ID
+		From
+		ORGANIZATION org, PROCUREMENT_PROVIDER pro, DOC_LAPSING_RULES_MASTER
+		doc, (select ORGANIZATION_ID, business_application_id, EXPIRATION_DATE
+		from (select ORGANIZATION_ID, business_application_id,EXPIRATION_DATE,
+		RANK() OVER (PARTITION BY ORGANIZATION_ID ORDER BY CREATED_DATE desc)
+		rank
+		from BUSINESS_APPLICATION
+		where EXPIRATION_DATE IS NOT NULL)
+		where
+		rank = 1) br
+		where
+		pro.procurement_id = #{procurementId}
+		and
+		pro.eligibility_flag = 1
+		and ( pro.restrict_submit is null or pro.restrict_submit = 0)
+		and
+		pro.ORGANIZATION_ID = org.ORGANIZATION_ID
+		and (doc.ORGANIZATION_ID is
+		null OR doc.UPLOAD_ORDER = '1')
+		and doc.ORGANIZATION_ID(+) =
+		pro.ORGANIZATION_ID
+		and br.ORGANIZATION_ID = pro.ORGANIZATION_ID
+		ORDER
+		BY
+		<choose>
+			<when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+			<otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+		</choose>
+		<if test="secondSort != null">
+			, lower(${secondSort}) ${secondSortType}
+		</if>
+	</select>
+	<!-- <resultMap id="appProvListBySelectedServ" type="com.nyc.hhs.model.SelectedServicesBean"> -->
+	<!-- <result property="organizationId" column="ORGANIZATION_ID" /> -->
+	<!-- <result property="organizationLegalName" column="ORGANIZATION_LEGAL_NAME" 
+		/> -->
+	<!-- <result property="baExpDate" column="expdate" /> -->
+	<!-- <result property="filingExpDate" column="DUE_DATE" /> -->
+	<!-- </resultMap> -->
+	<!-- <select id="fetchListBySelectedServ" parameterType="com.nyc.hhs.model.SelectedServicesBean" -->
+	<!-- resultMap="appProvListBySelectedServ"> -->
+	<!-- SELECT org.ORGANIZATION_ID,org.ORGANIZATION_LEGAL_NAME, -->
+	<!-- tax.ELEMENT_NAME, brnew.expdate, doc.DUE_DATE -->
+	<!-- FROM -->
+	<!-- DOC_LAPSING_RULES_MASTER doc, ORGANIZATION org, TAXONOMY_MASTER tax, -->
+	<!-- (SELECT br.ORGANIZATION_ID orgid, br.EXPIRATION_DATE expdate -->
+	<!-- FROM -->
+	<!-- BUSINESS_APPLICATION br -->
+	<!-- WHERE br.BUSINESS_APPLICATION_ID in -->
+	<!-- (SELECT -->
+	<!-- sa.BUSINESS_APPLICATION_ID FROM SERVICE_APPLICATION sa WHERE -->
+	<!-- sa.ELEMENT_ID IN -->
+	<!-- (SELECT ELEMENT_ID from TAXONOMY_MASTER where -->
+	<!-- ELEMENT_NAME=#{procurementServiceName}) -->
+	<!-- and -->
+	<!-- sa.SERVICE_STATUS='Approved' -->
+	<!-- UNION ALL -->
+	<!-- SELECT -->
+	<!-- sa1.BUSINESS_APPLICATION_ID FROM SERVICE_APPLICATION sa1 WHERE -->
+	<!-- sa1.ELEMENT_ID IN -->
+	<!-- (SELECT ELEMENT_ID from TAXONOMY_MASTER where -->
+	<!-- ELEMENT_NAME=#{procurementServiceName}) -->
+	<!-- and sa1.SERVICE_APPLICATION_ID -->
+	<!-- in( -->
+	<!-- SELECT ENTITY_ID FROM SUPERSEDING_STATUS WHERE STATUS = -->
+	<!-- 'Conditionally Approved'))) brnew -->
+	<!-- WHERE org.ORGANIZATION_ID in -->
+	<!-- brnew.orgid and tax.ELEMENT_NAME=#{procurementServiceName} and -->
+	<!-- doc.UPLOAD_ORDER = '1' and doc.ORGANIZATION_ID=org.ORGANIZATION_ID -->
+	<!-- ORDER BY -->
+	<!-- lower(${firstSort}) ${firstSortType} -->
+	<!-- <if test="secondSort != null"> -->
+	<!-- , lower(${secondSort}) ${secondSortType} -->
+	<!-- </if> -->
+	<!-- </select> -->
+
+	<!-- <resultMap id="appProvList" type="com.nyc.hhs.model.SelectedServicesBean"> -->
+	<!-- <result property="organizationId" column="ORGANIZATION_ID" /> -->
+	<!-- <result property="organizationLegalName" column="ORGANIZATION_LEGAL_NAME" 
+		/> -->
+	<!-- <result property="baExpDate" column="expdate" /> -->
+	<!-- <result property="filingExpDate" column="DUE_DATE" /> -->
+	<!-- </resultMap> -->
+	<!-- <select id="fetchAppProvidersList" parameterType="com.nyc.hhs.model.SelectedServicesBean" -->
+	<!-- resultMap="appProvList"> -->
+	<!-- </select> -->
+
+	<select id="getFormDetails" parameterType="hashmap" resultType="hashmap">
+		SELECT * FROM ${TABLE} WHERE ${asWhere}
+	</select>
+
+	<select id="getFormDetailsOfOrg" parameterType="hashmap"
+		resultType="map">
+		SELECT FORM_ID, FORM_NAME, FORM_VERSION FROM
+		SUB_SECTION_SUMMARY
+		WHERE ORGANIZATION_ID = #{asOrgId} AND
+		BUSINESS_APPLICATION_ID =
+		#{asBuisAppId}
+		AND SECTION_ID = #{section} AND
+		SUB_SECTION_ID = #{subSection}
+		AND rownum
+		= 1
+	</select>
+
+	<select id="getCorpStructureValue" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT CORPORATE_STRUCTURE_ID FROM ORGANIZATION WHERE
+		ORGANIZATION_ID =
+		#{asOrgId} AND rownum = 1
+	</select>
+
+	<resultMap id="widgetList" type="com.nyc.hhs.model.SelectedServicesBean">
+		<result property="lastModifiedDate" column="LAST_MODIFIED_DATE" />
+		<result property="lastModifiedByUser" column="LAST_MODIFIED_USERID" />
+		<result property="lastPublishedDate" column="LAST_PUBLISHED_DATE" />
+		<result property="lastPublishedByUser" column="LAST_PUBLISHED_USERID" />
+	</resultMap>
+
+	<select id="fetchWidgetDetails" parameterType="com.nyc.hhs.model.SelectedServicesBean"
+		resultMap="widgetList">
+		SELECT LAST_MODIFIED_DATE, LAST_MODIFIED_USERID,
+		LAST_PUBLISHED_DATE, LAST_PUBLISHED_USERID
+		FROM
+		PROCUREMENT
+		WHERE
+		PROCUREMENT_ID =
+		#{procurementId,jdbcType=VARCHAR}
+	</select>
+
+	<!-- changed in build 2.6.0, defect id 5667 -->
+	<update id="deleteRfpDocumentDetails" parameterType="map">
+		UPDATE 
+		RFP_DOCUMENT SET DOC_DELETE_FLAG = '1' WHERE
+		PROCUREMENT_ID=#{procurementId} AND
+		DOCUMENT_IDENTIFIER_ID=#{replacingDocumentId} AND RFP_DOC_FLAG='1' AND
+		RFP_DOCUMENT_ID=#{docReferenceNum}
+	</update>
+
+	<delete id="deleteRfpAddendumDocumentDetails" parameterType="map">
+		DELETE FROM
+		PRCRMNT_ADDM_RFP_DOCUMENT WHERE
+		PROCUREMENT_ID=#{procurementId}
+		AND
+		DOCUMENT_IDENTIFIER_ID=#{asDeletedDocumentId} AND
+		ADDM_RFP_DOCUMENT_ID=#{docReferenceNum}
+	</delete>
+
+    <!--Modified as a part of release 3.10.0 for enhancement request 6577-->
+    <!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<resultMap id="proposalQuestionAnswer" type="com.nyc.hhs.model.ProposalQuestionAnswerBean">
+		<result property="questionFlag" column="CUSTOM_QUESTION_FLAG" />
+		<result property="questionText" column="CUSTOM_QUESTION_TEXT" />
+		<result property="questionSeqNo" column="QUESTION_SEQUENCE_NUMBER" />
+		<result property="answerText" column="CUSTOM_ANSWER" />
+		<result property="procurementQnId" column="PROCUREMENT_QN_ID" />
+		<result property="versionNo" column="used_version" />
+	</resultMap>
+	<select id="fetchProcurementCustomQuestionAnswer" parameterType="map"
+		resultMap="proposalQuestionAnswer">
+		select pqm.PROCUREMENT_QN_ID,
+		pqc.CUSTOM_QUESTION_TEXT, pqm.QUESTION_SEQUENCE_NUMBER,
+		pqr.CUSTOM_ANSWER,
+		decode(status.proposal_status_id, 17, status.max_version, 19, status.version_number_pqc, status.version_number_qc) used_version
+		from (select * from PROCUREMENT_QUESTION_CONFIG where procurement_id = #{asProcurementId}) PQC, 
+			(select * from PRCRMNT_QUESTION_MAPPING where procurement_id = #{asProcurementId}) PQM, 
+		  (select * from PROPOSAL_QUESTION_RESPONSE where proposal_id = #{asProposalId}) PQR, 
+		  (select eg.status_id EG_STATUS_ID, pc.proposal_status_id, pc.proposal_id, eg.version_number_pqc, pc.version_number_qc, 
+		  	(select max(version_number) from PRCRMNT_QUESTION_MAPPING where procurement_id = #{asProcurementId}) max_version
+		    from Evaluation_group EG, proposal_config pc
+		    where pc.proposal_id = #{asProposalId}
+		    and pc.evaluation_group_id = eg.evaluation_group_id(+)) status
+		where
+		  status.proposal_id = #{asProposalId}
+		  and pqm.PROCUREMENT_QN_ID = pqc.PROCUREMENT_QN_ID
+		  and pqm.PROCUREMENT_QN_ID = pqr.PROCUREMENT_QN_ID(+)
+		  and ((status.proposal_status_id = 17 and pqm.version_number = status.max_version)
+		  	  or (status.proposal_status_id = 18 and status.EG_STATUS_ID = 131 and pqm.version_number = status.max_version)
+		  	  or (status.proposal_status_id = 18 and status.EG_STATUS_ID != 131 and pqm.version_number = status.version_number_pqc) 
+		  	  or (status.proposal_status_id = 166 and status.version_number_pqc is null and pqm.version_number = status.max_version) or 
+          	  (status.proposal_status_id = 166 and status.version_number_pqc is not null
+          	  and pqm.version_number = status.version_number_pqc) 
+          	  or (status.proposal_status_id not in (17,18) and pqm.version_number = status.version_number_pqc)
+		      )
+		 order by pqm.QUESTION_SEQUENCE_NUMBER
+	</select>
+
+	<resultMap id="providerComments" type="com.nyc.hhs.model.CommentsHistoryBean">
+		<result property="dateTime" column="MODIFIED_DATE" />
+		<result property="user" column="MODIFIED_BY_USERID" />
+		<result property="detail" column="DATA" />
+	</resultMap>
+	<select id="fetchProviderComments" parameterType="map"
+		resultMap="providerComments">
+		Select MODIFIED_DATE, MODIFIED_BY_USERID, DATA
+		from
+		GENERAL_AUDIT_RELEASE_2
+		where
+		ORGANIZATION_ID = #{asOrganizaionId} and
+		PROCUREMENT_ID = #{asProcurementId} and
+		PROPOSAL_ID = #{asProposalId}
+		and
+		lower(PROVIDER_VISIBILITY_FLAG) = 'true'
+	</select>
+
+	<resultMap id="procurementCONDetails" type="com.nyc.hhs.model.ProcurementCOF">
+		<result property="procurementValue" column="ESTIMATED_PROCUREMENT_VALUE" />
+		<result property="contractStartDate" column="CONTRACT_START_DATE" />
+		<result property="contractEndDate" column="CONTRACT_END_DATE" />
+		<result property="contractValue" column="CONTRACT_AMOUNT" />
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<result property="amendmentValue" column="AMENDMENT_AMOUNT" />
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="agencyName" column="AGENCY_NAME" />
+		<result property="agencyCode" column="AGENCY_CODE" />
+		<result property="providerName" column="ORGANIZATION_LEGAL_NAME" />
+		<result property="updatedContractId" column="contract_id" />
+		<result property="amendmentType" column="amendmentType" />
+		<result property="positiveAmendmentValue" column="POSITIVE_AMENDMENT_AMOUNT" />
+		<result property="negativeAmendmentValue" column="NEGATIVE_AMENDMENT_AMOUNT" />
+		<result property="amendmentCount" column="AMENDMENT_COUNT" />
+		<result property="amendmentEpin" column="AMENDMENT_EPIN" />
+		<result property="amendmentStartDate" column="AMENDMENT_START_DATE" />
+		<result property="amendmentEndDate" column="AMENDMENT_END_DATE" />
+		<result property="amendmentTitle" column="AMENDMENT_TITLE" />
+	</resultMap>
+
+	<select id="fetchProcurementCONDetails" parameterType="String"
+		resultMap="procurementCONDetails">
+		SELECT P.ESTIMATED_PROCUREMENT_VALUE,
+		C.CONTRACT_AMOUNT,C.PROCUREMENT_ID,
+		TO_CHAR(C.CONTRACT_START_DATE,'MM/DD/YYYY')AS CONTRACT_START_DATE,
+		TO_CHAR(C.CONTRACT_END_DATE,'MM/DD/YYYY')AS CONTRACT_END_DATE,
+		P.PROCUREMENT_TITLE FROM
+		CONTRACT C,PROCUREMENT
+		P
+		WHERE C.CONTRACT_ID =
+		#{asContractId} AND
+		C.PROCUREMENT_ID =
+		P.PROCUREMENT_ID
+	</select>
+	
+	<select id="fetchUpdateConfigurationDetails" parameterType="hashmap"
+		resultMap="procurementCONDetails">
+		SELECT 
+			C.CONTRACT_AMOUNT AS AMENDMENT_AMOUNT,
+			c.contract_id,
+	    		(select 
+	    			TO_CHAR(CONTRACT_START_DATE,'MM/DD/YYYY')
+	    		 from 
+	    		 	contract 
+	    		 where 
+	    		 	contract_id  = #{contractID} 
+	    	)AS CONTRACT_START_DATE,
+		decode(TO_CHAR(c.proposed_CONTRACT_END_DATE,'MM/DD/YYYY'),NULL,TO_CHAR(c.CONTRACT_END_DATE,'MM/DD/YYYY'),TO_CHAR(c.proposed_CONTRACT_END_DATE,'MM/DD/YYYY'))
+		CONTRACT_END_DATE,
+			CASE
+				WHEN C.CONTRACT_AMOUNT >0 THEN 'positive'
+				ELSE 'negative'
+			END as amendmentType, 
+			N.AGENCY_CODE, 
+			N.AGENCY_NAME, 
+			O.ORGANIZATION_LEGAL_NAME 
+		FROM
+			CONTRACT C, 
+			NYC_AGENCY_DETAILS N, 
+			ORGANIZATION O
+		WHERE 
+			C.CONTRACT_ID = (select 
+								contract_id 
+							 from 
+							 	contract 
+							 where 
+							 	parent_contract_id=#{contractID} 
+							 and 
+							 	contract_id!=#{contractID} 
+							 and 
+							 	contract_type_id=#{contractTypeId}
+							 and 
+							 	delete_flag=0
+						<if test="contractTypeId != null and contractTypeId==2">
+							 and 
+								status_id  in (61, 67)
+						</if>
+							 	)
+		and C.AGENCY_ID = N.AGENCY_ID 
+		and C.ORGANIZATION_ID = O.ORGANIZATION_ID
+			</select>	
+	
+<select id="fetchAmendmentConfigurationDetails" parameterType="hashmap"
+		resultMap="procurementCONDetails">
+		SELECT 
+		(select count(1) from contract where parent_contract_id=#{contractID} and
+		contract_type_id=2
+			and delete_flag=0  and 	status_id !=62) as AMENDMENT_COUNT ,
+		( select sum(CONTRACT_AMOUNT) from contract where
+		parent_contract_id=#{contractID} and contract_type_id=2
+		and delete_flag=0 and status_id !=62 and CONTRACT_AMOUNT &gt;0)as
+		POSITIVE_AMENDMENT_AMOUNT,
+		(select sum(CONTRACT_AMOUNT) from contract where
+		parent_contract_id=#{contractID} and contract_id !=#{AmendContractId}
+		and contract_type_id=2 and delete_flag=0 and status_id != 62 and
+		CONTRACT_AMOUNT &lt; 0)as NEGATIVE_AMENDMENT_AMOUNT,
+			C.CONTRACT_AMOUNT AS AMENDMENT_AMOUNT,
+			C.CONTRACT_TITLE AS AMENDMENT_TITLE,
+      		C.EXT_EPIN AS AMENDMENT_EPIN,
+      		TO_CHAR(C.CONTRACT_START_DATE,'MM/DD/YYYY') AS AMENDMENT_START_DATE,
+        	TO_CHAR(C.CONTRACT_END_DATE,'MM/DD/YYYY') AS AMENDMENT_END_DATE,
+			c.contract_id,
+	    		(select 
+	    			TO_CHAR(CONTRACT_START_DATE,'MM/DD/YYYY')
+	    		 from 
+	    		 	contract 
+	    		 where 
+	    		 	contract_id  = #{contractID} 
+	    	)AS CONTRACT_START_DATE,
+	    		    		(select 
+	    			CONTRACT_TITLE
+	    		 from 
+	    		 	contract 
+	    		 where 
+	    		 	contract_id  = #{contractID} 
+	    	)AS PROCUREMENT_TITLE,
+		decode(TO_CHAR(c.proposed_CONTRACT_END_DATE,'MM/DD/YYYY'),NULL,TO_CHAR(c.CONTRACT_END_DATE,'MM/DD/YYYY'),TO_CHAR(c.proposed_CONTRACT_END_DATE,'MM/DD/YYYY'))
+		CONTRACT_END_DATE,
+			CASE
+				WHEN C.CONTRACT_AMOUNT >0 THEN 'positive'
+				ELSE 'negative'
+			END as amendmentType, 
+			N.AGENCY_CODE, 
+			N.AGENCY_NAME, 
+			O.ORGANIZATION_LEGAL_NAME 
+		FROM
+			CONTRACT C, 
+			NYC_AGENCY_DETAILS N, 
+			ORGANIZATION O
+		WHERE 
+			C.CONTRACT_ID = #{AmendContractId}
+		and C.AGENCY_ID = N.AGENCY_ID 
+		and C.ORGANIZATION_ID = O.ORGANIZATION_ID
+	</select>
+	<select id="fetchProcurementCONDetailsForR3Contract"
+		parameterType="String" resultMap="procurementCONDetails">
+		SELECT C.CONTRACT_AMOUNT,
+		TO_CHAR(C.CONTRACT_START_DATE,'MM/DD/YYYY')AS CONTRACT_START_DATE,
+		TO_CHAR(C.CONTRACT_END_DATE,'MM/DD/YYYY')AS CONTRACT_END_DATE FROM
+		CONTRACT C
+		WHERE C.CONTRACT_ID = #{asContractId}
+	</select>
+	<!-- Modified for Release 6 new Epin validation -->
+	<select id="fetchProcurementDetailsForR3Contract" parameterType="String"
+		resultType="String">
+		select
+		AWARD_AMOUNT AS ESTIMATED_PROCUREMENT_VALUE
+		FROM
+		REF_APT_EPIN_MASTER
+		where
+		REF_APT_EPIN_ID =(select PROCUREMENT_EPIN_ID from REF_APT_EPIN_MASTER
+		where
+		REF_APT_EPIN_ID = (select REF_APT_EPIN_ID from CONTRACT where
+		CONTRACT_ID=#{asContractId}))
+	</select>
+	<!-- Release 6 new Epin validation changes end -->
+	<insert id="addProcurementCoFInfo" parameterType="Map">
+		INSERT
+		INTO
+		PROCUREMENT_CERT_OF_FUNDS(PROCUREMENT_CERT_OF_FUNDS_ID,PROCUREMENT_ID,
+		CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,MODIFIED_BY_USERID)
+		VALUES(
+		SEQ_PROCUREMENT_CoF_ID.NEXTVAL,#{procurementId},
+		sysdate,
+		#{userId,jdbcType=VARCHAR},sysdate,#{userId,jdbcType=VARCHAR})
+	</insert>
+
+	<insert id="saveSelectedServicesList" parameterType="java.util.Map">
+		INSERT INTO
+		PROCUREMENT_SERVICES(PROCUREMENT_SERVICE_ID,
+		PROCUREMENT_ID,ELEMENT_ID,LAST_UPDATE_DATE,ACTIVE_FLAG,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,MODIFIED_BY_USERID)
+		(select
+		SEQ_PROCUREMENT_SERVICES_ID.NEXTVAL,#{procurementId,jdbcType=VARCHAR},
+		#{elementId,jdbcType=VARCHAR},
+		SYSDATE,#{activeFlag,jdbcType=VARCHAR},SYSDATE,
+		#{createdByUserId,jdbcType=VARCHAR},SYSDATE,
+		#{modifiedByUserId,jdbcType=VARCHAR} from dual
+		where not exists (select
+		1 from PROCUREMENT_SERVICES where
+		ELEMENT_ID =
+		#{elementId,jdbcType=VARCHAR} and
+		PROCUREMENT_ID=#{procurementId,jdbcType=VARCHAR})) 
+	</insert>
+
+	<insert id="saveAddendumServicesList" parameterType="com.nyc.hhs.model.SelectedServicesBean">
+		INSERT INTO
+		PRCRMNT_ADDM_SERVICES(PRCRMNT_ADDM_SERVICE_ID,
+		PROCUREMENT_ID,ELEMENT_ID,LAST_UPDATE_DATE,ACTIVE_FLAG,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,MODIFIED_BY_USERID)
+		VALUES(SEQ_PROCUREMENT_SERVICES_ID.NEXTVAL,#{procurementId,jdbcType=VARCHAR},
+		#{elementId,jdbcType=VARCHAR},
+		SYSDATE,#{activeFlag,jdbcType=VARCHAR},SYSDATE,
+		#{createdByUserId,jdbcType=VARCHAR},SYSDATE,
+		#{modifiedByUserId,jdbcType=VARCHAR})
+	</insert>
+
+	<update id="updateSelectedServicesList" parameterType="com.nyc.hhs.model.SelectedServicesBean">
+		UPDATE
+		PROCUREMENT_SERVICES
+		SET PROCUREMENT_SERVICE_ID
+		=SEQ_PROCUREMENT_SERVICES_ID.NEXTVAL, PROCUREMENT_ID=#{procurementId,
+		jdbcType=VARCHAR},ELEMENT_ID=#{elementId,jdbcType=VARCHAR},LAST_UPDATE_DATE=SYSDATE,ACTIVE_FLAG=#{activeFlag,jdbcType=VARCHAR},
+		CREATED_DATE=SYSDATE,CREATED_BY_USERID=#{createdByUserId,jdbcType=VARCHAR},MODIFIED_DATE=SYSDATE,
+		MODIFIED_BY_USERID=#{modifiedByUserId,jdbcType=VARCHAR}
+		WHERE
+		PROCUREMENT_ID = #{procurementId,jdbcType=VARCHAR} and
+		ELEMENT_ID=#{elementId,jdbcType=VARCHAR}
+	</update>
+
+	<delete id="deleteSelectedServicesList" parameterType="java.util.Map">
+		DELETE
+		FROM PROCUREMENT_SERVICES
+		WHERE PROCUREMENT_ID =
+		#{procurementId,jdbcType=VARCHAR}
+		and ELEMENT_ID not in
+		<foreach item="items" collection="loInsertSelectedServiceList"
+			open="(" separator="," close=")">
+			#{items.elementId}
+   		</foreach>
+	</delete>
+
+	<delete id="deleteAddendumServicesList" parameterType="java.util.Map">
+		DELETE
+		FROM PRCRMNT_ADDM_SERVICES
+		WHERE PROCUREMENT_ID =
+		#{procurementId,jdbcType=VARCHAR}
+	</delete>
+
+	<select id="getSavedServicesList" parameterType="java.lang.String"
+		resultMap="selectedServicesList">
+		select element_id from
+		(SELECT ELEMENT_ID, 1 data FROM
+		PRCRMNT_ADDM_SERVICES WHERE
+		PROCUREMENT_ID =
+		#{asProcurementId,jdbcType=VARCHAR}
+		UNION ALL
+		SELECT ELEMENT_ID, 0 data
+		FROM
+		PROCUREMENT_SERVICES WHERE PROCUREMENT_ID =
+		#{asProcurementId,jdbcType=VARCHAR}) dataFromTables
+		where data =
+		decode((select count(1) FROM PRCRMNT_ADDM_SERVICES
+		WHERE
+		PROCUREMENT_ID
+		= #{asProcurementId,jdbcType=VARCHAR}), 0, 0, 1)
+	</select>
+
+
+	<select id="fetchDropDownValue" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		SELECT SERVICE_FILTER
+		FROM PROCUREMENT
+		WHERE
+		PROCUREMENT_ID=#{asProcId,jdbcType=VARCHAR}
+	</select>
+	<!--<update id="updateProcurementStatusClosed" parameterType="int"> update 
+		PROCUREMENT set STATUS_ID = 8 where procurement_id = #{asProcurementId} </update> --><!-- Procurement grid transaction queries -->
+	<resultMap id="procurementCoADetailsList" type="com.nyc.hhs.model.AccountsAllocationBean">
+		<result property="id" column="PROCUREMENT_FINANCIALS_ID" />
+		<result property="unitOfAppropriation" column="UNIT_OF_APPROPRIATION" />
+		<result property="budgetCode" column="BUDGET_CODE" />
+		<result property="objectCode" column="OBJECT_CODE" />
+		<result property="subOc" column="SUB_OBJECT_CODE" />
+		<result property="rc" column="REPORTING_CATEGORY" />
+		<result property="fiscalYear" column="FISCAL_YEAR_ID" />
+		<result property="ammount" column="AMOUNT" />
+	</resultMap>
+	<!-- R5 Changes starts-->
+	<select id="fetchProcurementCoADetails" parameterType="com.nyc.hhs.model.AccountsAllocationBean"
+		resultMap="procurementCoADetailsList">
+		SELECT
+		A.PROCUREMENT_FINANCIALS_ID,
+		A.UNIT_OF_APPROPRIATION,
+		A.BUDGET_CODE,
+		A.OBJECT_CODE,
+		A.SUB_OBJECT_CODE,
+		A.REPORTING_CATEGORY,
+		B.FISCAL_YEAR_ID,
+		A.AMOUNT
+		FROM PROCUREMENT_FINANCIALS A, FISCAL_YEAR B
+		WHERE
+		A.PROCUREMENT_ID = #{procurementID}
+		and a.version_number = (select PCOF_PSR_VERSION_NUMBER from procurement where procurement_id = #{procurementID})
+		AND A.FISCAL_YEAR_ID = B.FISCAL_YEAR_ID
+		ORDER BY A.UNIT_OF_APPROPRIATION, A.BUDGET_CODE,
+		A.OBJECT_CODE,
+		A.SUB_OBJECT_CODE, A.REPORTING_CATEGORY, B.FISCAL_YEAR
+	</select>
+	<!-- R5 Changes ends-->
+	
+	<resultMap id="procurementFundingSourceDetailsList" type="com.nyc.hhs.model.FundingAllocationBean">
+		<result property="id" column="PROCUREMENT_FUNDING_STREAM_ID" />
+		<result property="federalAmount" column="FEDERAL_AMOUNT" />
+		<result property="stateAmount" column="STATE_AMOUNT" />
+		<result property="cityAmount" column="CITY_AMOUNT" />
+		<result property="otherAmount" column="OTHER_AMOUNT" />
+		<result property="fiscalYear" column="FISCAL_YEAR_ID" />
+	</resultMap>
+	<!-- R5 Changes starts-->
+	<select id="fetchProcurementFundingSourceDetails" parameterType="com.nyc.hhs.model.FundingAllocationBean"
+		resultMap="procurementFundingSourceDetailsList">
+		SELECT
+		A.PROCUREMENT_FUNDING_STREAM_ID,
+		A.FEDERAL_AMOUNT,
+		A.STATE_AMOUNT,
+		A.CITY_AMOUNT,
+		A.OTHER_AMOUNT,
+		B.FISCAL_YEAR_ID
+		FROM
+		PROCUREMENT_FIN_FUNDING_STREAM A, FISCAL_YEAR B
+		WHERE
+		A.PROCUREMENT_ID = #{procurementID}
+		and a.version_number = = (select PCOF_PSR_VERSION_NUMBER from procurement where procurement_id = #{procurementID})
+		AND A.FISCAL_YEAR_ID = B.FISCAL_YEAR_ID
+		ORDER BY
+		A.FEDERAL_AMOUNT, A.STATE_AMOUNT, A.CITY_AMOUNT, A.OTHER_AMOUNT, B.FISCAL_YEAR
+	</select>
+	
+	
+	<delete id="deleteProcurementCoADetails">
+		<!-- to delete the Chart of accounts details -->
+		DELETE FROM PROCUREMENT_FINANCIALS WHERE PROCUREMENT_ID
+		=#{asProcurementId} and VERSION_NUMBER = (select PCOF_PSR_VERSION_NUMBER from procurement where procurement_id = #{asProcurementId})
+	</delete>
+	<!-- R5 Changes ends-->	
+	<insert id="insertPCOFDetails">
+		<!-- to insert the Procurement certification of funds details once the 
+			financials page has been submitted -->
+	</insert>
+	<delete id="deleteProviderQuesResponseData" parameterType="String">
+		DELETE FROM
+		PROPOSAL_QUESTION_RESPONSE
+		WHERE PROPOSAL_ID IN (select
+		proposal_id from proposal_config where procurement_id =
+		#{lsProcurementId}) 
+	</delete>
+	<delete id="deleteProviderSiteData" parameterType="String">
+		delete from
+		PROPOSAL_SITE where proposal_id in (select proposal_id from
+		proposal_config
+        where procurement_id = #{lsProcurementId})
+	</delete>
+	<delete id="deleteProvidersData" parameterType="String">
+		DELETE FROM
+		PROPOSAL_CONFIG
+		WHERE PROCUREMENT_ID = #{lsProcurementId} 
+	</delete>
+	<delete id="deleteProposalDocument" parameterType="String">
+		DELETE FROM
+		PROPOSAL_DOCUMENT
+		WHERE PROCUREMENT_ID =#{lsProcurementId} 
+	</delete>
+	<update id="preserveOldStatus" parameterType="String">
+		update procurement
+		set prev_status_id = status_id where PROCUREMENT_ID =
+		#{asProcurementId,
+		jdbcType=VARCHAR}
+	</update>
+
+
+<!--[Start] QC9168:R7.6.0 Procurement- Unable to delete the RFP  --> 
+	<select id="fetchdocumentIdList" parameterType="String" resultType="String">
+		SELECT  DOCUMENT_IDENTIFIER_ID 
+		FROM    PROPOSAL_DOCUMENT 
+		WHERE   PROCUREMENT_ID = #{asProcurementId}
+		and     DOCUMENT_IDENTIFIER_ID is not null
+	</select>
+<!--[End] QC9168:R7.6.0 Procurement- Unable to delete the RFP  -->
+
+	<update id="updateProcurementStatus" parameterType="Map">
+		UPDATE
+		PROCUREMENT set
+		LAST_MODIFIED_USERID =
+		#{userId,jdbcType=VARCHAR},
+		MODIFIED_BY_USERID =
+		#{userId,jdbcType=VARCHAR},
+		MODIFIED_DATE = sysdate,
+		LAST_MODIFIED_DATE
+		= sysdate,
+		STATUS_ID =
+			#{procurementStatusCode,jdbcType=VARCHAR}
+		<if test="isReleaseProcurement != null">
+			, RFP_RELEASE_DATE= systimestamp,
+			RFP_RELEASE_USERID =
+			#{userId,jdbcType=VARCHAR},
+			LAST_PUBLISHED_DATE = systimestamp,
+			LAST_PUBLISHED_USERID = #{userId,jdbcType=VARCHAR}
+		</if>
+		where
+		procurement_id =
+		#{procurementId,jdbcType=VARCHAR}
+	</update>
+
+	<select id="checkBeforeSaveApprovedProvDetails" parameterType="com.nyc.hhs.model.SelectedServicesBean"
+		resultType="String">
+		Select status_id from procurement where PROCUREMENT_ID =
+		#{procurementId, jdbcType=VARCHAR}
+	</select>
+
+	<update id="updateDropDownValueDraft" parameterType="com.nyc.hhs.model.SelectedServicesBean">
+		UPDATE
+		PROCUREMENT SET
+		SERVICE_FILTER = #{approvedForDropDown,
+		jdbcType=VARCHAR},
+		LAST_MODIFIED_DATE = sysdate,
+		LAST_MODIFIED_USERID =
+		#{userId},
+		SF_MODIFIED_DATE = sysdate,
+		SF_MODIFIED_USERID = #{userId}
+		WHERE
+		PROCUREMENT_ID = #{procurementId, jdbcType=VARCHAR}
+	</update>
+
+	<update id="updateDropDownValuePlanned" parameterType="com.nyc.hhs.model.SelectedServicesBean">
+		UPDATE
+		PROCUREMENT_ADDENDUM SET
+		SERVICE_FILTER = #{approvedForDropDown,
+		jdbcType=VARCHAR},
+		LAST_MODIFIED_DATE = sysdate,
+		LAST_MODIFIED_USERID =
+		#{userId},
+		SF_MODIFIED_DATE = sysdate,
+		SF_MODIFIED_USERID = #{userId}
+		WHERE
+		PROCUREMENT_ID = #{procurementId, jdbcType=VARCHAR}
+	</update>
+
+	<insert id="insertDropDownValuePlanned" parameterType="com.nyc.hhs.model.SelectedServicesBean">
+		INSERT
+		INTO PROCUREMENT_ADDENDUM
+		(PROCUREMENT_ADDENDUM_ID,
+		PROCUREMENT_ID,
+		PROCUREMENT_TITLE,
+		EPIN,
+		STATUS_ID, AGENCY_ID, PROGRAM_ID,
+		ACCELERATOR_PRMRY_CONTACT_ID,
+		ACCELERATOR_SECNDRY_CONTACT_ID,
+		AGENCY_PRIMARY_CONTACT_ID,
+		AGENCY_SECONDARY_CONTACT_ID,
+		AGENCY_EMAIL_CONTACT,
+		PROCUREMENT_DESCRIPTION, ESTIMATED_NUM_CONTRACTS,
+		ESTIMATED_PROCUREMENT_VALUE, LINK_TO_CONCEPT_REPORT,
+		PLND_RFP_RELEASE_DATE, Upd_RFP_Release_Date,
+		PLND_PRE_PROPOSAL_CONF_DATE, UPD_PRE_PROPOSAL_CONF_DATE,
+		PLND_PROPOSAL_DUE_DATE, Upd_Proposal_Due_Date,
+		PLND_FRST_DRAFT_RFP_DATE, UPD_FRST_DRAFT_RFP_DATE,
+		PLND_FINALIZE_RFP_DATE, UPD_FINALIZE_RFP_DATE,
+		PLND_EVALUATOR_TRANING_DATE, UPD_EVALUATOR_TRAINING_DATE,
+		PLND_FST_RND_EVAL_CMPLT_DATE, UPD_FST_RND_EVAL_CMPLT_DATE,
+		PLND_FINALIZE_EVAL_DATE, UPD_FINALIZE_EVAL_DATE,
+		PLND_AWARD_SELECTION_DATE, UPD_AWARD_SELECTION_DATE,
+		PLND_CONTRACT_START_DATE, Upd_Contract_Start_Date,
+		PLND_CONTRACT_END_DATE, UPD_CONTRACT_END_DATE,
+		LAST_MODIFIED_DATE,
+		LAST_PUBLISHED_DATE, CREATED_DATE,
+		CREATED_BY_USERID, MODIFIED_DATE,
+		MODIFIED_BY_USERID,
+		RFP_RELEASE_USERID,
+		RFP_RELEASE_DATE,
+		LAST_PUBLISHED_USERID,
+		LAST_MODIFIED_USERID, SERVICE_FILTER,
+		ADDENDUM_FLAG, SF_MODIFIED_DATE,
+		SF_MODIFIED_USERID, IS_OPEN_ENDED_RFP)
+		(select
+		SEQ_PROCUREMENT_ADDENDUM_ID.nextval,
+		PROCUREMENT_ID,
+		PROCUREMENT_TITLE,
+		EPIN,
+		STATUS_ID, AGENCY_ID, PROGRAM_ID,
+		ACCELERATOR_PRMRY_CONTACT_ID,
+		ACCELERATOR_SECNDRY_CONTACT_ID,
+		AGENCY_PRIMARY_CONTACT_ID,
+		AGENCY_SECONDARY_CONTACT_ID,
+		AGENCY_EMAIL_CONTACT,
+		PROCUREMENT_DESCRIPTION, ESTIMATED_NUM_CONTRACTS,
+		ESTIMATED_PROCUREMENT_VALUE, LINK_TO_CONCEPT_REPORT,
+		PLND_RFP_RELEASE_DATE, Upd_RFP_Release_Date,
+		PLND_PRE_PROPOSAL_CONF_DATE, UPD_PRE_PROPOSAL_CONF_DATE,
+		PLND_PROPOSAL_DUE_DATE, Upd_Proposal_Due_Date,
+		PLND_FRST_DRAFT_RFP_DATE, UPD_FRST_DRAFT_RFP_DATE,
+		PLND_FINALIZE_RFP_DATE, UPD_FINALIZE_RFP_DATE,
+		PLND_EVALUATOR_TRANING_DATE, UPD_EVALUATOR_TRAINING_DATE,
+		PLND_FST_RND_EVAL_CMPLT_DATE, UPD_FST_RND_EVAL_CMPLT_DATE,
+		PLND_FINALIZE_EVAL_DATE, UPD_FINALIZE_EVAL_DATE,
+		PLND_AWARD_SELECTION_DATE, UPD_AWARD_SELECTION_DATE,
+		PLND_CONTRACT_START_DATE, Upd_Contract_Start_Date,
+		PLND_CONTRACT_END_DATE, UPD_CONTRACT_END_DATE,
+		LAST_MODIFIED_DATE,
+		LAST_PUBLISHED_DATE, CREATED_DATE,
+		CREATED_BY_USERID, MODIFIED_DATE,
+		MODIFIED_BY_USERID,
+		RFP_RELEASE_USERID,
+		RFP_RELEASE_DATE,
+		LAST_PUBLISHED_USERID,
+		LAST_MODIFIED_USERID, #{approvedForDropDown,
+		jdbcType=VARCHAR}, SERVICE_FILTER, SF_MODIFIED_DATE,
+		SF_MODIFIED_USERID, IS_OPEN_ENDED_RFP from
+		procurement where
+		PROCUREMENT_ID = #{procurementId, jdbcType=VARCHAR})
+	</insert>
+
+	<select id="getProviderStatus" parameterType="Map" resultType="String">
+		Select NVL(ProcProv.status1, decode(st.status_id,
+		#{PROCUREMENT_PLANNED}, #{PROVIDER_SERVICE_APP_REQUIRED},
+		#{PROCUREMENT_RELEASED}, #{PROVIDER_SERVICE_APP_REQUIRED},
+		#{PROVIDER_NOT_APPLICABLE})) as Provider_Status
+		from Procurement proc
+		left join (select
+		abc.procurement_id, r2r3.status_id as status1,
+		abc.organization_id as orgid
+		from
+		procurement_provider abc,
+		status_master_r2_r3 r2r3 where
+		abc.eligibility_flag = 1 and
+		abc.provider_status_id = r2r3.status_id
+		and abc.organization_id =
+		#{asProviderId}
+		and abc.procurement_id =
+		#{asProcurementId}) ProcProv
+		on
+		proc.procurement_id =
+		procprov.procurement_id
+		inner join
+		status_master_r2_r3 st
+		on
+		proc.status_id = st.status_id
+		where
+		Proc.Procurement_Id =
+		#{asProcurementId}
+
+	</select>
+
+	<select id="displayApprovedProvidersList" parameterType="com.nyc.hhs.model.SelectedServicesBean"
+		resultMap="approvedProvidersViewList">
+		select Organization_Legal_name from Organization org,
+		procurement_services
+		ps where org.organization_id =ps.organization_id
+		and
+		procurement_id = #{procurementId}
+	</select>
+
+	<resultMap id="approvedProvidersViewList" type="com.nyc.hhs.model.ApprovedProvidersBean">
+		<result property="organizationId" column="ORGANIZATION_ID" />
+
+	</resultMap>
+
+	<select id="fetchApprovedProvDetails" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		Select service_filter from
+		(Select service_filter, 1 data
+		from procurement_addendum where procurement_id = #{asProcurementId}
+		UNION
+		SELECT service_filter, 0 data FROM procurement WHERE
+		PROCUREMENT_ID = #{asProcurementId}) dataFromTables
+		where data =
+		decode((select count(1) FROM procurement_addendum WHERE PROCUREMENT_ID
+		= #{asProcurementId}), 0, 0, 1)
+	</select>
+
+	<insert id="insertProcurementAddendumDetails">
+		INSERT INTO PROCUREMENT_ADDENDUM
+		(PROCUREMENT_ADDENDUM_ID,
+		PROCUREMENT_ID,
+		PROCUREMENT_TITLE,
+		EPIN,
+		STATUS_ID, AGENCY_ID, PROGRAM_ID,
+		ACCELERATOR_PRMRY_CONTACT_ID,
+		ACCELERATOR_SECNDRY_CONTACT_ID,
+		AGENCY_PRIMARY_CONTACT_ID,
+		AGENCY_SECONDARY_CONTACT_ID,
+		AGENCY_EMAIL_CONTACT,
+		PROCUREMENT_DESCRIPTION, ESTIMATED_NUM_CONTRACTS,
+		ESTIMATED_PROCUREMENT_VALUE, LINK_TO_CONCEPT_REPORT,
+		PLND_RFP_RELEASE_DATE, Upd_RFP_Release_Date,
+			PLND_PRE_PROPOSAL_CONF_DATE, UPD_PRE_PROPOSAL_CONF_DATE,
+			PLND_PROPOSAL_DUE_DATE, Upd_Proposal_Due_Date,
+			PLND_FRST_DRAFT_RFP_DATE, UPD_FRST_DRAFT_RFP_DATE,
+			PLND_FINALIZE_RFP_DATE, UPD_FINALIZE_RFP_DATE,
+			PLND_EVALUATOR_TRANING_DATE, UPD_EVALUATOR_TRAINING_DATE,
+			PLND_FST_RND_EVAL_CMPLT_DATE, UPD_FST_RND_EVAL_CMPLT_DATE,
+			PLND_FINALIZE_EVAL_DATE, UPD_FINALIZE_EVAL_DATE,
+			PLND_AWARD_SELECTION_DATE, UPD_AWARD_SELECTION_DATE,
+			PLND_CONTRACT_START_DATE, Upd_Contract_Start_Date,
+			PLND_CONTRACT_END_DATE, UPD_CONTRACT_END_DATE,
+		LAST_MODIFIED_DATE,
+		LAST_PUBLISHED_DATE, CREATED_DATE,
+		CREATED_BY_USERID, MODIFIED_DATE,
+		MODIFIED_BY_USERID,
+		RFP_RELEASE_USERID,
+		RFP_RELEASE_DATE,
+		LAST_PUBLISHED_USERID,
+		LAST_MODIFIED_USERID, SERVICE_FILTER,
+		ADDENDUM_FLAG, SF_MODIFIED_USERID, SF_MODIFIED_DATE,
+		SERVICE_UNITS_REQUIRED, IS_OPEN_ENDED_RFP)
+		(SELECT
+		SEQ_PROCUREMENT_ADDENDUM_ID.NEXTVAL,
+		#{procurementId},
+		trim(#{procurementTitle,
+		jdbcType=VARCHAR}),
+		#{procurementEpin,
+		jdbcType=VARCHAR}, #{status,
+		jdbcType=VARCHAR},
+		#{agencyId,
+		jdbcType=VARCHAR}, #{programName,
+		jdbcType=VARCHAR},
+		#{accPrimaryContact, jdbcType=VARCHAR},
+		#{accSecondaryContact,
+		jdbcType=VARCHAR},
+		#{agecncyPrimaryContact,
+		jdbcType=VARCHAR},
+		#{agecncySecondaryContact, jdbcType=VARCHAR},
+		trim(#{email,
+		jdbcType=VARCHAR}), trim(#{procurementDescription,
+		jdbcType=VARCHAR}),
+		#{estNumberOfContracts, jdbcType=VARCHAR},
+		#{estProcurementValue,
+		jdbcType=VARCHAR},
+		trim(#{linkToConceptReport,
+		jdbcType=VARCHAR}),
+		to_date(#{rfpReleaseDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{rfpReleaseDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{preProposalConferenceDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{preProposalConferenceDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{proposalDueDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+			to_date(#{proposalDueDateUpdated,jdbcType=VARCHAR}, 'MM/dd/YYYY HH:MI:SS'),
+		to_date(#{firstRFPEvalDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{firstRFPEvalDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{finalRFPEvalDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{finalRFPEvalDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{evaluatorTrainingDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{evaluatorTrainingDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{firstEvalCompletionDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{firstEvalCompletionDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{finalEvalCompletionDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{finalEvalCompletionDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{awardSelectionDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{awardSelectionDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{contractStartDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{contractStartDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{contractEndDatePlanned,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		to_date(#{contractEndDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		 sysdate,
+		#{lastPublishDate, jdbcType=DATE}, sysdate,
+		#{createdBy,
+		jdbcType=VARCHAR}, sysdate,
+		#{modifiedBy, jdbcType=VARCHAR},
+		#{rfpReleaseUserId, jdbcType=VARCHAR},
+		#{lastPublishDate,
+		jdbcType=DATE}, #{lastPublishedByUser, jdbcType=VARCHAR},
+		#{modifiedBy, jdbcType=VARCHAR},
+		SERVICE_FILTER, #{addendumFlag},
+		SF_MODIFIED_USERID, SF_MODIFIED_DATE, #{serviceUnitRequiredFlag},
+		#{isOpenEndedRFP} FROM procurement WHERE PROCUREMENT_ID =
+		#{procurementId})
+	</insert>
+
+	<update id="updateProcurementAddendumDetails">
+		UPDATE
+		PROCUREMENT_ADDENDUM SET
+		PROCUREMENT_TITLE =
+		trim(#{procurementTitle, jdbcType=VARCHAR}),
+		EPIN = #{procurementEpin,
+		jdbcType=VARCHAR},
+		STATUS_ID = #{status, jdbcType=VARCHAR}, 
+		AGENCY_ID = #{agencyId, jdbcType=VARCHAR},
+		PROGRAM_ID = #{programName,
+		jdbcType=VARCHAR},
+		ACCELERATOR_PRMRY_CONTACT_ID = #{accPrimaryContact,
+		jdbcType=VARCHAR},
+		ACCELERATOR_SECNDRY_CONTACT_ID =
+		#{accSecondaryContact, jdbcType=VARCHAR},
+		AGENCY_PRIMARY_CONTACT_ID =
+		#{agecncyPrimaryContact, jdbcType=VARCHAR},
+		AGENCY_SECONDARY_CONTACT_ID = #{agecncySecondaryContact,
+		jdbcType=VARCHAR},
+		AGENCY_EMAIL_CONTACT = trim(#{email,
+		jdbcType=VARCHAR}),
+		PROCUREMENT_DESCRIPTION =
+		trim(#{procurementDescription, jdbcType=VARCHAR}),
+		ESTIMATED_NUM_CONTRACTS = #{estNumberOfContracts, jdbcType=VARCHAR},
+		ESTIMATED_PROCUREMENT_VALUE = #{estProcurementValue,
+		jdbcType=VARCHAR},
+		LINK_TO_CONCEPT_REPORT = trim(#{linkToConceptReport,
+		jdbcType=VARCHAR}),
+		Upd_RFP_Release_Date =
+		to_date(#{rfpReleaseDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+			UPD_PRE_PROPOSAL_CONF_DATE =
+		to_date(#{preProposalConferenceDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+			Upd_Proposal_Due_Date = 
+			to_date(#{proposalDueDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY HH:MI:SS'),
+			UPD_FRST_DRAFT_RFP_DATE =
+			to_date(#{firstRFPEvalDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY HH:MI:SS'),
+			UPD_FINALIZE_RFP_DATE =
+			to_date(#{finalRFPEvalDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY HH:MI:SS'),
+			UPD_EVALUATOR_TRAINING_DATE =
+		to_date(#{evaluatorTrainingDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+			UPD_FST_RND_EVAL_CMPLT_DATE =
+		to_date(#{firstEvalCompletionDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+			UPD_FINALIZE_EVAL_DATE =
+		to_date(#{finalEvalCompletionDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+			UPD_AWARD_SELECTION_DATE =
+			to_date(#{awardSelectionDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY HH:MI:SS'),
+			Upd_Contract_Start_Date =
+			to_date(#{contractStartDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY HH:MI:SS'),
+			UPD_CONTRACT_END_DATE =
+			to_date(#{contractEndDateUpdated,jdbcType=VARCHAR},'MM/dd/YYYY HH:MI:SS'),
+		LAST_MODIFIED_DATE = sysdate,
+		MODIFIED_BY_USERID =
+		#{modifiedBy, jdbcType=VARCHAR},
+		LAST_MODIFIED_USERID = #{modifiedBy,
+		jdbcType=VARCHAR},
+		MODIFIED_DATE = sysdate,
+		ADDENDUM_FLAG =
+		#{addendumFlag},
+		SERVICE_UNITS_REQUIRED = #{serviceUnitRequiredFlag},
+		IS_OPEN_ENDED_RFP = #{isOpenEndedRFP}
+		WHERE
+		PROCUREMENT_ID =
+		#{procurementId}
+	</update>
+	<!-- changes for r5 starts -->
+	<!-- R6 emergency build defect 8646 - added an extra column ref_apt_epin_id in fetch query for procurement summary defect-8646 -->
+	<select id="getReleasedProcurementSummary" parameterType="int"
+		resultMap="procurementDetails">
+		SELECT P.PROCUREMENT_ID,
+		PROC.PREV_STATUS_ID,
+		p.IS_OPEN_ENDED_RFP,
+		P.PROCUREMENT_TITLE,
+		P.EPIN,
+		PROC.REF_APT_EPIN_ID,
+		PROC.STATUS_ID,
+		P.AGENCY_ID, P.PROGRAM_ID,
+		PM.PROGRAM_NAME, S.STATUS,
+		P.ACCELERATOR_PRMRY_CONTACT_ID,
+		P.ACCELERATOR_SECNDRY_CONTACT_ID,
+		P.AGENCY_PRIMARY_CONTACT_ID,
+		P.AGENCY_SECONDARY_CONTACT_ID,
+		P.AGENCY_EMAIL_CONTACT,
+		P.PROCUREMENT_DESCRIPTION,
+		P.ESTIMATED_NUM_CONTRACTS,
+		P.ESTIMATED_PROCUREMENT_VALUE,
+		P.LINK_TO_CONCEPT_REPORT,
+		P.PLND_RFP_RELEASE_DATE,
+		P.Upd_RFP_Release_Date,
+		P.PLND_PRE_PROPOSAL_CONF_DATE,
+		P.UPD_PRE_PROPOSAL_CONF_DATE,
+		P.PLND_PROPOSAL_DUE_DATE,
+		P.Upd_Proposal_Due_Date,
+		P.PLND_FRST_DRAFT_RFP_DATE,
+		P.UPD_FRST_DRAFT_RFP_DATE,
+		P.PLND_FINALIZE_RFP_DATE,
+		P.UPD_FINALIZE_RFP_DATE,
+		P.PLND_EVALUATOR_TRANING_DATE,
+		P.UPD_EVALUATOR_TRAINING_DATE,
+		P.PLND_FST_RND_EVAL_CMPLT_DATE,
+		P.UPD_FST_RND_EVAL_CMPLT_DATE,
+		P.PLND_FINALIZE_EVAL_DATE,
+		P.UPD_FINALIZE_EVAL_DATE,
+		P.PLND_AWARD_SELECTION_DATE,
+		P.UPD_AWARD_SELECTION_DATE,
+		P.PLND_CONTRACT_START_DATE,
+		P.Upd_Contract_Start_Date,
+		P.LAST_PUBLISHED_DATE,
+		P.PLND_CONTRACT_END_DATE,
+		P.UPD_CONTRACT_END_DATE,
+		N.AGENCY_NAME,
+		P.LAST_MODIFIED_DATE,
+		P.LAST_PUBLISHED_USERID,
+		P.SERVICE_UNITS_REQUIRED,
+		C.FIRST_NAME || ' '|| C.LAST_NAME 
+		AS NAME,
+		proc.rfp_release_date, PSR.PDF_FLAG, proc.GENERATE_NEW_TASK, PSR.PSR_DETAILS_ID
+		FROM
+		PROCUREMENT_ADDENDUM P,
+		PROCUREMENT Proc left OUTER JOIN PSR_DETAILS psr on Proc.PROCUREMENT_ID = PSR.PROCUREMENT_ID AND Proc.PCOF_PSR_VERSION_NUMBER = PSR.VERSION_NUMBER,
+		STATUS_MASTER_R2_R3 S,
+		PROGRAM_MASTER PM,
+		NYC_AGENCY_DETAILS N,
+		CITY_USER_DETAILS C
+		WHERE
+		P.PROCUREMENT_ID = #{asProcurementId}
+		AND proc.procurement_id = p.procurement_id
+		AND PROC.STATUS_ID = S.STATUS_ID
+		AND P.PROGRAM_ID = PM.PROGRAM_ID
+		AND P.AGENCY_ID = N.AGENCY_ID
+		AND P.MODIFIED_BY_USERID = C.USER_ID
+	</select>
+	<!-- changes for r5 ends -->
+	
+	<select id="displayAppProviderOnPageLoad" parameterType="java.lang.String"
+		resultMap="appServiceProviders">
+		SELECT org.ORGANIZATION_LEGAL_NAME, org.ORGANIZATION_ID
+		FROM
+		ORGANIZATION org INNER JOIN PROCUREMENT_PROVIDER ON
+		org.ORGANIZATION_ID = PROCUREMENT_PROVIDER.ORGANIZATION_ID
+		AND
+		PROCUREMENT_PROVIDER.PROCUREMENT_ID = #{asProcurementId}
+		and PROCUREMENT_PROVIDER.eligibility_flag = 1
+		and (
+		PROCUREMENT_PROVIDER.restrict_submit is null or
+		PROCUREMENT_PROVIDER.restrict_submit = 0)
+		ORDER BY
+		lower(org.ORGANIZATION_LEGAL_NAME) ASC
+	</select>
+	
+	<resultMap type="com.nyc.hhs.model.ApprovedProvidersBean" id="appServiceProviders">
+		<result property="organizationLegalName" column="ORGANIZATION_LEGAL_NAME" />
+		<result property="organizationId" column="ORGANIZATION_ID" />
+	</resultMap>
+
+	<resultMap id="procurementInfoDetails" type="com.nyc.hhs.model.ProcurementInfo">
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<result property="previousStatus" column="PREV_STATUS_ID" />
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="procurementEpin" column="EPIN" />
+		<result property="status" column="STATUS_ID" />
+		<result property="procurementStatus" column="STATUS" />
+		<result property="lastUpdatedDate" column="LAST_MODIFIED_DATE" />
+		<result property="isOpenEndedRFP" column="IS_OPEN_ENDED_RFP"/>
+		<result property="isRfpReleasedBefore" column="IS_RELEASED_BEFORE_R4"/>
+	</resultMap>
+	<select id="getProcurementSummaryForNav" parameterType="int"
+		resultMap="procurementInfoDetails">
+		SELECT P.PROCUREMENT_ID,
+		P.PREV_STATUS_ID,
+		P.PROCUREMENT_TITLE,
+		P.EPIN,
+		P.STATUS_ID, S.STATUS,
+		P.LAST_MODIFIED_DATE,
+		p.IS_OPEN_ENDED_RFP,
+		p.IS_RELEASED_BEFORE_R4
+		FROM
+		PROCUREMENT P, STATUS_MASTER_R2_R3 S
+		WHERE
+		P.PROCUREMENT_ID =
+		#{asProcurementId}
+		AND
+		P.STATUS_ID = S.STATUS_ID
+	</select>
+	<!--<update id="updateAddendumDocumentTable" parameterType="Map"> UPDATE 
+		PRCRMNT_ADDM_RFP_DOCUMENT SET DOCUMENT_TITLE=#{DocumentTitle,jdbcType=VARCHAR},MODIFIED_DATE=#{modifiedDate},MODIFIED_BY_USERID=#{modifiedBy,jdbcType=VARCHAR} 
+		WHERE PROCUREMENT_ID=#{procurementId,jdbcType=VARCHAR} AND DOCUMENT_IDENTIFIER_ID=#{documentId,jdbcType=VARCHAR} 
+		</update> <update id="updateRfpDocumentTable" parameterType="Map"> UPDATE 
+		RFP_DOCUMENT SET DOCUMENT_TITLE=#{DocumentTitle,jdbcType=VARCHAR},MODIFIED_DATE=#{modifiedDate},MODIFIED_BY_USERID=#{modifiedBy, 
+		jdbcType=VARCHAR} WHERE PROCUREMENT_ID=#{procurementId, jdbcType=VARCHAR} 
+		AND DOCUMENT_IDENTIFIER_ID=#{documentId, jdbcType=VARCHAR} </update> -->
+
+	<update id="updateRFPdocumentStatus" parameterType="Map">
+		update
+		rfp_document set status_id =#{rfpDocumentStatusCode,jdbcType=VARCHAR},
+		MODIFIED_DATE = sysdate,modified_by_userid=#{userId,jdbcType=VARCHAR}
+		where procurement_Id =#{procurementId,jdbcType=VARCHAR}
+	</update>
+
+	<select id="getProcurementTitle" parameterType="string"
+		resultType="map">
+		select proc.PROCUREMENT_TITLE, proc.AGENCY_ID,
+		city.email_id as
+		AGENCY_PRIMARY_CONTACT, city1.email_id as
+		AGENCY_SECONDARY_CONTACT
+		from (select email_id, user_id from
+		city_user_details) city,
+		(select email_id, user_id from
+		city_user_details) city1,
+		procurement proc where city.user_id =
+		proc.AGENCY_PRIMARY_CONTACT_ID and
+		city1.user_id =
+		proc.AGENCY_SECONDARY_CONTACT_ID
+		and PROCUREMENT_ID = #{procurementId}
+	</select>
+
+	<select id="fetchApprovedProviders" parameterType="string"
+		resultType="string">
+		SELECT DISTINCT ORGANIZATION_ID FROM PROCUREMENT_PROVIDER
+		WHERE PROCUREMENT_ID = #{procurementId} and eligibility_flag = 1
+	</select>
+
+	<insert id="updateProcurementServiceData" parameterType="java.lang.String">
+		INSERT
+		INTO
+		PROCUREMENT_SERVICES
+		PROC(PROC.PROCUREMENT_SERVICE_ID,
+		PROC.PROCUREMENT_ID,
+		PROC.ELEMENT_ID,
+		PROC.LAST_UPDATE_DATE,
+		PROC.ACTIVE_FLAG,
+		PROC.CREATED_DATE,
+		PROC.CREATED_BY_USERID,
+		PROC.MODIFIED_DATE,
+		MODIFIED_BY_USERID)
+		(select
+		SEQ_PROCUREMENT_SERVICES_ID.NEXTVAL,
+		addem.PROCUREMENT_ID,
+		addem.ELEMENT_ID,
+		addem.LAST_UPDATE_DATE,
+		addem.ACTIVE_FLAG,
+		addem.CREATED_DATE,
+		addem.CREATED_BY_USERID,
+		addem.MODIFIED_DATE,
+		addem.MODIFIED_BY_USERID
+		from
+		PRCRMNT_ADDM_SERVICES addem
+		WHERE
+		addem.PROCUREMENT_ID=
+		#{procurementId,
+		jdbcType=VARCHAR})
+	</insert>
+
+	<delete id="deleteProcurementServiceData" parameterType="java.lang.String">
+		DELETE
+		FROM PROCUREMENT_SERVICES
+		WHERE PROCUREMENT_ID =
+		#{procurementId,jdbcType=VARCHAR} and exists (select 1 from
+		PRCRMNT_ADDM_SERVICES WHERE PROCUREMENT_ID
+		=
+		#{procurementId,jdbcType=VARCHAR})
+	
+	</delete>
+
+	<select id="fetchServiceDetails" parameterType="java.lang.String"
+		resultType="int">
+		select count(1) FROM PRCRMNT_ADDM_SERVICES WHERE
+		PROCUREMENT_ID
+		=#{procurementId,jdbcType=VARCHAR}
+	</select><!--
+
+	<resultMap type="com.nyc.hhs.model.ProposalQuestionAnswerBean"
+		id="proposalCustomQuestions">
+		<result property="procurementQnId" column="PROCUREMENT_QN_ID" />
+		<result property="questionText" column="CUSTOM_QUESTION_TEXT" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+		<result property="modifiedBy" column="MODIFIED_BY_USERID" />
+		<result property="isAddendum" column="IS_ADDENDUM" />
+	</resultMap>
+
+	<select id="fetchProposalCustomQuestions" parameterType="hashmap"
+		resultMap="proposalCustomQuestions">
+		Select * from (SELECT PROCUREMENT_QN_ID,
+		CUSTOM_QUESTION_TEXT, MODIFIED_DATE,
+		MODIFIED_BY_USERID,'true' as
+		IS_ADDENDUM FROM
+		PROCUREMENT_QUESTION_CONFIG WHERE
+		PROCUREMENT_ID =
+		#{procurementId})
+		UNION ALL
+		select * from(SELECT PROCUREMENT_QN_ID,
+		CUSTOM_QUESTION_TEXT, MODIFIED_DATE,
+		MODIFIED_BY_USERID, 'false' as
+		IS_ADDENDUM FROM
+		PRCRMNT_ADDM_QUESTION_CONFIG WHERE
+		PROCUREMENT_ID =
+		#{procurementId})
+	</select>
+
+	-->
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+      <resultMap type="com.nyc.hhs.model.ProposalQuestionAnswerBean"
+            id="proposalCustomQuestions">
+            <result property="addendumId" column="ADDENDUM_QN_ID" />
+            <result property="procurementId" column="PROCUREMENT_ID" />
+            <result property="procurementQnId" column="PROCUREMENT_QN_ID" />
+            <result property="questionText" column="CUSTOM_QUESTION_TEXT" />
+            <result property="modifiedDate" column="MODIFIED_DATE" />
+            <result property="modifiedBy" column="MODIFIED_BY_USERID" />
+            <result property="isAddendum" column="IS_ADDENDUM" />
+            <result property="questionSeqNo" column="QUESTION_SEQ_NUM" />
+      </resultMap>
+      <select id="fetchPropCustomQuesForPlanned" parameterType="hashmap"
+            resultMap="proposalCustomQuestions">
+            SELECT pqc.PROCUREMENT_QN_ID,
+            pqc.CUSTOM_QUESTION_TEXT, pqc.MODIFIED_DATE,
+            pqc.MODIFIED_BY_USERID,'false' as
+            IS_ADDENDUM, QUESTION_SEQUENCE_NUMBER FROM
+            PROCUREMENT_QUESTION_CONFIG pqc,PRCRMNT_QUESTION_MAPPING pqm WHERE 
+            pqc.PROCUREMENT_ID = pqm.PROCUREMENT_ID
+            AND pqc.PROCUREMENT_ID = #{procurementId}
+            AND pqc.PROCUREMENT_QN_ID = pqm.PROCUREMENT_QN_ID 
+            AND pqm.VERSION_NUMBER = (select max(VERSION_NUMBER) from 
+            PRCRMNT_QUESTION_MAPPING 
+            where PROCUREMENT_ID = #{procurementId}) ORDER BY QUESTION_SEQUENCE_NUMBER ASC
+      </select>
+      
+      <!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+      <select id="fetchPropCustomQuesForReleased" parameterType="hashmap"
+            resultMap="proposalCustomQuestions">
+            SELECT ADDENDUM_QN_ID,PROCUREMENT_QN_ID,
+            CUSTOM_QUESTION_TEXT, MODIFIED_DATE,
+            MODIFIED_BY_USERID, 'true' as IS_ADDENDUM, QUESTION_SEQ_NUM ,PROCUREMENT_ID
+            FROM PRCRMNT_ADDM_QUESTION_CONFIG 
+            WHERE
+            PROCUREMENT_ID = #{procurementId} order by QUESTION_SEQ_NUM asc
+      </select>
+
+   <!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+   <!--Modified as a part of release 3.6.0 for enhancement request 6485-->
+	 <resultMap type="com.nyc.hhs.model.ExtendedDocument" id="proposalDocumentTypes">
+		<result property="documentSeqNumber" column="PROCUREMENT_DOC_SEQ_NUM" />
+		<result property="procurementDocumentId" column="PROCUREMENT_DOCUMENT_ID" />
+		<result property="documentType" column="PROCUREMENT_DOCUMENT_TYPE" />
+		<result property="requiredFlag" column="REQUIRED_FLAG" />
+		<result property="isAddendum" column="IS_ADDENDUM" />
+		<result property="addendumDocumentId" column="PROCUREMENT_ADDM_DOCUMENT_ID" />
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+		<result property="createdDate" column="CREATED_DATE" />
+		<result property="createdBy" column="CREATED_BY_USERID" />
+		<result property="lastModifiedById" column="MODIFIED_BY_USERID" />
+		<result property="modifiedSqlDate" column="sql_MODIFIED_DATE" />
+		<result property="createdSqlDate" column="sql_created_DATE" />
+		<result property="customLabelName" column="CUSTOM_LABEL" />
+	</resultMap><!--
+
+	<select id="fetchProposalDocumentType" parameterType="hashmap"
+		resultMap="proposalDocumentTypes">
+		Select * from(SELECT PROCUREMENT_DOCUMENT_ID,
+		PROCUREMENT_DOCUMENT_TYPE,
+		REQUIRED_FLAG,'true' as
+		IS_ADDENDUM FROM
+		PROCUREMENT_DOCUMENT_CONFIG
+		WHERE PROCUREMENT_ID =
+		#{procurementId}
+		ORDER BY REQUIRED_FLAG DESC)
+		UNION ALL
+		Select * from(SELECT
+		PROCUREMENT_ADDM_DOCUMENT_ID as
+		PROCUREMENT_DOCUMENT_ID,
+		PROCUREMENT_DOCUMENT_TYPE,
+		REQUIRED_FLAG,'false' as
+		IS_ADDENDUM FROM
+		PRCRMNT_ADDM_DOCUMENT
+		WHERE
+		PROCUREMENT_ID =
+		#{procurementId}
+		ORDER BY
+		REQUIRED_FLAG DESC)
+	</select>
+	
+	-->
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	   <!--Modified as a part of release 3.6.0 for enhancement request 6485-->
+	<select id="fetchPropDocTypeForPlanned" parameterType="hashmap"
+		resultMap="proposalDocumentTypes">
+		    SELECT pdc.PROCUREMENT_DOCUMENT_ID,
+			pdc.PROCUREMENT_DOCUMENT_TYPE,
+			pdc.CUSTOM_LABEL,
+			pdc.REQUIRED_FLAG, pdm.PROCUREMENT_DOC_SEQ_NUM, 'false' as
+			IS_ADDENDUM FROM
+            PROCUREMENT_DOCUMENT_CONFIG pdc,PRCRMNT_DOCUMENT_MAPPING pdm WHERE 
+            pdc.PROCUREMENT_ID = pdm.PROCUREMENT_ID
+            AND pdc.PROCUREMENT_ID = #{procurementId}
+            AND pdc.PROCUREMENT_DOCUMENT_ID = pdm.PROCUREMENT_DOCUMENT_ID 
+            AND pdm.VERSION_NUMBER = (select max(VERSION_NUMBER) from 
+            PRCRMNT_DOCUMENT_MAPPING 
+            where PROCUREMENT_ID = #{procurementId}) ORDER BY PROCUREMENT_DOC_SEQ_NUM ASC
+ 	</select>
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	   <!--Modified as a part of release 3.6.0 for enhancement request 6485-->
+	<select id="fetchPropDocTypeForReleased" parameterType="hashmap"
+		resultMap="proposalDocumentTypes">
+		SELECT
+		PROCUREMENT_ID,PROCUREMENT_DOCUMENT_ID, 
+		PROCUREMENT_DOCUMENT_TYPE,REQUIRED_FLAG,
+		CREATED_DATE,CREATED_BY_USERID,
+		MODIFIED_DATE,MODIFIED_BY_USERID,
+		MODIFIED_DATE sql_MODIFIED_DATE, CREATED_DATE sql_CREATED_DATE,
+		PROCUREMENT_DOC_SEQ_NUM,
+		'true' as IS_ADDENDUM,
+		CUSTOM_LABEL,
+		PROCUREMENT_ADDM_DOCUMENT_ID 
+		FROM
+		PRCRMNT_ADDM_DOCUMENT
+		WHERE PROCUREMENT_ID = #{procurementId} order by PROCUREMENT_DOC_SEQ_NUM asc
+ 	</select>
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<insert id="insertProposalCustomQuestions" parameterType="com.nyc.hhs.model.ProposalQuestionAnswerBean">
+		INSERT
+		INTO PROCUREMENT_QUESTION_CONFIG(
+		PROCUREMENT_QN_ID,PROCUREMENT_ID,CUSTOM_QUESTION_TEXT,CREATED_DATE,
+		CREATED_BY_USERID,MODIFIED_DATE,MODIFIED_BY_USERID) 
+		VALUES(SEQ_PROC_QUESTION_CONFIG_ID.NEXTVAL,
+		#{procurementId,jdbcType=VARCHAR},
+		#{questionText,jdbcType=VARCHAR},
+		SYSDATE, #{createdBy,jdbcType=VARCHAR},
+		SYSDATE,
+		#{modifiedBy,jdbcType=VARCHAR})
+	</insert>
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<insert id="insertProposalMappingDoc" parameterType="com.nyc.hhs.model.ExtendedDocument">
+		INSERT
+		INTO PRCRMNT_DOCUMENT_MAPPING(PRCRMNT_DOCUMENT_MAPPING_ID,PROCUREMENT_DOCUMENT_ID,PROCUREMENT_ID
+		,PROCUREMENT_DOC_SEQ_NUM,VERSION_NUMBER,MODIFIED_BY_USERID
+		,MODIFIED_DATE,CREATED_DATE,CREATED_BY_USERID) 
+		VALUES(SEQ_PROC_DOCUMENT_MAPPING_ID.NEXTVAL,
+		SEQ_PROC_DOC_CONFIG_ID.CURRVAL,
+		#{procurementId,jdbcType=VARCHAR},
+		#{documentSeqNumber,jdbcType=VARCHAR},
+		'1',
+		#{createdBy,jdbcType=VARCHAR},SYSDATE,
+		SYSDATE,
+		#{lastModifiedById,jdbcType=VARCHAR})
+	</insert>
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<update id="updateProposalMappingDoc" parameterType="com.nyc.hhs.model.ExtendedDocument">
+		UPDATE
+		PRCRMNT_DOCUMENT_MAPPING SET
+		PROCUREMENT_DOC_SEQ_NUM =
+		#{documentSeqNumber,jdbcType=VARCHAR},
+		MODIFIED_DATE =
+		SYSDATE,
+		MODIFIED_BY_USERID =
+		#{lastModifiedById,jdbcType=VARCHAR} WHERE
+		PROCUREMENT_ID = #{procurementId}
+		AND PROCUREMENT_DOCUMENT_ID =
+		#{procurementDocumentId}
+	</update>
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<insert id="insertProposalMappingQues" parameterType="com.nyc.hhs.model.ProposalQuestionAnswerBean">
+		INSERT
+		INTO PRCRMNT_QUESTION_MAPPING(PRCRMNT_QUESTION_MAPPING_ID,PROCUREMENT_QN_ID,PROCUREMENT_ID
+		,QUESTION_SEQUENCE_NUMBER,VERSION_NUMBER,MODIFIED_BY_USERID
+		,MODIFIED_DATE,CREATED_DATE,CREATED_BY_USERID) 
+		VALUES(SEQ_PROC_QUESTION_MAPPING_ID.NEXTVAL,
+		SEQ_PROC_QUESTION_CONFIG_ID.CURRVAL,
+		#{procurementId,jdbcType=VARCHAR},
+		#{questionSeqNo,jdbcType=VARCHAR},
+		'1',
+		#{createdBy,jdbcType=VARCHAR},SYSDATE,
+		SYSDATE,
+		#{modifiedBy,jdbcType=VARCHAR})
+	</insert>
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<update id="updateProposalMappingQues" parameterType="com.nyc.hhs.model.ProposalQuestionAnswerBean">
+		UPDATE
+		PRCRMNT_QUESTION_MAPPING SET
+		QUESTION_SEQUENCE_NUMBER =
+		#{questionSeqNo,jdbcType=VARCHAR},
+		MODIFIED_DATE =
+		SYSDATE,
+		MODIFIED_BY_USERID =
+		#{modifiedBy,jdbcType=VARCHAR} WHERE
+		PROCUREMENT_ID = #{procurementId}
+		AND PROCUREMENT_QN_ID =
+		#{procurementQnId}
+	</update><!--
+	<update id="updateProposalCustomQuestions" parameterType="com.nyc.hhs.model.ProposalQuestionAnswerBean">
+		UPDATE
+		PROCUREMENT_QUESTION_CONFIG SET
+		CUSTOM_QUESTION_FLAG =
+		#{questionFlag,jdbcType=VARCHAR},
+		CUSTOM_QUESTION_TEXT =
+		#{questionText,jdbcType=VARCHAR}, MODIFIED_DATE =
+		SYSDATE,
+		MODIFIED_BY_USERID =
+		#{modifiedBy,jdbcType=VARCHAR} WHERE
+		PROCUREMENT_ID = #{procurementId}
+		AND PROCUREMENT_QN_ID =
+		#{questionSeqNo}
+	</update>
+	-->
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<update id="updateProposalCustomQuestions" parameterType="com.nyc.hhs.model.ProposalQuestionAnswerBean">
+		UPDATE
+		PROCUREMENT_QUESTION_CONFIG SET
+		CUSTOM_QUESTION_TEXT =
+		#{questionText,jdbcType=VARCHAR}, MODIFIED_DATE =
+		SYSDATE,
+		MODIFIED_BY_USERID =
+		#{modifiedBy,jdbcType=VARCHAR} WHERE
+		PROCUREMENT_ID = #{procurementId}
+		AND PROCUREMENT_QN_ID =
+		#{procurementQnId}
+	</update>
+
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<insert id="insertAddendumProposalCustomQuestions"
+		parameterType="com.nyc.hhs.model.ProposalQuestionAnswerBean">
+		INSERT
+		INTO PRCRMNT_ADDM_QUESTION_CONFIG 
+		(ADDENDUM_QN_ID,PROCUREMENT_ID,QUESTION_SEQ_NUM,
+		CUSTOM_QUESTION_TEXT,CREATED_DATE,CREATED_BY_USERID,
+		MODIFIED_DATE,MODIFIED_BY_USERID,PROCUREMENT_QN_ID) 
+		VALUES(SEQ_PROC_QUESTION_CONFIG_ID.NEXTVAL,
+		#{procurementId,jdbcType=VARCHAR},
+		#{questionSeqNo,jdbcType=VARCHAR},
+		#{questionText,jdbcType=VARCHAR},
+		SYSDATE, #{createdBy,jdbcType=VARCHAR},
+		SYSDATE,
+		#{modifiedBy,jdbcType=VARCHAR},
+		#{procurementQnId})
+	</insert><!--
+	<update id="updateAddendumProposalCustomQuestions"
+		parameterType="com.nyc.hhs.model.ProposalQuestionAnswerBean">
+		UPDATE
+		PRCRMNT_ADDM_QUESTION_CONFIG SET
+		CUSTOM_QUESTION_FLAG =
+		#{questionFlag,jdbcType=VARCHAR},
+		CUSTOM_QUESTION_TEXT =
+		#{questionText,jdbcType=VARCHAR}, MODIFIED_DATE
+		=
+		SYSDATE,
+		MODIFIED_BY_USERID =
+		#{modifiedBy,jdbcType=VARCHAR} WHERE
+		PROCUREMENT_ID = #{procurementId}
+		AND ADDENDUM_QN_ID =
+		#{questionSeqNo}
+	</update>
+	-->
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<update id="updateAddendumProposalCustomQuestions"
+		parameterType="com.nyc.hhs.model.ProposalQuestionAnswerBean">
+		UPDATE
+		PRCRMNT_ADDM_QUESTION_CONFIG SET
+		CUSTOM_QUESTION_TEXT =
+		#{questionText,jdbcType=VARCHAR},
+		QUESTION_SEQ_NUM =
+		#{questionSeqNo,jdbcType=VARCHAR},
+		MODIFIED_DATE = SYSDATE,
+		MODIFIED_BY_USERID =
+		#{modifiedBy,jdbcType=VARCHAR} WHERE
+		PROCUREMENT_ID = #{procurementId}
+		 <!--<if test="procurementQnId != null">
+		 AND PROCUREMENT_QN_ID =
+		#{procurementQnId}
+		 </if>
+		 <if test="addendumId != null">
+		 -->AND ADDENDUM_QN_ID =
+		#{addendumId}
+		 <!-- </if>	  -->
+	</update>
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	   <!--Modified as a part of release 3.6.0 for enhancement request 6485-->
+	   <!--  start release 3.14.0-->
+	<insert id="insertProposalDocumentType" parameterType="com.nyc.hhs.model.ExtendedDocument">
+		INSERT
+		INTO PROCUREMENT_DOCUMENT_CONFIG (PROCUREMENT_DOCUMENT_ID,PROCUREMENT_ID,PROCUREMENT_DOCUMENT_TYPE,REQUIRED_FLAG,
+			CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,MODIFIED_BY_USERID,CUSTOM_LABEL)
+		VALUES(SEQ_PROC_DOC_CONFIG_ID.NEXTVAL,
+		#{procurementId,jdbcType=VARCHAR},
+		#{documentType,jdbcType=VARCHAR}, #{requiredFlag,jdbcType=VARCHAR},
+		SYSDATE, #{createdBy,jdbcType=VARCHAR},
+		SYSDATE,
+		#{lastModifiedById,jdbcType=VARCHAR},
+		#{customLabelName,jdbcType=VARCHAR})
+	</insert>
+ 	<!--  end release 3.14.0-->
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	   <!--Modified as a part of release 3.6.0 for enhancement request 6485-->
+	<update id="updateProposalDocumentType" parameterType="com.nyc.hhs.model.ExtendedDocument">
+		UPDATE
+		PROCUREMENT_DOCUMENT_CONFIG SET PROCUREMENT_DOCUMENT_TYPE =
+		#{documentType,jdbcType=VARCHAR}, MODIFIED_DATE =
+		SYSDATE,
+		MODIFIED_BY_USERID =
+		#{lastModifiedById,jdbcType=VARCHAR},
+		CUSTOM_LABEL = 
+		#{customLabelName,jdbcType=VARCHAR}
+		WHERE PROCUREMENT_ID =
+		#{procurementId} AND PROCUREMENT_DOCUMENT_ID =
+		#{procurementDocumentId} AND
+		REQUIRED_FLAG =
+		#{requiredFlag}
+	</update>
+
+    <!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+       <!--Modified as a part of release 3.6.0 for enhancement request 6485-->
+	<insert id="insertAddendumProposalDocumentType" parameterType="com.nyc.hhs.model.ExtendedDocument">
+		INSERT
+		INTO PRCRMNT_ADDM_DOCUMENT 
+		(PROCUREMENT_ADDM_DOCUMENT_ID,PROCUREMENT_ID,PROCUREMENT_DOC_SEQ_NUM,
+		PROCUREMENT_DOCUMENT_TYPE,REQUIRED_FLAG,CREATED_DATE,CREATED_BY_USERID,
+		MODIFIED_DATE,MODIFIED_BY_USERID,PROCUREMENT_DOCUMENT_ID,CUSTOM_LABEL)
+		VALUES(SEQ_PROC_DOC_CONFIG_ID.NEXTVAL,
+		#{procurementId,jdbcType=VARCHAR},
+		#{documentSeqNumber,jdbcType=VARCHAR},
+		#{documentType,jdbcType=VARCHAR}, #{requiredFlag,jdbcType=VARCHAR},
+		SYSDATE, #{createdBy,jdbcType=VARCHAR},
+		SYSDATE,
+		#{lastModifiedById,jdbcType=VARCHAR},
+		#{procurementDocumentId,jdbcType=VARCHAR},
+		#{customLabelName,jdbcType=VARCHAR})
+	</insert>
+
+    <!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+       <!--Modified as a part of release 3.6.0 for enhancement request 6485-->
+	<update id="updateAddendumProposalDocumentType" parameterType="com.nyc.hhs.model.ExtendedDocument">
+		UPDATE
+		PRCRMNT_ADDM_DOCUMENT SET PROCUREMENT_DOCUMENT_TYPE =
+		#{documentType,jdbcType=VARCHAR}, MODIFIED_DATE =
+		SYSDATE,
+		MODIFIED_BY_USERID =
+		#{lastModifiedById,jdbcType=VARCHAR}, 
+		PROCUREMENT_DOC_SEQ_NUM = #{documentSeqNumber,jdbcType=VARCHAR},
+		CUSTOM_LABEL = #{customLabelName,jdbcType=VARCHAR}
+		WHERE PROCUREMENT_ID = #{procurementId}
+		<!--<choose> 
+		<when test="procurementDocumentId != null">
+		 AND PROCUREMENT_DOCUMENT_ID =
+		 #{procurementDocumentId}
+		 </when>
+		 <otherwise>-->
+		 AND PROCUREMENT_ADDM_DOCUMENT_ID =
+		 #{addendumDocumentId}
+		 <!--</otherwise> 
+		 </choose>	 
+	--></update>
+
+    <!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<delete id="deleteProposalCustomQuestions" parameterType="string">
+		DELETE
+		FROM PROCUREMENT_QUESTION_CONFIG WHERE PROCUREMENT_QN_ID =
+		#{quesSeqNo}
+	</delete>
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<delete id="deleteProposalMappingQues" parameterType="string">
+		DELETE
+		FROM PRCRMNT_QUESTION_MAPPING WHERE PROCUREMENT_QN_ID =
+		#{quesSeqNo}
+	</delete>
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<delete id="deleteProposalMappingDoc" parameterType="string">
+		DELETE
+		FROM PRCRMNT_DOCUMENT_MAPPING WHERE PROCUREMENT_DOCUMENT_ID =
+		#{procurementDocumentId}
+	</delete>
+	
+    <!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<delete id="deleteAddendumProposalCustomQuestions"
+		parameterType="string">
+		DELETE FROM PRCRMNT_ADDM_QUESTION_CONFIG WHERE
+		<choose>
+		<when test="addendumId != null">		 
+		ADDENDUM_QN_ID = #{addendumId}
+		</when>
+		<otherwise>PROCUREMENT_QN_ID = #{procurementQnId}
+		</otherwise>
+		</choose>
+	</delete>
+
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<delete id="deleteProposalDocumentType" parameterType="string">
+		DELETE
+		FROM PROCUREMENT_DOCUMENT_CONFIG WHERE PROCUREMENT_DOCUMENT_ID =
+		#{procurementDocumentId}
+	</delete>
+ 	
+ 	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<delete id="deleteAddendumProposalDocumentType" parameterType="string">
+		DELETE FROM PRCRMNT_ADDM_DOCUMENT WHERE
+		<choose>
+		<when test="addendumDocumentId != null">		 
+		PROCUREMENT_ADDM_DOCUMENT_ID = #{addendumDocumentId}
+		</when>
+		<otherwise>PROCUREMENT_ADDM_DOCUMENT_ID = #{procurementDocumentId}
+		</otherwise>
+		</choose>
+	</delete>
+	
+	<update id="updateProcurementData" parameterType="map">
+		UPDATE
+		PROCUREMENT PROC
+		SET (
+		PROC.PROGRAM_ID,
+		PROC.PROCUREMENT_TITLE,
+		PROC.ACCELERATOR_PRMRY_CONTACT_ID,
+		PROC.ACCELERATOR_SECNDRY_CONTACT_ID,
+		PROC.AGENCY_PRIMARY_CONTACT_ID,
+		PROC.AGENCY_SECONDARY_CONTACT_ID,
+		PROC.AGENCY_EMAIL_CONTACT,
+		PROC.PROCUREMENT_DESCRIPTION,
+		PROC.ESTIMATED_NUM_CONTRACTS,
+		PROC.ESTIMATED_PROCUREMENT_VALUE,
+		PROC.LINK_TO_CONCEPT_REPORT,
+		PROC.UPD_RFP_RELEASE_DATE,
+		PROC.UPD_PRE_PROPOSAL_CONF_DATE,
+		PROC.UPD_PROPOSAL_DUE_DATE,
+		PROC.UPD_FRST_DRAFT_RFP_DATE,
+		PROC.UPD_FINALIZE_RFP_DATE,
+		PROC.UPD_EVALUATOR_TRAINING_DATE,
+		PROC.UPD_FST_RND_EVAL_CMPLT_DATE,
+		PROC.UPD_FINALIZE_EVAL_DATE,
+		PROC.UPD_AWARD_SELECTION_DATE,
+		PROC.UPD_CONTRACT_START_DATE,
+		PROC.UPD_CONTRACT_END_DATE,
+		PROC.SERVICE_FILTER,
+		PROC.LAST_MODIFIED_DATE,
+		PROC.LAST_MODIFIED_USERID,
+		PROC.MODIFIED_BY_USERID,
+		PROC.MODIFIED_DATE,
+		PROC.SF_MODIFIED_USERID,
+		PROC.SF_MODIFIED_DATE,
+		PROC.LAST_PUBLISHED_DATE,
+		PROC.LAST_PUBLISHED_USERID,
+		PROC.SERVICE_UNITS_REQUIRED,
+		PROC.IS_OPEN_ENDED_RFP
+		<if test="isReleaseProcurement != null">
+			, PROC.RFP_RELEASE_DATE ,
+			PROC.RFP_RELEASE_USERID
+			,
+			PROC.STATUS_ID 
+		</if>
+		)=
+		(select
+		ADDEM.PROGRAM_ID,
+		addem.PROCUREMENT_TITLE,
+		addem.ACCELERATOR_PRMRY_CONTACT_ID,
+		addem.ACCELERATOR_SECNDRY_CONTACT_ID,
+		addem.AGENCY_PRIMARY_CONTACT_ID,
+		addem.AGENCY_SECONDARY_CONTACT_ID,
+		addem.AGENCY_EMAIL_CONTACT,
+		addem.PROCUREMENT_DESCRIPTION,
+		addem.ESTIMATED_NUM_CONTRACTS,
+		addem.ESTIMATED_PROCUREMENT_VALUE,
+		addem.LINK_TO_CONCEPT_REPORT,
+		addem.UPD_RFP_RELEASE_DATE,
+		addem.UPD_PRE_PROPOSAL_CONF_DATE,
+		addem.UPD_PROPOSAL_DUE_DATE,
+		addem.UPD_FRST_DRAFT_RFP_DATE,
+		addem.UPD_FINALIZE_RFP_DATE,
+		addem.UPD_EVALUATOR_TRAINING_DATE,
+		addem.UPD_FST_RND_EVAL_CMPLT_DATE,
+		addem.UPD_FINALIZE_EVAL_DATE,
+		addem.UPD_AWARD_SELECTION_DATE,
+		addem.UPD_CONTRACT_START_DATE,
+		addem.UPD_CONTRACT_END_DATE,
+		addem.SERVICE_FILTER,
+		sysdate,
+		#{userId,jdbcType=VARCHAR},
+		#{userId,jdbcType=VARCHAR},
+		sysdate,
+		addem.SF_MODIFIED_USERID,
+		addem.SF_MODIFIED_DATE,
+		sysdate,
+		#{userId,jdbcType=VARCHAR},
+		addem.SERVICE_UNITS_REQUIRED,
+		addem.IS_OPEN_ENDED_RFP
+		<if test="isReleaseProcurement != null">
+			, sysdate,
+			#{userId,jdbcType=VARCHAR},
+			#{procurementStatusCode,jdbcType=VARCHAR}
+		</if>
+		from
+		PROCUREMENT_ADDENDUM addem
+		WHERE
+		addem.PROCUREMENT_ID=
+		#{procurementId,
+		jdbcType=VARCHAR})
+		WHERE
+		PROCUREMENT_ID=#{procurementId,
+		jdbcType=VARCHAR}
+		and exists (
+		SELECT
+		PROCUREMENT_ADDENDUM.PROCUREMENT_ID from PROCUREMENT_ADDENDUM
+		where
+		PROCUREMENT_ADDENDUM.PROCUREMENT_ID=#{procurementId,
+		jdbcType=VARCHAR}
+		)
+	</update>
+<!-- R6: refEpinId also getting set -->
+<!-- R6 emergency build defect-8646 - updated variable name in parameters -->
+	<update id="updateProcurementEpinInMasterTable" parameterType="hashmap">
+		UPDATE Procurement set epin = #{epin,
+		jdbcType=VARCHAR}, REF_APT_EPIN_ID = #{refAptEpinId,
+		jdbcType=VARCHAR} where
+		procurement_id = #{procurementId,
+		jdbcType=VARCHAR}
+	</update>
+
+	<update id="updateProcurementDataOnPublish" parameterType="map">
+		UPDATE
+		PROCUREMENT PROC
+		SET (
+		PROC.PROGRAM_ID,
+		PROC.PROCUREMENT_TITLE,
+		PROC.ACCELERATOR_PRMRY_CONTACT_ID,
+		PROC.ACCELERATOR_SECNDRY_CONTACT_ID,
+		PROC.AGENCY_PRIMARY_CONTACT_ID,
+		PROC.AGENCY_SECONDARY_CONTACT_ID,
+		PROC.AGENCY_EMAIL_CONTACT,
+		PROC.PROCUREMENT_DESCRIPTION,
+		PROC.ESTIMATED_NUM_CONTRACTS,
+		PROC.ESTIMATED_PROCUREMENT_VALUE,
+		PROC.LINK_TO_CONCEPT_REPORT,
+		PROC.UPD_RFP_RELEASE_DATE,
+		PROC.UPD_PRE_PROPOSAL_CONF_DATE,
+		PROC.UPD_PROPOSAL_DUE_DATE,
+		PROC.UPD_FRST_DRAFT_RFP_DATE,
+		PROC.UPD_FINALIZE_RFP_DATE,
+		PROC.UPD_EVALUATOR_TRAINING_DATE,
+		PROC.UPD_FST_RND_EVAL_CMPLT_DATE,
+		PROC.UPD_FINALIZE_EVAL_DATE,
+		PROC.UPD_AWARD_SELECTION_DATE,
+		PROC.UPD_CONTRACT_START_DATE,
+		PROC.UPD_CONTRACT_END_DATE,
+		PROC.SERVICE_FILTER, 
+		PROC.LAST_MODIFIED_DATE,
+		PROC.LAST_MODIFIED_USERID,
+		PROC.MODIFIED_BY_USERID,
+		PROC.MODIFIED_DATE,
+		PROC.SF_MODIFIED_USERID,
+		PROC.SF_MODIFIED_DATE,
+		PROC.LAST_PUBLISHED_DATE,
+		PROC.LAST_PUBLISHED_USERID,
+		PROC.SERVICE_UNITS_REQUIRED)=
+		(select
+		ADDEM.PROGRAM_ID,
+		addem.PROCUREMENT_TITLE,
+		addem.ACCELERATOR_PRMRY_CONTACT_ID,
+		addem.ACCELERATOR_SECNDRY_CONTACT_ID,
+		addem.AGENCY_PRIMARY_CONTACT_ID,
+		addem.AGENCY_SECONDARY_CONTACT_ID,
+		addem.AGENCY_EMAIL_CONTACT,
+		addem.PROCUREMENT_DESCRIPTION,
+		addem.ESTIMATED_NUM_CONTRACTS,
+		addem.ESTIMATED_PROCUREMENT_VALUE,
+		addem.LINK_TO_CONCEPT_REPORT,
+		addem.UPD_RFP_RELEASE_DATE,
+		addem.UPD_PRE_PROPOSAL_CONF_DATE,
+		addem.UPD_PROPOSAL_DUE_DATE,
+		addem.UPD_FRST_DRAFT_RFP_DATE,
+		addem.UPD_FINALIZE_RFP_DATE,
+		addem.UPD_EVALUATOR_TRAINING_DATE,
+		addem.UPD_FST_RND_EVAL_CMPLT_DATE,
+		addem.UPD_FINALIZE_EVAL_DATE,
+		addem.UPD_AWARD_SELECTION_DATE,
+		addem.UPD_CONTRACT_START_DATE,
+		addem.UPD_CONTRACT_END_DATE,
+		addem.SERVICE_FILTER,
+		sysdate,
+		#{userId,jdbcType=VARCHAR},
+		#{userId,jdbcType=VARCHAR},
+		sysdate,
+		addem.SF_MODIFIED_USERID,
+		addem.SF_MODIFIED_DATE,
+		sysdate,
+		#{userId,jdbcType=VARCHAR},
+		addem.SERVICE_UNITS_REQUIRED
+		from
+		PROCUREMENT_ADDENDUM addem
+		WHERE
+		addem.PROCUREMENT_ID=
+		#{procurementId,
+		jdbcType=VARCHAR})
+		WHERE
+		PROCUREMENT_ID=#{procurementId,
+		jdbcType=VARCHAR}
+		and exists (
+		SELECT
+		PROCUREMENT_ADDENDUM.PROCUREMENT_ID from PROCUREMENT_ADDENDUM
+		where
+		PROCUREMENT_ADDENDUM.PROCUREMENT_ID=#{procurementId,
+		jdbcType=VARCHAR}
+		)
+	</update>
+
+	<update id="updateProcurementStatusOnPublish" parameterType="Map">
+		UPDATE
+		PROCUREMENT set status_id =
+		#{procurementStatus,jdbcType=VARCHAR},
+		LAST_MODIFIED_USERID =
+		#{userId,jdbcType=VARCHAR},
+		MODIFIED_BY_USERID =
+		#{userId,jdbcType=VARCHAR},
+		MODIFIED_DATE = sysdate,
+		LAST_MODIFIED_DATE
+		= sysdate,
+		LAST_PUBLISHED_DATE = sysdate,
+		LAST_PUBLISHED_USERID =
+		#{userId,jdbcType=VARCHAR}
+		where
+		procurement_id =
+		#{procurementId,jdbcType=VARCHAR}
+	</update>
+	
+	<resultMap type="com.nyc.hhs.model.ProcurementInfo" id="procOrgAndTitleMap">
+		<result property="orgId" column="ORGANIZATION_ID" />
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+	</resultMap>
+	
+	<select id="fetchProcTitleAndOrgList" parameterType="hashmap"
+		resultMap="procOrgAndTitleMap">
+		SELECT DISTINCT PROCONF.ORGANIZATION_ID,
+		PROC.PROCUREMENT_TITLE FROM PROCUREMENT PROC,
+		PROPOSAL_CONFIG PROCONF WHERE PROC.PROCUREMENT_ID = PROCONF.PROCUREMENT_ID AND 
+		PROC.PROCUREMENT_ID = #{procurementId,jdbcType=VARCHAR} AND 
+		PROCONF.PROPOSAL_STATUS_ID = #{statusId,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="fetchProcurementAddendumData" parameterType="String"
+		resultType="Integer">
+		select procurement_id from PRCRMNT_ADDM_DOCUMENT where
+		procurement_id = #{asProcurementId,jdbcType=VARCHAR}
+		union
+		select
+		procurement_id from PRCRMNT_ADDM_EVALUATE_CRITERIA where
+		procurement_id = #{asProcurementId,jdbcType=VARCHAR}
+		union 
+		select procurement_id from PRCRMNT_ADDM_QUESTION_CONFIG where procurement_id
+		= #{asProcurementId,jdbcType=VARCHAR}
+		union  
+		select procurement_id from PRCRMNT_ADDM_RFP_DOCUMENT where procurement_id =
+		#{asProcurementId,jdbcType=VARCHAR}
+		union  
+		select procurement_id from PRCRMNT_ADDM_SERVICES where procurement_id =
+		#{asProcurementId,jdbcType=VARCHAR}
+		union  
+		select procurement_id from PROCUREMENT_ADDENDUM where procurement_id =
+		#{asProcurementId,jdbcType=VARCHAR}
+	</select>
+	
+	<delete id="deleteProcurementDocFromVault" parameterType="String">
+		DELETE
+		FROM
+		PRCRMNT_ADDM_RFP_DOCUMENT WHERE
+		DOCUMENT_IDENTIFIER_ID=#{asDocumentId}
+	</delete>
+	
+	<delete id="deleteProcurementProviderData" parameterType="string">
+		delete
+		from procurement_provider where procurement_id = #{procurementId}
+	</delete>
+	<select id="fetchProcurementStatusId" parameterType="java.lang.String"
+		resultType="int">
+		SELECT STATUS_ID FROM PROCUREMENT WHERE
+		PROCUREMENT_ID=#{procurementId} 
+	</select>
+	
+	<select id="fetchPrevProcStatusId" parameterType="java.lang.String"
+		resultType="map">
+		SELECT prev_status_id, IS_OPEN_ENDED_RFP FROM PROCUREMENT
+		WHERE PROCUREMENT_ID=#{procurementId} 
+	</select>
+	
+	<select id="fetchServiceUnitFlag" parameterType="string"
+		resultType="string">
+		SELECT SERVICE_UNITS_REQUIRED FROM PROCUREMENT WHERE
+		PROCUREMENT_ID=#{procurementId}
+	</select>
+	
+	<delete id="deleteRemoveCompetitionPool" parameterType="map">
+		DELETE
+		FROM
+		COMPETITION_POOL WHERE PROCUREMENT_ID=#{asProcurementId}
+	</delete>
+	
+	<select id="fetchCompetitionPoolData" parameterType="string"
+		resultType="string">
+		SELECT COMPETITION_POOL_TITLE FROM COMPETITION_POOL 
+		WHERE PROCUREMENT_ID=#{asProcurementId}
+	</select>
+	
+	<insert id="insertNewCompetitionPool" parameterType="map">
+		INSERT INTO
+		COMPETITION_POOL
+		(COMPETITION_POOL_ID, PROCUREMENT_ID,
+		COMPETITION_POOL_TITLE,
+			CREATED_DATE, CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID)
+		VALUES(SEQ_COMPETITION_CONF_ID.NEXTVAL, #{asProcurementId},
+		#{lsSelectedPool},
+			systimestamp, #{asUserId}, systimestamp, #{asUserId})
+	</insert>
+	<insert id="insertNewCompetitionPoolNotIn" parameterType="map">
+		Merge Into COMPETITION_POOL cp
+		Using dual
+		On (  PROCUREMENT_ID = #{asProcurementId} and COMPETITION_POOL_TITLE = #{lsSelectedPool})
+		when not matched then
+	  		INSERT 	(COMPETITION_POOL_ID, PROCUREMENT_ID,	COMPETITION_POOL_TITLE, CREATED_DATE, CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID)
+			VALUES(SEQ_COMPETITION_CONF_ID.NEXTVAL, #{asProcurementId}, #{lsSelectedPool},	systimestamp, #{asUserId}, systimestamp, #{asUserId})
+	</insert>
+	<delete id="deleteCompetitionPools" parameterType="map">
+		DELETE FROM
+		COMPETITION_POOL WHERE PROCUREMENT_ID=#{asProcurementId}
+	</delete>
+	<!-- [Start] R6.3 added for QC6627  -->
+	<delete id="deleteCompetitionPoolsForAddendum" parameterType="map">
+		delete from COMPETITION_POOL
+		where  PROCUREMENT_ID=#{asProcurementId}
+		<if test="selectedPool != null">
+			and    COMPETITION_POOL_TITLE not in 
+				<foreach item="items" index="index" collection="selectedPool"
+						open="(" separator="," close=")">
+						#{items}
+		   		</foreach>
+   		</if>
+		and   ( COMPETITION_POOL_ID not in ( select COMPETITION_POOL_ID from EVALUATION_POOL_MAPPING where PROCUREMENT_ID=#{asProcurementId} )
+		       or   COMPETITION_POOL_ID not in ( select COMPETITION_POOL_ID from PROPOSAL_CONFIG where PROCUREMENT_ID=#{asProcurementId} 
+                                    UNION all
+                                    select TEMP_COMPETITION_POOL_ID from PROPOSAL_CONFIG where PROCUREMENT_ID=#{asProcurementId} 
+                                 )
+              )		
+	</delete>
+<!-- [End] R6.3 added for QC6627  -->
+	<select id="checkIfFavoriteExists" parameterType="map"
+		resultType="int">
+		SELECT count(PROCUREMENT_FAVORITES_ID) FROM
+		PROCUREMENT_FAVORITES
+		WHERE PROCUREMENT_ID=#{procurementId} and ORGANIZATION_ID=#{organizationId}
+	</select>
+	
+	<insert id="saveFavorites">
+		INSERT INTO PROCUREMENT_FAVORITES
+		(PROCUREMENT_FAVORITES_ID, PROCUREMENT_ID, ORGANIZATION_ID,
+			CREATED_DATE, CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID)
+		VALUES(SEQ_PROCUREMENT_FAVORITES_ID.NEXTVAL, #{procurementId},
+		#{organizationId},
+			systimestamp, #{userId}, systimestamp, #{userId})
+	</insert>
+	
+	<delete id="deleteFavorites" parameterType="map">
+		DELETE FROM
+		PROCUREMENT_FAVORITES WHERE
+		ORGANIZATION_ID=#{organizationId} AND
+		PROCUREMENT_ID in 
+		<foreach item="items" index="index" collection="procurementIdList"
+				open="(" separator="," close=")">
+				#{items}
+   		</foreach>
+	</delete>
+	
+	<insert id="insertEvaluationGroup" parameterType="com.nyc.hhs.model.Procurement">
+		INSERT INTO
+		EVALUATION_GROUP
+		(EVALUATION_GROUP_ID, PROCUREMENT_ID,
+		EVALUATION_GROUP_TITLE, CREATED_DATE,
+		CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID, STATUS_ID)
+		VALUES(SEQ_EVALUATION_GRP_ID.NEXTVAL, #{procurementId}, 
+		#{evaluationGroupTitle} || to_char((select count(procurement_id)+1
+		from evaluation_group where procurement_id = #{procurementId}),
+		'000'),
+		systimestamp, #{createdBy}, systimestamp, #{modifiedBy},
+		#{evalGroupStatus})
+	</insert>
+	
+	<delete id="deleteProviderQuesResponseDataGroup" parameterType="String">
+		DELETE FROM
+		PROPOSAL_QUESTION_RESPONSE
+		WHERE PROPOSAL_ID IN (select
+		proposal_id from proposal_config where Evaluation_group_id in (select
+		evaluation_group_id from evaluation_group
+		where procurement_id = #{lsProcurementId} and submission_close_date is
+		null) OR (Evaluation_group_id is null and procurement_id =
+		#{lsProcurementId}))
+	</delete>
+	
+	<delete id="deleteProviderSiteDataGroup" parameterType="String">
+		delete
+		from PROPOSAL_SITE
+		WHERE PROPOSAL_ID IN (select proposal_id from proposal_config where
+		Evaluation_group_id in (select evaluation_group_id from
+		evaluation_group
+		where procurement_id = #{lsProcurementId} and submission_close_date is
+		null) OR (Evaluation_group_id is null and procurement_id =
+		#{lsProcurementId}))
+	</delete>
+	
+	<delete id="deleteProvidersDataGroup" parameterType="String">
+		DELETE FROM
+		PROPOSAL_CONFIG
+		where evaluation_group_id in (select
+		evaluation_group_id from evaluation_group
+		where procurement_id = #{lsProcurementId} and submission_close_date is
+		null) OR (Evaluation_group_id is null and procurement_id =
+		#{lsProcurementId}) 
+	</delete>
+	
+	<delete id="deleteProposalDocumentGroup" parameterType="String">
+		DELETE
+		FROM
+		PROPOSAL_DOCUMENT
+		WHERE PROPOSAL_ID IN (select proposal_id from
+		proposal_config where Evaluation_group_id in (select
+		evaluation_group_id from evaluation_group
+		where procurement_id = #{lsProcurementId} and submission_close_date is
+		null) OR (Evaluation_group_id is null and procurement_id =
+		#{lsProcurementId}))
+	</delete>
+	
+	<delete id="delEvalPoolMappingData" parameterType="string">
+		delete from
+		evaluation_pool_mapping
+		where EVALUATION_GROUP_ID in (select evaluation_group_id from
+		evaluation_group
+		where procurement_id = #{lsProcurementId} and submission_close_date is
+		null)
+	</delete>
+	
+	<!--<delete id="delEvalGroupData" parameterType="string"> delete from evaluation_group 
+		where procurement_id = #{lsProcurementId} and submission_close_date is null 
+		</delete> -->
+	<select id="isOpenEndedOrZeroValue" parameterType="string"
+		resultType="int">
+		SELECT count(p.PROCUREMENT_ID) FROM PROCUREMENT p,
+		PROCUREMENT_ADDENDUM pa
+		WHERE p.PROCUREMENT_ID = #{asProcurementId}
+		and
+		p.PROCUREMENT_ID = pa.PROCUREMENT_ID(+)
+		and (p.IS_OPEN_ENDED_RFP = '1'
+		OR ((pa.ESTIMATED_PROCUREMENT_VALUE is null AND
+		p.ESTIMATED_PROCUREMENT_VALUE = 0)
+		OR (pa.ESTIMATED_PROCUREMENT_VALUE is not null AND
+		pa.ESTIMATED_PROCUREMENT_VALUE = 0)))
+	</select>
+	
+	<select id="fetchProcurementContractTitleList" parameterType="map"
+		resultType="map">
+		Select procurement_title, PROCUREMENT_TYPE from
+			(SELECT distinct procurement_title, 'P' PROCUREMENT_TYPE FROM PROCUREMENT 
+			WHERE lower(procurement_title) like #{aoInputParam}
+			Union ALl
+			SELECT distinct contract_title, 'C' PROCUREMENT_TYPE FROM CONTRACT 
+			WHERE lower(contract_title) like #{aoInputParam} and 
+	    contract_title not in (SELECT distinct procurement_title FROM PROCUREMENT 
+			WHERE lower(procurement_title) like #{aoInputParam})
+	    )
+		order by lower(procurement_title) asc
+	</select>
+	
+	<!--   Begin QC5446 -->
+	<select id="fetchProcurementTitleList" parameterType="map"
+		resultType="map">
+		Select procurement_title, PROCUREMENT_TYPE from
+			(SELECT distinct procurement_title, 'P' PROCUREMENT_TYPE FROM PROCUREMENT 
+			WHERE lower(procurement_title) like #{aoInputParam} )
+		order by lower(procurement_title) asc
+	</select>
+	<!--   End QC5446  -->
+	
+	<select id="fetchCompetitionPoolTitleList" parameterType="MAP"
+		resultType="map">
+		SELECT to_char(cp.competition_pool_id) competition_pool_id,
+		cp.competition_pool_title FROM COMPETITION_POOL cp, Procurement P
+		WHERE lower(cp.competition_pool_title) like #{aoInputParam}
+		and
+		cp.procurement_id = p.procurement_id
+		and p.procurement_title =
+		#{procurementTitle}
+		order by lower(competition_pool_title) asc
+	</select>
+	
+	<select id="getCompetitionPoolStatus" parameterType="map"
+		resultType="string">
+		Select status_id from evaluation_pool_mapping 
+		where evaluation_pool_mapping_id = #{evaluationPoolMappingId}
+	</select>
+	
+	<select id="getProvRestrictSubmitFlag" parameterType="map"
+		resultType="int">
+		Select Restrict_submit from Procurement_Provider 
+		where procurement_id = #{asProcurementId} AND ORGANIZATION_ID =
+		#{ORGANIZATION_ID}
+	</select>
+	
+	<select id="getProvRestrictSubmitFlagProposal" parameterType="hashmap"
+		resultType="int">
+		Select pp.Restrict_submit from Procurement_Provider pp,
+		proposal_config pc
+		where pp.procurement_id = #{procurementId} AND
+		pp.ORGANIZATION_ID = pc.organization_id
+		and pc.proposal_id =
+		#{proposalId}
+	</select>
+	
+	<select id="fetchNewDocsCount" parameterType="string"
+		resultType="int">
+		select count(1) from PRCRMNT_ADDM_DOCUMENT 
+		where PROCUREMENT_DOCUMENT_ID is null and PROCUREMENT_ID=#{asProcId}
+	</select>	
+	
+	<!-- added below in build 3.6.0, defect id 6498 -->
+	<select id="fetchProcurementTitle" parameterType="string"
+		resultType="string">
+		select PROCUREMENT_TITLE
+		from procurement where PROCUREMENT_ID = #{procurementId}
+	</select>
+	
+	
+	<!-- Start : Added in R5 -->
+	<insert id="insertNewPsrDetails">
+		INSERT INTO
+		PSR_DETAILS(PSR_DETAILS_ID,PROCUREMENT_ID,BASIS_CONTRACTING_OUT,ANTICIPATE_LEVEL_COMPETITION,
+		CONSIDERATION_PRICE,CONCEPT_REPORT_RELEASE_DATE,
+		RENEWAL_OPTION,MULTI_YEAR_HUMAN_SERVIC_CNTCT,
+		CONTRACT_TERM_INFO,CREATED_USER_ID,CREATE_DATE,MODIFIED_BY_AGENCY_ID,MODIFIED_DATE_AGENCY,
+		VERSION_NUMBER,STATUS_ID,MULTI_YEAR_HUMAN_SERVIC_OPT,PDF_FLAG)
+		VALUES(SEQ_PSR_DETAILS_ID.NEXTVAL,#{procurementId,jdbcType=NUMERIC},
+		#{basisContractOut,jdbcType=VARCHAR},#{anticipateLevelComp,jdbcType=VARCHAR},
+		#{considerationPrice,jdbcType=VARCHAR},
+		to_date(#{conceptReportReleaseDt,jdbcType=VARCHAR},'MM/dd/YYYY
+		HH:MI:SS'),
+		#{renewalOption,jdbcType=VARCHAR},#{multiYearHumanServContract,jdbcType=VARCHAR},
+		#{contractTermInfo,jdbcType=VARCHAR},
+		#{userId,jdbcType=VARCHAR},
+		sysdate,#{userId,jdbcType=VARCHAR},
+		sysdate,
+		#{psrPcofVersionNumber},
+		#{statusId,jdbcType=VARCHAR},
+		#{multiYearHumanServOpt,jdbcType=VARCHAR},0
+		)
+	</insert>
+	<!-- End : Added in R5 -->
+	
+	<!-- Start : Added in R5 -->
+	
+	<update id="updatePsrDetails">
+		update psr_details
+		set
+		basis_contracting_out=#{basisContractOut,jdbcType=VARCHAR},anticipate_level_competition=#{anticipateLevelComp,jdbcType=VARCHAR},
+		consideration_price=#{considerationPrice,jdbcType=VARCHAR},concept_report_release_date=to_date(#{conceptReportReleaseDt,jdbcType=VARCHAR},
+		'MM/dd/YYYY HH:MI:SS'),
+		renewal_option=#{renewalOption,jdbcType=VARCHAR},multi_year_human_servic_cntct=#{multiYearHumanServContract,jdbcType=VARCHAR},
+		contract_term_info=#{contractTermInfo,jdbcType=VARCHAR},MODIFIED_BY_AGENCY_ID=#{userId,jdbcType=VARCHAR},MODIFIED_DATE_AGENCY=sysdate,
+		STATUS_ID=#{statusId,jdbcType=VARCHAR},
+		MULTI_YEAR_HUMAN_SERVIC_OPT=#{multiYearHumanServOpt,jdbcType=VARCHAR}
+		where procurement_id=#{procurementId,jdbcType=NUMERIC} and
+		version_number = #{psrPcofVersionNumber}
+	</update>
+	<!-- End : Added in R5 -->
+	
+	<!-- Start : Added in R5 -->
+	<update id="updatePsrStatusFlag" parameterType="hashmap">
+		update psr_details
+		set status_id= #{statusId,jdbcType=VARCHAR},MODIFIED_BY_CITY_ID= #{userId,jdbcType=VARCHAR},MODIFIED_DATE_CITY=sysdate,
+		PSR_APPROVED_START_DATE = (select nvl(pa.UPD_CONTRACT_START_DATE, proc.UPD_CONTRACT_START_DATE) 
+    	from procurement proc,procurement_addendum pa where	pa.procurement_id(+) = proc.procurement_id and proc.procurement_id=#{procurementId,jdbcType=VARCHAR}),
+		PSR_APPROVED_END_DATE=(select nvl(pa.UPD_CONTRACT_END_DATE, proc.UPD_CONTRACT_END_DATE) from procurement proc,procurement_addendum pa where	pa.procurement_id(+) = proc.procurement_id and	proc.procurement_id=#{procurementId,jdbcType=VARCHAR}),
+		PSR_APPROVED_AMOUNT=(select nvl(pa.ESTIMATED_PROCUREMENT_VALUE, proc.ESTIMATED_PROCUREMENT_VALUE) from procurement  proc,procurement_addendum pa where pa.procurement_id(+) = proc.procurement_id and proc.procurement_id=#{procurementId,jdbcType=VARCHAR})
+		where
+		procurement_id= #{procurementId,jdbcType=VARCHAR}
+	</update>
+	
+	<update id="updatePsrStatusFlagAgency" parameterType="hashmap">
+		update psr_details
+		set status_id= #{statusId,jdbcType=VARCHAR},MODIFIED_BY_AGENCY_ID= #{userId,jdbcType=VARCHAR},MODIFIED_DATE_AGENCY=sysdate
+		where
+		procurement_id= #{procurementId,jdbcType=VARCHAR}
+	</update>
+	<!-- End : Added in R5 -->
+	
+	<!-- Start : Added in R5 -->
+	<update id="updatePsrPdfStatusFlag" parameterType="hashmap">
+		update psr_details set pdf_flag=#{asPdfFlag,jdbcType=VARCHAR} where
+		procurement_id= #{procurementId,jdbcType=VARCHAR}
+	</update>
+	<!-- End : Added in R5 -->
+	
+	<!-- Start : Added in R5 -->
+	<select id="getPsrSummary" parameterType="int" resultMap="psrDetails">
+		SELECT procurement.procurement_id,nvl(pa.UPD_FINALIZE_RFP_DATE, procurement.UPD_FINALIZE_RFP_DATE) as UPD_FINALIZE_RFP_DATE,procurement.link_to_concept_report,
+		procurement.procurement_description,procurement.SERVICE_FILTER,
+		procurement.is_open_ended_rfp,
+		nvl(pa.upd_proposal_due_date, procurement.upd_proposal_due_date) as upd_proposal_due_date,
+		procurement.procurement_title,
+		procurement.EPIN,
+		NYC_AGENCY_DETAILS.Agency_name,
+		PROGRAM_MASTER.program_name,
+		procurement.AGENCY_EMAIL_CONTACT,
+		(select (FIRST_NAME ||' '|| LAST_NAME ) as n from
+		city_user_details where user_id =
+		PSR_details.MODIFIED_BY_AGENCY_ID) as SUBMITTED_BY ,
+    	PSR_details.MODIFIED_DATE_AGENCY as SUBMITTED_DATE,
+     	(select (FIRST_NAME ||' '|| LAST_NAME ) as n from
+		city_user_details where user_id =
+		PSR_details.MODIFIED_BY_CITY_ID) as APPROVED_BY ,
+    	PSR_details.MODIFIED_DATE_CITY as APPROVED_DATE,
+		(select (FIRST_NAME ||' '|| LAST_NAME ||' || ' || EMAIL_ID) as n from
+		city_user_details where user_id =
+		procurement.ACCELERATOR_PRMRY_CONTACT_ID) as accPrimaryContract,
+		(select (FIRST_NAME ||' '|| LAST_NAME ||' || ' || EMAIL_ID) as n from
+		city_user_details where user_id =
+		procurement.ACCELERATOR_SECNDRY_CONTACT_ID) as accSecondaryContract,
+
+		(select (FIRST_NAME ||' '|| LAST_NAME ||' || ' || EMAIL_ID) as n from
+		city_user_details where user_id =
+		procurement.AGENCY_PRIMARY_CONTACT_ID) as agencyPrimaryContract,
+		(select (FIRST_NAME ||' '|| LAST_NAME ||' || ' || EMAIL_ID) as n from
+		city_user_details where user_id =
+		procurement.AGENCY_SECONDARY_CONTACT_ID) as agencySecondaryContract,
+		procurement.procurement_description,
+		psr_details.basis_contracting_out,
+		psr_details.consideration_price,
+		psr_details.ANTICIPATE_LEVEL_COMPETITION,
+		procurement.ESTIMATED_NUM_CONTRACTS,
+		nvl(pa.ESTIMATED_PROCUREMENT_VALUE, procurement.ESTIMATED_PROCUREMENT_VALUE) as ESTIMATED_PROCUREMENT_VALUE,
+		psr_details.CONCEPT_REPORT_RELEASE_DATE,
+		nvl(pa.UPD_RFP_RELEASE_DATE, procurement.UPD_RFP_RELEASE_DATE) as UPD_RFP_RELEASE_DATE,
+		nvl(pa.UPD_FRST_DRAFT_RFP_DATE, procurement.UPD_FRST_DRAFT_RFP_DATE) as First_Draft_RFP_Eval_Criteria,
+		nvl(pa.UPD_FINALIZE_EVAL_DATE, procurement.UPD_FINALIZE_EVAL_DATE) as FINAL_RFP_Evaluation_Criteria,
+		nvl(pa.UPD_EVALUATOR_TRAINING_DATE, procurement.UPD_EVALUATOR_TRAINING_DATE) as UPD_EVALUATOR_TRAINING_DATE,
+		nvl(pa.UPD_FST_RND_EVAL_CMPLT_DATE, procurement.UPD_FST_RND_EVAL_CMPLT_DATE) as First_Round_Eval_Complete,
+		nvl(pa.UPD_AWARD_SELECTION_DATE, procurement.UPD_AWARD_SELECTION_DATE) as AWARD_SELECTION_DATE,
+		nvl(pa.UPD_CONTRACT_START_DATE, procurement.UPD_CONTRACT_START_DATE) as CONTRACT_START_DATE,	
+		nvl(pa.UPD_CONTRACT_END_DATE, procurement.UPD_CONTRACT_END_DATE) as CONTRACT_END_DATE,
+		psr_details.RENEWAL_OPTION,
+		psr_details.MULTI_YEAR_HUMAN_SERVIC_CNTCT,
+		psr_details.CONTRACT_TERM_INFO,
+		procurement.pcof_psr_version_number,multi_year_human_servic_opt,PSR_DETAILS_ID
+		FROM 
+		procurement 
+		left outer join PSR_details ON PSR_details.procurement_id = procurement.procurement_id and PSR_details.version_number = procurement.pcof_psr_version_number
+		INNER JOIN PROGRAM_MASTER ON procurement.program_id = PROGRAM_MASTER.program_id
+		inner join NYC_AGENCY_DETAILS on procurement.Agency_id = NYC_AGENCY_DETAILS.Agency_id
+		left outer join procurement_addendum pa on procurement.procurement_id = pa.procurement_id
+		where
+		procurement.procurement_id = #{asProcurementId} 
+
+	</select>
+	<resultMap id="psrDetails" type="com.nyc.hhs.model.PsrBean">
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="programName" column="PROGRAM_NAME" />
+		<result property="email" column="AGENCY_EMAIL_CONTACT" />
+		<result property="accPrimaryContact" column="accPrimaryContract" />
+		<result property="accSecondaryContact" column="accSecondaryContract" />
+		<result property="agecncyPrimaryContact" column="agencyPrimaryContract" />
+		<result property="agecncySecondaryContact" column="agencySecondaryContract" />
+		<result property="procurementDescription" column="procurement_description" />
+		<result property="basisContractOut" column="basis_contracting_out" />
+		<result property="anticipateLevelComp" column="ANTICIPATE_LEVEL_COMPETITION" />
+		<result property="estNumberOfContracts" column="ESTIMATED_NUM_CONTRACTS" />
+		<result property="estProcurementValue" column="ESTIMATED_PROCUREMENT_VALUE" />
+		<result property="conceptReportReleaseDt" column="CONCEPT_REPORT_RELEASE_DATE" />
+		<result property="rfpReleaseDate" column="UPD_RFP_RELEASE_DATE" />
+		<result property="firstRFPEvalDateUpdated" column="First_Draft_RFP_Eval_Criteria" />
+		<result property="finalEvalCompletionDateUpdated" column="FINAL_RFP_Evaluation_Criteria" />
+		<result property="evaluatorTrainingDateUpdated" column="UPD_EVALUATOR_TRAINING_DATE" />
+		<result property="firstEvalCompletionDateUpdated" column="First_Round_Eval_Complete" />
+		<result property="awardSelectionDateUpdated" column="AWARD_SELECTION_DATE" />
+		<result property="contractStartDatePlanned" column="CONTRACT_START_DATE" />
+		<result property="contractEndDateUpdated" column="CONTRACT_END_DATE" />
+		<result property="renewalOption" column="RENEWAL_OPTION" />
+		<result property="multiYearHumanServContract" column="MULTI_YEAR_HUMAN_SERVIC_CNTCT" />
+		<result property="contractTermInfo" column="CONTRACT_TERM_INFO" />
+		<result property="procurementEpin" column="EPIN" />
+		<result property="agencyName" column="Agency_name" />
+		<result property="considerationPrice" column="consideration_price" />
+		<result property="isOpenEndedRFP" column="is_open_ended_rfp" />
+		<result property="proposalDueDateUpdated" column="upd_proposal_due_date" />
+		<result property="procurementDescription" column="procurement_description" />
+		<result property="psrPcofVersionNumber" column="pcof_psr_version_number" />
+		<result property="multiYearHumanServOpt" column="multi_year_human_servic_opt" />
+		<result property="psrDetailId" column="PSR_DETAILS_ID" />
+		<result property="finalRFPEvalDateUpdated" column="UPD_FINALIZE_RFP_DATE" />
+		<result property="serviceFilter" column="SERVICE_FILTER" />
+		<result property="createdBy" column="SUBMITTED_BY" />
+		<result property="createdDate" column="SUBMITTED_DATE" />
+		<result property="approverUserId" column="APPROVED_BY" />
+		<result property="contractStartFrom" column="APPROVED_DATE" />
+		<result property="linkToConceptReport" column="LINK_TO_CONCEPT_REPORT" />
+	</resultMap>
+
+	<update id="updatePcofPsrVersionNumber" parameterType="String">
+		UPDATE
+		PROCUREMENT SET PCOF_PSR_VERSION_NUMBER = PCOF_PSR_VERSION_NUMBER+1
+		WHERE PROCUREMENT_ID = #{procurementId}
+	</update>
+	<select id="getPsrServicesList" parameterType="String"
+		resultMap="serviceElementList">
+		select t.element_name from procurement p,
+		PROCUREMENT_SERVICES ps, taxonomy_master t
+		where
+		p.procurement_id =#{asProcurementId,jdbcType=NUMERIC}
+		and p.procurement_id =
+		ps.procurement_id
+		and ps.element_id = t.ELEMENT_ID
+	</select>
+	<resultMap id="serviceElementList" type="com.nyc.hhs.model.Procurement">
+		<result property="serviceName" column="ELEMENT_NAME" />
+	</resultMap>
+	<select id="getPcofPsrdetails" parameterType="String" resultMap="pcofPsrDetailBean">
+	SELECT CUD1.FIRST_NAME
+		  ||' '
+		  ||CUD1.LAST_NAME AS CREATED_BY,
+		  PROCUREMENT_FINANCIALS.created_by_userid,
+		  cud1.email_id AS CREATED_EMAIL,
+		  CUD2.FIRST_NAME
+		  ||' '
+		  ||CUD2.LAST_NAME AS APPROVED_BY,
+		  PROCUREMENT_FINANCIALS.approved_by,
+		  cud2.email_id AS APPROVED_EMAIL,
+		  NYC_AGENCY_DETAILS.AGENCY_CODE,
+		  PROCUREMENT_FINANCIALS.created_date,
+		  PROCUREMENT_FINANCIALS.approved_date
+		FROM PROCUREMENT_FINANCIALS ,
+		  CITY_USER_DETAILS CUD1 ,
+		  CITY_USER_DETAILS CUD2,
+		  NYC_AGENCY_DETAILS,
+		  procurement
+		WHERE TYPE                                   ='Approved'
+		AND PROCUREMENT_FINANCIALS.CREATED_BY_USERID = CUD1.USER_ID
+		AND PROCUREMENT_FINANCIALS.PROCUREMENT_ID                           =#{lsProcurementId}
+		AND PROCUREMENT_FINANCIALS.APPROVED_BY       = CUD2.USER_ID
+		AND CUD1.ORGANIZATION_NAME                   = NYC_AGENCY_DETAILS.AGENCY_ID
+		AND procurement_financials.version_number    = procurement.PCOF_PSR_VERSION_NUMBER
+		AND PROCUREMENT_FINANCIALS.procurement_id    = procurement.procurement_id
+		AND ROWNUM                                   =1
+		ORDER BY PROCUREMENT_FINANCIALS.MODIFIED_DATE DESC
+	</select>
+	<resultMap id="pcofPsrDetailBean" type="com.nyc.hhs.model.ProcurementCOF">
+		<result property="agencyCode" column="AGENCY_CODE" />
+		<result property="createdDate" column="created_date" />
+		<result property="approvedDate" column="approved_date" />
+		<result property="approverFirstName" column="APPROVED_BY" />
+		<result property="createdByUserId" column="CREATED_BY" />
+	</resultMap>
+	<select id="fetchPSRApprovedCount" parameterType="string"
+		resultType="int">
+		select count(1)
+		from psr_details pd, procurement p 
+		where p.PROCUREMENT_ID = #{procurementId}
+		and p.PROCUREMENT_ID = pd.PROCUREMENT_ID 
+		and p.PCOF_PSR_VERSION_NUMBER = pd.VERSION_NUMBER
+		and pd.status_id = 174
+	</select>
+	<select id="fetchPSRCount" parameterType="string"
+		resultType="int">
+		select count(1)
+		from psr_details pd, procurement p 
+		where p.PROCUREMENT_ID = #{procurementId}
+		and p.PROCUREMENT_ID = pd.PROCUREMENT_ID 
+		and p.PCOF_PSR_VERSION_NUMBER = pd.VERSION_NUMBER
+	</select>
+	<update id="updateGeneratePDFFlag" parameterType="map">
+		UPDATE 
+		procurement SET GENERATE_NEW_TASK =  #{generateTaskFlag}
+		WHERE
+		PROCUREMENT_ID = #{procurementId}
+	</update>
+	
+	<update id="resetGeneratePDFFlag" parameterType="String">
+		UPDATE 
+		procurement SET GENERATE_NEW_TASK = 0
+		WHERE
+		PROCUREMENT_ID = #{procurementId}
+	</update>
+		
+	<select id="validateProcurementPSRPCOF" parameterType="string"
+		resultMap="fetchProcProv">
+		select nvl((SELECT sum(PF.AMOUNT) approved_amount FROM PROCUREMENT_FINANCIALS PF WHERE 
+			PF.PROCUREMENT_ID = #{procurementID} AND PF.TYPE = 'Updated' and pf.version_number = p.PCOF_PSR_VERSION_NUMBER), 0) approved_amount, 
+		nvl(pa.ESTIMATED_PROCUREMENT_VALUE, p.ESTIMATED_PROCUREMENT_VALUE) ESTIMATED_PROCUREMENT_VALUE,
+		to_char(nvl(pa.Upd_Contract_Start_Date, p.Upd_Contract_Start_Date), 'MM/dd/YYYY') Upd_Contract_Start_Date,
+		to_char(nvl(pa.Upd_Contract_end_Date, p.Upd_Contract_end_Date), 'MM/dd/YYYY') UPD_CONTRACT_END_DATE,
+		to_char(p.pcof_Contract_start_Date, 'MM/dd/YYYY') PCOF_CONTRACT_START_DATE,
+		to_char(p.pcof_Contract_end_Date, 'MM/dd/YYYY') PCOF_CONTRACT_END_DATE,
+		p.IS_OPEN_ENDED_RFP,to_char(ps.PSR_APPROVED_START_DATE,'MM/dd/YYYY') PSR_APPROVED_START_DATE,to_char(ps.PSR_APPROVED_END_DATE, 'MM/dd/YYYY')
+    	PSR_APPROVED_END_DATE,
+   		ps.PSR_APPROVED_AMOUNT 
+		from procurement p left OUTER JOIN psr_details ps on p.procurement_id=ps.procurement_id and p.pcof_psr_version_number=
+    	ps.version_number left outer join procurement_addendum pa on p.procurement_id = pa.procurement_id
+		where p.procurement_id =   #{procurementID}
+	</select>
+	
+	<select id="fetchPdfFlagList" parameterType="String" resultType="string">
+		select  procurement_id from psr_details where pdf_flag=1
+	</select>
+	
+	<select id="fetchPCOFFinanceDetails" parameterType="com.nyc.hhs.model.AccountsAllocationBean"
+		resultMap="procurementFinanceDetailsList">
+		SELECT
+		A.PROCUREMENT_FINANCIALS_ID,
+		A.UNIT_OF_APPROPRIATION,
+		A.BUDGET_CODE,
+		A.OBJECT_CODE,
+		A.SUB_OBJECT_CODE,
+		A.REPORTING_CATEGORY,
+		a.FISCAL_YEAR_ID,
+		A.AMOUNT,
+		A.CREATED_DATE,
+		A.MODIFIED_DATE,
+		A.PCOF_STATUS_ID
+		FROM PROCUREMENT_FINANCIALS A, procurement p ,fiscal_year b
+		WHERE
+		A.PROCUREMENT_ID = #{aoProcurementId} 
+		AND A.TYPE = 'Approved'
+		and p.procurement_id = a.procurement_id
+		and a.version_number = p.PCOF_PSR_VERSION_NUMBER
+  		and a.fiscal_year_id = b.fiscal_year_id
+		ORDER BY A.UNIT_OF_APPROPRIATION, A.BUDGET_CODE,
+		A.OBJECT_CODE,
+		A.SUB_OBJECT_CODE, A.REPORTING_CATEGORY, b.FISCAL_YEAR
+	</select>
+	
+	<resultMap id="procurementFinanceDetailsList" type="com.nyc.hhs.model.AccountsAllocationBean">
+		<result property="id" column="PROCUREMENT_FINANCIALS_ID" />		
+		<result property="unitOfAppropriation" column="UNIT_OF_APPROPRIATION" />
+		<result property="budgetCode" column="BUDGET_CODE" />
+		<result property="objectCode" column="OBJECT_CODE" />
+		<result property="subOc" column="SUB_OBJECT_CODE" />
+		<result property="rc" column="REPORTING_CATEGORY" />
+		<result property="fiscalYear" column="FISCAL_YEAR_ID" />
+		<result property="ammount" column="AMOUNT" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+		<result property="createdDate" column="CREATED_DATE" />
+		<result property="delStatus" column="PCOF_STATUS_ID" />
+	</resultMap>
+	<update id="updatePCOFContractDates" parameterType="com.nyc.hhs.model.StaffDetails">
+		UPDATE procurement p
+		SET
+		  (
+		    p.PCOF_CONTRACT_start_DATE,
+		    p.PCOF_CONTRACT_END_DATE
+		  )
+		  =
+		  (SELECT nvl(pa.UPD_CONTRACT_START_DATE , p1.UPD_CONTRACT_START_DATE) ,
+		    nvl(pa.UPD_CONTRACT_END_DATE, p1.UPD_CONTRACT_END_DATE)
+		  FROM procurement p1, procurement_addendum pa
+		  WHERE p.procurement_id = p1.procurement_id
+		  and pa.procurement_id(+) = p1.procurement_id
+		  )
+		WHERE p.procurement_id = #{asProcurementId}
+	</update>
+	
+		<select id="fetchPsrConfFundingDetails" parameterType="String"
+		resultMap="fundSourceDetailsList">
+
+		SELECT id,fundingsrc,
+		       SUM(CASE WHEN RN = 1 THEN X END) AS "fy1",
+		       SUM(CASE WHEN RN = 2 THEN X END) AS "fy2",
+		       SUM(CASE WHEN RN = 3 THEN X END) AS "fy3",
+		       SUM(CASE WHEN RN = 4 THEN X END) AS "fy4",
+		       SUM(CASE WHEN RN = 5 THEN X END) AS "fy5",
+		       SUM(CASE WHEN RN = 6 THEN X END) AS "fy6",
+		       SUM(CASE WHEN RN = 7 THEN X END) AS "fy7",
+		       SUM(CASE WHEN RN = 8 THEN X END) AS "fy8",
+		       SUM(CASE WHEN RN = 9 THEN X END) AS "fy9",
+		       SUM(CASE WHEN RN = 10 THEN X END) AS "fy10",
+		       SUM(CASE WHEN RN = 11 THEN X END) AS "fy11",
+		       SUM(CASE WHEN RN = 12 THEN X END) AS "fy12",
+		       SUM(CASE WHEN RN = 13 THEN X END) AS "fy13",
+		       SUM(CASE WHEN RN = 14 THEN X END) AS "fy14",
+		       SUM(CASE WHEN RN = 15 THEN X END) AS "fy15",
+		       SUM(CASE WHEN RN = 16 THEN X END) AS "fy16",
+		       SUM(CASE WHEN RN = 17 THEN X END) AS "fy17",
+		       SUM(CASE WHEN RN = 18 THEN X END) AS "fy18",
+		       SUM(CASE WHEN RN = 19 THEN X END) AS "fy19",
+		       SUM(CASE WHEN RN = 20 THEN X END) AS "fy20",
+		       SUM(CASE WHEN RN = 21 THEN X END) AS "fy21",
+		       SUM(CASE WHEN RN = 22 THEN X END) AS "fy22",
+		       SUM(CASE WHEN RN = 23 THEN X END) AS "fy23",
+		       SUM(CASE WHEN RN = 24 THEN X END) AS "fy24",
+		       SUM(CASE WHEN RN = 25 THEN X END) AS "fy25",
+		       SUM(CASE WHEN RN = 26 THEN X END) AS "fy26",
+		       SUM(CASE WHEN RN = 27 THEN X END) AS "fy27",
+		       SUM(CASE WHEN RN = 28 THEN X END) AS "fy28",
+		       SUM(CASE WHEN RN = 29 THEN X END) AS "fy29",
+		       SUM(CASE WHEN RN = 30 THEN X END) AS "fy30",
+		       SUM(CASE WHEN RN = 31 THEN X END) AS "fy31"
+
+		from (select rn,fy,
+		             (case when n.n = 1 then  #{asProcurmentId} || '-Federal'
+		                   when n.n = 2 then  #{asProcurmentId} || '-State'
+		                   when n.n = 3 then  #{asProcurmentId} || '-City'
+		                   when n.n = 4 then  #{asProcurmentId} || '-Other'
+		              end) as id,
+		             (case when n.n = 1 then  'Federal'
+		                   when n.n = 2 then  'State'
+		                   when n.n = 3 then  'City'
+		                   when n.n = 4 then  'Other'
+		              end) as fundingsrc,
+		              (case when n.n = 1 then 1
+		                   when n.n = 2 then 2
+		                   when n.n = 3 then 3
+		                   when n.n = 4 then 4
+		              end) as orderby,
+		             (case when n.n = 1 then x1
+		                   when n.n = 2 then x2
+		                   when n.n = 3 then x3
+		                   when n.n = 4 then x4
+		              END) AS X
+		      from (
+		            select x1,x2,x3,x4,fy, rownum rn
+    				from(
+		      SELECT A.FEDERAL_AMOUNT x1,A.STATE_AMOUNT x2,A.CITY_AMOUNT x3,A.OTHER_AMOUNT x4,A.FISCAL_YEAR_ID fy
+		FROM PROCUREMENT_FIN_FUNDING_STREAM A WHERE
+		A.PROCUREMENT_ID=#{asProcurmentId} AND A.ACTIVE_FLAG='1' and type='Approved'
+		ORDER BY A.FISCAL_YEAR_ID)) cross join
+		            (select 1 as n from dual union all
+		             select 2 from dual union all
+		             select 3 from dual union all
+		             select 4 from dual
+		           ) n
+		     ) T
+		group by id ,fundingsrc, orderby 
+		     order by orderby
+	</select>
+	
+	<resultMap id="fundSourceDetailsList" type="com.nyc.hhs.model.FundingAllocationBean">
+		<result property="id" column="id" />	
+		<result property="fundingSource" column="fundingsrc" />	
+		<result property="fy1" column="fy1"/>
+		<result property="fy2" column="fy2"/>
+		<result property="fy3" column="fy3"/>
+		<result property="fy4" column="fy4"/>
+		<result property="fy5" column="fy5"/>
+		<result property="fy6" column="fy6"/>
+		<result property="fy7" column="fy7"/>
+		<result property="fy8" column="fy8"/>
+		<result property="fy9" column="fy9"/>
+		<result property="fy10" column="fy10"/>
+		<result property="fy11" column="fy11"/>
+		<result property="fy12" column="fy12"/>
+		<result property="fy13" column="fy13"/>
+		<result property="fy14" column="fy14"/>
+		<result property="fy15" column="fy15"/>
+		<result property="fy16" column="fy16"/>
+		<result property="fy17" column="fy17"/>
+		<result property="fy18" column="fy18"/>
+		<result property="fy19" column="fy19"/>
+		<result property="fy20" column="fy20"/>
+		<result property="fy21" column="fy21"/>
+		<result property="fy22" column="fy22"/>
+		<result property="fy23" column="fy23"/>
+		<result property="fy24" column="fy24"/>
+		<result property="fy25" column="fy25"/>
+		<result property="fy26" column="fy26"/>
+		<result property="fy27" column="fy27"/>
+		<result property="fy28" column="fy28"/>
+		<result property="fy29" column="fy29"/>
+		<result property="fy30" column="fy30"/>
+		<result property="fy31" column="fy31"/>
+	</resultMap>
+	
+	<select id="showPsrFundingSubGrid" parameterType="String"
+		resultType="int">
+	select (decode(max(FEDERAL_AMOUNT), 0, 0, 1) +
+		decode(max(STATE_AMOUNT), 0, 0, 1)+decode(max(CITY_AMOUNT), 0, 0, 1)
+		+decode(max(OTHER_AMOUNT), 0, 0, 1) + decode(min(FEDERAL_AMOUNT), 0, 0,
+		1) + decode(min(STATE_AMOUNT), 0, 0, 1)+decode(min(CITY_AMOUNT), 0, 0,
+		1)+decode(min(OTHER_AMOUNT), 0, 0, 1)) exists_flag
+	from procurement_fin_funding_stream pf, procurement p
+		where
+	pf.procurement_id = p.procurement_id
+		and pf.version_number = p.pcof_psr_version_number
+		and p.procurement_id = #{asProcurmentId}
+		and pf.type='Approved'
+	group by p.procurement_id 
+	</select>
+	
+	<!-- End : Added in R5 -->
+	
+	
+	<!-- Start QC 9401 R 8.5.1  -->	
+	<resultMap id="procEpinDetails" type="com.nyc.hhs.model.EPinDetailBean">
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="epinId" column="EPIN" />
+		<result property="agencyId" column="AGENCY_ID" />
+		<result property="procurementId" column="PROCUREMENT_ID"/>
+        <result property="statusId" column="STATUS_ID"/>
+		<result property="status" column="STATUS"/>		
+	</resultMap>
+	
+	<select id="getProcurementForEpin" parameterType="String"	resultMap="procEpinDetails">
+		SELECT	PRO.PROCUREMENT_ID,
+				PRO.PROCUREMENT_TITLE,
+				PRO.EPIN EPIN,
+				PRO.STATUS_ID,
+				PRO.AGENCY_ID,
+				ST.STATUS
+				FROM PROCUREMENT PRO, STATUS_MASTER_R2_R3 ST 
+				where	PRO.Status_ID =	ST.Status_ID
+						and ST.PROCESS_TYPE = 'Procurement'
+						and EPIN =  #{asEpinId}
+	</select>
+	<!-- <result property="proposalStatus"           column="REP.PROPOSAL_STATUS"/> -->
+	<resultMap id="rfpReportData" type="com.nyc.hhs.model.ProposalReportBean">
+		<result property="procurementTitle"         column="PROCUREMENT_TITLE"/>
+	    <result property="providerName"             column="PROVIDER_NAME"/>
+	    <result property="providerEIN"              column="EIN_ID_NN"/>
+	    <result property="proposalTitle"            column="PROPOSAL_TITLE"/>
+	    <result property="proposalId"               column="PROPOSAL_ID"/>
+	    <result property="proposalStatus"           column="PROPOSAL_STATUS"/>
+		<result property="competitionPool"          column="COMPETITION_POOL"/>
+		<result property="totalFundingRequest"      column="TOTAL_FUNDING_REQUEST"/>
+	    <result property="createdDate"              column="CREATED_DATE_AND_TIME"/>
+	    <result property="lastModifiedDate"         column="MODIFIED_DATE_AND_TIME"/>
+	    <result property="lastModifiedByName"       column="LAST_MODIFIED_BY_NAME"/>
+	    <result property="lastModifiedByEmail"      column="LAST_MODIFIED_BY_EMAIL"/>
+	    <result property="lastModifiedByPhone"      column="LAST_MODIFIED_BY_PHONE"/>
+
+	    <result property="question1Answer"          column="QUESTION_1_ANSWER"/>
+	    <result property="question2Answer"          column="QUESTION_2_ANSWER"/>
+	    <result property="question3Answer"          column="QUESTION_3_ANSWER"/>
+	    <result property="question4Answer"          column="QUESTION_4_ANSWER"/>
+	    <result property="question5Answer"          column="QUESTION_5_ANSWER"/>
+	    <result property="question6Answer"          column="QUESTION_6_ANSWER"/>
+	    <result property="question7Answer"          column="QUESTION_7_ANSWER"/>
+	    <result property="question8Answer"          column="QUESTION_8_ANSWER"/>
+	    <result property="question9Answer"          column="QUESTION_9_ANSWER"/>
+	    <result property="question10Answer"         column="QUESTION_10_ANSWER"/>
+	    <result property="question11Answer"         column="QUESTION_11_ANSWER"/>
+	    <result property="question12Answer"         column="QUESTION_12_ANSWER"/>
+	    <result property="question13Answer"         column="QUESTION_13_ANSWER"/>
+	    <result property="question14Answer"         column="QUESTION_14_ANSWER"/>
+	    <result property="question15Answer"         column="QUESTION_15_ANSWER"/>
+		<result property="question16Answer"         column="QUESTION_16_ANSWER"/>
+	    <result property="question17Answer"         column="QUESTION_17_ANSWER"/>
+	    <result property="question18Answer"         column="QUESTION_18_ANSWER"/>
+	                                                
+	    <result property="schoolDistrictName"       column="SCHOOL_DISTR_NAME"/>
+		<result property="communityDistinct"        column="COMMUNITY_DISTRICT"/>
+	                                                
+	    <result property="numberOfSites"            column="SITE_COUNT"/>
+	    <result property="siteName"                 column="SITE_NAME"/>
+	    <result property="siteAddress1"             column="SITE_ADDRESS_1"/>
+	    <result property="siteAddress2"             column="SITE_ADDRESS_2"/>
+	    <result property="siteCity"                 column="SITE_CITY"/>
+	    <result property="siteState"                column="SITE_STATE"/>
+	    <result property="siteZip"                  column="SITE_ZIP"/>
+	    <result property="epin"                     column="EIN_ID_NN"/>
+		
+		<result property="providerContactPhone"     column="PHONE"/>
+		<result property="providerContactEmail"    	column="EMAIL"/>
+		<result property="providerContactName"      column="Provider_Contact_Name"/>
+		<result property="newColumn"      column="New_Name"/>
+		
+		
+		<result property="spare"                    column="Spare"/>
+	</resultMap>
+	
+	<select id="getRfpReportData" parameterType="String"	resultMap="rfpReportData">
+	<![CDATA[
+		SELECT REP.PROCUREMENT_TITLE  , 
+		  REP.COMPETITION_POOL  , 
+		  REP.PROVIDER_NAME  , 
+		  REP.SITE_NAME , 
+		  REP.SITE_ADDRESS_1  , 
+		  REP.SITE_ADDRESS_2 , 
+		  REP.SITE_CITY  , 
+		  REP.SITE_STATE , 
+		  REP.SITE_ZIP  , 
+		  REP.EIN_ID_NN  , 
+		  REP.PROPOSAL_STATUS  , 
+		  REP.PROPOSAL_ID  , 
+		  REP.PROPOSAL_TITLE , 
+		  REP.TOTAL_FUNDING_REQUEST  , 
+		  NVL(Q_A.QUESTION_1_ANSWER ,'NA') "QUESTION_1_ANSWER", 
+		  NVL(Q_A.QUESTION_2_ANSWER ,'NA') "QUESTION_2_ANSWER", 
+		  NVL(Q_A.QUESTION_3_ANSWER ,'NA') "QUESTION_3_ANSWER" , 
+		  NVL(Q_A.QUESTION_4_ANSWER ,'NA') "QUESTION_4_ANSWER" , 
+		  NVL(Q_A.QUESTION_5_ANSWER ,'NA') "QUESTION_5_ANSWER" , 
+		  NVL(Q_A.QUESTION_6_ANSWER ,'NA') "QUESTION_6_ANSWER" , 
+		  NVL(Q_A.QUESTION_7_ANSWER ,'NA') "QUESTION_7_ANSWER", 
+		  NVL(Q_A.QUESTION_8_ANSWER ,'NA') "QUESTION_8_ANSWER", 
+		  NVL(Q_A.QUESTION_9_ANSWER ,'NA') "QUESTION_9_ANSWER" , 
+		  NVL(Q_A.QUESTION_10_ANSWER,'NA') "QUESTION_10_ANSWER" , 
+		  NVL(Q_A.QUESTION_11_ANSWER,'NA') "QUESTION_11_ANSWER", 
+		  NVL(Q_A.QUESTION_12_ANSWER,'NA') "QUESTION_12_ANSWER", 
+		  NVL(Q_A.QUESTION_13_ANSWER,'NA') "QUESTION_13_ANSWER", 
+		  NVL(Q_A.QUESTION_14_ANSWER,'NA') "QUESTION_14_ANSWER", 
+		  NVL(Q_A.QUESTION_15_ANSWER,'NA') "QUESTION_15_ANSWER" , 
+		  NVL(Q_A.QUESTION_16_ANSWER,'NA') "QUESTION_16_ANSWER" , 
+		  NVL(Q_A.QUESTION_17_ANSWER,'NA') "QUESTION_17_ANSWER" , 
+		  NVL(Q_A.QUESTION_18_ANSWER,'NA') "QUESTION_18_ANSWER" , 
+		  (REP.FIRST_NAME 
+		  || ' ' 
+		  || REP.LAST_NAME) "Provider_Contact_Name" , 
+		  REP.EMAIL , 
+		  REP.PHONE, 
+		  REP.SITE_COUNT , 
+		  REP.COMMUNITY_DISTRICT , 
+		  REP.CREATED_DATE_AND_TIME  , 
+		  REP.MODIFIED_DATE_AND_TIME  , 
+		  REP.LAST_MODIFIED_BY_NAME  , 
+		  REP.LAST_MODIFIED_BY_EMAIL  , 
+		  REP.LAST_MODIFIED_BY_PHONE  , 
+		  '' AS Spare 
+		FROM 
+		  (
+		  SELECT proc.PROCUREMENT_TITLE           AS PROCUREMENT_TITLE, 
+		    pconf.ORGANIZATION_LEGAL_NAME          AS Provider_Name, 
+		    NVL(pconf.VAL_SCHOOL_DISTR_NAME ,'NA') AS SCHOOL_DISTRICT_NAME , 
+		    pconf.PROPOSAL_TITLE                   AS Proposal_Title , 
+		    pconf.COMPETITION_POOL_ID , 
+		    NVL(comp.COMPETITION_POOL_TITLE,'NA')     AS Competition_Pool, 
+		    NVL(pconf.TOTAL_NUM_OF_SERVICE_REQUEST,0) AS Total_Service_Units, 
+		    NVL(pconf.TOTAL_FUNDING_REQUEST,0)        AS Total_Funding_Request, 
+		    NVL(PROC.SERVICE_UNITS_REQUIRED,0)        AS SERVICE_UNITS_REQUIRED, 
+		    NVL(pconf.PHONE_NUMBER,'NA')              AS Provider_contact, 
+		    NVL( (SELECT COUNT(*) FROM HHSA_APP.PROPOSAL_SITE  WHERE proposal_id=pconf.proposal_id  GROUP BY proposal_id   ),0) AS site_count , 
+		    NVL(psite.site_name, 'NA')                           AS site_name, 
+		    NVL(psite.ADDRESS1, 'NA')                            AS site_address_1, 
+		    NVL(psite.ADDRESS2, 'NA')                            AS site_address_2, 
+		    NVL(psite.CITY, 'NA')                                AS site_city , 
+		    NVL(psite.STATE, 'NA')                               AS site_state, 
+		    NVL(psite.zip_code, 'NA')                            AS site_zip, 
+		    NVL(PSITE.VAL_SCHOOL_DISTR_NAME, 'NA')               AS SCHOOL_DISTR_NAME, 
+		    NVL(PSITE.VAL_COMMUNITY_DISTRICT,'NA')               AS COMMUNITY_DISTRICT, 
+		    stat.status                                          AS Proposal_status, 
+		    TO_CHAR(pconf.CREATED_DATE,'MM/DD/YYYY HH24:MI:SS')  AS CREATED_DATE_and_Time, 
+		    TO_CHAR(pconf.MODIFIED_DATE,'MM/DD/YYYY HH24:MI:SS') AS Modified_Date_and_Time, 
+		    (pconf.FIRST_NAME 
+		    ||' ' 
+		    ||pconf.LAST_NAME)    AS Last_Modified_by_Name, 
+		    pconf.EMAIL           AS Last_Modified_by_Email, 
+		    NVL(pconf.Phone,'NA') AS Last_Modified_by_Phone, 
+		    pconf.proposal_id, 
+		    pconf.EIN_ID_NN, 
+		    pconf.FIRST_NAME, 
+		    pconf.LAST_NAME, 
+		    pconf.EMAIL, 
+		    pconf.PHONE , 
+		    pconf.MEMBER_NAME AS Office_Title 
+		  FROM hhsa_app.procurement PROC, 
+		          (SELECT  pconf.PROCUREMENT_ID, pconf.PROPOSAL_STATUS_ID, pconf.MODIFIED_BY_USERID, pconf.MODIFIED_DATE , pconf.ORGANIZATION_ID , pconf.PROPOSAL_ID, pconf.CREATED_DATE , pconf.COMPETITION_POOL_ID , 
+		                   pconf.TOTAL_FUNDING_REQUEST, pconf.TOTAL_NUM_OF_SERVICE_REQUEST, pconf.PROPOSAL_TITLE , pconf.FIRST_NAME, pconf.LAST_NAME , pconf.EMAIL , 
+		                   pconf.PHONE , pconf.staff_id , pconf.ORGANIZATION_ID, s_o.STAFF_ID, s_o.MEMBER_NAME , pconf.VAL_SCHOOL_DISTR_NAME, 
+		                   pconf.EIN_ID_NN , pconf.PHONE_NUMBER, pconf.ORGANIZATION_LEGAL_NAME 
+		          FROM    (  SELECT pcon.PROCUREMENT_ID, pcon.PROPOSAL_STATUS_ID, pcon.MODIFIED_BY_USERID, pcon.MODIFIED_DATE , pcon.ORGANIZATION_ID , pcon.PROPOSAL_ID, pcon.CREATED_DATE , 
+		                            NVL(pcon.COMPETITION_POOL_ID, pcon.temp_COMPETITION_POOL_ID) AS COMPETITION_POOL_ID , pcon.TOTAL_FUNDING_REQUEST, pcon.TOTAL_NUM_OF_SERVICE_REQUEST, pcon.PROPOSAL_TITLE , 
+		                            NVL(sdet.FIRST_NAME, 'Not Available') AS FIRST_NAME, NVL(sdet.LAST_NAME, 'Not Available')  AS LAST_NAME , NVL(sdet.EMAIL, 'Not Available')      AS EMAIL , 
+		                            NVL(sdet.PHONE, 'Not Available')      AS PHONE , pcon.MODIFIED_BY_USERID               AS staff_id, org.VAL_SCHOOL_DISTR_NAME, 
+		                            org.EIN_ID_NN , org.PHONE_NUMBER , org.ORGANIZATION_LEGAL_NAME 
+		                    FROM hhsa_app.proposal_config pcon, hhsa_app.staff_details sdet , hhsa_app.Organization org
+		                    WHERE  pcon.MODIFIED_BY_USERID = sdet.staff_id 
+		                      AND  pcon.ORGANIZATION_ID = org.ORGANIZATION_ID 
+		                      AND  pcon.procurement_id      IN (#{asProcurementId}) 
+		                    ) pconf , 
+		                    (SELECT org.ORGANIZATION_ID,  st_org.STAFF_ID, mt.MEMBER_NAME , org.VAL_SCHOOL_DISTR_NAME, 
+		                            org.EIN_ID_NN , org.PHONE_NUMBER , org.ORGANIZATION_LEGAL_NAME 
+		                      FROM hhsa_app.staff_organization st_org, hhsa_app.Organization org, hhsa_app.MEMBER_TITLE mt 
+		                      WHERE ST_ORG.ACTIVE_FLAG   = 'Yes' 
+		                      AND st_org.ORGANIZATION_ID = org.ORGANIZATION_ID 
+		                      AND st_org.TITLE           = mt.MEMBER_ID 
+		                    ) s_o 
+		            WHERE pconf.staff_id      = s_o.staff_id (+)
+		            AND pconf.ORGANIZATION_ID = s_o.ORGANIZATION_ID (+)
+		          ) pconf , hhsa_app.proposal_site psite , hhsa_app.status_master_r2_r3 stat, hhsa_app.Competition_pool comp 
+		  WHERE proc.PROCUREMENT_ID     = pconf.PROCUREMENT_ID (+)
+		  AND pconf.proposal_id         = psite.proposal_id (+)
+		  AND pconf.PROPOSAL_STATUS_ID  = stat.STATUS_ID 
+		  AND pconf.COMPETITION_POOL_ID = comp.COMPETITION_POOL_ID (+)
+		  ) rep , 
+		  (SELECT proposal_id , 
+		    MAX( 
+		    CASE 
+		      WHEN seq = 1 
+		      THEN custom_answer 
+		      ELSE NULL 
+		    END ) AS Question_1_Answer , 
+		    MAX( 
+		    CASE 
+		      WHEN seq = 2 
+		      THEN custom_answer 
+		      ELSE NULL 
+		    END ) AS Question_2_Answer , 
+		    MAX( 
+		    CASE 
+		      WHEN seq = 3 
+		      THEN custom_answer 
+		      ELSE NULL 
+		    END ) AS Question_3_Answer , 
+		    MAX( 
+		    CASE 
+		      WHEN seq = 4 
+		      THEN custom_answer 
+		      ELSE NULL 
+		    END ) AS Question_4_Answer , 
+		    MAX( 
+		    CASE 
+		      WHEN seq = 5 
+		      THEN custom_answer 
+		      ELSE NULL 
+		    END ) AS Question_5_Answer , 
+		    MAX( 
+		    CASE 
+		      WHEN seq = 6 
+		      THEN custom_answer 
+		      ELSE NULL 
+		    END ) AS Question_6_Answer , 
+		    MAX( 
+		    CASE 
+		      WHEN seq = 7 
+		      THEN custom_answer 
+		      ELSE NULL 
+		    END ) AS Question_7_Answer , 
+		    MAX( 
+		    CASE 
+		      WHEN seq = 8 
+		      THEN custom_answer 
+		      ELSE NULL 
+		    END ) AS Question_8_Answer , 
+		    MAX( 
+		    CASE 
+		      WHEN seq = 9 
+		      THEN custom_answer 
+		      ELSE NULL 
+		    END ) AS Question_9_Answer , 
+		    MAX( 
+		    CASE 
+		      WHEN seq = 10 
+		      THEN custom_answer 
+		      ELSE NULL 
+		    END ) AS Question_10_Answer , 
+		    MAX( 
+		    CASE 
+		      WHEN seq = 11 
+		      THEN custom_answer 
+		      ELSE NULL 
+		    END ) AS Question_11_Answer , 
+		    MAX( 
+		    CASE 
+		      WHEN seq = 12 
+		      THEN custom_answer 
+		      ELSE NULL 
+		    END ) AS Question_12_Answer , 
+		    MAX( 
+		    CASE 
+		      WHEN seq = 13 
+		      THEN custom_answer 
+		      ELSE NULL 
+		    END ) AS Question_13_Answer , 
+		    MAX( 
+		    CASE 
+		      WHEN seq = 14 
+		      THEN custom_answer 
+		      ELSE NULL 
+		    END ) AS Question_14_Answer , 
+		    MAX( 
+		    CASE 
+		      WHEN seq = 15 
+		      THEN custom_answer 
+		      ELSE NULL 
+		    END ) AS Question_15_Answer , 
+		    MAX( 
+		    CASE 
+		      WHEN seq = 16 
+		      THEN custom_answer 
+		      ELSE NULL 
+		    END ) AS Question_16_Answer , 
+		    MAX( 
+		    CASE 
+		      WHEN seq = 17 
+		      THEN custom_answer 
+		      ELSE NULL 
+		    END ) AS Question_17_Answer , 
+		    MAX( 
+		    CASE 
+		      WHEN seq = 18 
+		      THEN custom_answer 
+		      ELSE NULL 
+		    END ) AS Question_18_Answer 
+		  FROM 
+		    (SELECT pcr.proposal_id, 
+		      pqm.question_sequence_number AS seq, 
+		      custom_answer 
+		    FROM hhsa_app.proposal_question_response pcr, 
+		      hhsa_app.procurement_question_config pqc , 
+		      hhsa_app.prcrmnt_question_mapping pqm 
+		    WHERE pcr.procurement_qn_id= pqc.procurement_qn_id 
+		    AND pqm.procurement_qn_id  = pqc.procurement_qn_id 
+		    
+		
+		    AND pqc.procurement_id    IN (#{asProcurementId}) 
+		    AND pqm.version_number     = 
+		      (SELECT MAX(version_number) 
+		      FROM hhsa_app.prcrmnt_question_mapping pqm2 
+		      WHERE pqm2.question_sequence_number=pqm.question_sequence_number 
+		      AND pqm2.procurement_qn_id         =pqm.procurement_qn_id 
+		      ) 
+		    ORDER BY pcr.proposal_id, 
+		      pqm.question_sequence_number 
+		    ) 
+		  GROUP BY proposal_id 
+		  ) q_a , 
+		  (SELECT pc.proposal_id, 
+		    pc.procurement_id , 
+		    epm.EVALUATION_POOL_MAPPING_ID , 
+		    eg.EVALUATION_GROUP_TITLE 
+		  FROM hhsa_app.proposal_config pc, 
+		    hhsa_app.evaluation_pool_mapping epm, 
+		    hhsa_app.evaluation_group eg 
+		WHERE pc.procurement_id    IN (#{asProcurementId}) 
+		  AND pc.evaluation_group_id  = epm.evaluation_group_id 
+		  AND eg.evaluation_group_id  = epm.evaluation_group_id 
+		  AND epm.COMPETITION_POOL_id = pc.COMPETITION_POOL_id 
+		  ) eval 
+		WHERE rep.PROPOSAL_ID = q_a.PROPOSAL_ID(+) 
+		AND rep.PROPOSAL_ID   = eval.proposal_id (+) 
+		ORDER BY rep.PROPOSAL_ID
+	]]>	
+	</select>	
+	 <!-- End QC 9401 R 8.5.1  -->		
+</mapper>

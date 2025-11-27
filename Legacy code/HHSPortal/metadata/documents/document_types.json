@@ -1,0 +1,425 @@
+{
+  "version": "2.0.0",
+  "description": "Enterprise Document Types and Specifications",
+  "document_engine": {
+    "supported_formats": ["pdf", "docx", "xlsx", "pptx", "txt", "rtf", "html", "xml", "json"],
+    "max_file_size_mb": 100,
+    "virus_scanning": true,
+    "content_validation": true,
+    "metadata_extraction": true,
+    "ocr_support": true
+  },
+  "document_types": {
+    "contract_documents": {
+      "contract_agreement": {
+        "id": "contract_agreement",
+        "name": "Contract Agreement",
+        "description": "Main contract document with terms and conditions",
+        "category": "legal",
+        "priority": "high",
+        "required": true,
+        "file_specifications": {
+          "allowed_formats": ["pdf", "docx"],
+          "max_size_mb": 50,
+          "min_size_kb": 10,
+          "preferred_format": "pdf"
+        },
+        "validation_rules": {
+          "virus_scan": true,
+          "content_validation": true,
+          "digital_signature_required": true,
+          "watermark_required": true,
+          "metadata_validation": true,
+          "compliance_check": true
+        },
+        "metadata_schema": {
+          "required_fields": [
+            "contract_id",
+            "contract_type",
+            "parties",
+            "effective_date",
+            "expiry_date",
+            "contract_value",
+            "currency"
+          ],
+          "optional_fields": [
+            "description",
+            "terms_conditions",
+            "special_clauses",
+            "attachments"
+          ],
+          "auto_extract": [
+            "contract_id",
+            "parties",
+            "dates",
+            "amounts"
+          ]
+        },
+        "access_control": {
+          "view": ["{{references.user_roles.CONTRACT_OWNER.code}}", "{{references.user_roles.ACCO_MANAGER.code}}", "{{references.user_roles.FINANCE_MANAGER.code}}"],
+          "edit": ["{{references.user_roles.CONTRACT_OWNER.code}}"],
+          "download": ["{{references.user_roles.CONTRACT_OWNER.code}}", "{{references.user_roles.ACCO_MANAGER.code}}"],
+          "print": ["{{references.user_roles.CONTRACT_OWNER.code}}"],
+          "sign": ["{{references.user_roles.CONTRACT_OWNER.code}}", "{{references.user_roles.ACCO_MANAGER.code}}"]
+        },
+        "version_control": {
+          "enabled": true,
+          "auto_version": true,
+          "max_versions": 20,
+          "version_naming": "{{contract_id}}_v{{version}}_{{date}}",
+          "retention_policy": "keep_all_versions"
+        },
+        "retention_policy": {
+          "retention_period": "7_years_after_contract_end",
+          "archive_after": "1_year_after_contract_end",
+          "disposal_method": "secure_deletion",
+          "legal_hold_support": true
+        },
+        "workflow_integration": {
+          "creation_workflow": "contract_document_creation",
+          "approval_workflow": "contract_document_approval",
+          "signing_workflow": "contract_document_signing",
+          "archival_workflow": "contract_document_archival"
+        }
+      },
+      "amendment_document": {
+        "id": "amendment_document",
+        "name": "Amendment Document",
+        "description": "Contract amendment or modification document",
+        "category": "legal",
+        "priority": "high",
+        "required": true,
+        "file_specifications": {
+          "allowed_formats": ["pdf", "docx"],
+          "max_size_mb": 25,
+          "min_size_kb": 5,
+          "preferred_format": "pdf"
+        },
+        "validation_rules": {
+          "virus_scan": true,
+          "content_validation": true,
+          "digital_signature_required": true,
+          "parent_contract_validation": true,
+          "version_compatibility": true
+        },
+        "metadata_schema": {
+          "required_fields": [
+            "amendment_id",
+            "parent_contract_id",
+            "amendment_type",
+            "effective_date",
+            "description",
+            "changes_summary"
+          ],
+          "optional_fields": [
+            "justification",
+            "impact_assessment",
+            "approval_chain"
+          ]
+        },
+        "access_control": {
+          "view": ["{{references.user_roles.CONTRACT_OWNER.code}}", "{{references.user_roles.ACCO_MANAGER.code}}"],
+          "edit": ["{{references.user_roles.CONTRACT_OWNER.code}}"],
+          "download": ["{{references.user_roles.CONTRACT_OWNER.code}}", "{{references.user_roles.ACCO_MANAGER.code}}"],
+          "approve": ["{{references.user_roles.ACCO_MANAGER.code}}"]
+        },
+        "version_control": {
+          "enabled": true,
+          "auto_version": true,
+          "max_versions": 10,
+          "version_naming": "{{amendment_id}}_v{{version}}_{{date}}",
+          "parent_version_tracking": true
+        },
+        "retention_policy": {
+          "retention_period": "7_years_after_contract_end",
+          "archive_after": "1_year_after_contract_end",
+          "disposal_method": "secure_deletion"
+        }
+      },
+      "contract_schedule": {
+        "id": "contract_schedule",
+        "name": "Contract Schedule",
+        "description": "Detailed schedule or appendix to contract",
+        "category": "legal",
+        "priority": "medium",
+        "required": false,
+        "file_specifications": {
+          "allowed_formats": ["pdf", "docx", "xlsx"],
+          "max_size_mb": 30,
+          "min_size_kb": 5,
+          "preferred_format": "pdf"
+        },
+        "validation_rules": {
+          "virus_scan": true,
+          "content_validation": true,
+          "format_validation": true
+        },
+        "metadata_schema": {
+          "required_fields": [
+            "schedule_id",
+            "parent_contract_id",
+            "schedule_type",
+            "effective_date"
+          ],
+          "optional_fields": [
+            "description",
+            "items_count",
+            "total_value"
+          ]
+        },
+        "access_control": {
+          "view": ["{{references.user_roles.CONTRACT_OWNER.code}}", "{{references.user_roles.ACCO_MANAGER.code}}", "{{references.user_roles.FINANCE_MANAGER.code}}"],
+          "edit": ["{{references.user_roles.CONTRACT_OWNER.code}}"],
+          "download": ["{{references.user_roles.CONTRACT_OWNER.code}}", "{{references.user_roles.ACCO_MANAGER.code}}"]
+        }
+      }
+    },
+    "legal_documents": {
+      "terms_conditions": {
+        "id": "terms_conditions",
+        "name": "Terms and Conditions",
+        "description": "Standard terms and conditions document",
+        "category": "legal",
+        "priority": "high",
+        "required": true,
+        "file_specifications": {
+          "allowed_formats": ["pdf", "docx"],
+          "max_size_mb": 20,
+          "min_size_kb": 5,
+          "preferred_format": "pdf"
+        },
+        "validation_rules": {
+          "virus_scan": true,
+          "content_validation": true,
+          "legal_review_required": true,
+          "version_control": true
+        },
+        "metadata_schema": {
+          "required_fields": [
+            "document_id",
+            "version",
+            "effective_date",
+            "legal_review_date"
+          ],
+          "optional_fields": [
+            "reviewed_by",
+            "approval_date",
+            "next_review_date"
+          ]
+        },
+        "access_control": {
+          "view": ["{{references.user_roles.ACCO_MANAGER.code}}", "{{references.user_roles.CONTRACT_OWNER.code}}"],
+          "edit": ["{{references.user_roles.ACCO_MANAGER.code}}"],
+          "download": ["{{references.user_roles.ACCO_MANAGER.code}}", "{{references.user_roles.CONTRACT_OWNER.code}}"]
+        }
+      },
+      "compliance_certificate": {
+        "id": "compliance_certificate",
+        "name": "Compliance Certificate",
+        "description": "Compliance and regulatory certificate",
+        "category": "legal",
+        "priority": "high",
+        "required": false,
+        "file_specifications": {
+          "allowed_formats": ["pdf"],
+          "max_size_mb": 10,
+          "min_size_kb": 1,
+          "preferred_format": "pdf"
+        },
+        "validation_rules": {
+          "virus_scan": true,
+          "certificate_validation": true,
+          "expiry_date_check": true
+        },
+        "metadata_schema": {
+          "required_fields": [
+            "certificate_id",
+            "issuing_authority",
+            "issue_date",
+            "expiry_date",
+            "compliance_type"
+          ]
+        },
+        "access_control": {
+          "view": ["{{references.user_roles.ACCO_MANAGER.code}}", "{{references.user_roles.CONTRACT_OWNER.code}}"],
+          "download": ["{{references.user_roles.ACCO_MANAGER.code}}", "{{references.user_roles.CONTRACT_OWNER.code}}"]
+        }
+      }
+    },
+    "financial_documents": {
+      "invoice": {
+        "id": "invoice",
+        "name": "Invoice",
+        "description": "Financial invoice document",
+        "category": "financial",
+        "priority": "medium",
+        "required": false,
+        "file_specifications": {
+          "allowed_formats": ["pdf", "xlsx", "docx"],
+          "max_size_mb": 15,
+          "min_size_kb": 1,
+          "preferred_format": "pdf"
+        },
+        "validation_rules": {
+          "virus_scan": true,
+          "financial_validation": true,
+          "amount_validation": true
+        },
+        "metadata_schema": {
+          "required_fields": [
+            "invoice_number",
+            "invoice_date",
+            "amount",
+            "currency",
+            "vendor_id"
+          ],
+          "optional_fields": [
+            "due_date",
+            "payment_terms",
+            "description"
+          ]
+        },
+        "access_control": {
+          "view": ["{{references.user_roles.FINANCE_MANAGER.code}}", "{{references.user_roles.FINANCE_STAFF.code}}"],
+          "edit": ["{{references.user_roles.FINANCE_STAFF.code}}"],
+          "download": ["{{references.user_roles.FINANCE_MANAGER.code}}", "{{references.user_roles.FINANCE_STAFF.code}}"]
+        }
+      },
+      "budget_approval": {
+        "id": "budget_approval",
+        "name": "Budget Approval",
+        "description": "Budget approval document",
+        "category": "financial",
+        "priority": "high",
+        "required": false,
+        "file_specifications": {
+          "allowed_formats": ["pdf", "xlsx"],
+          "max_size_mb": 20,
+          "min_size_kb": 5,
+          "preferred_format": "pdf"
+        },
+        "validation_rules": {
+          "virus_scan": true,
+          "financial_validation": true,
+          "approval_chain_validation": true
+        },
+        "metadata_schema": {
+          "required_fields": [
+            "budget_id",
+            "fiscal_year",
+            "total_amount",
+            "approved_by",
+            "approval_date"
+          ]
+        },
+        "access_control": {
+          "view": ["{{references.user_roles.FINANCE_MANAGER.code}}", "{{references.user_roles.ACCO_MANAGER.code}}"],
+          "edit": ["{{references.user_roles.FINANCE_MANAGER.code}}"],
+          "download": ["{{references.user_roles.FINANCE_MANAGER.code}}", "{{references.user_roles.ACCO_MANAGER.code}}"]
+        }
+      }
+    },
+    "administrative_documents": {
+      "correspondence": {
+        "id": "correspondence",
+        "name": "Correspondence",
+        "description": "Email or letter correspondence",
+        "category": "administrative",
+        "priority": "low",
+        "required": false,
+        "file_specifications": {
+          "allowed_formats": ["pdf", "docx", "txt", "eml"],
+          "max_size_mb": 10,
+          "min_size_kb": 1,
+          "preferred_format": "pdf"
+        },
+        "validation_rules": {
+          "virus_scan": true,
+          "content_validation": false
+        },
+        "metadata_schema": {
+          "required_fields": [
+            "correspondence_id",
+            "date",
+            "from",
+            "to",
+            "subject"
+          ]
+        },
+        "access_control": {
+          "view": ["{{references.user_roles.CONTRACT_OWNER.code}}", "{{references.user_roles.ACCO_STAFF.code}}"],
+          "edit": ["{{references.user_roles.CONTRACT_OWNER.code}}"],
+          "download": ["{{references.user_roles.CONTRACT_OWNER.code}}", "{{references.user_roles.ACCO_STAFF.code}}"]
+        }
+      },
+      "report": {
+        "id": "report",
+        "name": "Report",
+        "description": "Contract or project report",
+        "category": "administrative",
+        "priority": "medium",
+        "required": false,
+        "file_specifications": {
+          "allowed_formats": ["pdf", "docx", "xlsx", "pptx"],
+          "max_size_mb": 25,
+          "min_size_kb": 5,
+          "preferred_format": "pdf"
+        },
+        "validation_rules": {
+          "virus_scan": true,
+          "content_validation": true
+        },
+        "metadata_schema": {
+          "required_fields": [
+            "report_id",
+            "report_type",
+            "period",
+            "created_by",
+            "created_date"
+          ]
+        },
+        "access_control": {
+          "view": ["{{references.user_roles.ACCO_MANAGER.code}}", "{{references.user_roles.CONTRACT_OWNER.code}}"],
+          "edit": ["{{references.user_roles.ACCO_MANAGER.code}}"],
+          "download": ["{{references.user_roles.ACCO_MANAGER.code}}", "{{references.user_roles.CONTRACT_OWNER.code}}"]
+        }
+      }
+    }
+  },
+  "document_processing": {
+    "ocr_settings": {
+      "enabled": true,
+      "languages": ["en", "es", "fr"],
+      "confidence_threshold": 0.8,
+      "auto_retry": true
+    },
+    "metadata_extraction": {
+      "enabled": true,
+      "extraction_rules": {
+        "contract_id": "regex_patterns.contract_id",
+        "amounts": "regex_patterns.currency_amounts",
+        "dates": "regex_patterns.date_formats",
+        "parties": "nlp_entities.organization_names"
+      }
+    },
+    "content_validation": {
+      "enabled": true,
+      "validation_rules": {
+        "required_sections": ["parties", "terms", "signatures"],
+        "forbidden_content": ["confidential_terms"],
+        "format_requirements": ["page_numbers", "headers", "footers"]
+      }
+    }
+  },
+  "metadata": {
+    "created_at": "2024-01-01T00:00:00Z",
+    "created_by": "system",
+    "version": "2.0.0",
+    "description": "Enterprise document types with comprehensive specifications",
+    "tags": ["documents", "types", "validation", "metadata", "enterprise"],
+    "dependencies": [
+      "schema/references.json",
+      "documents/document_management.json"
+    ]
+  }
+}

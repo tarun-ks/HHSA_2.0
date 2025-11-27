@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+
+<mapper namespace = "com.nyc.hhs.maintenance.programnames.mapper.ProgramNameMapper">
+
+	<resultMap id="AgencyDetailsBeanList" type="com.nyc.hhs.model.AgencyDetailsBean">
+		<result property="agencyName" column="AGENCY_NAME" />
+		<result property="agencyId"   column="AGENCY_ID" />
+	</resultMap>
+
+     <resultMap id="programNameResult" type="programNameVo" >
+        <result  property = "programId"             column= "PROGRAM_ID"    />
+        <result  property = "programName"           column= "PROGRAM_NAME"     />
+        <result  property = "activeFlag"            column= "ACTIVE_FLAG"     />
+        <result  property = "createdDate"           column= "CREATED_DATE"     />
+        <result  property = "createdByUserid"       column= "CREATED_BY_USERID"      />
+        <result  property = "modifiedDate"          column= "MODIFIED_DATE"      />
+        <result  property = "modifiedByUserid"      column= "MODIFIED_BY_USERID"    />
+        <result  property = "agencyId"              column= "AGENCY_ID"    />
+        <result  property = "ref_cnt"               column= "REF_CNT"    />
+
+    </resultMap> 
+
+    <select id="getAllProgramNames__" parameterType="int" resultMap="programNameResult">
+			SELECT   PROGRAM_ID
+							,PROGRAM_NAME
+							,ACTIVE_FLAG
+							,CREATED_DATE
+							,CREATED_BY_USERID
+							,MODIFIED_DATE
+							,MODIFIED_BY_USERID         	
+			From (   SELECT ROWNUM rnum,  pro.*
+			            FROM (	SELECT   PROGRAM_ID
+			                            ,PROGRAM_NAME
+			                            ,ACTIVE_FLAG
+			                            ,TO_CHAR(CREATED_DATE, 'mm/dd/yyyy') AS CREATED_DATE
+			                            ,CREATED_BY_USERID
+			                            ,TO_CHAR(MODIFIED_DATE, 'mm/dd/yyyy')  AS MODIFIED_DATE
+			                            ,MODIFIED_BY_USERID         	
+			                    FROM   PROGRAM_MASTER
+			                    ORDER BY PROGRAM_NAME 
+			                  ) PRO
+			      ) PRO
+			WHERE pro.rnum BETWEEN ((#{pageNo}-1)*10)+1  and ((#{pageNo})*10)
+	 </select>
+
+     <resultMap id="pagingInfo" type="pagingVo" >
+        <result  property = "totalDataCount"	column= "TOTALDATACOUNT"    />
+        <result  property = "rowsInPage"  		column= "ROWSINPAGE"		/>
+        <result  property = "totalPageCount"	column= "TOTALPAGECOUNT"    />
+        <result  property = "currentPage"       column= "CURRENTPAGE"		/>
+        <result  property = "startPage"			column= "STARTPAGE"			/>
+        <result  property = "endPage"			column= "ENDPAGE"			/>
+    </resultMap> 
+
+    <select id="getAllProgramNames" parameterType="pagingVo" resultMap="programNameResult">
+    SELECT PROGRAM_ID,PROGRAM_NAME,ACTIVE_FLAG, AGENCY_ID
+			,CREATED_DATE   ,CREATED_BY_USERID ,MODIFIED_DATE	,MODIFIED_BY_USERID	,REF_CNT
+    FROM ( 
+			SELECT    ROWNUM RNUM, PROGRAM_ID
+							,PROGRAM_NAME
+							,ACTIVE_FLAG
+							,AGENCY_ID
+							,TO_CHAR(CREATED_DATE, 'mm/dd/yyyy') AS CREATED_DATE
+							,CREATED_BY_USERID
+							,TO_CHAR(MODIFIED_DATE, 'mm/dd/yyyy')  AS MODIFIED_DATE
+							,MODIFIED_BY_USERID
+							,REF_CNT
+			From (   SELECT  PRO.* , NVL(ID_CNT.REF_CNT,0) AS REF_CNT
+			            FROM (	SELECT   P.PROGRAM_ID
+								          ,P.PROGRAM_NAME
+								          ,P.ACTIVE_FLAG
+								          ,P.CREATED_DATE AS CREATED_DATE
+								          ,P.CREATED_BY_USERID
+								          ,P.MODIFIED_DATE  AS MODIFIED_DATE
+								          ,P.MODIFIED_BY_USERID 
+								          ,PM.AGENCY_ID   AS AGENCY_ID
+			                    FROM    PROGRAM_MASTER P , AGENCY_PROGRAM_MAPPING PM
+			                    WHERE   P.PROGRAM_ID = PM.PROGRAM_ID
+								<if test="searchWord !=null and searchWord !=''">
+								 	AND    UPPER(P.PROGRAM_NAME) LIKE UPPER('%${searchWord}%')
+								</if>
+								<if test="searchAgencyId !=null and searchAgencyId !=''">
+								 	AND    UPPER(PM.AGENCY_ID) = UPPER(#{searchAgencyId})
+								</if>
+								<if test="searchStatus !=null and searchStatus !=''">
+								 	AND    P.ACTIVE_FLAG = #{searchStatus}
+								</if>
+								<if test="searchModifiedFrom !=null and searchModifiedFrom !='' and searchModifiedTo !=null and searchModifiedTo !=''">
+								 	AND    P.MODIFIED_DATE BETWEEN TO_TIMESTAMP(#{searchModifiedFrom} ,'mm/dd/yyyy') 
+								 	                           AND TO_TIMESTAMP(#{searchModifiedTo} ,'mm/dd/yyyy')
+								</if>
+								<if test="searchCreatedFrom !=null and searchCreatedFrom !='' and searchCreatedTo !=null and searchCreatedTo !=''">
+								 	AND    P.CREATED_DATE BETWEEN TO_TIMESTAMP(#{searchCreatedFrom} ,'mm/dd/yyyy') 
+								 	                           AND TO_TIMESTAMP(#{searchCreatedTo} ,'mm/dd/yyyy')
+								</if>
+			                  ) PRO, 
+		                      (SELECT PROGRAM_ID, SUM(CNT)  AS REF_CNT
+		                           FROM ( SELECT PROGRAM_ID, count(1) AS CNT FROM BUDGET  GROUP BY PROGRAM_ID
+		                                  UNION ALL
+		                                  SELECT PROGRAM_ID, count(1) FROM CONTRACT GROUP BY PROGRAM_ID
+		                                  UNION ALL
+		                                  SELECT PROGRAM_ID, count(1) FROM INVOICE GROUP BY PROGRAM_ID
+		                                  UNION ALL
+		                                  SELECT PROGRAM_ID, count(1) FROM PAYMENT GROUP BY PROGRAM_ID
+		                                  UNION ALL
+		                                  SELECT PROGRAM_ID, count(1) FROM PROCUREMENT GROUP BY PROGRAM_ID
+		                                 )
+		                         GROUP BY PROGRAM_ID
+		                      ) ID_CNT
+		                WHERE  PRO.PROGRAM_ID = ID_CNT.PROGRAM_ID(+)
+						<if test="searchSortOrder !=null and searchSortOrder !=''">
+						${searchSortOrder}
+						</if>								
+			      ) pro
+			     ) pro
+			WHERE PRO.RNUM BETWEEN ((#{currentPage}-1)*#{rowsInPage})+1  and ((#{currentPage})*#{rowsInPage})
+	</select>
+
+    <select id="getProgramNamesForTypeHead" parameterType="pagingVo" resultMap="programNameResult">
+			 SELECT   PROGRAM_NAME
+             FROM    PROGRAM_MASTER 
+			 <if test="searchWord !=null and searchWord !=''">
+			   WHERE    UPPER(PROGRAM_NAME) LIKE UPPER('%${searchWord}%')
+			 </if>
+             ORDER BY upper(PROGRAM_NAME) 
+	</select>
+
+    <select id="getPageInfo" parameterType="pagingVo" resultMap="pagingInfo">
+		SELECT 
+<![CDATA[
+				TOTALDATACOUNT, ROWSINPAGE, TOTALPAGECOUNT, CURRENTPAGE, STARTPAGE 
+        		, CASE  WHEN (TOTALPAGECOUNT <  ( STARTPAGE -1 + 5) ) 
+               			THEN TOTALPAGECOUNT
+				        ELSE ( STARTPAGE -1 + 5)
+				  END  AS ENDPAGE
+]]>
+		FROM (
+				SELECT   TOTALDATACOUNT, #{rowsInPage} AS ROWSINPAGE
+				        , DECODE( MOD(TOTALDATACOUNT,#{rowsInPage}), 0, 0, 1 )+ FLOOR(TOTALDATACOUNT/#{rowsInPage}) AS TOTALPAGECOUNT
+						, #{currentPage} AS CURRENTPAGE 
+						, CASE WHEN ( MOD(#{currentPage},5) = 0 )
+						       THEN    ((FLOOR(#{currentPage}/ 5)-1)*5)+1
+						       ELSE  (FLOOR(#{currentPage}/ 5)*5)+1
+						  END  AS   STARTPAGE		
+				FROM ( SELECT COUNT(P.PROGRAM_ID) AS TOTALDATACOUNT 
+				         FROM  PROGRAM_MASTER P , AGENCY_PROGRAM_MAPPING PM
+				        WHERE  P.PROGRAM_ID = PM.PROGRAM_ID
+								<if test="searchWord !=null and searchWord !=''">
+								 	AND    UPPER(P.PROGRAM_NAME) LIKE UPPER('%${searchWord}%')
+								</if>
+								<if test="searchAgencyId !=null and searchAgencyId !=''">
+								 	AND    UPPER(PM.AGENCY_ID) = UPPER(#{searchAgencyId})
+								</if>
+								<if test="searchStatus !=null and searchStatus !=''">
+								 	AND    P.ACTIVE_FLAG = #{searchStatus}
+								</if>
+								<if test="searchModifiedFrom !=null and searchModifiedFrom !='' and searchModifiedTo !=null and searchModifiedTo !=''">
+								 	AND    P.MODIFIED_DATE BETWEEN TO_TIMESTAMP(#{searchModifiedFrom} ,'mm/dd/yyyy') 
+								 	                           AND TO_TIMESTAMP(#{searchModifiedTo} ,'mm/dd/yyyy')
+								</if>
+								<if test="searchCreatedFrom !=null and searchCreatedFrom !='' and searchCreatedTo !=null and searchCreatedTo !=''">
+								 	AND    P.CREATED_DATE BETWEEN TO_TIMESTAMP(#{searchCreatedFrom} ,'mm/dd/yyyy') 
+								 	                           AND TO_TIMESTAMP(#{searchCreatedTo} ,'mm/dd/yyyy')
+								</if>
+				     )
+			 )
+    </select>
+
+	<select id="getAgencyList" resultMap="AgencyDetailsBeanList">
+		SELECT    AGENCY_NAME, AGENCY_ID 
+		  FROM    NYC_AGENCY_DETAILS 
+		WHERE     ACTIVE_FLAG  =  '1'
+		ORDER BY  AGENCY_NAME ASC
+    </select>
+
+	<update id="inactivateProgram" parameterType="programNameVo">
+		UPDATE   PROGRAM_MASTER
+		   SET   ACTIVE_FLAG = '0',
+		         MODIFIED_BY_USERID = #{modifiedByUserid},
+		         MODIFIED_DATE = SYSTIMESTAMP
+		 WHERE   PROGRAM_ID = #{programId}
+	</update>
+
+	<update id="activateProgram" parameterType="programNameVo">
+		UPDATE   PROGRAM_MASTER
+		   SET   ACTIVE_FLAG = '1',
+		         MODIFIED_BY_USERID = #{modifiedByUserid},
+		         MODIFIED_DATE = SYSTIMESTAMP
+		 WHERE   PROGRAM_ID = #{programId}
+	</update>
+
+	<insert id="addNewProgram" parameterType="programNameVo">
+	    {call
+	        DECLARE
+	        	NEW_PROGRAM_ID    NUMBER;
+	        	NEW_AGENCY_PROGRAM_MAPPING_ID    NUMBER;
+	        BEGIN 
+	        	SELECT SEQ_PROGRAM_ID.nextval 
+	        	INTO NEW_PROGRAM_ID 
+	        	FROM DUAL;
+	        	
+	        	SELECT SEQ_AGENCY_PROGRAM_MAPPING_ID.nextval  
+	        	INTO NEW_AGENCY_PROGRAM_MAPPING_ID
+	        	FROM DUAL; 
+
+				INSERT INTO PROGRAM_MASTER 
+				(PROGRAM_ID, PROGRAM_NAME,ACTIVE_FLAG,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,MODIFIED_BY_USERID )
+				VALUES
+				(NEW_PROGRAM_ID, #{programName},#{activeFlag} , SYSTIMESTAMP, #{createdByUserid}, 	SYSTIMESTAMP, #{modifiedByUserid});
+
+				INSERT INTO AGENCY_PROGRAM_MAPPING
+				(AGENCY_PROGRAM_MAPPING_ID, 
+				   AGENCY_ID, PROGRAM_ID, ACTIVE_FLAG,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,MODIFIED_BY_USERID )
+				VALUES
+				( NEW_AGENCY_PROGRAM_MAPPING_ID ,
+				  #{agencyId},NEW_PROGRAM_ID, #{activeFlag}, SYSTIMESTAMP, #{createdByUserid}, 	SYSTIMESTAMP, #{modifiedByUserid});
+	        END
+	    }
+	</insert>
+	
+	<select id="programNameDupCheck" parameterType="programNameVo"  resultType="Integer">
+		SELECT   COUNT(PROGRAM_NAME)   
+		FROM     PROGRAM_MASTER
+		 WHERE   PROGRAM_NAME = #{programName}
+	</select>
+	
+	<update id="programNameChange" parameterType="programNameVo">
+		UPDATE   PROGRAM_MASTER
+		   SET   program_name = #{programName},
+		         MODIFIED_BY_USERID = #{modifiedByUserid},
+		         MODIFIED_DATE = SYSTIMESTAMP
+		 WHERE   PROGRAM_ID = #{programId}
+	</update>
+	
+	
+</mapper>
+
+
+

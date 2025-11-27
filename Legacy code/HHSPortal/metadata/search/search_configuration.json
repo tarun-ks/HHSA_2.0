@@ -1,0 +1,485 @@
+{
+  "version": "1.0.0",
+  "description": "Enterprise Search & Filtering System",
+  "search_engine": {
+    "global_search": {
+      "enabled": true,
+      "engine": "elasticsearch",
+      "index_name": "contracts_search",
+      "searchable_entities": [
+        {
+          "entity": "contracts",
+          "weight": 1.0,
+          "fields": [
+            {
+              "field": "title",
+              "weight": 2.0,
+              "analyzer": "standard",
+              "searchable": true,
+              "highlight": true
+            },
+            {
+              "field": "contract_id",
+              "weight": 3.0,
+              "analyzer": "keyword",
+              "searchable": true,
+              "highlight": true
+            },
+            {
+              "field": "description",
+              "weight": 1.5,
+              "analyzer": "standard",
+              "searchable": true,
+              "highlight": true
+            },
+            {
+              "field": "agency.name",
+              "weight": 1.2,
+              "analyzer": "standard",
+              "searchable": true,
+              "highlight": false
+            },
+            {
+              "field": "provider.name",
+              "weight": 1.2,
+              "analyzer": "standard",
+              "searchable": true,
+              "highlight": false
+            }
+          ]
+        },
+        {
+          "entity": "amendments",
+          "weight": 0.8,
+          "fields": [
+            {
+              "field": "title",
+              "weight": 2.0,
+              "analyzer": "standard",
+              "searchable": true,
+              "highlight": true
+            },
+            {
+              "field": "description",
+              "weight": 1.5,
+              "analyzer": "standard",
+              "searchable": true,
+              "highlight": true
+            }
+          ]
+        }
+      ],
+      "search_configuration": {
+        "fuzzy_matching": {
+          "enabled": true,
+          "fuzziness": "AUTO",
+          "max_expansions": 50
+        },
+        "autocomplete": {
+          "enabled": true,
+          "min_length": 2,
+          "max_suggestions": 10
+        },
+        "spell_check": {
+          "enabled": true,
+          "confidence_threshold": 0.7
+        },
+        "synonyms": {
+          "enabled": true,
+          "synonym_file": "search/synonyms.txt"
+        }
+      }
+    },
+    "page_specific_search": {
+      "contract_list": {
+        "page": "contract_list",
+        "search_fields": [
+          {
+            "field": "title",
+            "type": "text",
+            "label": "Contract Title",
+            "placeholder": "Search by contract title...",
+            "weight": 2.0
+          },
+          {
+            "field": "contract_id",
+            "type": "text",
+            "label": "Contract ID",
+            "placeholder": "Search by contract ID...",
+            "weight": 3.0
+          },
+          {
+            "field": "description",
+            "type": "text",
+            "label": "Description",
+            "placeholder": "Search in description...",
+            "weight": 1.5
+          }
+        ],
+        "filters": [
+          {
+            "id": "status",
+            "type": "multi_select",
+            "label": "Status",
+            "field": "status.code",
+            "data_source": "{{references.contract_statuses}}",
+            "default_values": [],
+            "ui_component": "status_badge_filter"
+          },
+          {
+            "id": "agency",
+            "type": "multi_select",
+            "label": "Agency",
+            "field": "agency_id",
+            "data_source": "organizations",
+            "filter_condition": "type = '{{references.organization_types.AGENCY.code}}'",
+            "default_values": [],
+            "ui_component": "dropdown_filter"
+          },
+          {
+            "id": "provider",
+            "type": "multi_select",
+            "label": "Provider",
+            "field": "provider_id",
+            "data_source": "organizations",
+            "filter_condition": "type = '{{references.organization_types.PROVIDER.code}}'",
+            "default_values": [],
+            "ui_component": "dropdown_filter"
+          },
+          {
+            "id": "contract_type",
+            "type": "multi_select",
+            "label": "Contract Type",
+            "field": "contract_type_id",
+            "data_source": "{{references.contract_types}}",
+            "default_values": [],
+            "ui_component": "dropdown_filter"
+          },
+          {
+            "id": "amount_range",
+            "type": "range",
+            "label": "Amount Range",
+            "field": "current_contract_amount",
+            "min_field": "amount_from",
+            "max_field": "amount_to",
+            "ui_component": "range_slider",
+            "format": "currency"
+          },
+          {
+            "id": "date_range",
+            "type": "date_range",
+            "label": "Date Range",
+            "field": "created_date",
+            "start_field": "start_date_from",
+            "end_field": "start_date_to",
+            "ui_component": "date_range_picker"
+          },
+          {
+            "id": "created_by",
+            "type": "multi_select",
+            "label": "Created By",
+            "field": "created_by",
+            "data_source": "users",
+            "default_values": [],
+            "ui_component": "user_selector"
+          }
+        ],
+        "sort_options": [
+          {
+            "field": "created_date",
+            "direction": "desc",
+            "label": "Newest First",
+            "default": true
+          },
+          {
+            "field": "created_date",
+            "direction": "asc",
+            "label": "Oldest First"
+          },
+          {
+            "field": "title",
+            "direction": "asc",
+            "label": "Title A-Z"
+          },
+          {
+            "field": "title",
+            "direction": "desc",
+            "label": "Title Z-A"
+          },
+          {
+            "field": "current_contract_amount",
+            "direction": "desc",
+            "label": "Highest Amount"
+          },
+          {
+            "field": "current_contract_amount",
+            "direction": "asc",
+            "label": "Lowest Amount"
+          }
+        ],
+        "view_options": [
+          {
+            "id": "table",
+            "label": "Table View",
+            "icon": "table",
+            "default": true
+          },
+          {
+            "id": "grid",
+            "label": "Grid View",
+            "icon": "grid"
+          },
+          {
+            "id": "cards",
+            "label": "Card View",
+            "icon": "cards"
+          }
+        ]
+      },
+      "amendment_list": {
+        "page": "amendment_list",
+        "search_fields": [
+          {
+            "field": "title",
+            "type": "text",
+            "label": "Amendment Title",
+            "placeholder": "Search by amendment title...",
+            "weight": 2.0
+          },
+          {
+            "field": "description",
+            "type": "text",
+            "label": "Description",
+            "placeholder": "Search in description...",
+            "weight": 1.5
+          }
+        ],
+        "filters": [
+          {
+            "id": "status",
+            "type": "multi_select",
+            "label": "Status",
+            "field": "status",
+            "data_source": "{{references.amendment_statuses}}",
+            "default_values": [],
+            "ui_component": "status_badge_filter"
+          },
+          {
+            "id": "amount_range",
+            "type": "range",
+            "label": "Amount Change",
+            "field": "amendment_amount",
+            "min_field": "amount_from",
+            "max_field": "amount_to",
+            "ui_component": "range_slider",
+            "format": "currency"
+          },
+          {
+            "id": "effective_date_range",
+            "type": "date_range",
+            "label": "Effective Date",
+            "field": "effective_date",
+            "start_field": "start_date_from",
+            "end_field": "start_date_to",
+            "ui_component": "date_range_picker"
+          }
+        ]
+      },
+      "dashboard": {
+        "page": "dashboard",
+        "search_fields": [
+          {
+            "field": "global_search",
+            "type": "text",
+            "label": "Search Everything",
+            "placeholder": "Search contracts, amendments, documents...",
+            "weight": 1.0,
+            "global_search": true
+          }
+        ],
+        "filters": [
+          {
+            "id": "quick_filters",
+            "type": "quick_filter",
+            "label": "Quick Filters",
+            "options": [
+              {
+                "id": "my_contracts",
+                "label": "My Contracts",
+                "filter": "created_by = current_user",
+                "icon": "user"
+              },
+              {
+                "id": "pending_approval",
+                "label": "Pending Approval",
+                "filter": "status in ['{{references.contract_statuses.PENDING_APPROVAL.code}}', '{{references.contract_statuses.PENDING_COF.code}}']",
+                "icon": "clock"
+              },
+              {
+                "id": "expiring_soon",
+                "label": "Expiring Soon",
+                "filter": "end_date <= date_add(today(), 30)",
+                "icon": "alert"
+              },
+              {
+                "id": "high_value",
+                "label": "High Value",
+                "filter": "current_contract_amount > 100000",
+                "icon": "dollar"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "advanced_filters": {
+      "filter_groups": [
+        {
+          "id": "financial",
+          "label": "Financial",
+          "filters": [
+            {
+              "id": "amount_range",
+              "type": "range",
+              "label": "Contract Amount",
+              "field": "current_contract_amount",
+              "ui_component": "range_slider",
+              "format": "currency",
+              "step": 1000
+            },
+            {
+              "id": "budget_variance",
+              "type": "range",
+              "label": "Budget Variance %",
+              "field": "budget_variance_percentage",
+              "ui_component": "range_slider",
+              "format": "percentage",
+              "min": -100,
+              "max": 100
+            }
+          ]
+        },
+        {
+          "id": "temporal",
+          "label": "Time-based",
+          "filters": [
+            {
+              "id": "created_date_range",
+              "type": "date_range",
+              "label": "Created Date",
+              "field": "created_date",
+              "ui_component": "date_range_picker"
+            },
+            {
+              "id": "contract_period",
+              "type": "date_range",
+              "label": "Contract Period",
+              "field": "start_date",
+              "end_field": "end_date",
+              "ui_component": "date_range_picker"
+            },
+            {
+              "id": "fiscal_year",
+              "type": "select",
+              "label": "Fiscal Year",
+              "field": "fiscal_year",
+              "data_source": "fiscal_years",
+              "ui_component": "dropdown"
+            }
+          ]
+        },
+        {
+          "id": "organizational",
+          "label": "Organizational",
+          "filters": [
+            {
+              "id": "agency_hierarchy",
+              "type": "hierarchical_select",
+              "label": "Agency Hierarchy",
+              "field": "agency_id",
+              "data_source": "organizations",
+              "hierarchy_field": "parent_organization_id",
+              "ui_component": "hierarchical_dropdown"
+            },
+            {
+              "id": "program",
+              "type": "multi_select",
+              "label": "Program",
+              "field": "program_id",
+              "data_source": "programs",
+              "ui_component": "dropdown_filter"
+            }
+          ]
+        }
+      ]
+    },
+    "saved_searches": {
+      "enabled": true,
+      "user_specific": true,
+      "shared_searches": {
+        "enabled": true,
+        "permission_required": "contract:view",
+        "max_shared_searches": 10
+      },
+      "search_templates": [
+        {
+          "id": "high_value_contracts",
+          "name": "High Value Contracts",
+          "description": "Contracts over $100,000",
+          "filters": {
+            "amount_range": {
+              "min": 100000,
+              "max": null
+            }
+          },
+          "sort": "current_contract_amount:desc",
+          "public": true
+        },
+        {
+          "id": "expiring_contracts",
+          "name": "Expiring Contracts",
+          "description": "Contracts expiring in next 30 days",
+          "filters": {
+            "end_date_range": {
+              "start": "today",
+              "end": "date_add(today(), 30)"
+            }
+          },
+          "sort": "end_date:asc",
+          "public": true
+        }
+      ]
+    },
+    "search_analytics": {
+      "enabled": true,
+      "track_searches": true,
+      "track_filters": true,
+      "track_results": true,
+      "popular_searches": {
+        "enabled": true,
+        "max_items": 20,
+        "time_window": "30_days"
+      },
+      "search_suggestions": {
+        "enabled": true,
+        "based_on": ["popular_searches", "user_history", "content_analysis"],
+        "max_suggestions": 10
+      }
+    },
+    "performance": {
+      "search_timeout": 5000,
+      "max_results": 1000,
+      "default_page_size": 25,
+      "caching": {
+        "enabled": true,
+        "ttl": 300,
+        "cache_popular_searches": true
+      },
+      "indexing": {
+        "real_time": true,
+        "batch_size": 1000,
+        "refresh_interval": "1s"
+      }
+    }
+  }
+}

@@ -1,0 +1,112 @@
+<aspectj>
+	<aspects>
+		<!-- define a concrete aspect inline -->
+		<concrete-aspect name="com.nyc.hhs.aop.trace._TraceAspect_"
+			extends="com.nyc.hhs.aop.trace.TraceAspect">
+			<pointcut name="logR1Transactions"
+				expression="execution(* com.nyc.hhs.frameworks.transaction.TransactionManager.executeTransaction(..))" />
+			<pointcut name="logR2Transactions"
+				expression="execution(* com.nyc.hhs.frameworks.transaction.HHSTransactionManager.executeTransaction(..))" />
+			<pointcut name="logServices"
+				expression="execution(* com.nyc.hhs.daomanager.service..*(..))" />
+		</concrete-aspect>
+
+		<concrete-aspect name="com.nyc.hhs.aop.log._LoggingAspect_"
+			extends="com.nyc.hhs.aop.log.LoggingAspect">
+			<pointcut name="serviceMethods"
+				expression="execution(* com.nyc.hhs.daomanager.service..*(..))" />
+		</concrete-aspect>
+
+		<concrete-aspect name="com.nyc.hhs.aop.access._AccessAspect_"
+			extends="com.nyc.hhs.aop.access.AccessAspect">
+			<pointcut name="controllerMethods"
+				expression="execution(protected * com.nyc.hhs.controllers..*(..)) &amp;&amp; @annotation(org.springframework.web.portlet.bind.annotation.RenderMapping)" />
+			<pointcut name="resourceSolicitaionMethods"
+				expression="execution(protected * com.nyc.hhs.controllers..launchProposal*Overlay(..)) &amp;&amp; @annotation(org.springframework.web.portlet.bind.annotation.ResourceMapping)" />
+			<pointcut name="resourceFinancialMethods"
+				expression="execution(protected * com.nyc.hhs.controllers..getOverlayContent(..)) &amp;&amp; @annotation(org.springframework.web.portlet.bind.annotation.ResourceMapping)" />
+			<pointcut name="actionWithdrawInvoice"
+				expression="execution(protected * com.nyc.hhs.controllers..actionWithdrawInvoice(..)) &amp;&amp; @annotation(org.springframework.web.portlet.bind.annotation.ResourceMapping)" />
+			<pointcut name="deleteInvoice"
+				expression="execution(protected * com.nyc.hhs.controllers..deleteInvoice(..)) &amp;&amp; @annotation(org.springframework.web.portlet.bind.annotation.ResourceMapping)" />
+			<pointcut name="controllerRenderMethods"
+				expression="(execution(* com.nyc.hhs.controllers..handleRenderRequestInternal(..)) || execution(* com.nyc.hhs.controllers..doView(..))) &amp;&amp; !@annotation(org.springframework.web.portlet.bind.annotation.RenderMapping)" />
+			<pointcut name="resourceDocumentMethods"
+				expression="execution(protected * com.nyc.hhs.controllers..editDocumentPropertiesGetLock(..)) &amp;&amp; @annotation(org.springframework.web.portlet.bind.annotation.ResourceMapping)" />
+			<pointcut name="controllerResourceMethods"
+				expression="(execution(* com.nyc.hhs.controllers.BaseController.showBudgetTabJsp(..))||
+							execution(* com.nyc.hhs.controllers.BaseController.showCBModificationGridTabs(..))||
+							execution(* com.nyc.hhs.controllers.BaseController.showInvoiceTabJsp(..))||
+							execution(* com.nyc.hhs.controllers.BaseController.showCBAmendmentGridTabs(..))) 
+							&amp;&amp; @annotation(org.springframework.web.portlet.bind.annotation.ResourceMapping)" />
+							<!-- Added for R5- autoSave -->
+							<pointcut name="controllerActionMethods"
+				expression="execution(protected * com.nyc.hhs.controllers..*(..)) &amp;&amp; @annotation(org.springframework.web.portlet.bind.annotation.ActionMapping)" />
+							<!-- End R5-->
+		</concrete-aspect>
+		<concrete-aspect name="com.nyc.hhs.aop.log._SetUserAspect_"
+			extends="com.nyc.hhs.aop.access.SetUserAspect">
+			<pointcut name="setUnsetUser"
+				expression="execution(* com.nyc.hhs.controllers..*(..)) || execution(* com.nyc.hhs.servlet..*(..))" />
+		</concrete-aspect> 
+		<!-- Start QC 9499  Multi-Tab Browsing letting Invoice and Advance tasks to be Approved Multiple times causing Duplicate Payments -->
+		<concrete-aspect name="com.nyc.hhs.aop.token._InvoiceController_Set_HHSAopToken_"
+			extends="com.nyc.hhs.aop.token.HHSAopToken">
+			<pointcut name="tokenAop"
+				expression="execution(* com.nyc.hhs.controllers.InvoiceController.*(..)) &amp;&amp; @annotation(com.nyc.hhs.annotation.HHSExtToken)" />
+		</concrete-aspect>	
+		<concrete-aspect name="com.nyc.hhs.aop.token._InvoiceController_Validate_HHSAopToken_"
+			extends="com.nyc.hhs.aop.token.HHSAopToken">
+			<pointcut name="tokenAop"
+				expression="execution(* com.nyc.hhs.controllers.InvoiceController.*(..)) &amp;&amp; @annotation(com.nyc.hhs.annotation.HHSTokenValidator)" />
+		</concrete-aspect>
+		<concrete-aspect name="com.nyc.hhs.aop.token._AdvancePaymentController_Set_HHSAopToken_"
+			extends="com.nyc.hhs.aop.token.HHSAopToken">
+			<pointcut name="tokenAop"
+				expression="execution(* com.nyc.hhs.controllers.AdvancePaymentController.*(..)) &amp;&amp; @annotation(com.nyc.hhs.annotation.HHSExtToken)" />
+		</concrete-aspect>	
+		<concrete-aspect name="com.nyc.hhs.aop.token._AdvancePaymentController_Validate_HHSAopToken_"
+			extends="com.nyc.hhs.aop.token.HHSAopToken">
+			<pointcut name="tokenAop"
+				expression="execution(* com.nyc.hhs.controllers.AdvancePaymentController.*(..)) &amp;&amp; @annotation(com.nyc.hhs.annotation.HHSTokenValidator)" />
+		</concrete-aspect>		
+		<!-- End QC 9499  Multi-Tab Browsing letting Invoice and Advance tasks to be Approved Multiple times causing Duplicate Payments -->
+	
+		<concrete-aspect name="com.nyc.hhs.aop.validation._Mapper_Model_Validation_"
+				extends="com.nyc.hhs.aop.validation.HHSAopModelValidation">
+				<pointcut name="validateAop"
+					expression="execution(public * com.nyc.hhs.service.db.services.application.*.*(com.nyc.hhs.model.*)) || execution(public * com.nyc.hhs.service.db.services.application.*.*(com.nyc.hhs.model.*, ..)) || execution(public * com.nyc.hhs.service.db.services.application.*.*(java.util.HashMap)) || execution(public * com.nyc.hhs.service.db.services.application.*.*(java.util.HashMap, ..))" />
+		</concrete-aspect>	
+		
+		<!-- Start QC 9654 R 9.4 Multi-Tab Browsing Causing Records to not be Inserted for Services and Cost Centers -->
+		 
+		<concrete-aspect name="com.nyc.hhs.aop.token._BmcController_Set_HHSAopToken_"
+			extends="com.nyc.hhs.aop.token.HHSAopToken">
+			<pointcut name="tokenAop"
+				expression="execution(* com.nyc.hhs.controllers.BmcController.*(..)) &amp;&amp; @annotation(com.nyc.hhs.annotation.HHSExtToken)" />
+		</concrete-aspect>	
+		<concrete-aspect name="com.nyc.hhs.aop.token._BmcController_Validate_HHSAopToken_"
+			extends="com.nyc.hhs.aop.token.HHSAopToken">
+			<pointcut name="tokenAop"
+				expression="execution(* com.nyc.hhs.controllers.BmcController.*(..)) &amp;&amp; @annotation(com.nyc.hhs.annotation.HHSTokenValidator)" />
+		</concrete-aspect>	
+		 
+		
+		<!-- End QC 9654 R 9.4 Multi-Tab Browsing Causing Records to not be Inserted for Services and Cost Centers -->
+		
+		<!-- Start R9.5.0 qc_9670 Remote Command Execution in Log4J (CVE-2021-44228) Vulnerability from IBM App Scan report (part2) -->
+		<concrete-aspect name="com.nyc.hhs.aop._HHSAopParameterValidation_"
+			extends="com.nyc.hhs.aop.validation.HHSAopParameterValidation">
+			<pointcut name="validateParameterAop"
+				expression="execution(* javax.portlet.PortletRequest.getParameter(java.lang.String))" />
+		</concrete-aspect>	
+		
+		<concrete-aspect name="com.nyc.hhs.aop._HHSAopModelSetMethod_"
+			extends="com.nyc.hhs.aop.validation.HHSAopModelSetMethod">
+			<pointcut name="validateSetMethodAop"
+				expression="execution(* com.nyc.hhs.model.*.set*(java.lang.String)) || execution(* com.nyc.hhs.frameworks.transaction.*.set*(java.lang.String))" />
+		</concrete-aspect>
+		<!-- End R9.5.0 qc_9670 Remote Command Execution in Log4J (CVE-2021-44228) Vulnerability from IBM App Scan report (part2) -->
+	</aspects>
+
+</aspectj>

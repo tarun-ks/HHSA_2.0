@@ -1,0 +1,802 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.nyc.hhs.service.db.services.application.AgencySettingsMapper">
+
+	<resultMap id="AgencyDetailsBeanList" type="com.nyc.hhs.model.AgencyDetailsBean">
+		<result property="agencyName" column="AGENCY_NAME" />
+		<result property="agencyId" column="AGENCY_ID" />
+	</resultMap>
+
+	<resultMap id="ReviewProcessBeanList" type="com.nyc.hhs.model.ReviewProcessBean">
+		<result property="reviewProcessId" column="REVIEW_PROCESS_ID" />
+		<result property="reviewProcess" column="REVIEW_PROCESS" />
+		<result property="reviewProcessDescription" column="DESCRIPTION" />
+		<result property="reviewProcessConfigFlag" column="CONFIG_FLAG" />
+	</resultMap>
+
+	<resultMap id="CityUserDetailsBeanList" type="com.nyc.hhs.model.CityUserDetailsBean">
+		<result property="firstName" column="FIRST_NAME" />
+		<result property="lastName" column="LAST_NAME" />
+		<result property="userId" column="USER_ID" />
+		<result property="userRole" column="USER_ROLE" />
+		<result property="levelId" column="LEVEL_ID" />
+	</resultMap>
+
+	<resultMap id="AgencySettingsBeanList" type="com.nyc.hhs.model.AgencySettingsBean">
+		<result property="levelId" column="LEVEL_ID" />
+		<result property="levelReviewerId" column="LEVEL_REVIEWER_ID" />
+	</resultMap>
+
+	<select id="fetchAgencyNames" resultMap="AgencyDetailsBeanList">
+		select
+		AGENCY_NAME,
+		AGENCY_ID
+		from
+		NYC_AGENCY_DETAILS
+		where ACTIVE_FLAG = 1
+		order by AGENCY_NAME asc
+	</select>
+
+	<select id="fetchReviewProcess" resultMap="ReviewProcessBeanList">
+		select
+		REVIEW_PROCESS_ID,
+		REVIEW_PROCESS,
+		DESCRIPTION,
+		CONFIG_FLAG
+		from
+		REVIEW_PROCESS
+		<if test="nonConfigTask != null and nonConfigTask==true">
+			where CONFIG_FLAG = '0'
+		</if>
+		order by REVIEW_PROCESS asc
+	</select>
+
+	<select id="fetchReviewLevels" parameterType="map" resultType="Integer">
+		select
+		LEVEL_OF_REVIEW
+		from
+		AGENCY_SETTING
+		where AGENCY_ID = #{agencyId}
+		and REVIEW_PROCESS_ID = #{reviewProcessId}
+	</select>
+
+	<!-- Query modified as a part of release 3.8.0 enhancement 6534 -->
+	<insert id="insertReviewLevels" parameterType="com.nyc.hhs.model.AgencySettingsBean">
+		insert into
+		AGENCY_SETTING(
+		AGENCY_SETTING_ID,
+		AGENCY_ID,
+		REVIEW_PROCESS_ID,
+		LEVEL_OF_REVIEW,
+		LAST_UPDATE_DATE,
+		CREATED_DATE,
+		CREATED_BY_USERID,
+		MODIFIED_DATE,
+		MODIFIED_BY_USERID,
+		REVIEW_LEVEL_CHG_IN_PROGRESS
+		)
+		values(
+		SEQ_AGENCY_SETTING_ID.nextval,
+		#{agencyId},
+		#{reviewProcessId},
+		#{levelOfReview},
+		SYSTIMESTAMP,
+		SYSTIMESTAMP,
+		#{createdByUserId},
+		SYSTIMESTAMP,
+		#{modifiedByUserId},
+		#{reviewLevelChangeInProgress}
+		)
+	</insert>
+
+	<!-- Query modified as a part of release 3.8.0 enhancement 6534 -->
+	<update id="updateReviewLevels" parameterType="com.nyc.hhs.model.AgencySettingsBean">
+		update
+		AGENCY_SETTING set
+		LEVEL_OF_REVIEW = #{levelOfReview},
+		LAST_UPDATE_DATE = SYSTIMESTAMP,
+		REVIEW_LEVEL_CHG_IN_PROGRESS = #{reviewLevelChangeInProgress},
+		MODIFIED_DATE = SYSTIMESTAMP,
+		MODIFIED_BY_USERID = #{modifiedByUserId}
+		where
+		AGENCY_ID = #{agencyId} and
+		REVIEW_PROCESS_ID = #{reviewProcessId}
+	</update>
+
+	<delete id="deleteLevelUsersViaAccelerator" parameterType="com.nyc.hhs.model.AgencySettingsBean">
+		delete FROM
+		AGENCY_SETTING_LEVEL_USERS
+		where
+		AGENCY_SETTING_ID = (select AGENCY_SETTING_ID from AGENCY_SETTING where AGENCY_ID =
+		#{agencyId}
+		and REVIEW_PROCESS_ID = #{reviewProcessId})
+		and LEVEL_ID =
+		#{levelId}
+	</delete>
+
+	<select id="fetchAgencyUserNames" parameterType="map"
+		resultMap="CityUserDetailsBeanList">
+		select
+		FIRST_NAME,
+		LAST_NAME,
+		USER_ID,
+		USER_ROLE
+		from
+		CITY_USER_DETAILS
+		where ORGANIZATION_NAME = #{agencyId} and active_flag
+		= '1'
+		minus
+		select
+		asCity.first_name,
+		asCity.last_name,
+		asCity.USER_ID,
+		asCity.user_role
+		from
+		city_user_details asCity
+		inner join
+		AGENCY_SETTING_LEVEL_USERS asLevUsr
+		on asLevUsr.LEVEL_REVIEWER_ID =
+		asCity.USER_ID
+		inner join AGENCY_SETTING
+		asAgSet
+		on
+		asLevUsr.AGENCY_SETTING_ID = asAgSet.AGENCY_SETTING_ID
+		where
+		asAgSet.AGENCY_ID= #{agencyId} and asAgSet.REVIEW_PROCESS_ID =
+		#{reviewProcessId}
+		and active_flag = '1'
+		order by FIRST_NAME, LAST_NAME,
+		USER_ROLE
+	</select>
+
+	<select id="fetchAssgndUserNames" parameterType="map"
+		resultMap="CityUserDetailsBeanList">
+		select
+		asCity.first_name,
+		asCity.last_name,
+		asCity.USER_ID,
+		asCity.user_role,
+		asLevUsr.level_id
+		from
+		city_user_details asCity
+		inner
+		join AGENCY_SETTING_LEVEL_USERS asLevUsr
+		on asLevUsr.LEVEL_REVIEWER_ID
+		= asCity.USER_ID
+		inner join AGENCY_SETTING
+		asAgSet
+		on
+		asLevUsr.AGENCY_SETTING_ID = asAgSet.AGENCY_SETTING_ID
+		where
+		asAgSet.AGENCY_ID= #{agencyId} and asAgSet.REVIEW_PROCESS_ID =
+		#{reviewProcessId}
+		and asCity.ACTIVE_FLAG = 1
+		order by
+		asCity.first_name, asCity.last_name,
+		asCity.user_role
+	</select>
+
+	<select id="fetchLevel1UsersIfCoFTask" parameterType="map"
+		resultMap="CityUserDetailsBeanList">
+		select
+		asCity.first_name,
+		asCity.last_name,
+		asCity.USER_ID,
+		asCity.user_role,
+		asLevUsr.level_id
+		from
+		city_user_details asCity
+		inner
+		join AGENCY_SETTING_LEVEL_USERS asLevUsr
+		on asLevUsr.LEVEL_REVIEWER_ID
+		= asCity.USER_ID
+		inner join AGENCY_SETTING
+		asAgSet
+		on
+		asLevUsr.AGENCY_SETTING_ID = asAgSet.AGENCY_SETTING_ID
+		where
+		asAgSet.AGENCY_ID= #{agencyId}
+		and asAgSet.REVIEW_PROCESS_ID =
+		#{reviewProcessId}
+		and asLevUsr.LEVEL_ID =
+		'1'
+		and asCity.ACTIVE_FLAG = 1
+		order by asCity.first_name, asCity.last_name,
+		asCity.user_role
+
+	</select>
+
+	<insert id="insertLevelUsers" parameterType="com.nyc.hhs.model.AgencySettingsBean">
+		insert into
+		AGENCY_SETTING_LEVEL_USERS(
+		AGENCY_SETTING_LEVEL_ID,
+		AGENCY_SETTING_ID,
+		LEVEL_ID,
+		LEVEL_REVIEWER_ID,
+		LAST_UPDATE_DATE,
+		CREATED_DATE,
+		CREATED_BY_USERID,
+		MODIFIED_DATE,
+		MODIFIED_BY_USERID)
+		values(
+		SEQ_AGENCY_SETTING_LEVEL_ID.nextval,
+		(select AGENCY_SETTING_ID
+		from
+		AGENCY_SETTING
+		where review_process_id = #{reviewProcessId}
+		and
+		agency_id = #{agencyId}),
+		#{levelId},
+		#{levelReviewerId},
+		SYSTIMESTAMP,
+		SYSTIMESTAMP,
+		#{createdByUserId},
+		SYSTIMESTAMP,
+		#{modifiedByUserId})
+	</insert>
+
+	<delete id="deleteLevelUsers" parameterType="com.nyc.hhs.model.AgencySettingsBean">
+		delete FROM
+		AGENCY_SETTING_LEVEL_USERS
+		where
+		AGENCY_SETTING_ID = (select
+		AGENCY_SETTING_ID from AGENCY_SETTING
+		where AGENCY_ID = #{agencyId}
+		and
+		REVIEW_PROCESS_ID = #{reviewProcessId})
+		and LEVEL_REVIEWER_ID =
+		#{levelReviewerId}
+		and LEVEL_ID = #{levelId}
+	</delete>
+
+	<!-- Query added as a part of release 3.8.0 enhancement 6534 -->
+	<update id="updateReviewInProgressFlag" parameterType="map">
+		update
+		AGENCY_SETTING set
+		REVIEW_LEVEL_CHG_IN_PROGRESS =
+		#{updateReviewInProgressFlag, jdbcType=VARCHAR},
+		MODIFIED_DATE =
+		SYSTIMESTAMP,
+		MODIFIED_BY_USERID = #{modifiedByUserId,
+		jdbcType=VARCHAR}
+		where
+		AGENCY_ID = #{Agency_ID, jdbcType=VARCHAR} and
+		REVIEW_PROCESS_ID = #{reviewProcessId}
+	</update>
+	<select id="fetchReviewInProgressFlag" parameterType="hashmap"
+		resultType="String">
+		select ag.REVIEW_LEVEL_CHG_IN_PROGRESS FROM AGENCY_SETTING
+		ag, REVIEW_PROCESS rev where
+		ag.REVIEW_PROCESS_ID =
+		rev.REVIEW_PROCESS_ID and
+		ag.AGENCY_ID = #{agencyId} and
+		rev.REVIEW_PROCESS = #{taskType}
+	</select>
+	<!-- R6 Start: Added in r6 for return payment -->
+	<select id="fetchFiscalYearsList" parameterType="String"
+		resultType="String">
+		select distinct fiscal_year_id from budget where
+		agency_id=#{agencyId} and
+		active_flag=1 and status_id in (85,87,88)
+		order by
+		fiscal_year_id
+	</select>
+	<select id="fetchProviderNotificationListForRecoupTask"
+		parameterType="map" resultMap="fetchNotificationsBeanList">
+		SELECT b.budget_Id,
+		b.contract_id contractID,
+		b.fiscal_year_id fy,
+		o.organization_legal_name name,
+		o.organization_id,
+		c.EXT_CT_NUMBER EXT_CT_NUMBER,
+		c.contract_title
+		FROM budget b,
+		(SELECT b.budget_id
+		FROM budget b
+		WHERE b.fiscal_year_id=#{fiscalYear}
+		AND b.program_id =#{programId}
+		AND b.budget_id =#{budgetId}
+		)rcoup,
+		contract c,organization o
+		WHERE b.budget_id =rcoup.budget_id
+		AND b.contract_id
+		=c.contract_id
+		AND o.organization_id =c.organization_id
+	</select>
+	<!-- Start QC 9582 R 8.9.0 include Advance Invoice Amount in the formula for Unrecouped Amount -->
+	
+	<!-- R6 Start: Updated for defect 8571
+	<select id="fetchProviderNotificationsList" parameterType="map"
+		resultMap="fetchNotificationsBeanList">
+		SELECT b.budget_Id,b.contract_id contractID,b.fiscal_year_id
+		fy,
+		so.organization_legal_name name,
+		b.organization_id,
+		c.EXT_CT_NUMBER
+		EXT_CT_NUMBER,
+		rcoup.advance_recouped,
+		c.contract_title
+		FROM budget b,
+		(select ta.budget_id, (ta.advance_recouped)-nvl(tb.advance_recouped,0) advance_recouped from 
+		(SELECT b.budget_id,
+		to_number(SUM(amount)) advance_recouped
+		FROM
+		contract c,
+		budget
+		b,
+		budget_advance ba
+		WHERE c.contract_type_id =1
+		AND
+		c.status_id in
+		(62,68,67)
+		AND c.contract_id NOT IN
+		(
+		SELECT
+		c.parent_contract_id
+		FROM
+		contract c,budget b
+		WHERE (c.contract_type_id =2
+		AND c.status_id=60 and 
+		#{fiscalYear} = b.fiscal_year_id
+        and b.contract_id=c.contract_id)
+		UNION		
+		SELECT
+		parent_contract_id
+		FROM
+		contract
+		WHERE (contract_type_id =2
+		AND status_id
+		IN
+		(59,61,128,129,130) )
+		OR (contract_type_id =4
+		AND status_id = 59
+		and
+		delete_flag=0)
+		)
+		AND b.status_id in(85,87,88)
+		AND b.fiscal_year_id =
+		#{fiscalYear}
+		AND b.budget_id NOT IN
+		(SELECT parent_id
+		FROM budget
+		WHERE
+		status_id IN (83,84,82,87)
+		AND budget_type_id = 4
+		AND active_flag =1
+		)
+		AND c.contract_id = b.contract_id
+		AND b.budget_type_id = 2
+		AND
+		b.program_id =#{programId}
+		AND b.active_flag =1
+		AND b.budget_id
+		=ba.budget_id
+		AND b.fiscal_year_id =#{fiscalYear}
+		AND ba.status_id = 125
+		GROUP BY b.budget_id) ta left join
+ 		(select rp.budget_id, to_number(sum(rp.check_amount)) advance_recouped from return_payment rp, budget b where 
+	 	rp.status_id in ('186','187') 
+ 		and b.budget_id=rp.budget_id
+		AND
+		b.fiscal_year_id=#{fiscalYear}
+		AND b.program_id =#{programId}
+		AND
+		b.active_flag =1
+    	group by rp.budget_id) tb
+   		on ta.budget_id=tb.budget_id
+  		) rcoup,
+		contract c,
+		organization so
+		WHERE b.budget_id =rcoup.budget_id
+		and b.contract_id=c.contract_id
+		AND to_number(rcoup.advance_recouped)>0
+		and so.ORGANIZATION_ID=
+		b.organization_id
+	</select>
+	  defect 8571 End -->
+	
+  <select id="fetchProviderNotificationsList" parameterType="map"
+		resultMap="fetchNotificationsBeanList">
+		  
+	SELECT b.budget_Id, 
+		b.contract_id contractID, 
+		b.fiscal_year_id fy, 
+		so.organization_legal_name name, 
+		b.organization_id, c.EXT_CT_NUMBER EXT_CT_NUMBER, 
+		rcoup.advance_recouped, 
+		c.contract_title , 
+		rcoup.NT322_condition
+	FROM budget b, 
+		(select ta.budget_id, 
+		(ta.advance_recouped) - nvl(ti.inv_adv_amt_recouped,0) advance_recouped,
+		(ta.advance_recouped) - nvl(ti.inv_adv_amt_recouped,0) - nvl(tb.advance_recouped,0) as NT322_condition  
+		FROM ( SELECT b.budget_id, to_number(SUM(amount)) advance_recouped 
+               FROM hhsa_app.contract c, budget b, hhsa_app.budget_advance ba 
+               WHERE c.contract_type_id =1 
+               		AND c.status_id in (62,68,67) 
+                    AND c.contract_id NOT IN ( 
+	                                          SELECT c.parent_contract_id 
+	                                          FROM hhsa_app.contract c, hhsa_app.budget b
+	                                          WHERE c.contract_type_id =2 
+	                                          	AND c.status_id=60 
+	                                          	AND #{fiscalYear} = b.fiscal_year_id 
+	                                          	AND b.contract_id=c.contract_id
+	                                          UNION 
+	                                          SELECT parent_contract_id FROM hhsa_app.contract 
+                                                WHERE (contract_type_id = 2 AND status_id IN (59,61,128,129,130) ) 
+                                                   OR (contract_type_id = 4 AND status_id = 59 and delete_flag=0) 
+                                              ) 
+                     AND b.status_id in(85,87,88) 
+                     AND b.fiscal_year_id = #{fiscalYear} 
+                     AND b.budget_id NOT IN 
+                                    (SELECT parent_id FROM hhsa_app.budget 
+                                     WHERE status_id IN (83,84,82,87) 
+                                       AND budget_type_id = 4 
+                                       AND active_flag = 1 
+                                      ) 
+                      AND c.contract_id = b.contract_id 
+                      AND b.budget_type_id = 2 
+                      AND b.program_id = #{programId} 
+                      AND b.active_flag = 1 
+                      AND b.budget_id = ba.budget_id 
+                      AND b.fiscal_year_id = #{fiscalYear} 
+                      AND ba.status_id = 125 
+                    GROUP BY b.budget_id
+                     ) ta 
+                     LEFT JOIN (SELECT ia.budget_id as budget_id, sum(amount_recouped)as inv_adv_amt_recouped  
+                                FROM hhsa_app.invoice_advance ia, hhsa_app.invoice i
+                                WHERE ia.invoice_id = i.invoice_id
+                                	AND i.status_id in (72,73) 
+                                GROUP BY ia.budget_id
+                                ) ti
+                    ON ti.budget_id=ta.budget_id
+					LEFT JOIN (SELECT rp.budget_id, to_number(sum(rp.check_amount)) advance_recouped 
+                               FROM hhsa_app.return_payment rp, hhsa_app.budget b
+                               WHERE rp.status_id in ('186','187') 
+                               	AND b.budget_id = rp.budget_id 
+                               	AND b.fiscal_year_id = #{fiscalYear} 
+                               	AND b.program_id = #{programId} 
+                               	AND b.active_flag =1 
+                               GROUP BY rp.budget_id
+                               ) tb 
+                     ON ta.budget_id=tb.budget_id 
+         ) rcoup, 
+           hhsa_app.contract c, hhsa_app.organization so 
+           WHERE b.budget_id = rcoup.budget_id 
+		   	AND  b.contract_id = c.contract_id 
+           	AND to_number(rcoup.NT322_condition) > 0 
+           	AND so.ORGANIZATION_ID = b.organization_id 
+     </select>                                                               
+	
+	<!-- End QC 9582 R 8.9.0 include Advance Invoice Amount in the formula for Unrecouped Amount -->
+	
+	<resultMap id="fetchNotificationsBeanList" type="com.nyc.hhs.model.BudgetList">
+		<result property="budgetId" column="BUDGET_ID" />
+		<result property="contractId" column="CONTRACTID" />
+		<result property="fiscalYear" column="FY" />
+		<result property="orgId" column="ORGANIZATION_ID" />
+		<result property="ctId" column="EXT_CT_NUMBER" />
+		<result property="unRecoupAmount" column="ADVANCE_RECOUPED" />
+		<result property="providerName" column="NAME" />
+		<result property="contractTitle" column="CONTRACT_TITLE" />
+	</resultMap>
+<!--Start: defect 8604 -->
+	<select id="exportBulkNotificationDetails" parameterType="map"
+		resultMap="exportBulkNotificationsBeanList">
+		select distinct ct.contract_id CONTRACT_ID,rpnh.group_notification_id groupNotificationId,
+		ct.organization_id PROVIDER_ORG_ID,
+		NVL(ct.contract_title,ct.procurement_title) CONTRACT_TITLE,
+		to_char(rpnh.sent_date,'MM/dd/YYYY HH:MI')
+		NOTIFICATION_SENT,rpnh.sent_by SENTBYUSERID, cud.first_name
+		||' '
+		||cud.last_name SENT_BY, sd.email PROVIDER_NAME,
+		org.organization_legal_name PROVIDER_ORG_LEGAL_NAME, org.ein_id_nn EIN, ct.ext_ct_number CT,
+		bd.fiscal_year_id FISCAL_YEAR, ct.ext_epin EXT_EPIN
+		from budget bd, contract ct, return_payment_notif_history rpnh,
+		city_user_details
+		cud, staff_details sd, organization org where
+		bd.fiscal_year_id = #{fiscalYear} and bd.program_id = #{programId}
+		and bd.contract_id = ct.contract_id and rpnh.budget_id = bd.budget_id and
+		rpnh.sent_by = cud.user_id and
+		org.ORGANIZATION_ID = ct.organization_id and
+		rpnh.sent_by = #{userId}
+		and sd.staff_id = rpnh.sent_to
+
+	</select>
+	<resultMap id="exportBulkNotificationsBeanList" type="com.nyc.hhs.model.BulkNotificationList">
+		<result property="contractId" column="CONTRACT_ID" />
+		<result property="providerOrgId" column="PROVIDER_ORG_ID" />
+		<result property="providerName" column="PROVIDER_NAME" />
+		<result property="orgLegalName" column="PROVIDER_ORG_LEGAL_NAME" />
+		<result property="orgEIN" column="EIN" />
+		<result property="ctNumber" column="CT" />
+		<result property="procTitle" column="CONTRACT_TITLE" />
+		<result property="budgetFY" column="FISCAL_YEAR" />
+		<result property="sentBy" column="SENT_BY" />
+		<result property="sentById" column="SENTBYUSERID" />
+		<result property="notificationSent" column="NOTIFICATION_SENT" />
+		<result property="awardEPIN" column="EXT_EPIN" />
+		<result property="groupNotificationId" column="groupNotificationId" />
+		<!--End: defect 8604 -->
+	</resultMap>
+	<select id="sequenceForBulkRequest" resultType="String">
+		select
+		SEQ_EXPORT_PAY_NOTIFICATION.NEXTVAL from dual
+	</select>
+	<insert id="insertBulkNotificationRequestExport" parameterType="map">
+		Insert into
+		RETURN_PAYMENT_NOTIF_EXPORT(RETURN_PAYMENT_NOTIF_EXP_ID,CREATED_BY_USERID,FISCAL_YEAR,PROGRAM_ID,STATUS,CREATED_DATE,MODIFIED_DATE,MODIFIED_BY_USERID)
+		values(SEQ_EXPORT_PAY_NOTIFICATION.NEXTVAL,#{userId},#{fiscalYear},#{programId},#{status},systimestamp,systimestamp,#{userId})
+	</insert>
+	<update id="updateExportNotificationStatus" parameterType="map">
+		UPDATE RETURN_PAYMENT_NOTIF_EXPORT
+		SET status=#{notificationStatus}
+		WHERE
+		RETURN_PAYMENT_NOTIF_EXP_ID=#{notificationId}
+	</update>
+	<select id="getCreateDateForExportNotification" parameterType="String"
+		resultMap="getExportRequestDetails">
+		select ex.created_date,ex.created_by_userid
+		created_by,cd.ORGANIZATION_NAME from
+		RETURN_PAYMENT_NOTIF_EXPORT ex,
+		city_user_details cd
+		where RETURN_PAYMENT_NOTIF_EXP_ID=#{requestId}
+		and
+		ex.created_by_userid=cd.USER_ID
+	</select>
+
+	<resultMap id="getExportRequestDetails" type="com.nyc.hhs.model.TaskDetailsBean">
+		<result property="taskRequestedDate" column="CREATED_DATE" />
+		<result property="agencyId" column="CREATED_BY" />
+		<result property="orgName" column="ORGANIZATION_NAME" />
+	</resultMap>
+
+	<select id="getProgramNameNotification" parameterType="hashmap"
+		resultMap="resultProgramName">
+		SELECT b.program_name,
+		a.program_id
+		FROM agency_program_mapping a,
+		program_master b
+		WHERE a.agency_id = #{asOrgId}
+		AND a.program_id = b.program_id
+		AND
+		a.active_flag = #{activeFlag}
+		AND b.program_id IN(
+		select a.program_id from program_master a, budget c
+		where a.program_id=c.program_id and c.agency_id=#{asOrgId} and
+		c.status_id in (85,87,88)
+		)
+	</select>
+	<resultMap id="resultProgramName" type="com.nyc.hhs.model.ProgramNameInfo">
+		<result property="programId" column="PROGRAM_ID" />
+		<result property="programName" column="PROGRAM_NAME" />
+	</resultMap>
+	<!-- R6 End -->
+	<!-- R7 Start :Modification Auto Approval Enhancement -->
+		
+	<!--Start R7: Fetching Threshold Percentage, Owner of Update and date From AUTO_APPROVAL_CONFIG_PCT_TH -->
+	<select id="fetchAutoApprovalThreshold" parameterType="map" resultMap="DefaultThresholdBean">
+		select
+		asAutoApp.AGENCY_ID,
+		asAutoApp.THRESHOLD_PERCENTAGE,
+		asCityUser.FIRST_NAME || ' ' || asCityUser.LAST_NAME 
+		AS MODIFIED_BY_USERNAME,
+		asAutoApp.MODIFIED_BY_USERID,
+		TO_CHAR(asAutoApp.MODIFIED_DATE, 'MM/DD/YYYY') 
+		AS MODIFIED_DATE
+		from
+		AUTO_APPROVAL_CONFIG_PCT_TH asAutoApp
+		inner join
+		CITY_USER_DETAILS asCityUser
+		on asAutoApp.MODIFIED_BY_USERID=
+		asCityUser.USER_ID
+		where AGENCY_ID = #{agencyId}
+		and	
+		ORGANIZATION_ID is null
+	</select>
+	
+	<resultMap id="DefaultThresholdBean" type="com.nyc.hhs.model.AutoApprovalConfigBean">
+		<result property="agencyId" column="AGENCY_ID" />
+		<result property="thresholdPercentage" column="THRESHOLD_PERCENTAGE" />
+		<result property="modifiedByUserName" column="MODIFIED_BY_USERNAME" />
+		<result property="modifiedByUserId" column="MODIFIED_BY_USERID" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+	</resultMap>
+	<!--End R7: Fetching Threshold Percentage From AUTO_APPROVAL_CONFIG_PCT_TH -->
+	
+	<!--Start R7: inserting Threshold in Auto_Approval_History -->
+	<insert id="insertAutoApprovalThresholdHistory" parameterType="String">
+		insert into
+		AUTO_APPROVAL_CFG_PCT_TH_HIST(
+		AUTO_APP_CFG_PCT_TH_HIST_ID,
+		AGENCY_ID,
+		THRESHOLD_PERCENTAGE,
+		ORGANIZATION_ID,
+		CREATED_DATE,
+		CREATED_BY_USERID,
+		MODIFIED_DATE,
+		MODIFIED_BY_USERID,
+		VERSION_ID,
+		REVIEW_PROCESS_ID
+		)
+		SELECT AUTO_APP_CONFIG_PCT_TH_ID,
+		AGENCY_ID,
+		THRESHOLD_PERCENTAGE,
+		ORGANIZATION_ID,
+		CREATED_DATE,
+		CREATED_BY_USERID,
+		MODIFIED_DATE,
+		MODIFIED_BY_USERID,
+		VERSION_ID,
+		REVIEW_PROCESS_ID from
+		AUTO_APPROVAL_CONFIG_PCT_TH 
+		where AGENCY_ID = #{agencyId}
+	</insert>
+	<!--End R7: inserting Threshold in Auto_Approval_History -->
+	
+	<!--Start R7: update version_id in AUTO_APPROVAL_CONFIG_PCT_TH table -->
+	<update id="updateAutoApprovalVersionId" parameterType="String">
+		update
+		AUTO_APPROVAL_CONFIG_PCT_TH set
+		VERSION_ID =
+		(select (max(version_id)+1) from AUTO_APPROVAL_CONFIG_PCT_TH where agency_id=#{agencyId})
+		where
+		AGENCY_ID = #{agencyId}
+	</update>
+	<!--End R7: update version_id in AUTO_APPROVAL_CONFIG_PCT_TH table -->
+	
+	
+	<!--Start R7: Updating Threshold in AUTO_APPROVAL_CONFIG_PCT_TH table -->
+	<update id="updateAutoApprovalConfig" parameterType="map">
+		update
+		AUTO_APPROVAL_CONFIG_PCT_TH set
+		THRESHOLD_PERCENTAGE =
+		#{thresholdPercentage},
+		MODIFIED_DATE = SYSTIMESTAMP,
+		MODIFIED_BY_USERID =
+		#{asUserId}
+		where
+		AGENCY_ID = #{agencyId} and
+		ORGANIZATION_ID is null
+	</update>
+	<!--End R7: Updating Threshold in AUTO_APPROVAL_CONFIG_PCT_TH table-->
+	
+ 	<!--Start R7: Fetch list of Agency providers to populate the grid drop down -->
+ 	<select id="fetchAgencyProviders" parameterType="String" resultMap="OrganizationBean">
+		select ORGANIZATION_ID, ORGANIZATION_LEGAL_NAME 
+		from Organization 
+		where organization_id in 
+		(select distinct organization_id 
+		from contract 
+		where agency_id =#{agencyId})
+ 		order by ORGANIZATION_LEGAL_NAME
+	</select>
+	<resultMap id="OrganizationBean" type="com.nyc.hhs.model.OrganizationBean">
+		<result property="msOrgId" column="ORGANIZATION_ID"/>
+		<result property="msOrgLegalName" column="ORGANIZATION_LEGAL_NAME"/>
+	</resultMap>
+	<!--End R7: Fetch list of Agency providers to populate the grid drop down-->
+	
+	<!--Start R7: Fetch list of Agency providers along with the threshold details to populate the grid -->
+	<select id="fetchAutoApprovalDetailsList" parameterType="String" resultMap="AutoApprovalConfigBeanList">
+		select 
+		asAutoApp.AUTO_APP_CONFIG_PCT_TH_ID,
+		asAutoApp.ORGANIZATION_ID, 
+		asOrg.ORGANIZATION_LEGAL_NAME 
+		AS PROVIDER,
+		asAutoApp.THRESHOLD_PERCENTAGE,
+		asCityUser.FIRST_NAME || ' ' || asCityUser.LAST_NAME 
+		AS MODIFIED_BY_USERNAME,
+		asAutoApp.MODIFIED_BY_USERID,
+		TO_CHAR(asAutoApp.MODIFIED_DATE, 'MM/DD/YYYY')
+		AS MODIFIED_DATE
+		from
+		AUTO_APPROVAL_CONFIG_PCT_TH asAutoApp
+		inner join
+		CITY_USER_DETAILS asCityUser
+		on asAutoApp.MODIFIED_BY_USERID=
+		asCityUser.USER_ID
+		inner join 
+		Organization asOrg
+		on asAutoApp.ORGANIZATION_ID=
+		asOrg.ORGANIZATION_ID 
+		where AGENCY_ID = #{agencyId}
+		and	
+		asAutoApp.ORGANIZATION_ID is not null
+		ORDER BY asAutoApp.MODIFIED_DATE DESC
+	</select>
+	<!--End R7: Fetch list of Agency providers along with the threshold details to populate the grid -->
+	
+	<resultMap id="AutoApprovalConfigBeanList" type="com.nyc.hhs.model.AutoApprovalConfigBean">
+		<result property="id" column="AUTO_APP_CONFIG_PCT_TH_ID"/>
+		<result property="organizationId" column="ORGANIZATION_ID"/>
+		<result property="empPosition" column="PROVIDER"/>
+		<result property="thresholdPercentage" column="THRESHOLD_PERCENTAGE" />
+		<result property="modifiedByUserName" column="MODIFIED_BY_USERNAME" />
+		<result property="modifiedByUserId" column="MODIFIED_BY_USERID" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+	</resultMap>
+	
+	<insert id="addAutoApprovalDetails" parameterType="com.nyc.hhs.model.AutoApprovalConfigBean">
+		insert into
+		AUTO_APPROVAL_CONFIG_PCT_TH(
+		AUTO_APP_CONFIG_PCT_TH_ID,
+		AGENCY_ID,
+		THRESHOLD_PERCENTAGE,
+		CREATED_DATE,
+		CREATED_BY_USERID,
+		MODIFIED_DATE,
+		MODIFIED_BY_USERID,
+		REVIEW_PROCESS_ID,
+		VERSION_ID,
+		ORGANIZATION_ID
+		)
+		values(
+		SEQ_AUTO_APPROVAL_CONFIG_ID.NEXTVAL,
+		#{agencyId,jdbcType=VARCHAR},
+		#{thresholdPercentage},
+		SYSTIMESTAMP,
+		#{createdByUserId,jdbcType=VARCHAR},
+		SYSTIMESTAMP,
+		#{modifiedByUserId,jdbcType=VARCHAR},
+		#{reviewProcessId},
+		(select (nvl(max(version_id),1)) from AUTO_APPROVAL_CONFIG_PCT_TH where agency_id=#{agencyId}),
+		#{organizationId,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<select id="fetchAutoApproveProvider" parameterType="com.nyc.hhs.model.AutoApprovalConfigBean" resultMap="DefaultThresholdBean">
+		select
+		asAutoApp.AGENCY_ID,
+		asAutoApp.THRESHOLD_PERCENTAGE,
+		asCityUser.FIRST_NAME || ' ' || asCityUser.LAST_NAME 
+		AS MODIFIED_BY_USERNAME,
+		asAutoApp.MODIFIED_BY_USERID,
+		TO_CHAR(asAutoApp.MODIFIED_DATE, 'MM/DD/YYYY')
+		AS MODIFIED_DATE
+		from
+		AUTO_APPROVAL_CONFIG_PCT_TH asAutoApp
+		inner join
+		CITY_USER_DETAILS asCityUser
+		on asAutoApp.MODIFIED_BY_USERID=
+		asCityUser.USER_ID
+		where AGENCY_ID = #{agencyId}
+		and	
+		ORGANIZATION_ID = #{organizationId,jdbcType=VARCHAR}
+	</select>
+	
+	<delete id="delAutoApprovalDetails" parameterType="com.nyc.hhs.model.AutoApprovalConfigBean">
+		delete
+		from AUTO_APPROVAL_CONFIG_PCT_TH
+		where
+		AUTO_APP_CONFIG_PCT_TH_ID =#{id}
+	</delete>
+	
+	<update id="editAutoApprovalDetails" parameterType="com.nyc.hhs.model.AutoApprovalConfigBean">
+		update
+		AUTO_APPROVAL_CONFIG_PCT_TH set
+		THRESHOLD_PERCENTAGE =
+		#{thresholdPercentage},
+		MODIFIED_DATE = SYSTIMESTAMP,
+		MODIFIED_BY_USERID =
+		#{modifiedByUserId}
+		where
+		AUTO_APP_CONFIG_PCT_TH_ID =#{id}
+	</update>
+	
+	<select id="fetchAutoApproverUserList" resultType="String">
+		select 
+		concat(concat(first_name,' ') 
+		, last_name) as name 
+		from city_user_details 
+		where user_dn not like '%cn%' 
+		and active_flag =0 
+		and user_type='agency_org' 
+		and user_role='system'
+	</select>
+	<!-- R7 End :Modification Auto Approval Enhancement -->
+</mapper>

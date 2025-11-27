@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+     http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context-3.0.xsd
+     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+     http://www.springframework.org/schema/mvc
+	 http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+
+	<mvc:annotation-driven />
+
+
+	<context:component-scan base-package="com.nyc.hhs.controllers" />
+
+
+	<bean id="configurationLoader"
+		class="org.springmodules.validation.bean.conf.loader.annotation.AnnotationBeanValidationConfigurationLoader" />
+	<bean id="validator" class="org.springmodules.validation.bean.BeanValidator"
+		p:configurationLoader-ref="configurationLoader" />
+
+	<bean id="proposalAnswerValidator" class="com.nyc.hhs.validator.ProposalAnswerValidator" />
+	<bean id="proposalDetailsValidator" class="com.nyc.hhs.validator.ProposalDetailsValidator">
+		<constructor-arg>
+			<ref bean="proposalAnswerValidator" />
+		</constructor-arg>
+	</bean>
+
+	<bean id="proposalCustomQuestionValidator" class="com.nyc.hhs.validator.ProposalCustomQuestionValidator" />
+	<bean id="proposalConfigurationValidator" class="com.nyc.hhs.validator.ProposalConfigurationValidator">
+		<constructor-arg>
+			<ref bean="proposalCustomQuestionValidator" />
+		</constructor-arg>
+	</bean>
+
+	<bean id="evaluationCriteriaScoreValidator" class="com.nyc.hhs.validator.EvaluationCriteriaScoreValidator" />
+	<bean id="evaluationCriteriaDetailsValidator" class="com.nyc.hhs.validator.EvaluationCriteriaDetailsValidator">
+		<constructor-arg>
+			<ref bean="evaluationCriteriaScoreValidator" />
+		</constructor-arg>
+	</bean>
+	
+	<bean id="procurementDateValidator" class="com.nyc.hhs.validator.ProcurementDateValidator" />
+	<bean id="procurementSummaryValidator" class="com.nyc.hhs.validator.ProcurementSummaryValidator">
+		<constructor-arg>
+			<ref bean="procurementDateValidator" />
+		</constructor-arg>
+	</bean>
+	
+	<bean id="portletParameterHandlerMapping"
+		class="com.nyc.hhs.controllers.util.CustomParameterHandlerMapping">
+		<property name="parameterMap">
+			<map>
+				<entry key="procurementHandler" value-ref="procurementHandler" />
+				<entry key="rfpRelease" value-ref="rfpReleaseHandler" />
+				<entry key="propEval" value-ref="propEvalHandler" />
+				<entry key="awardContract" value-ref="awardContractHandler" />
+				<entry key="selectionDetail" value-ref="selectionDetailHandler"></entry>
+			    <!--Start Added in R5 -->
+			    <entry key="enhanceddocumentvault" value-ref="enhanceddocumentvault"></entry>
+				<!--End Added in R5 -->
+			</map>
+		</property>
+	</bean>
+
+	<bean id="portletModeHandlerMapping"
+		class="org.springframework.web.portlet.handler.PortletModeHandlerMapping">
+		<property name="portletModeMap">
+			<map>
+				<entry key="view" value-ref="procurementHandler" />
+			</map>
+		</property>
+	</bean>
+
+	<bean id="messageSource"
+		class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basename" value="/WEB-INF/errors" />
+	</bean>
+
+	<!-- ********************************************* -->
+	<bean id="procurementHandler" class="com.nyc.hhs.controllers.ProcurementController" />
+	<bean id="rfpReleaseHandler" class="com.nyc.hhs.controllers.RFPReleaseController" />
+	<bean id="propEvalHandler" class="com.nyc.hhs.controllers.ProposalEvaluationController" />
+	<bean id="awardContractHandler" class="com.nyc.hhs.controllers.AwardContractController" />
+	<bean id="selectionDetailHandler" class="com.nyc.hhs.controllers.SelectionDetailsController" />
+    <!--Start Added in R5 -->
+    <bean id="enhanceddocumentvault" class="com.nyc.hhs.controllers.DocumentVaultController" />
+	<bean id="viewResolver"
+		class="com.nyc.hhs.spring.view.resolver.HHSSpringViewResolver">
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="/WEB-INF/r2/jsp/procurement/" />
+		<property name="alternatePrefix" value="/portlet/application/enhanceddocumentvault/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+<!--End Added in R5 -->
+	<!-- ********************************************* -->
+
+</beans>

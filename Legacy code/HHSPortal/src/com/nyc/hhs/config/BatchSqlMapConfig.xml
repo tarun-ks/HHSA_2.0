@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+	PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC" />
+			<dataSource type="pooled">
+				<property name="driver" value="oracle.jdbc.driver.OracleDriver" />
+				<!--Start Updated in R5 -->
+				<property name="url"
+					value="jdbc:oracle:thin:@10.240.204.69:1521:HHSAPPR2R3" />
+					<!--End Updated in R5 -->
+				<property name="username" value="hhs_r6" />
+				<property name="password" value="Acc12345" />
+			</dataSource>
+		</environment>
+		<environment id="local-dev">
+			<transactionManager type="JDBC" />
+			<dataSource type="pooled">
+				<property name="driver" value="oracle.jdbc.driver.OracleDriver" />
+				<!--Start Updated in R5 -->
+				<property name="url"
+					value="jdbc:oracle:thin:@10.240.204.69:1521:HHSAPPR2R3" />
+					<!--End Updated in R5 -->
+				<property name="username" value="hhs_r6" />
+				<property name="password" value="Acc12345" />
+			</dataSource>
+		</environment>
+       
+       	<!-- QC9645 R 9.4.0 - Remove unused configurations for DEV2, UAT, VM1, VM2 environments. Remove batch and component config for all env in Portal -->              
+		<!-- QC9583 R 9.3.0 - Retrieve credentials from Passwordstate during the Jenkins Build process   -->
+		
+        <environment id="spg">
+                <transactionManager type="JDBC" />
+                <dataSource type="pooled">
+                        <property name="driver" value="oracle.jdbc.driver.OracleDriver" />
+                        <property name="url" value="jdbc:oracle:thin:@10.155.230.227:1521:spgorcl121" />
+                        <property name="username" value="@SPG_USERNAME_DB@" />
+						<property name="password" value="@SPG_PASSWORD_DB@" />
+                </dataSource>
+        </environment>
+       
+        <environment id="sbx">
+                <transactionManager type="JDBC" />
+                <dataSource type="pooled">
+                        <property name="driver" value="oracle.jdbc.driver.OracleDriver" />
+                        <property name="url" value="jdbc:oracle:thin:@msxlvd-mcsacc01.csc.nycnet:1688:MOCACSB1" />
+                        <property name="username" value="@SBX_USERNAME_DB@" />
+						<property name="password" value="@SBX_PASSWORD_DB@" />
+                </dataSource>
+        </environment>
+
+        
+ 		
+		<environment id="dev">
+			<transactionManager type="JDBC" />
+			<dataSource type="pooled">
+				<property name="driver" value="oracle.jdbc.driver.OracleDriver" />
+				<property name="url" value="jdbc:oracle:thin:@10.155.102.78:1566:HACWDEV" />
+				<property name="username" value="@DEV_USERNAME_DB@" />
+				<property name="password" value="@DEV_PASSWORD_DB@" />
+			</dataSource>
+		</environment>
+	
+		<environment id="trn">
+			<transactionManager type="JDBC" />
+			<dataSource type="pooled">
+				<property name="driver" value="oracle.jdbc.driver.OracleDriver" />
+				<property name="url"
+					value="jdbc:oracle:thin:@msduvd-doittoltp-shrd3a-mgmt.cscx.nycnet:2008:hacwtrn" />
+					<property name="username" value="@TRN_USERNAME_DB@" />
+				<property name="password" value="@TRN_PASSWORD_DB@" />
+			</dataSource>
+		</environment>
+
+		<environment id="test2">
+			<transactionManager type="JDBC" />
+			<dataSource type="pooled">
+				<property name="driver" value="oracle.jdbc.driver.OracleDriver" />
+				<property name="url"
+					value="jdbc:oracle:thin:@msduvd-doittoltp-shrd3a-mgmt.cscx.nycnet:1564:HACWTS2" />
+				<property name="username" value="@TS2_USERNAME_DB@" />
+				<property name="password" value="@TS2_PASSWORD_DB@" />
+			</dataSource>
+		</environment>
+		
+		<environment id="ts2">
+			<transactionManager type="JDBC" />
+			<dataSource type="pooled">
+				<property name="driver" value="oracle.jdbc.driver.OracleDriver" />
+				<property name="url"
+					value="jdbc:oracle:thin:@mstlvd-mcsacc01.csc.nycnet:1583:acpwts2.nycnet" />
+				<property name="username" value="@TS2_USERNAME_DB@" />
+				<property name="password" value="@TS2_PASSWORD_DB@" />
+			</dataSource>
+		</environment>
+
+		<environment id="test">
+			<transactionManager type="JDBC" />
+			<dataSource type="pooled">
+				<property name="driver" value="oracle.jdbc.driver.OracleDriver" />
+				<property name="url"
+					value="jdbc:oracle:thin:@mstlvd-mocacc01.csc.nycnet:1567:mocacts1" />
+				<property name="username" value="@TST_USERNAME_DB@" />
+				<property name="password" value="@TST_PASSWORD_DB@" />
+			</dataSource>
+		</environment>
+		
+		<environment id="tst">
+			<transactionManager type="JDBC" />
+			<dataSource type="pooled">
+				<property name="driver" value="oracle.jdbc.driver.OracleDriver" />
+				<property name="url"
+					value="jdbc:oracle:thin:@mstlvd-mocacc01.csc.nycnet:1567:mocacts1" />
+				<property name="username" value="@TST_USERNAME_DB@" />
+				<property name="password" value="@TST_PASSWORD_DB@" />
+			</dataSource>
+		</environment>
+		
+		<environment id="stg">
+			<transactionManager type="JDBC" />
+			<dataSource type="pooled">
+				<property name="driver" value="oracle.jdbc.driver.OracleDriver" />
+				<property name="url"
+					value="jdbc:oracle:thin:@msslvd-mocacc01.csc.nycnet:1574:mocacsg1" />
+				<property name="username" value="@STG_USERNAME_DB@" />
+				<property name="password" value="@STG_PASSWORD_DB@" />
+			</dataSource>
+		</environment>
+		
+		<environment id="prd">
+				<transactionManager type="JDBC" />
+				<dataSource type="pooled">
+						<property name="driver" value="oracle.jdbc.driver.OracleDriver" />
+						<property name="url" value="jdbc:oracle:thin:@msplvd-mocacc01.csc.nycnet:1521:mocacpd1" />
+						<property name="username" value="@USERNAME_DB@" />
+						<property name="password" value="@PASSWORD_DB@" />
+				</dataSource>
+		</environment>		
+		
+	<environment id="prod">
+				<transactionManager type="JDBC" />
+				<dataSource type="pooled">
+						<property name="driver" value="oracle.jdbc.driver.OracleDriver" />
+						<property name="url" value="jdbc:oracle:thin:@msplvd-mocacc01.csc.nycnetz:1578:HACWPRD" />
+						<property name="username" value="@USERNAME_DB@" />
+						<property name="password" value="@PASSWORD_DB@" />
+				</dataSource>
+		</environment>	
+			
+	</environments>
+
+	<mappers>
+		<mapper resource="com/nyc/hhs/config/FileUploadMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/QuestionAnswerMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ApplicationMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/WorkflowDetailMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/InsertMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/TaxonomyMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/BusinessApplicationSummaryMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/TaskHistoryMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/SectionMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/MasterTableMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/FAQMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ApplicationSummaryMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ContactUsMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/InvoiceMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/AlertInboxMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/NycRegisterMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/AuditMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/SecurityMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/NotificationMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/TransactionLogMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/TaxonomyBatchMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ProcurementMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ContractMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/AgencySettingsMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/PaymentMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ProposalMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/TaskServiceMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/HhsAuditMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/HHSComponentP8Mapper.xml" />
+		<mapper resource="com/nyc/hhs/config/InvoiceMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/CommonMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/EvaluationMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/AwardsMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/RFPReleaseMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/BudgetMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ConfigurationMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ContractBudgetMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/TaxonomyTaggingMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ContractBudgetModificationMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ContractBudgetAmendmentMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/BatchNotificationMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/PaymentModuleMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/TaskAuditMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ProposalDueDateNotificationServiceMapper.xml" />
+		<!-- Added for R5 -->
+			<mapper resource="com/nyc/hhs/config/FolderMappingMapper.xml" />
+			<mapper resource="com/nyc/hhs/config/AuditHistoryMapper.xml" />
+			<mapper resource="com/nyc/hhs/config/UserRoleMapper.xml" />
+			<mapper resource="com/nyc/hhs/config/AutoSaveMapper.xml" />
+		<!--End Added in R5 -->
+	</mappers>
+
+</configuration>

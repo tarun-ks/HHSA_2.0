@@ -1,0 +1,635 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.TaxonomyTaggingMapper">
+
+<resultMap id="ProcurementList" type="com.nyc.hhs.model.TaxonomyTaggingBean">
+	<result property="procurementId" column="PROCUREMENT_ID" />
+	<result property="proposalId" column="PROPOSAL_ID" />
+	<result property="contractId" column="CONTRACT_ID" />
+	<result property="proposalTitle" column="PROPOSAL_TITLE" />
+	<result property="providerName" column="ORGANIZATION_LEGAL_NAME" />
+	<result property="procurementContractTitle" column="PROCUREMENT_TITLE" />
+	<result property="approvalDate" column="AWARD_APPROVAL_DATE" />
+	<result property="isTagged" column="TAXONOMY_TAGGING_FLAG" />
+	<result property="type" column="TYPE" />
+	<!-- Begin QC 6523, Release 3.7.0 -->
+	<result property="awardEpin" column="AWARD_EPIN" />
+	<!-- End QC 6523, Release 3.7.0 -->
+	<result property="organizationId" column="ORGANIZATION_ID" />
+	<result property="competitionPoolTitle" column="pool_title" />
+</resultMap>
+
+<resultMap id="ServiceFunctionModifiersList" type="com.nyc.hhs.model.TaxonomyTaggingBean">
+	<result property="procurementId" column="PROCUREMENT_ID" />
+	<result property="proposalId" column="PROPOSAL_ID" />
+	<result property="modifiers" column="MODIFIERS" />
+	<result property="elementId" column="ELEMENT_ID" />
+	<result property="taxonomyTaggingId" column="TAXONOMY_TAGGING_ID" />
+</resultMap>
+
+<resultMap id="ProposalTitleAndOrganizationName" type="com.nyc.hhs.model.TaxonomyTaggingBean">
+	<result property="proposalTitle" column="PROPOSAL_TITLE" />
+	<result property="providerName" column="ORGANIZATION_LEGAL_NAME" />
+</resultMap>
+
+<select id="fetchProcurementProposalDetails" parameterType="com.nyc.hhs.model.TaxonomyTaggingBean" resultMap="ProcurementList">
+<!--  QC 6523, Release 3.7.0 Added Award_Epin to select -->
+	select PROCUREMENT_ID,PROCUREMENT_TITLE,PROPOSAL_ID,CONTRACT_ID,
+	   ORGANIZATION_LEGAL_NAME,
+	   PROPOSAL_TITLE,
+	   AWARD_APPROVAL_DATE,
+	   TAXONOMY_TAGGING_FLAG,
+	   TYPE, AWARD_EPIN, ORGANIZATION_ID, pool_title from (
+		SELECT 
+		nvl(PROCUREMENT_ID, '') PROCUREMENT_ID,PROCUREMENT_TITLE,PROPOSAL_ID,CONTRACT_ID,
+	   ORGANIZATION_LEGAL_NAME,
+	   PROPOSAL_TITLE,
+	   AWARD_APPROVAL_DATE,
+	   TAXONOMY_TAGGING_FLAG,
+	   TYPE, AWARD_EPIN, ORGANIZATION_ID,
+	   rownum as rn, pool_title
+	   FROM
+		  (select details.AWARD_APPROVAL_DATE, ORG.ORGANIZATION_LEGAL_NAME, details.PROCUREMENT_ID,
+		      CASE details.ACTIVE_FLAG WHEN '1' THEN 'Yes' ELSE 'No' END AS TAXONOMY_TAGGING_FLAG, 
+		      details.title PROCUREMENT_TITLE, PROPOSAL_ID, CONTRACT_ID, details.PROPOSAL_TITLE,
+		      details.TYPE, details.epin as AWARD_EPIN, ORG.ORGANIZATION_ID, details.pool_title
+		from
+			(select 'proc' TYPE,AWRD.AWARD_APPROVAL_DATE, decode(nvl(TT.ACTIVE_FLAG, '0'), '0', '0', '1') ACTIVE_FLAG, PROC.PROCUREMENT_ID,
+			 PROC.PROCUREMENT_TITLE title, 
+			 <!-- Begin QC 6523, Release 3.7.0 -->
+			 proc.agency_id, proc.program_id, '' as epin,
+			 <!-- End QC 6523, Release 3.7.0 -->
+			 PROP.ORGANIZATION_ID, PROP.PROPOSAL_ID PROPOSAL_ID, null CONTRACT_ID, PROP.PROPOSAL_TITLE, cp.competition_pool_title pool_title,
+			 cp.competition_pool_id pool_id
+			from PROCUREMENT PROC, PROPOSAL_CONFIG PROP, EVALUATION_RESULTS EV_RS, 
+			(SELECT PROPOSAL_ID, PROCUREMENT_ID, count(1) ACTIVE_FLAG FROM TAXONOMY_TAGGING 
+			where ACTIVE_FLAG = '1'
+			GROUP BY PROPOSAL_ID, PROCUREMENT_ID) TT, AWARD AWRD, evaluation_pool_mapping epm, competition_pool cp
+			where 
+			epm.STATUS_ID > 135 and 
+			epm.EVALUATION_POOL_MAPPING_ID = AWRD.EVALUATION_POOL_MAPPING_ID and
+			epm.competition_pool_id = cp.competition_pool_id and
+			epm.PROCUREMENT_ID = PROP.PROCUREMENT_ID and
+			epm.competition_pool_id = PROP.competition_pool_id and
+			epm.evaluation_group_id = PROP.evaluation_group_id and
+			AWRD.AWARD_APPROVAL_DATE is not null and
+			PROC.PROCUREMENT_ID = PROP.PROCUREMENT_ID and 
+			proc.PREV_STATUS_ID is null and
+		    EV_RS.PROPOSAL_ID = PROP.PROPOSAL_ID and
+		    PROP.PROC_REVIEW_STATUS_ID = #{proposalStatusId} and
+		    TT.PROPOSAL_ID(+) = PROP.PROPOSAL_ID
+			UNION ALL
+			select 'cont' TYPE, LAST_UPDATE_DATE AWARD_APPROVAL_DATE, decode(nvl(TT.ACTIVE_FLAG, '0'), '0', '0', '1') ACTIVE_FLAG, 
+			null PROCUREMENT_ID, CTRC.CONTRACT_TITLE title, 
+			<!-- Begin QC 6523, Release 3.7.0 -->
+			ctrc.agency_id, ctrc.program_id, ctrc.ext_epin as epin,
+			<!-- End QC 6523, Release 3.7.0 -->
+			 CTRC.ORGANIZATION_ID, null PROPOSAL_ID, CTRC.CONTRACT_ID CONTRACT_ID, '--' PROPOSAL_TITLE, '' pool_title, null pool_id
+			from CONTRACT CTRC, (SELECT CONTRACT_ID, count(1) ACTIVE_FLAG FROM TAXONOMY_TAGGING 
+			where ACTIVE_FLAG = '1'
+			GROUP BY CONTRACT_ID) TT
+			where
+			CTRC.PROCUREMENT_ID is null and
+		    CTRC.STATUS_ID = #{contractStatusId} and
+		    TT.CONTRACT_ID(+) = CTRC.CONTRACT_ID and 
+		    CTRC.CONTRACT_SOURCE_ID = '2'
+		    ) details, ORGANIZATION ORG
+		where
+		  ORG.ORGANIZATION_ID = details.ORGANIZATION_ID
+		<if test="proposalTitle != null and proposalTitle != ''">
+		 	AND lower(details.PROPOSAL_TITLE) LIKE lower(#{proposalTitle}) AND details.TYPE = 'proc'
+		</if>
+		<if test="procurementContractTitle != null and procurementContractTitle != ''">
+		 	AND lower(details.TITLE) LIKE lower(#{procurementContractTitle})
+		</if>
+		<if test="competitionPoolTitle != null and competitionPoolTitle != ''">
+		 	AND lower(details.pool_title) LIKE lower(#{competitionPoolTitle})
+		</if>
+		<if test="providerName != null and providerName != ''">
+		 	AND lower(ORG.ORGANIZATION_LEGAL_NAME) = lower(#{providerName})
+		</if>
+		
+		<!-- Begin QC 6523, Release 3.7.0 -->
+		<if test="contractAgencyName != null and contractAgencyName != ''">
+		 	AND lower(details.agency_id) = lower(#{contractAgencyName})
+		</if>
+		<if test="programName != null and programName != ''">
+		 	AND lower(details.program_id) = lower(#{programName})
+		</if>
+		<if test="awardEpin != null and awardEpin != ''">
+		 	AND lower(details.epin) = lower(#{awardEpin})
+		</if>
+		<!-- End QC 6523, Release 3.7.0 -->
+
+		<choose>
+			<when test="dateApprovedFrom != null and dateApprovedFrom != '' and dateApprovedTo != null and dateApprovedTo != ''">
+				AND details.AWARD_APPROVAL_DATE BETWEEN #{approvedDateFrom, jdbcType=TIMESTAMP} AND #{approvedDateTo, jdbcType=TIMESTAMP}
+			</when>
+			<when test="dateApprovedFrom != null and dateApprovedFrom != '' and (dateApprovedTo == null or dateApprovedTo == '')">
+				AND details.AWARD_APPROVAL_DATE &gt;= #{approvedDateFrom, jdbcType=TIMESTAMP}
+			</when>
+			<when test="(dateApprovedFrom == null or dateApprovedFrom == '') and dateApprovedTo != null and dateApprovedTo != ''">
+				AND details.AWARD_APPROVAL_DATE &lt;= #{approvedDateTo, jdbcType=TIMESTAMP}
+			</when>
+		</choose>
+		<if test="tagged != null">
+			AND details.ACTIVE_FLAG in 
+			<foreach item="items" index="index" collection="tagged"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach>
+		</if>
+		ORDER BY
+		<choose>
+			<when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+			<otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+		</choose>
+		<if test="secondSort != null">
+			<choose>
+				<when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+				<otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+			</choose>
+		</if>)a ) b WHERE rn
+	BETWEEN #{startNode} AND
+	#{endNode}
+</select>
+
+
+<select id="fetchGridProcurementProposalDetailsInBulk" parameterType="map" resultMap="ProcurementList">
+		select details.AWARD_APPROVAL_DATE, ORG.ORGANIZATION_LEGAL_NAME, details.PROCUREMENT_ID,
+		      CASE details.ACTIVE_FLAG WHEN '1' THEN 'Yes' ELSE 'No' END AS TAXONOMY_TAGGING_FLAG, 
+		      details.title PROCUREMENT_TITLE, PROPOSAL_ID, CONTRACT_ID, details.PROPOSAL_TITLE,
+		      details.TYPE, ORG.ORGANIZATION_ID
+		from
+			(
+			<if test="proposalId != null and  proposalId.size > 0 and procurementId != null and  procurementId.size > 0">
+			select 'proc' TYPE,AWRD.AWARD_APPROVAL_DATE, decode(nvl(TT.ACTIVE_FLAG, '0'), '0', '0', '1') ACTIVE_FLAG, PROC.PROCUREMENT_ID,
+			 PROC.PROCUREMENT_TITLE title, 
+			 PROP.ORGANIZATION_ID, PROP.PROPOSAL_ID PROPOSAL_ID, null CONTRACT_ID, PROP.PROPOSAL_TITLE
+			from PROCUREMENT PROC, PROPOSAL_CONFIG PROP, EVALUATION_RESULTS EV_RS, 
+			(SELECT PROPOSAL_ID, PROCUREMENT_ID, count(1) ACTIVE_FLAG FROM TAXONOMY_TAGGING 
+			where ACTIVE_FLAG = '1'
+			GROUP BY PROPOSAL_ID, PROCUREMENT_ID) TT, AWARD AWRD
+			where 
+		    PROC.PROCUREMENT_ID = PROP.PROCUREMENT_ID and proc.PREV_STATUS_ID is null and
+		    EV_RS.PROPOSAL_ID = PROP.PROPOSAL_ID and
+		    PROP.PROC_REVIEW_STATUS_ID = #{proposalStatusId} and
+		    TT.PROPOSAL_ID(+) = PROP.PROPOSAL_ID and
+		    AWRD.PROCUREMENT_ID = PROP.PROCUREMENT_ID
+		    and PROC.STATUS_ID > 4 and AWRD.AWARD_APPROVAL_DATE is not null
+		     and PROP.PROPOSAL_ID in 
+		     <foreach item="items" index="index" collection="proposalId"
+				open="(" separator="," close=")">
+				 #{items}
+    		</foreach>
+    		 and AWRD.PROCUREMENT_ID in 
+		     <foreach item="items" index="index" collection="procurementId"
+				open="(" separator="," close=")">
+				 #{items}
+    		</foreach>
+			</if>
+			<if test="contractId != null and  contractId.size > 0">
+			<if test="proposalId != null and  proposalId.size > 0 and procurementId != null and  procurementId.size > 0">
+			UNION ALL
+			</if>
+			select 'cont' TYPE, LAST_UPDATE_DATE AWARD_APPROVAL_DATE, decode(nvl(TT.ACTIVE_FLAG, '0'), '0', '0', '1') ACTIVE_FLAG, 
+			null PROCUREMENT_ID, CTRC.CONTRACT_TITLE title, 
+			 CTRC.ORGANIZATION_ID, null PROPOSAL_ID, CTRC.CONTRACT_ID CONTRACT_ID, '--' PROPOSAL_TITLE
+			from CONTRACT CTRC, (SELECT CONTRACT_ID, count(1) ACTIVE_FLAG FROM TAXONOMY_TAGGING 
+			where ACTIVE_FLAG = '1'
+			GROUP BY CONTRACT_ID) TT
+			where
+			CTRC.PROCUREMENT_ID is null and
+		    CTRC.STATUS_ID = #{contractStatusId} and
+		    TT.CONTRACT_ID(+) = CTRC.CONTRACT_ID and 
+		    CTRC.CONTRACT_SOURCE_ID = '2'
+		     and CTRC.CONTRACT_ID in 
+		     <foreach item="items" index="index" collection="contractId"
+				open="(" separator="," close=")">
+				 #{items}
+    		</foreach>
+    		</if>
+		    ) details, ORGANIZATION ORG
+		where
+		ORG.ORGANIZATION_ID = details.ORGANIZATION_ID
+</select>
+
+<select id="getTaxonomyTaggingList" parameterType="map" resultMap="ServiceFunctionModifiersList">
+	select TT.TAXONOMY_TAGGING_ID, TT.ELEMENT_ID, TT.PROCUREMENT_ID, TT.PROPOSAL_ID, 
+	      LISTAGG(TM.ELEMENT_ID, ',') WITHIN GROUP (ORDER BY TM.ELEMENT_ID) AS MODIFIERS
+	from
+	TAXONOMY_TAGGING TT, (Select ELEMENT_ID, TAXONOMY_TAGGING_ID from TAXONOMY_MODIFIER where ACTIVE_FLAG = '1') TM
+		WHERE 
+	  TT.TAXONOMY_TAGGING_ID = TM.TAXONOMY_TAGGING_ID(+)
+	  <if test="procurementId != null and procurementId != '' and procurementId != 'null'">
+	  	and TT.PROCUREMENT_ID = #{procurementId}
+	  </if>
+	  <if test="proposalId != null and proposalId != '' and proposalId != 'null'">
+		and TT.PROPOSAL_ID = #{proposalId}
+	  </if>
+	  <if test="contractId != null and contractId != '' and contractId != 'null'">
+	  	and TT.CONTRACT_ID = #{contractId}
+	  </if>
+	  and TT.ACTIVE_FLAG = '1'
+	GROUP BY
+	  TT.TAXONOMY_TAGGING_ID, TT.ELEMENT_ID, TT.PROCUREMENT_ID, TT.PROPOSAL_ID
+</select>
+
+
+<select id="getTaxonomyTaggingInBulkList" parameterType="map" resultMap="ServiceFunctionModifiersList">
+SELECT LISTAGG(TAXONOMY_TAGGING_ID, ',') WITHIN GROUP (
+ORDER BY TAXONOMY_TAGGING_ID) AS TAXONOMY_TAGGING_ID,
+  ELEMENT_ID,
+  ELEMENT_ID_MOD as MODIFIERS
+FROM
+  ( SELECT DISTINCT(TAXONOMY_TAGGING_ID),
+    ELEMENT_ID,
+    LISTAGG(ELEMENT_ID_MOD, ',') WITHIN GROUP (
+  ORDER BY ELEMENT_ID_MOD) AS ELEMENT_ID_MOD
+  FROM
+    (SELECT TT.TAXONOMY_TAGGING_ID,
+      TT.ELEMENT_ID,
+      TM.ELEMENT_ID AS ELEMENT_ID_MOD
+    FROM TAXONOMY_TAGGING TT,
+      (SELECT ELEMENT_ID,
+        TAXONOMY_TAGGING_ID
+      FROM TAXONOMY_MODIFIER
+      WHERE ACTIVE_FLAG = '1'
+      ) TM
+    WHERE TT.TAXONOMY_TAGGING_ID = TM.TAXONOMY_TAGGING_ID(+)
+  <if test="procurementId != null and  procurementId.size > 0">
+			  	and TT.PROCUREMENT_ID in
+			  	<foreach item="items" index="index" collection="procurementId"
+						open="(" separator="," close=")">
+						#{items}
+		      	</foreach>
+	</if>
+<if test="proposalId != null and proposalId.size > 0">
+				and TT.PROPOSAL_ID in
+				 <foreach item="items" index="index" collection="proposalId"
+						open="(" separator="," close=")">
+						#{items}
+		    	 </foreach>
+ </if>
+  <if test="taxonomyTaggingIdForFetch != null and taxonomyTaggingIdForFetch.size > 0">
+			  	and TT.TAXONOMY_TAGGING_ID in
+			  	<foreach item="items" index="index" collection="taxonomyTaggingIdForFetch"
+						open="(" separator="," close=")">
+						#{items}
+		      	</foreach>
+	</if>
+    AND TT.ACTIVE_FLAG           = '1'
+    UNION ALL
+    SELECT TT.TAXONOMY_TAGGING_ID,
+      TT.ELEMENT_ID,
+      TM.ELEMENT_ID AS ELEMENT_ID_MOD
+    FROM TAXONOMY_TAGGING TT,
+      (SELECT ELEMENT_ID,
+        TAXONOMY_TAGGING_ID
+      FROM TAXONOMY_MODIFIER
+      WHERE ACTIVE_FLAG = '1'
+      ) TM
+    WHERE TT.TAXONOMY_TAGGING_ID = TM.TAXONOMY_TAGGING_ID(+)
+    <if test="contractId != null and contractId.size > 0">
+			  	and TT.CONTRACT_ID in
+			 	 <foreach item="items" index="index" collection="contractId"
+						open="(" separator="," close=")">
+						 #{items}
+		    		</foreach>
+		    	</if>
+	<if test="taxonomyTaggingIdForFetch != null and taxonomyTaggingIdForFetch.size > 0">
+			  	and TT.TAXONOMY_TAGGING_ID in
+			  	<foreach item="items" index="index" collection="taxonomyTaggingIdForFetch"
+						open="(" separator="," close=")">
+						#{items}
+		      	</foreach>
+	</if>
+    AND TT.ACTIVE_FLAG           = '1'
+    )
+  GROUP BY ELEMENT_ID,
+    TAXONOMY_TAGGING_ID
+  )
+GROUP BY ELEMENT_ID,
+  ELEMENT_ID_MOD
+</select>
+
+<insert id="insertTaxonomyModifierDetails" parameterType="com.nyc.hhs.model.TaxonomyModifiersBean">
+   INSERT INTO TAXONOMY_MODIFIER(ELEMENT_ID, TAXONOMY_TAGGING_ID, TAXONOMY_MODIFIER_ID,CREATED_DATE,MODIFIED_DATE,CREATED_BY_USERID,
+   MODIFIED_BY_USERID, ACTIVE_FLAG) 
+   VALUES(#{elementId}, #{taxonomyTaggingId}, SEQ_TAXONOMY_MODIFIER_ID.NEXTVAL,systimestamp,systimestamp,
+   #{createdBy,jdbcType=VARCHAR},#{modifyBy,jdbcType=VARCHAR}, '1')
+</insert>
+
+	<select id="selectTaxonomyModifierDetails" parameterType="map" resultType="String">
+		SELECT LISTAGG(branch_id, '|') WITHIN GROUP (
+		ORDER BY branch_id) AS branch_id
+		FROM
+		  ( SELECT DISTINCT(tma.branch_id)
+		  FROM taxonomy_master tma,
+		    taxonomy_modifier tmo
+		  WHERE tma.element_id         = tmo.element_id
+		  AND tmo.TAXONOMY_TAGGING_ID IN 
+		  <foreach item="items" index="index" collection="asTaxonomyTaggingId"
+							open="(" separator="," close=")">
+							#{items}
+			   		</foreach>
+		AND tmo.active_flag =1
+		  )
+	</select>
+
+<update id="updateTaxonomyModifierDetails" parameterType="com.nyc.hhs.model.TaxonomyModifiersBean">
+   UPDATE TAXONOMY_MODIFIER
+   set MODIFIED_DATE=systimestamp, MODIFIED_BY_USERID=#{modifyBy,jdbcType=VARCHAR}, ACTIVE_FLAG='1' 
+   where
+   TAXONOMY_TAGGING_ID = #{taxonomyTaggingId} and
+   ELEMENT_ID = #{elementId}
+</update>
+
+<update id="deleteFromTaxonomyTagging" parameterType="com.nyc.hhs.model.TaxonomyTaggingBean">
+      UPDATE TAXONOMY_TAGGING
+		SET ACTIVE_FLAG = '0',
+		MODIFIED_DATE = systimestamp,
+		MODIFIED_BY_USERID = #{modifyByUserId,jdbcType=VARCHAR}
+		WHERE 
+		TAXONOMY_TAGGING_ID = #{taxonomyTaggingId,jdbcType=NUMERIC}
+</update>
+
+<update id="deleteFromTaxonomyTaggingModifiers" parameterType="com.nyc.hhs.model.TaxonomyTaggingBean">
+      UPDATE TAXONOMY_MODIFIER
+		SET 
+		ACTIVE_FLAG = '0',
+		MODIFIED_DATE = systimestamp,
+		MODIFIED_BY_USERID = #{modifyByUserId,jdbcType=VARCHAR}
+		WHERE 
+		TAXONOMY_TAGGING_ID = #{taxonomyTaggingId,jdbcType=NUMERIC}
+		<if test="elementIdAlreadyPresent != null and elementIdAlreadyPresent.size > 0">
+			AND Element_Id not in 
+			<foreach item="items" index="index" collection="elementIdAlreadyPresent"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach>
+		</if>
+</update>
+
+<update id="deleteFromTaxonomyTaggingInBulk" parameterType="com.nyc.hhs.model.TaxonomyTaggingBean">
+      UPDATE TAXONOMY_TAGGING
+		SET ACTIVE_FLAG = '0',
+		MODIFIED_DATE = systimestamp,
+		MODIFIED_BY_USERID = #{modifyByUserId,jdbcType=VARCHAR}
+		WHERE 
+		TAXONOMY_TAGGING_ID in
+		<foreach item="items" index="index" collection="taxonomyTaggingIdList"
+				open="(" separator="," close=")">
+				#{items}
+   		</foreach>
+</update>
+
+<update id="deleteFromTaxonomyTaggingModifiersInBulk" parameterType="com.nyc.hhs.model.TaxonomyTaggingBean">
+      UPDATE TAXONOMY_MODIFIER
+		SET 
+		ACTIVE_FLAG = '0',
+		MODIFIED_DATE = systimestamp,
+		MODIFIED_BY_USERID = #{modifyByUserId,jdbcType=VARCHAR}
+		WHERE 
+		TAXONOMY_TAGGING_ID in
+		<foreach item="items" index="index" collection="taxonomyTaggingIdList"
+				open="(" separator="," close=")">
+				#{items}
+   		</foreach>
+		<if test="elementIdAlreadyPresent != null and elementIdAlreadyPresent.size > 0">
+			AND Element_Id not in 
+			<foreach item="items" index="index" collection="elementIdAlreadyPresent"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach>
+		</if>
+</update>
+
+
+
+<select id="getTaxonomyTaggingIds"  parameterType="com.nyc.hhs.model.TaxonomyTaggingBean" resultType="string">
+select LISTAGG(TAXONOMY_TAGGING_ID, ',') WITHIN GROUP (ORDER BY TAXONOMY_TAGGING_ID) from taxonomy_tagging 
+		WHERE ACTIVE_FLAG      = '1'
+		and  (
+		<if test="contractIdList != null and  contractIdList.size > 0">
+			  	CONTRACT_ID in
+			 	 <foreach item="items" index="index" collection="contractIdList"
+						open="(" separator="," close=")">
+						 #{items}
+		    		</foreach>
+		   	</if>
+		<if test="procurementIdList != null and  procurementIdList.size > 0">
+			  <if test="contractIdList != null and contractIdList.size > 0">
+			  OR (
+			  </if>
+			  	PROCUREMENT_ID in
+			 	 <foreach item="items" index="index" collection="procurementIdList"
+						open="(" separator="," close=")">
+						 #{items}
+		    		</foreach>
+		    	</if>
+		 <if test="proposalIdList != null and proposalIdList.size > 0">
+			  	and PROPOSAL_ID in
+			 	 <foreach item="items" index="index" collection="proposalIdList"
+						open="(" separator="," close=")">
+						 #{items}
+		    		</foreach>
+		    <if test="contractIdList != null and contractIdList.size > 0">
+			  )
+			  </if>
+		    	</if>
+		)
+</select>
+
+<select id="getTaxonomyTaggingIds1"  parameterType="java.util.Map" resultType="string">
+select TAXONOMY_TAGGING_ID from taxonomy_tagging 
+		WHERE ACTIVE_FLAG = '1'
+		<choose>
+			<when test="contractId != null and contractId != 'null'  and contractId != ''">and	CONTRACT_ID = #{contractId}</when>
+			<otherwise>and CONTRACT_ID is null</otherwise>
+		</choose>
+		<choose>
+			<when test="procurementId != null and procurementId != 'null'  and procurementId != ''">and PROCUREMENT_ID = #{procurementId}</when>
+			<otherwise>and PROCUREMENT_ID is null</otherwise>
+		</choose>
+		<choose>
+			<when test="proposalId != null and proposalId != 'null'  and proposalId != ''">and	PROPOSAL_ID = #{proposalId}</when>
+			<otherwise>and PROPOSAL_ID is null</otherwise>
+		</choose>
+</select>
+		
+<update id="removeAllFromTaxonomyTaggingModifiersInBulk" parameterType="com.nyc.hhs.model.TaxonomyTaggingBean">
+		UPDATE taxonomy_modifier
+		SET ACTIVE_FLAG      = '0',
+		  MODIFIED_DATE      = systimestamp,
+		  MODIFIED_BY_USERID =  #{modifyByUserId,jdbcType=VARCHAR}
+		WHERE TAXONOMY_TAGGING_ID   IN 
+			 	 <foreach item="items" index="index" collection="taxonomyTaggingIdList"
+						open="(" separator="," close=")">
+						 #{items}
+		    		</foreach>
+</update>
+
+<update id="removeAllFromTaxonomyTaggingInBulk" parameterType="com.nyc.hhs.model.TaxonomyTaggingBean">
+		UPDATE taxonomy_tagging
+		SET ACTIVE_FLAG      = '0',
+		  MODIFIED_DATE      = systimestamp,
+		  MODIFIED_BY_USERID = #{modifyByUserId,jdbcType=VARCHAR}
+		WHERE TAXONOMY_TAGGING_ID   IN 
+			 	 <foreach item="items" index="index" collection="taxonomyTaggingIdList"
+						open="(" separator="," close=")">
+						 #{items}
+		    		</foreach>
+		
+</update>
+
+<update id="updateTaxonomyTaggingDetails" parameterType="com.nyc.hhs.model.TaxonomyTaggingBean">
+      UPDATE TAXONOMY_TAGGING
+		SET ACTIVE_FLAG = '1',
+		MODIFIED_DATE = systimestamp,
+		MODIFIED_BY_USERID = #{modifyByUserId},
+		ELEMENT_ID = #{elementId}
+		WHERE 
+		TAXONOMY_TAGGING_ID = #{taxonomyTaggingId}
+</update>
+
+<update id="updateTaxonomyTaggingDetailsInBulk" parameterType="com.nyc.hhs.model.TaxonomyTaggingBean">
+      UPDATE TAXONOMY_TAGGING
+		SET ACTIVE_FLAG = '1',
+		MODIFIED_DATE = systimestamp,
+		MODIFIED_BY_USERID = #{modifyByUserId},
+		ELEMENT_ID = #{elementId}
+		WHERE 
+		TAXONOMY_TAGGING_ID in
+		<foreach item="items" index="index" collection="taxonomyTaggingIdList"
+				open="(" separator="," close=")">
+				#{items}
+   		</foreach>
+</update>
+
+<select id="getNextTaggingId" resultType="String">
+	select SEQ_TAXONOMY_TAGGING_ID.NEXTVAL from dual
+</select>
+
+<insert id="insertTaxonomyTaggingDetails" parameterType="com.nyc.hhs.model.TaxonomyTaggingBean" >
+INSERT INTO TAXONOMY_TAGGING 
+							 (
+							 TAXONOMY_TAGGING_ID, PROCUREMENT_ID, ELEMENT_ID,
+               PROPOSAL_ID, CONTRACT_ID, LAST_UPDATE_DATE, ACTIVE_FLAG, CREATED_DATE,
+               CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID)
+     		    VALUES (#{taxonomyTaggingId}, #{procurementId,jdbcType=VARCHAR}, #{elementId,jdbcType=VARCHAR},
+			        #{proposalId,jdbcType=VARCHAR}, #{contractId,jdbcType=VARCHAR}, systimestamp,
+			        '1', systimestamp, #{createdByUserId,jdbcType=VARCHAR}, systimestamp, #{modifyByUserId,jdbcType=VARCHAR})
+</insert>
+
+<insert id="insertTaxonomyTaggingDetailsInBulkProposal" parameterType="com.nyc.hhs.model.TaxonomyTaggingBean" >
+INSERT INTO TAXONOMY_TAGGING 
+							 (
+							 TAXONOMY_TAGGING_ID, PROCUREMENT_ID, ELEMENT_ID,
+               PROPOSAL_ID, CONTRACT_ID, LAST_UPDATE_DATE, ACTIVE_FLAG, CREATED_DATE,
+               CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID)
+     		    VALUES (#{taxonomyTaggingId}, (select procurement_id from proposal_config where proposal_id =  #{proposalId,jdbcType=VARCHAR}),
+     		     #{elementId,jdbcType=VARCHAR},
+			        #{proposalId,jdbcType=VARCHAR}, #{contractId,jdbcType=VARCHAR}, systimestamp,
+			        '1', systimestamp, #{createdByUserId,jdbcType=VARCHAR}, systimestamp, #{modifyByUserId,jdbcType=VARCHAR})
+</insert>
+
+<select id="selectProcurementRecordCount" parameterType="com.nyc.hhs.model.TaxonomyTaggingBean" resultType="int">
+	select count(*)
+		from
+			(select 'proc' TYPE,AWRD.AWARD_APPROVAL_DATE, decode(nvl(TT.ACTIVE_FLAG, '0'), '0', '0', '1') ACTIVE_FLAG, PROC.PROCUREMENT_ID,
+			 PROC.PROCUREMENT_TITLE title, 
+			 <!-- Begin QC 6523, Release 3.7.0 -->
+			 proc.agency_id, proc.program_id, proc.epin as epin,
+			 <!-- End QC 6523, Release 3.7.0 -->
+			 PROP.ORGANIZATION_ID, PROP.PROPOSAL_ID PROPOSAL_ID, null CONTRACT_ID, PROP.PROPOSAL_TITLE, cp.competition_pool_title pool_title,
+			 cp.competition_pool_id pool_id
+			from PROCUREMENT PROC, PROPOSAL_CONFIG PROP, EVALUATION_RESULTS EV_RS, 
+			(SELECT PROPOSAL_ID, PROCUREMENT_ID, count(1) ACTIVE_FLAG FROM TAXONOMY_TAGGING 
+			where ACTIVE_FLAG = '1'
+			GROUP BY PROPOSAL_ID, PROCUREMENT_ID) TT, AWARD AWRD, evaluation_pool_mapping epm, competition_pool cp
+			where 
+			epm.STATUS_ID > 135 and 
+			epm.EVALUATION_POOL_MAPPING_ID = AWRD.EVALUATION_POOL_MAPPING_ID and
+			epm.competition_pool_id = cp.competition_pool_id and
+			epm.PROCUREMENT_ID = PROP.PROCUREMENT_ID and
+			epm.competition_pool_id = PROP.competition_pool_id and
+			epm.evaluation_group_id = PROP.evaluation_group_id and
+			AWRD.AWARD_APPROVAL_DATE is not null and
+			PROC.PROCUREMENT_ID = PROP.PROCUREMENT_ID and 
+			proc.PREV_STATUS_ID is null and
+		    EV_RS.PROPOSAL_ID = PROP.PROPOSAL_ID and
+		    PROP.PROC_REVIEW_STATUS_ID = #{proposalStatusId} and
+		    TT.PROPOSAL_ID(+) = PROP.PROPOSAL_ID
+			UNION ALL
+			select 'cont' TYPE, LAST_UPDATE_DATE AWARD_APPROVAL_DATE, decode(nvl(TT.ACTIVE_FLAG, '0'), '0', '0', '1') ACTIVE_FLAG, 
+			null PROCUREMENT_ID, CTRC.CONTRACT_TITLE title, 
+			<!-- Begin QC 6523, Release 3.7.0 -->
+			ctrc.agency_id, ctrc.program_id, ctrc.ext_epin as epin,
+			 <!-- End QC 6523, Release 3.7.0 -->
+			 CTRC.ORGANIZATION_ID, null PROPOSAL_ID, CTRC.CONTRACT_ID CONTRACT_ID, '--' PROPOSAL_TITLE, '--' pool_title, null pool_id
+			from CONTRACT CTRC, (SELECT CONTRACT_ID, count(1) ACTIVE_FLAG FROM TAXONOMY_TAGGING 
+			where ACTIVE_FLAG = '1'
+			GROUP BY CONTRACT_ID) TT
+			where
+			CTRC.PROCUREMENT_ID is null and
+		    CTRC.STATUS_ID = #{contractStatusId} and
+		    TT.CONTRACT_ID(+) = CTRC.CONTRACT_ID and 
+		    CTRC.CONTRACT_SOURCE_ID = '2'
+		    ) details, ORGANIZATION ORG
+		where
+		  ORG.ORGANIZATION_ID = details.ORGANIZATION_ID
+		<if test="proposalTitle != null and proposalTitle != ''">
+		 	AND lower(details.PROPOSAL_TITLE) LIKE lower(#{proposalTitle}) AND details.TYPE = 'proc'
+		</if>
+		<if test="procurementContractTitle != null and procurementContractTitle != ''">
+		 	AND lower(details.TITLE) LIKE lower(#{procurementContractTitle})
+		</if>
+		<if test="competitionPoolTitle != null and competitionPoolTitle != ''">
+		 	AND lower(details.pool_title) LIKE lower(#{competitionPoolTitle})
+		</if>
+		<if test="providerName != null and providerName != ''">
+		 	AND lower(ORG.ORGANIZATION_LEGAL_NAME) = lower(#{providerName})
+		</if>
+		<!-- Begin QC 6523, Release 3.7.0 -->
+		<if test="contractAgencyName != null and contractAgencyName != ''">
+		 	AND lower(details.agency_id) = lower(#{contractAgencyName})
+		</if>
+		<if test="programName != null and programName != ''">
+		 	AND lower(details.program_id) = lower(#{programName})
+		</if>
+		<if test="awardEpin != null and awardEpin != ''">
+		 	AND lower(details.epin) = lower(#{awardEpin})
+		</if>
+		<!-- End QC 6523, Release 3.7.0 -->
+		<choose>
+			<when test="dateApprovedFrom != null and dateApprovedFrom != '' and dateApprovedTo != null and dateApprovedTo != ''">
+				AND details.AWARD_APPROVAL_DATE BETWEEN #{approvedDateFrom, jdbcType=TIMESTAMP} AND #{approvedDateTo, jdbcType=TIMESTAMP}
+			</when>
+			<when test="dateApprovedFrom != null and dateApprovedFrom != '' and (dateApprovedTo == null or dateApprovedTo == '')">
+				AND details.AWARD_APPROVAL_DATE &gt;= #{approvedDateFrom, jdbcType=TIMESTAMP}
+			</when>
+			<when test="(dateApprovedFrom == null or dateApprovedFrom == '') and dateApprovedTo != null and dateApprovedTo != ''">
+				AND details.AWARD_APPROVAL_DATE &lt;= #{approvedDateTo, jdbcType=TIMESTAMP}
+			</when>
+		</choose>
+		<if test="tagged != null">
+			AND details.ACTIVE_FLAG in 
+			<foreach item="items" index="index" collection="tagged"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach>
+		</if>
+	</select>
+
+	<select id="getProposalTitle" parameterType="String" resultMap="ProposalTitleAndOrganizationName">
+		SELECT PROP.PROPOSAL_TITLE, ORG.ORGANIZATION_LEGAL_NAME
+		FROM PROPOSAL_CONFIG PROP, ORGANIZATION ORG
+		WHERE
+	    PROP.PROPOSAL_ID=#{asProposalId} AND
+	    PROP.ORGANIZATION_ID=ORG.ORGANIZATION_ID
+	</select>
+</mapper>

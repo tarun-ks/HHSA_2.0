@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapping>
+	<page name="proposalSummaryActions">
+		<type name="manager">
+			<!-- Start || Changes done for enhancement #6577 for Release 3.10.0 -->
+			<status name="166">
+				<action>View Proposal Details</action>
+				<action>View Proposal Documents</action>
+			</status>
+			<!-- End || Changes done for enhancement #6577 for Release 3.10.0 -->
+			<status name="7">
+				<action>View Proposal Details</action>
+				<action>View Proposal Documents</action>
+			</status>
+			<status name="8">
+				<action>View Proposal Details</action>
+				<action>View Proposal Documents</action>
+				<action>View Evaluation Score</action>
+			</status>
+			<status name="17">
+				<action>Edit Proposal Details</action>
+				<action>Upload Proposal Documents</action>
+				<action>Submit Proposal</action>
+				<action>Cancel Proposal</action>
+			</status>
+			<status name="18">
+				<action>View Proposal Details</action>
+				<action>View Proposal Documents</action>
+				<action>Retract Proposal</action>
+			</status>
+			<status name="19">
+				<action>Edit Proposal Details</action>
+				<action>Upload Proposal Documents</action>
+				<action>Submit Proposal</action>
+			</status>
+			<status name="20">
+				<action>View Proposal Details</action>
+				<action>View Proposal Documents</action>
+			</status>
+			<status name="23">
+				<action>View Proposal Details</action>
+				<action>View Proposal Documents</action>
+				<action>View Evaluation Score</action>
+			</status>
+			<status name="24">
+				<action>View Proposal Details</action>
+				<action>View Proposal Documents</action>
+				<action>View Evaluation Score</action>
+			</status>
+			<status name="25">
+				<action>View Proposal Details</action>
+				<action>View Proposal Documents</action>
+			</status>
+		</type>
+		
+		<type name="staff">
+			<!-- Start || Changes done for enhancement #6577 for Release 3.10.0 -->
+			<status name="166">
+				<action>View Proposal Details</action>
+				<action>View Proposal Documents</action>
+			</status>
+			<!-- End || Changes done for enhancement #6577 for Release 3.10.0 -->
+			<status name="7">
+				<action>View Proposal Details</action>
+				<action>View Proposal Documents</action>
+			</status>
+			<status name="8">
+				<action>View Proposal Details</action>
+				<action>View Proposal Documents</action>
+			</status>
+			<status name="17">
+				<action>Edit Proposal Details</action>
+				<action>Upload Proposal Documents</action>
+			</status>
+			<status name="18">
+				<action>View Proposal Details</action>
+				<action>View Proposal Documents</action>
+			</status>
+			<status name="19">
+				<action>Edit Proposal Details</action>
+				<action>Upload Proposal Documents</action>
+			</status>
+			<status name="20">
+				<action>View Proposal Details</action>
+				<action>View Proposal Documents</action>
+			</status>
+			<status name="23">
+				<action>View Proposal Details</action>
+				<action>View Proposal Documents</action>
+			</status>
+			<status name="24">
+				<action>View Proposal Details</action>
+				<action>View Proposal Documents</action>
+			</status>
+			<status name="25">
+				<action>View Proposal Details</action>
+				<action>View Proposal Documents</action>
+			</status>
+		</type>
+		
+	</page>
+</mapping>

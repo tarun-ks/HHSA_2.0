@@ -1,0 +1,825 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.PaymentMapper">
+	
+	<!-- Changes for enhancement  id 6356   release 3.4.0 -->
+	<resultMap id="resultPaymentListSummary" type="com.nyc.hhs.model.PaymentSortAndFilter">
+		<result property="paymentVoucherNumber" column="payment_voucher_num" />
+		<result property="paymentValue" column="payment_amount" />
+		<result property="paymentLastUpdateDate" column="last_update_date" />
+		<result property="paymentPayeeName" column="payee_name" />
+		<result property="paymentDisNum" column="check_eft_num" />
+		<result property="paymentStatus" column="status" />
+		<result property="paymentStatusId" column="status_id" />
+		<result property="paymentProvider" column="organization_legal_name" />
+		<result property="paymentContractTitle" column="contract_title" />
+		<result property="paymentProcurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="paymentCtId" column="ct_number" />
+		<result property="paymentDisDate" column="disbursement_date" />
+		<result property="dateLastUpdate" column="LAST_UPDATE_DATE" />
+		<result property="paymentId" column="PAYMENT_ID" />
+		<result property="invoiceId" column="INVOICE_ID" />
+		<result property="budgetId" column="BUDGET_ID" />
+		<result property="contractId" column="CONTRACT_ID" />
+		<result property="budgetAdvanceId" column="BUDGET_ADVANCE_ID" />
+		<result property="paymentAgencyId" column="AGENCY_ID" />
+		<result property="paymentFiscalYearId" column="FISCAL_YEAR_ID" />
+		<!-- Start : R5 Added -->
+		<result property="orgId" column="organization_id" />
+		<!-- End : R5 Added -->
+        <!-- [Start] R9.7.5 QC9719 -->
+        <result property="actionDisable" column= "action_disable"/>
+        <!-- [End] R9.7.5 QC9719 -->		
+        <!-- [Start] R9.7.6 QC9730 -->
+        <result property="actionException" column= "action_exception"/>
+        <!-- [End] R9.7.6 QC9730 -->
+	</resultMap>
+
+	<resultMap id="resultFiscalYear" type="com.nyc.hhs.model.FiscalYear">
+		<result property="fiscalYear" column="FISCAL_YEAR" />
+		<result property="fiscalYearId" column="FISCAL_YEAR_ID" />
+	</resultMap>
+	
+	<resultMap id="resultProgramName" type="com.nyc.hhs.model.ProgramNameInfo">
+		<result property="programId" column="PROGRAM_ID" />
+		<result property="programName" column="PROGRAM_NAME" />
+	</resultMap>
+	
+	<resultMap id="resultPaymentStatus" type="com.nyc.hhs.model.StatusR3">
+		<result property="statusId" column="STATUS_ID" />
+		<result property="processType" column="PROCESS_TYPE" />
+		<result property="statusProcessTypeId" column="STATUS_PROCESS_TYPE_ID" />
+		<result property="status" column="STATUS" />
+		<result property="statusFilter" column="STATUS_FILTER" />
+	</resultMap>
+	
+	<resultMap id="resultAgency" type="com.nyc.hhs.model.NycAgencyDetails">
+		<result property="agencyName" column="AGENCY_NAME" />
+		<result property="agencyId" column="AGENCY_ID" />
+	</resultMap>
+	<!-- Made changes in this query for defect id 6248 release 3.3.0  -->
+	<!-- Changes for enhancement  id 6356   release 3.4.0 -->
+	<!-- Changes for enhancement  id 6495 for release 3.12.0 -->
+	<select id="fetchPaymentListSummaryProvider" parameterType="com.nyc.hhs.model.PaymentSortAndFilter"
+		resultMap="resultPaymentListSummary">
+		select    disbursement_date,payment_voucher_num,payment_amount,
+		          payee_name, check_eft_num,contract_id,budget_id,INVOICE_ID,status,status_id,AGENCY_ID,organization_legal_name,
+		          contract_title,PROCUREMENT_TITLE,ct_number,BUDGET_ADVANCE_ID,FISCAL_YEAR,FISCAL_YEAR_ID, rn
+		          <!-- [Start] R9.7.5 QC9719 -->
+                  , action_disable
+                  <!-- [End] R9.7.5 QC9719 -->     
+                  <!-- [Start] R9.7.6 QC9730 -->
+				  , action_exception 
+                  <!-- [End] R9.7.6 QC9730 --> 
+		from (    select  disbursement_date,payment_voucher_num,payment_amount,last_update_date,payee_name, check_eft_num,contract_id,budget_id,INVOICE_ID,
+		                  status,status_id,AGENCY_ID,organization_legal_name,contract_title,PROCUREMENT_TITLE,ct_number,BUDGET_ADVANCE_ID,FISCAL_YEAR,
+		                  FISCAL_YEAR_ID, rownum as rn
+					        <!-- [Start] R9.7.3 QC9719 -->
+					        ,(select count(1) from ACTION_DISABLE_TASK_OBJ aet 
+					               where  aet.CONTRACT_ID = b.CONTRACT_ID and  aet.BUDGET_ID = b.BUDGET_ID and aet.AGENCY_ID = b.AGENCY_ID
+					                 and aet.IS_ACTIVE = 1 and aet.VERSION_NO in ( select  nvl( max(eae.VERSION_NO), 0 ) 
+					                                                             from  ACTION_DISABLE_TASK_OBJ eae 
+					                                                            where  eae.CONTRACT_ID = aet.CONTRACT_ID 
+					                                                              AND  eae.BUDGET_ID =  aet.BUDGET_ID
+					                                                              AND  eae.AGENCY_ID =  aet.AGENCY_ID  ) 
+					         ) action_disable
+					        <!-- [End] R9.7.3 QC9719 -->
+			                <!-- [Start] R9.7.6 QC9730 -->
+							  , (select count(1) from ACTION_EXCEPTIONAL_OBJ aet 
+					               where  aet.CONTRACT_ID = b.CONTRACT_ID and aet.AGENCY_ID = b.AGENCY_ID
+					                 and aet.IS_ACTIVE = 1 and aet.VERSION_NO in ( select  nvl( max(eae.VERSION_NO), 0 ) 
+					                                                             from  ACTION_EXCEPTIONAL_OBJ eae 
+					                                                            where  eae.CONTRACT_ID = aet.CONTRACT_ID 
+					                                                              AND  eae.AGENCY_ID =  aet.AGENCY_ID  ) 
+					          ) action_exception 
+			                <!-- [End] R9.7.6 QC9730 --> 
+		            from  (select  	 disbursement_date,payment_voucher_num,payment_amount,last_update_date,payee_name,check_eft_num,contract_id,budget_id,INVOICE_ID,
+		                             status,status_id,AGENCY_ID,organization_legal_name,contract_title,PROCUREMENT_TITLE,ct_number,BUDGET_ADVANCE_ID,FISCAL_YEAR,FISCAL_YEAR_ID 
+		                    from   ( select  TO_DATE (TO_CHAR (pay.disbursement_date, 'DD-MON-YYYY'),'DD-MON-YYYY') AS disbursement_date, 
+		                                     pay.payment_voucher_num,pay.payment_amount,
+                                             <!-- START : QC 6663  Last update date   -->
+                                             decode( pay.STATUS_ID,  65, NVL(pay.DISBURSEMENT_DATE, pay.MODIFIED_DATE) 
+                                                                       , NVL(pay.LAST_UPDATE_DATE, pay.MODIFIED_DATE) 
+                                              ) as LAST_UPDATE_DATE,
+                                             <!-- END : QC 6663  Last update date   -->
+		                                     pay.payee_name, decode(pay.status_id,65,pay.check_eft_num,'Pending EFT') as check_eft_num,
+                                             sta.status,decode(sta.status_id,109,64,sta.status_id) as status_id  ,org.organization_legal_name,
+                                             con.contract_title,con.PROCUREMENT_TITLE,pay.AGENCY_ID,pay.contract_id,pay.budget_id,pay.INVOICE_ID,
+                                             pay.ct_number,pay.BUDGET_ADVANCE_ID,fis.FISCAL_YEAR,fis.FISCAL_YEAR_ID,
+                                             decode(sta.status_process_type_id,3,1,sta.status_process_type_id) as status_process_type_id
+		                               from  payment pay, contract con,STATUS_MASTER_R2_R3 sta, organization org,fiscal_year fis
+		                              where  pay.contract_id = con.contract_id and pay.status_id = sta.status_id 
+		                              and    pay.FISCAL_YEAR_ID = fis.FISCAL_YEAR_ID 
+		                              and    pay.organization_id = org.organization_id
+		                              and pay.organization_id = #{orgId}
+									  and pay.DELETE_FLAG != 1
+										<if test="paymentContractTitle != null and paymentContractTitle !=''">
+											AND	(lower(con.CONTRACT_TITLE) LIKE
+											lower('%${paymentContractTitle}%'))
+										</if>
+										<if test="paymentProgramName !=null and paymentProgramName !=''">
+											AND pay.PROGRAM_ID = #{paymentProgramName}
+										</if>
+										<if test="agency !=null and agency!=''">
+										 AND pay.agency_id = #{agency}
+										</if>
+										<if test="paymentCtId != null and paymentCtId !=''">
+										AND lower(pay.CT_NUMBER) = lower(#{paymentCtId})
+										</if>
+										<if test=" fiscalYearId != null and  fiscalYearId !=''">
+										AND pay.FISCAL_YEAR_ID = #{fiscalYearId}
+										</if>
+										<if test=" paymentVoucherNumber != null and paymentVoucherNumber !=''">
+											AND	lower(pay.payment_voucher_num) LIKE
+											lower('%${paymentVoucherNumber}%')
+										</if>
+										<!--<if test="  paymentDisNum == 'Pending EFT'">
+										AND sta.STATUS_ID IN ('64','109')
+										</if>-->
+										<if test=" paymentValueFrom != null and    paymentValueFrom !=''">
+										AND  pay.payment_amount &gt; = #{paymentValueFrom}
+										</if>
+										<if test="paymentValueTo != null and paymentValueTo !=''">
+										AND  pay.payment_amount &lt; = #{paymentValueTo}
+										</if>
+										<if test=" dateDisbursedFrom != null and  dateDisbursedFrom !=''">
+										AND pay.DISBURSEMENT_DATE &gt; = to_date(#{dateDisbursedFrom, jdbcType=VARCHAR},'MM/dd/YYYY')
+										</if>
+										<if test="dateDisbursedTo != null and  dateDisbursedTo !=''">
+										AND pay.DISBURSEMENT_DATE &lt; = to_date(#{dateDisbursedTo, jdbcType=VARCHAR},'MM/dd/YYYY')
+										</if>
+										<!-- Start : R5 Added -->
+										<if test="contractId != null and contractId !=''">
+											AND pay.CONTRACT_ID = #{contractId,jdbcType=VARCHAR}
+										</if>
+										<if test="budgetId != null and budgetId !=''">
+											AND pay.BUDGET_ID = #{budgetId,jdbcType=VARCHAR}
+										</if>
+										<if test="invoiceId != null and invoiceId !=''">
+											AND pay.INVOICE_ID = #{invoiceId,jdbcType=VARCHAR}
+										</if>
+										<!-- End : R5 Added -->
+										<!--<if test="paymentStatusList != null">
+											AND sta.STATUS_ID IN
+											<foreach item="items" index="index" collection="paymentStatusList"
+												open="(" separator="," close=")">
+												#{items}
+								    		</foreach>
+										</if>-->
+									) a 
+		                  where STATUS_ID is not null
+						<!-- Start for enhancement  id 6495 for release 3.12.0 -->
+						<if test="  paymentDisNum != null and   paymentDisNum !=''">
+						AND lower(check_eft_num) like lower('%${paymentDisNum}%')
+						</if>
+						<if test="paymentStatusList != null">
+							AND STATUS_ID IN
+							<foreach item="items" index="index" collection="paymentStatusList"
+								open="(" separator="," close=")">
+								#{items}
+				    		</foreach>
+						</if>
+						ORDER BY
+				            <choose>
+			                  <when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+			                  <otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+				            </choose>
+				            <if test="secondSort != null and secondSort != ''">
+				                  <choose>
+				                        <when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+				                        <otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+				                  </choose>
+				            </if>
+         		<!-- End for enhancement  id 6495 for release 3.12.0 -->
+				) b 
+		 )c 
+		 where rn &gt;= #{startNode} AND rn &lt;= #{endNode}
+	</select>
+	<!-- Made changes in this query for defect id 6248 release 3.3.0  -->
+	<select id="fetchPaymentListSummaryAgency" parameterType="com.nyc.hhs.model.PaymentSortAndFilter"
+		resultMap="resultPaymentListSummary">
+		select     disbursement_date,payment_voucher_num,payment_amount,last_update_date,payee_name,check_eft_num,
+		           status,status_id,AGENCY_ID,organization_legal_name,contract_title,PROCUREMENT_TITLE,ct_number,BUDGET_ADVANCE_ID,
+					<!-- Start : R5 Added -->
+					organization_id,
+					<!-- End : R5 Added -->
+					PAYMENT_ID,INVOICE_ID,BUDGET_ID,CONTRACT_ID,FISCAL_YEAR,FISCAL_YEAR_ID,rn
+					<!-- [Start] R9.7.3 QC9719 -->
+                    ,action_disable
+                    <!-- [End] R9.7.3 QC9719 -->
+					<!-- [Start] R9.7.6 QC9730 -->
+			        , action_exception 
+				    <!-- [End] R9.7.6 QC9730 -->            				
+		from ( select  	disbursement_date,payment_voucher_num,payment_amount,last_update_date,payee_name,check_eft_num,
+                        status,status_id,AGENCY_ID,organization_legal_name,contract_title,PROCUREMENT_TITLE,ct_number,BUDGET_ADVANCE_ID,
+						<!-- Start : R5 Added -->
+						organization_id,
+						<!-- End : R5 Added -->
+		               PAYMENT_ID,INVOICE_ID,BUDGET_ID,CONTRACT_ID,FISCAL_YEAR,FISCAL_YEAR_ID, rownum as rn 
+                       <!-- [Start] R9.7.5 QC9719 -->
+				        , (select count(1) from ACTION_DISABLE_TASK_OBJ aet 
+				               where  aet.CONTRACT_ID = A.CONTRACT_ID and  aet.BUDGET_ID = A.BUDGET_ID and aet.AGENCY_ID = A.AGENCY_ID
+				                 and aet.IS_ACTIVE = 1 and aet.VERSION_NO in ( select  nvl( max(eae.VERSION_NO), 0 ) 
+				                                                             from  ACTION_DISABLE_TASK_OBJ eae 
+				                                                            where  eae.CONTRACT_ID = aet.CONTRACT_ID 
+				                                                              AND  eae.BUDGET_ID =  aet.BUDGET_ID
+				                                                              AND  eae.AGENCY_ID =  aet.AGENCY_ID  ) 
+				         ) action_disable
+                       <!-- [End] R9.7.5 QC9719 -->	
+					   <!-- [Start] R9.7.6 QC9730 -->
+					   , (select count(1) from ACTION_EXCEPTIONAL_OBJ aet 
+				               where  aet.CONTRACT_ID = A.CONTRACT_ID  and aet.AGENCY_ID = A.AGENCY_ID
+				                 and aet.IS_ACTIVE = 1 and aet.VERSION_NO in ( select  nvl( max(eae.VERSION_NO), 0 ) 
+				                                                             from  ACTION_EXCEPTIONAL_OBJ eae 
+				                                                            where  eae.CONTRACT_ID = aet.CONTRACT_ID 
+				                                                              AND  eae.AGENCY_ID =  aet.AGENCY_ID  ) 
+				         ) action_exception 
+					   <!-- [End] R9.7.6 QC9730 -->   
+		         from ( select  pay.disbursement_date,pay.payment_voucher_num,pay.payment_amount,
+                                <!-- START : QC 6663  Last update date   -->
+                                 decode( pay.STATUS_ID,  65, NVL(pay.DISBURSEMENT_DATE, pay.MODIFIED_DATE) 
+                                                           , NVL(pay.LAST_UPDATE_DATE, pay.MODIFIED_DATE) 
+                                  ) as LAST_UPDATE_DATE,
+                                <!-- END : QC 6663  Last update date   -->
+                                pay.payee_name,decode(pay.status_id,65,pay.check_eft_num,'Pending EFT') as check_eft_num,
+								<!-- Start : R5 Added -->
+								org.organization_id,
+								<!-- End : R5 Added -->
+								sta.status,sta.status_id,pay.AGENCY_ID,org.organization_legal_name,con.contract_title,con.PROCUREMENT_TITLE,
+								pay.PAYMENT_ID,pay.INVOICE_ID,pay.BUDGET_ID,pay.CONTRACT_ID,pay.ct_number,pay.BUDGET_ADVANCE_ID,
+								fis.FISCAL_YEAR,fis.FISCAL_YEAR_ID
+		                  from payment pay, contract con,STATUS_MASTER_R2_R3 sta, organization org,fiscal_year fis
+		                 where  pay.contract_id = con.contract_id and pay.status_id = sta.status_id 
+		                   and  pay.FISCAL_YEAR_ID = fis.FISCAL_YEAR_ID 
+		                   and  pay.organization_id = org.organization_id
+							and pay.agency_id = #{agency}
+							and (pay.DELETE_FLAG != 1
+							or (pay.DELETE_FLAG =1 and pay.status_id ='159'))
+							<if test="paymentContractTitle != null and paymentContractTitle !=''">
+							AND	(lower(con.CONTRACT_TITLE) LIKE  lower('%${paymentContractTitle}%') )
+							</if>
+							<if test="paymentProgramName !=null and paymentProgramName !=''">
+								AND pay.PROGRAM_ID = #{paymentProgramName}
+							</if>
+							<if test=" paymentProvider !=null and paymentProvider !=''">
+							    AND lower(org.ORGANIZATION_ID) = lower('${providerId}')
+							</if>
+							<if test="paymentCtId != null and paymentCtId !=''">
+							AND lower(pay.CT_NUMBER) = lower(#{paymentCtId})
+							</if>
+							<if test=" fiscalYearId != null and  fiscalYearId !=''">
+							AND pay.FISCAL_YEAR_ID = #{fiscalYearId}
+							</if>
+							<if test=" paymentVoucherNumber != null and paymentVoucherNumber !=''">
+							AND	lower(pay.payment_voucher_num) LIKE  lower('%${paymentVoucherNumber}%')
+							</if>
+							<!--<if test="  paymentDisNum != null and   paymentDisNum !=''">
+							AND lower(pay.check_eft_num) like lower('%${paymentDisNum}%')
+							</if>-->
+							<if test=" paymentValueFrom != null and    paymentValueFrom !=''">
+							AND  pay.payment_amount &gt; = #{paymentValueFrom}
+							</if>
+							<if test="paymentValueTo != null and paymentValueTo !=''">
+							AND  pay.payment_amount &lt; = #{paymentValueTo}
+							</if>
+							<if test=" dateLastUpdateFrom != null and    dateLastUpdateFrom !=''">
+							AND  pay.LAST_UPDATE_DATE &gt; = to_date(#{dateLastUpdateFrom, jdbcType=VARCHAR},'MM/dd/YYYY')
+							</if>
+							<if test=" dateLastUpdateTo != null and dateLastUpdateTo !=''">
+							AND  pay.LAST_UPDATE_DATE &lt; = to_date(#{dateLastUpdateTo, jdbcType=VARCHAR},'MM/dd/YYYY')
+							</if>
+							<if test="paymentStatusList != null">
+								AND sta.STATUS_ID IN
+								<foreach item="items" index="index" collection="paymentStatusList"
+									open="(" separator="," close=")">
+									#{items}
+					    		</foreach>
+							</if>
+							<!-- Start : R5 Added -->
+							<if test="contractId != null and contractId !=''">
+								AND pay.CONTRACT_ID = #{contractId,jdbcType=VARCHAR}
+							</if>
+							<if test="budgetId != null and budgetId !=''">
+								AND pay.BUDGET_ID = #{budgetId,jdbcType=VARCHAR}
+							</if>
+							<if test="invoiceId != null and invoiceId !=''">
+								AND pay.INVOICE_ID = #{invoiceId,jdbcType=VARCHAR}
+							</if>
+							<!-- End : R5 Added -->
+							ORDER BY
+							    <choose>
+				                  <when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+				                  <otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+					            </choose>
+					            <if test="secondSort != null and secondSort != ''">
+					                  <choose>
+					                        <when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+					                        <otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+					                  </choose>
+					            </if>
+					
+					 ) a 
+					<if test="  paymentDisNum != null and   paymentDisNum !=''">
+					where lower(check_eft_num) like lower('%${paymentDisNum}%')
+					</if>
+				) b where rn &gt;= #{startNode} AND rn &lt;=  #{endNode}
+	</select>
+	<!-- Made changes in this query for defect id 6248 release 3.3.0  -->
+	<select id="fetchPaymentListSummaryCity" parameterType="com.nyc.hhs.model.PaymentSortAndFilter"
+		resultMap="resultPaymentListSummary">
+		select 	disbursement_date,payment_voucher_num,payment_amount,last_update_date,payee_name,check_eft_num,
+				<!-- Start : R5 Added -->
+				organization_id,
+				<!-- End : R5 Added -->
+				status,status_id,AGENCY_ID,organization_legal_name,contract_title,PROCUREMENT_TITLE,ct_number,BUDGET_ADVANCE_ID,
+				PAYMENT_ID,INVOICE_ID,BUDGET_ID,CONTRACT_ID,FISCAL_YEAR,FISCAL_YEAR_ID,rn
+		        <!-- [Start] R9.7.5 QC9719 -->
+                ,action_disable
+                <!-- [End] R9.7.5 QC9719 -->   
+				<!-- [Start] R9.7.6 QC9730 -->
+		        , action_exception 
+			    <!-- [End] R9.7.6 QC9730 -->            				
+		from ( select  disbursement_date,payment_voucher_num,payment_amount,last_update_date,payee_name,check_eft_num,
+						<!-- Start : R5 Added -->
+						organization_id,
+						<!-- End : R5 Added -->
+						status,status_id,AGENCY_ID,organization_legal_name,contract_title,PROCUREMENT_TITLE,ct_number,BUDGET_ADVANCE_ID,
+		                PAYMENT_ID,INVOICE_ID,BUDGET_ID,CONTRACT_ID,FISCAL_YEAR,FISCAL_YEAR_ID,rownum as rn 
+                       <!-- [Start] R9.7.5 QC9719 -->
+				        ,(select count(1) from ACTION_DISABLE_TASK_OBJ aet 
+				               where  aet.CONTRACT_ID = A.CONTRACT_ID and  aet.BUDGET_ID = A.BUDGET_ID and aet.AGENCY_ID = A.AGENCY_ID
+				                 and aet.IS_ACTIVE = 1 and aet.VERSION_NO in ( select  nvl( max(eae.VERSION_NO), 0 ) 
+				                                                             from  ACTION_DISABLE_TASK_OBJ eae 
+				                                                            where  eae.CONTRACT_ID = aet.CONTRACT_ID 
+				                                                              AND  eae.BUDGET_ID =  aet.BUDGET_ID
+				                                                              AND  eae.AGENCY_ID =  aet.AGENCY_ID  ) 
+				         ) action_disable
+                       <!-- [End] R9.7.5 QC9719 -->
+					   <!-- [Start] R9.7.6 QC9730 -->
+				       , (select count(1) from ACTION_EXCEPTIONAL_OBJ aet 
+				               where  aet.CONTRACT_ID = A.CONTRACT_ID and  aet.AGENCY_ID = A.AGENCY_ID
+				                 and aet.IS_ACTIVE = 1 and aet.VERSION_NO in ( select  nvl( max(eae.VERSION_NO), 0 ) 
+				                                                             from  ACTION_EXCEPTIONAL_OBJ eae 
+				                                                            where  eae.CONTRACT_ID = aet.CONTRACT_ID 
+				                                                              AND  eae.AGENCY_ID =  aet.AGENCY_ID  ) 
+				         ) action_exception 
+					   <!-- [End] R9.7.6 QC9730 -->            				
+		       from (  select  	pay.disbursement_date,pay.payment_voucher_num,pay.payment_amount,
+                                <!-- START : QC 6663  Last update date   -->
+                                 decode( pay.STATUS_ID,  65, NVL(pay.DISBURSEMENT_DATE, pay.MODIFIED_DATE) 
+                                                           , NVL(pay.LAST_UPDATE_DATE, pay.MODIFIED_DATE) 
+                                  ) as LAST_UPDATE_DATE,
+                                <!-- END : QC 6663  Last update date   -->
+                                pay.payee_name,decode(pay.status_id,65,pay.check_eft_num,'Pending EFT') as check_eft_num,pay.AGENCY_ID,
+		                        sta.status,sta.status_id,org.organization_legal_name,con.contract_title,con.PROCUREMENT_TITLE,
+								<!-- Start : R5 Added -->
+								org.organization_id,
+								<!-- End : R5 Added -->
+								pay.PAYMENT_ID,pay.INVOICE_ID,pay.BUDGET_ID,pay.CONTRACT_ID,pay.ct_number,pay.BUDGET_ADVANCE_ID,fis.FISCAL_YEAR,fis.FISCAL_YEAR_ID
+						from payment pay, contract con, STATUS_MASTER_R2_R3 sta, organization org, fiscal_year fis
+						where pay.contract_id = con.contract_id 
+						and pay.status_id = sta.status_id 
+						and pay.FISCAL_YEAR_ID = fis.FISCAL_YEAR_ID 
+						and pay.organization_id = org.organization_id
+						and (pay.DELETE_FLAG != 1 or (pay.DELETE_FLAG =1 and pay.status_id ='159'))
+						<if test="paymentContractTitle != null and paymentContractTitle !=''">
+							AND	(lower(con.CONTRACT_TITLE) LIKE  lower('%${paymentContractTitle}%'))
+						</if>
+						<if test="paymentProgramName !=null and paymentProgramName !=''">
+							AND pay.PROGRAM_ID = #{paymentProgramName}
+						</if>
+						<if test="agency !=null and agency!=''">
+						    AND pay.agency_id = #{agency}
+						</if>
+						<if test=" paymentProvider !=null and paymentProvider !=''">
+						    AND  lower(org.ORGANIZATION_ID) LIKE  lower('${providerId}')
+						</if>
+						<if test="paymentCtId != null and paymentCtId !=''">
+						    AND lower(pay.CT_NUMBER) = lower(#{paymentCtId})
+						</if>
+						<if test=" fiscalYearId != null and  fiscalYearId !=''">
+						    AND pay.FISCAL_YEAR_ID = #{fiscalYearId}
+						</if>
+						<if test=" paymentVoucherNumber != null and paymentVoucherNumber !=''">
+						   AND lower(pay.payment_voucher_num) LIKE lower('%${paymentVoucherNumber}%')
+						</if>
+						<!--<if test="  paymentDisNum != null and   paymentDisNum !=''">
+						AND lower(pay.check_eft_num) like lower('%${paymentDisNum}%')
+						</if>-->
+						<if test=" paymentValueFrom != null and    paymentValueFrom !=''">
+						   AND  pay.payment_amount &gt; = #{paymentValueFrom}
+						</if>
+						<if test="paymentValueTo != null and paymentValueTo !=''">
+						   AND  pay.payment_amount &lt; = #{paymentValueTo}
+						</if>
+						<if test=" dateLastUpdateFrom != null and    dateLastUpdateFrom !=''">
+						   AND  pay.LAST_UPDATE_DATE &gt; = to_date(#{dateLastUpdateFrom, jdbcType=VARCHAR},'MM/dd/YYYY')
+						</if>
+						<if test=" dateLastUpdateTo != null and dateLastUpdateTo !=''">
+						   AND  pay.LAST_UPDATE_DATE &lt; = to_date(#{dateLastUpdateTo, jdbcType=VARCHAR},'MM/dd/YYYY')
+						</if>
+						<if test="paymentStatusList != null">
+						   AND sta.STATUS_ID IN
+							<foreach item="items" index="index" collection="paymentStatusList"
+								open="(" separator="," close=")">
+								#{items}
+				    		</foreach>
+						</if>
+						<!-- Start : R5 Added -->
+						<if test="contractId != null and contractId !=''">
+						   AND pay.CONTRACT_ID = #{contractId,jdbcType=VARCHAR}
+						</if>
+						<if test="budgetId != null and budgetId !=''">
+						   AND pay.BUDGET_ID = #{budgetId,jdbcType=VARCHAR}
+						</if>
+						<if test="invoiceId != null and invoiceId !=''">
+						   AND pay.INVOICE_ID = #{invoiceId,jdbcType=VARCHAR}
+						</if>
+						<!-- End : R5 Added -->
+						ORDER BY
+						    <choose>
+				                  <when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+				                  <otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+				            </choose>
+				            <if test="secondSort != null and secondSort != ''">
+				                  <choose>
+				                        <when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+				                        <otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+				                  </choose>
+				            </if>
+			) a 
+			<if test="  paymentDisNum != null and   paymentDisNum !=''">
+			where lower(check_eft_num) like lower('%${paymentDisNum}%')
+		</if>
+		) b where rn &gt;= #{startNode} AND rn &lt;= 
+		#{endNode}
+	</select>
+
+	<select id="getPaymentCountProvider" parameterType="com.nyc.hhs.model.PaymentSortAndFilter"
+		resultType="int">
+		select  count(PAYMENT_ID)
+		from (  select  disbursement_date,payment_voucher_num,payment_amount,last_update_date,payee_name, check_eft_num,contract_id,budget_id,INVOICE_ID,
+						status,status_id,AGENCY_ID,organization_legal_name,contract_title,
+                        <!-- [Start] QC 6663  add LAST_UPDATE_DATE   -->
+						PAYMENT_ID,
+                         <!-- [End] QC 6663  add LAST_UPDATE_DATE   -->
+						PROCUREMENT_TITLE,ct_number,BUDGET_ADVANCE_ID,FISCAL_YEAR,
+						FISCAL_YEAR_ID,rownum 	as rn
+                 from ( select  disbursement_date,payment_voucher_num,payment_amount,last_update_date,payee_name,check_eft_num,contract_id,
+                                budget_id,INVOICE_ID,status,status_id,AGENCY_ID,organization_legal_name,contract_title,PROCUREMENT_TITLE,
+                                <!-- [Start] QC 6663  add LAST_UPDATE_DATE   -->
+                                PAYMENT_ID,
+                                <!-- [End] QC 6663  add LAST_UPDATE_DATE   -->
+                                ct_number,BUDGET_ADVANCE_ID,FISCAL_YEAR,FISCAL_YEAR_ID
+                         from  (select  TO_DATE (TO_CHAR (pay.disbursement_date, 'DD-MON-YYYY'), 'DD-MON-YYYY') AS disbursement_date,
+                                        pay.payment_voucher_num,pay.payment_amount,pay.last_update_date,pay.payee_name, 
+                                        decode(pay.status_id,65,pay.check_eft_num,'Pending EFT') as check_eft_num,
+										sta.status,decode(sta.status_id,109,64,sta.status_id) as status_id  ,org.organization_legal_name,
+										<!-- [Start] QC 6663  add LAST_UPDATE_DATE   -->
+										pay.PAYMENT_ID,
+										<!-- [End] QC 6663  add LAST_UPDATE_DATE   -->
+										con.contract_title,con.PROCUREMENT_TITLE,pay.AGENCY_ID,pay.contract_id,pay.budget_id,pay.INVOICE_ID,
+										pay.ct_number,pay.BUDGET_ADVANCE_ID,fis.FISCAL_YEAR,fis.FISCAL_YEAR_ID,
+										decode(sta.status_process_type_id,3,1,sta.status_process_type_id) as status_process_type_id
+                                   from payment pay, contract con,STATUS_MASTER_R2_R3 sta, organization org,fiscal_year fis
+                                 where  pay.contract_id = con.contract_id 
+                                   and  pay.status_id = sta.status_id 
+                                   and  pay.FISCAL_YEAR_ID = fis.FISCAL_YEAR_ID 
+                                   and  pay.organization_id = org.organization_id
+                                   and  pay.organization_id = #{orgId}
+                                   and  pay.DELETE_FLAG != 1
+								<if test="paymentContractTitle != null and paymentContractTitle !=''">
+									AND	(lower(con.CONTRACT_TITLE) LIKE lower('%${paymentContractTitle}%'))
+								</if>
+								<if test="paymentProgramName !=null and paymentProgramName !=''">
+									AND pay.PROGRAM_ID = #{paymentProgramName}
+								</if>
+								<if test="agency !=null and agency!=''">
+								 AND pay.agency_id = #{agency}
+								</if>
+								<if test="paymentCtId != null and paymentCtId !=''">
+								AND lower(pay.CT_NUMBER) = lower(#{paymentCtId})
+								</if>
+								<if test=" fiscalYearId != null and  fiscalYearId !=''">
+								AND pay.FISCAL_YEAR_ID = #{fiscalYearId}
+								</if>
+								<if test=" paymentVoucherNumber != null and paymentVoucherNumber !=''">
+									AND	lower(pay.payment_voucher_num) LIKE lower('%${paymentVoucherNumber}%')
+								</if>
+								<!--<if test="  paymentDisNum == 'Pending EFT'">
+								AND sta.STATUS_ID IN ('64','109')
+								</if>-->
+								<if test=" paymentValueFrom != null and    paymentValueFrom !=''">
+								AND  pay.payment_amount &gt; = #{paymentValueFrom}
+								</if>
+								<if test="paymentValueTo != null and paymentValueTo !=''">
+								AND  pay.payment_amount &lt; = #{paymentValueTo}
+								</if>
+								<if test=" dateDisbursedFrom != null and  dateDisbursedFrom !=''">
+								AND pay.DISBURSEMENT_DATE &gt; = to_date(#{dateDisbursedFrom, jdbcType=VARCHAR},'MM/dd/YYYY')
+								</if>
+								<if test="dateDisbursedTo != null and  dateDisbursedTo !=''">
+								AND pay.DISBURSEMENT_DATE &lt; = to_date(#{dateDisbursedTo, jdbcType=VARCHAR},'MM/dd/YYYY')
+								</if>
+								<!-- Start : R5 Added -->
+								<if test="contractId != null and contractId !=''">
+									AND pay.CONTRACT_ID = #{contractId,jdbcType=VARCHAR}
+								</if>
+								<if test="budgetId != null and budgetId !=''">
+									AND pay.BUDGET_ID = #{budgetId,jdbcType=VARCHAR}
+								</if>
+								<if test="invoiceId != null and invoiceId !=''">
+									AND pay.INVOICE_ID = #{invoiceId,jdbcType=VARCHAR}
+								</if>
+								<!-- End : R5 Added -->
+								<!--<if test="paymentStatusList != null">
+									AND sta.STATUS_ID IN
+									<foreach item="items" index="index" collection="paymentStatusList"
+										open="(" separator="," close=")">
+										#{items}
+						    		</foreach>
+								</if>-->
+						) a 
+					where STATUS_ID is not null
+					<!-- Start for enhancement  id 6495 for release 3.12.0 -->
+					<if test="  paymentDisNum != null and   paymentDisNum !=''">
+					AND lower(check_eft_num) like lower('%${paymentDisNum}%')
+						</if>
+						<if test="paymentStatusList != null">
+							AND STATUS_ID IN
+							<foreach item="items" index="index" collection="paymentStatusList"
+								open="(" separator="," close=")">
+								#{items}
+				    		</foreach>
+						</if>
+						ORDER BY
+						            <choose>
+				                  <when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+				                  <otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+				            </choose>
+				            <if test="secondSort != null and secondSort != ''">
+				                  <choose>
+				                        <when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+				                        <otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+				                  </choose>
+				            </if>
+				         <!-- End for enhancement  id 6495 for release 3.12.0 -->
+		) b )
+	</select>
+
+	<select id="getPaymentCountAgency" parameterType="com.nyc.hhs.model.PaymentSortAndFilter"
+		resultType="int">
+		select 	count(PAYMENT_ID)
+		from (select   disbursement_date,payment_voucher_num,payment_amount,last_update_date,payee_name,check_eft_num,
+		               status,status_id,AGENCY_ID,organization_legal_name,contract_title,PROCUREMENT_TITLE,ct_number,BUDGET_ADVANCE_ID,
+		              PAYMENT_ID,INVOICE_ID,BUDGET_ID,CONTRACT_ID,FISCAL_YEAR,FISCAL_YEAR_ID,rownum as rn 
+		       from  (select pay.disbursement_date,pay.payment_voucher_num,pay.payment_amount,TO_DATE 
+		                     (TO_CHAR (pay.last_update_date, 'DD-MON-YYYY'), 'DD-MON-YYYY') AS last_update_date,
+		                     pay.payee_name,decode(pay.status_id,65,pay.check_eft_num,'Pending EFT') as check_eft_num,
+		                     sta.status,sta.status_id,pay.AGENCY_ID,org.organization_legal_name,con.contract_title,con.PROCUREMENT_TITLE,
+		                     pay.PAYMENT_ID,pay.INVOICE_ID,pay.BUDGET_ID,pay.CONTRACT_ID,pay.ct_number,pay.BUDGET_ADVANCE_ID,
+		                     fis.FISCAL_YEAR,fis.FISCAL_YEAR_ID
+		                from payment pay, contract con,STATUS_MASTER_R2_R3 sta,organization org,fiscal_year fis
+		               where pay.contract_id = con.contract_id 
+		               and pay.status_id = sta.status_id 
+		               and pay.FISCAL_YEAR_ID = fis.FISCAL_YEAR_ID 
+		               and pay.organization_id = org.organization_id
+		               and pay.agency_id = #{agency}
+		               and (pay.DELETE_FLAG != 1 or (pay.DELETE_FLAG =1 and pay.status_id ='159'))
+						<if test="paymentContractTitle != null and paymentContractTitle !=''">
+						AND	(lower(con.CONTRACT_TITLE) LIKE
+							lower('%${paymentContractTitle}%') )
+						</if>
+						<if test="paymentProgramName !=null and paymentProgramName !=''">
+							AND pay.PROGRAM_ID = #{paymentProgramName}
+						</if>
+						<if test=" paymentProvider !=null and paymentProvider !=''">
+						 AND
+							lower(org.ORGANIZATION_ID) = lower('${providerId}')
+						</if>
+						<if test="paymentCtId != null and paymentCtId !=''">
+						AND lower(pay.CT_NUMBER) = lower(#{paymentCtId})
+						</if>
+						<if test=" fiscalYearId != null and  fiscalYearId !=''">
+						AND pay.FISCAL_YEAR_ID = #{fiscalYearId}
+						</if>
+						<if test=" paymentVoucherNumber != null and paymentVoucherNumber !=''">
+						AND	lower(pay.payment_voucher_num) LIKE
+							lower('%${paymentVoucherNumber}%')
+						</if>
+						<!--<if test="  paymentDisNum != null and   paymentDisNum !=''">
+						AND lower(pay.check_eft_num) like lower('%${paymentDisNum}%')
+						</if>-->
+						<if test=" paymentValueFrom != null and    paymentValueFrom !=''">
+						AND  pay.payment_amount &gt; = #{paymentValueFrom}
+						</if>
+						<if test="paymentValueTo != null and paymentValueTo !=''">
+						AND  pay.payment_amount &lt; = #{paymentValueTo}
+						</if>
+						<if test=" dateLastUpdateFrom != null and    dateLastUpdateFrom !=''">
+						AND  pay.LAST_UPDATE_DATE &gt; = to_date(#{dateLastUpdateFrom, jdbcType=VARCHAR},'MM/dd/YYYY')
+						</if>
+						<if test=" dateLastUpdateTo != null and dateLastUpdateTo !=''">
+						AND  pay.LAST_UPDATE_DATE &lt; = to_date(#{dateLastUpdateTo, jdbcType=VARCHAR},'MM/dd/YYYY')
+						</if>
+						<if test="paymentStatusList != null">
+							AND sta.STATUS_ID IN
+							<foreach item="items" index="index" collection="paymentStatusList"
+								open="(" separator="," close=")">
+								#{items}
+				    		</foreach>
+						</if>
+						<!-- Start : R5 Added -->
+						<if test="contractId != null and contractId !=''">
+							AND pay.CONTRACT_ID = #{contractId,jdbcType=VARCHAR}
+						</if>
+						<if test="budgetId != null and budgetId !=''">
+							AND pay.BUDGET_ID = #{budgetId,jdbcType=VARCHAR}
+						</if>
+						<if test="invoiceId != null and invoiceId !=''">
+							AND pay.INVOICE_ID = #{invoiceId,jdbcType=VARCHAR}
+						</if>
+						<!-- End : R5 Added -->
+						ORDER BY
+						            <choose>
+				                  <when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+				                  <otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+				            </choose>
+				            <if test="secondSort != null and secondSort != ''">
+				                  <choose>
+				                        <when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+				                        <otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+				                  </choose>
+				            </if>
+		
+				) a 
+				<if test="  paymentDisNum != null and   paymentDisNum !=''">
+				where lower(check_eft_num) like lower('%${paymentDisNum}%')
+		</if>
+		) b 
+	</select>
+
+	<select id="getPaymentCountCity" parameterType="com.nyc.hhs.model.PaymentSortAndFilter"
+		resultType="int">
+		select  count(PAYMENT_ID)
+		from (  select  disbursement_date,payment_voucher_num,payment_amount,last_update_date,payee_name,check_eft_num,
+		                status,status_id,AGENCY_ID,organization_legal_name,contract_title,PROCUREMENT_TITLE,ct_number,BUDGET_ADVANCE_ID,
+		                PAYMENT_ID,INVOICE_ID,BUDGET_ID,CONTRACT_ID,FISCAL_YEAR,FISCAL_YEAR_ID,rownum as rn 
+		         from  (select  pay.disbursement_date,pay.payment_voucher_num,pay.payment_amount,
+		                        TO_DATE (TO_CHAR (pay.last_update_date, 'DD-MON-YYYY'),'DD-MON-YYYY') AS last_update_date, 
+		                        pay.payee_name,decode(pay.status_id,65,pay.check_eft_num,'Pending EFT') as check_eft_num,pay.AGENCY_ID,
+		                        sta.status,sta.status_id,org.organization_legal_name,con.contract_title,con.PROCUREMENT_TITLE,
+		                        pay.PAYMENT_ID,pay.INVOICE_ID,pay.BUDGET_ID,pay.CONTRACT_ID,pay.ct_number,pay.BUDGET_ADVANCE_ID,fis.FISCAL_YEAR,
+		                        fis.FISCAL_YEAR_ID
+                          from  payment pay, contract con,STATUS_MASTER_R2_R3 sta, organization org,fiscal_year fis
+		                 where  pay.contract_id = con.contract_id 
+		                   and  pay.status_id = sta.status_id 
+		                   and  pay.FISCAL_YEAR_ID = fis.FISCAL_YEAR_ID 
+		                   and  pay.organization_id = org.organization_id
+		                   and  (pay.DELETE_FLAG != 1  or  (pay.DELETE_FLAG =1 and pay.status_id ='159') )
+						<if test="paymentContractTitle != null and paymentContractTitle !=''">
+							AND	(lower(con.CONTRACT_TITLE) LIKE
+							lower('%${paymentContractTitle}%'))
+						</if>
+						<if test="paymentProgramName !=null and paymentProgramName !=''">
+							AND pay.PROGRAM_ID = #{paymentProgramName}
+						</if>
+						<if test="agency !=null and agency!=''">
+						 AND pay.agency_id = #{agency}
+						</if>
+						<if test=" paymentProvider !=null and paymentProvider !=''">
+						 AND
+							lower(org.ORGANIZATION_ID) = lower('${providerId}')
+						</if>
+						<if test="paymentCtId != null and paymentCtId !=''">
+						AND lower(pay.CT_NUMBER) = lower(#{paymentCtId})
+						</if>
+						<if test=" fiscalYearId != null and  fiscalYearId !=''">
+						AND pay.FISCAL_YEAR_ID = #{fiscalYearId}
+						</if>
+						<if test=" paymentVoucherNumber != null and paymentVoucherNumber !=''">
+						AND	lower(pay.payment_voucher_num) LIKE
+							lower('%${paymentVoucherNumber}%')
+						</if>
+						<!--<if test="  paymentDisNum != null and   paymentDisNum !=''">
+						AND lower(pay.check_eft_num) like lower('%${paymentDisNum}%')
+						</if>-->
+						<if test=" paymentValueFrom != null and    paymentValueFrom !=''">
+						AND  pay.payment_amount &gt; = #{paymentValueFrom}
+						</if>
+						<if test="paymentValueTo != null and paymentValueTo !=''">
+						AND  pay.payment_amount &lt; = #{paymentValueTo}
+						</if>
+						<if test=" dateLastUpdateFrom != null and    dateLastUpdateFrom !=''">
+						AND  pay.LAST_UPDATE_DATE &gt; = to_date(#{dateLastUpdateFrom, jdbcType=VARCHAR},'MM/dd/YYYY')
+						</if>
+						<if test=" dateLastUpdateTo != null and dateLastUpdateTo !=''">
+						AND  pay.LAST_UPDATE_DATE &lt; = to_date(#{dateLastUpdateTo, jdbcType=VARCHAR},'MM/dd/YYYY')
+						</if>
+						<if test="paymentStatusList != null">
+							AND sta.STATUS_ID IN
+							<foreach item="items" index="index" collection="paymentStatusList"
+								open="(" separator="," close=")">
+								#{items}
+				    		</foreach>
+						</if>
+						<!-- Start : R5 Added -->
+						<if test="contractId != null and contractId !=''">
+							AND pay.CONTRACT_ID = #{contractId,jdbcType=VARCHAR}
+						</if>
+						<if test="budgetId != null and budgetId !=''">
+							AND pay.BUDGET_ID = #{budgetId,jdbcType=VARCHAR}
+						</if>
+						<if test="invoiceId != null and invoiceId !=''">
+							AND pay.INVOICE_ID = #{invoiceId,jdbcType=VARCHAR}
+						</if>
+						<!-- End : R5 Added -->
+						ORDER BY
+						            <choose>
+				                  <when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+				                  <otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+				            </choose>
+				            <if test="secondSort != null and secondSort != ''">
+				                  <choose>
+				                        <when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+				                        <otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+				                  </choose>
+				            </if>
+
+
+					) a 
+				<if test="  paymentDisNum != null and   paymentDisNum !=''">
+				where lower(check_eft_num) like lower('%${paymentDisNum}%')
+				</if>
+			) b 
+	</select>
+
+	<select id="getFiscalInformation" parameterType="String"
+		resultMap="resultFiscalYear">
+		select fiscal_year,fiscal_year_id from fiscal_year where
+		active_flag = #{asActiveFlag}
+		Order By fiscal_year_id
+	</select>
+	
+	<select id="getProgramName" parameterType="String"
+		resultMap="resultProgramName">
+	select PROGRAM_ID,
+	PROGRAM_NAME from program_master where active_flag = #{asActiveFlag}
+	</select>
+	
+	<select id="getProgramNameAgency" parameterType="hashmap"
+		resultMap="resultProgramName">
+		SELECT b.program_name,
+		  a.program_id
+		FROM agency_program_mapping a,
+		  program_master b
+		WHERE a.agency_id = #{asOrgId}
+		AND a.program_id  = b.program_id
+		AND b.active_flag = #{activeFlag}
+	</select>
+
+	<select id="getAgencyList" parameterType="String"
+		resultMap="resultAgency">
+		select AGENCY_NAME, AGENCY_ID from NYC_AGENCY_DETAILS where ACTIVE_FLAG='1'
+		order by AGENCY_NAME asc 
+	</select>
+	
+	<select id="getStatusList" parameterType="String"
+		resultMap="resultPaymentStatus">
+	select status,status_id,status_process_type_id,process_type,STATUS_FILTER from
+	status_master_r2_r3 where process_type =#{asProcessType}
+	ORDER BY STATUS_FILTER
+	</select>
+	
+	<!-- Start || changes done for enhancement 6495 for Release 3.12.0 -->
+	<select id="getPaymentStatusListProvider" parameterType="String"
+		resultMap="resultPaymentStatus">
+	select status,status_id,status_process_type_id,process_type,STATUS_FILTER from
+	status_master_r2_r3 where process_type =#{asProcessType} and status_id in ('64','65','109')
+	ORDER BY STATUS_FILTER
+	</select>
+	<!-- End || changes done for enhancement 6495 for Release 3.12.0 -->
+	
+	<select id="fetchBudgetIdListFromContractId" parameterType="hashmap"
+		resultType="hashmap">
+		select BUDGET_ID,STATUS_ID from budget where contract_id = #{contractId} and budget_type_id =#{budgetTypeId} and active_flag = #{activeflag}
+	</select>
+	
+	<select id="getProgramNameId" parameterType="com.batch.bulkupload.BulkUploadContractInfo"
+		resultType="java.lang.String">
+		SELECT 
+		a.program_id
+		FROM agency_program_mapping a,
+		program_master b
+		WHERE a.agency_id = #{agency, jdbcType=VARCHAR}
+		AND a.program_id  = b.program_id
+    	and b.program_name=#{accProgramName, jdbcType=VARCHAR}
+		AND a.active_flag = 1
+		AND b.active_flag = 1
+	</select>
+</mapper>
+
+

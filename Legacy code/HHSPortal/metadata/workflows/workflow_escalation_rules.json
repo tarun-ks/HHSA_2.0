@@ -1,0 +1,436 @@
+{
+  "version": "2.0.0",
+  "description": "Workflow Escalation Rules - WF301-WF316 from System",
+  "escalation_rules": {
+    "time_based_escalation": {
+      "id": "time_based_escalation",
+      "name": "Time-Based Escalation",
+      "description": "Escalation rules based on time from system",
+      "version": "1.0.0",
+      "is_active": true,
+      "created_by": "system",
+      "created_at": "2024-01-01T00:00:00Z",
+      "rules": [
+        {
+          "id": "cof_timeout_escalation",
+          "name": "CoF Timeout Escalation",
+          "description": "Escalate CoF approval if not completed within 72 hours",
+          "workflow_id": "WF301",
+          "state_id": "pending_cof",
+          "escalation_type": "time_based",
+          "timeout_hours": 72,
+          "escalation_actions": [
+            {
+              "action": "notify_supervisor",
+              "recipients": ["ACCO_MANAGER", "FINANCE_MANAGER"],
+              "template": "cof_timeout_escalation"
+            },
+            {
+              "action": "send_reminder",
+              "recipients": ["FINANCE_MANAGER"],
+              "template": "cof_reminder"
+            }
+          ],
+          "priority": "high",
+          "is_active": true
+        },
+        {
+          "id": "budget_review_timeout_escalation",
+          "name": "Budget Review Timeout Escalation",
+          "description": "Escalate budget review if not completed within 48 hours",
+          "workflow_id": "WF304",
+          "state_id": "pending_budget_review",
+          "escalation_type": "time_based",
+          "timeout_hours": 48,
+          "escalation_actions": [
+            {
+              "action": "notify_supervisor",
+              "recipients": ["ACCO_MANAGER", "FINANCE_MANAGER"],
+              "template": "budget_review_timeout_escalation"
+            },
+            {
+              "action": "send_reminder",
+              "recipients": ["FINANCE_MANAGER"],
+              "template": "budget_review_reminder"
+            }
+          ],
+          "priority": "high",
+          "is_active": true
+        },
+        {
+          "id": "invoice_review_timeout_escalation",
+          "name": "Invoice Review Timeout Escalation",
+          "description": "Escalate invoice review if not completed within 24 hours",
+          "workflow_id": "WF305",
+          "state_id": "pending_invoice_review",
+          "escalation_type": "time_based",
+          "timeout_hours": 24,
+          "escalation_actions": [
+            {
+              "action": "notify_supervisor",
+              "recipients": ["ACCO_MANAGER", "FINANCE_MANAGER"],
+              "template": "invoice_review_timeout_escalation"
+            },
+            {
+              "action": "send_reminder",
+              "recipients": ["FINANCE_MANAGER"],
+              "template": "invoice_review_reminder"
+            }
+          ],
+          "priority": "high",
+          "is_active": true
+        }
+      ]
+    },
+    "status_based_escalation": {
+      "id": "status_based_escalation",
+      "name": "Status-Based Escalation",
+      "description": "Escalation rules based on contract status from system",
+      "version": "1.0.0",
+      "is_active": true,
+      "created_by": "system",
+      "created_at": "2024-01-01T00:00:00Z",
+      "rules": [
+        {
+          "id": "pending_cof_status_escalation",
+          "name": "Pending CoF Status Escalation",
+          "description": "Escalate if contract status is pending CoF for too long",
+          "workflow_id": "WF301",
+          "state_id": "pending_cof",
+          "escalation_type": "status_based",
+          "conditions": [
+            {
+              "field": "contract.status_id",
+              "operator": "equals",
+              "value": "61"
+            },
+            {
+              "field": "workflow.created_at",
+              "operator": "less_than",
+              "value": "{{current_timestamp}} - 72 * 3600"
+            }
+          ],
+          "escalation_actions": [
+            {
+              "action": "notify_supervisor",
+              "recipients": ["ACCO_MANAGER", "FINANCE_MANAGER"],
+              "template": "pending_cof_status_escalation"
+            }
+          ],
+          "priority": "high",
+          "is_active": true
+        },
+        {
+          "id": "pending_submission_status_escalation",
+          "name": "Pending Submission Status Escalation",
+          "description": "Escalate if contract status is pending submission for too long",
+          "workflow_id": "WF303",
+          "state_id": "cof_initiated",
+          "escalation_type": "status_based",
+          "conditions": [
+            {
+              "field": "contract.status_id",
+              "operator": "equals",
+              "value": "62"
+            },
+            {
+              "field": "workflow.created_at",
+              "operator": "less_than",
+              "value": "{{current_timestamp}} - 48 * 3600"
+            }
+          ],
+          "escalation_actions": [
+            {
+              "action": "notify_supervisor",
+              "recipients": ["ACCO_MANAGER"],
+              "template": "pending_submission_status_escalation"
+            }
+          ],
+          "priority": "medium",
+          "is_active": true
+        }
+      ]
+    },
+    "workflow_specific_escalation": {
+      "id": "workflow_specific_escalation",
+      "name": "Workflow-Specific Escalation",
+      "description": "Escalation rules for specific workflows from system",
+      "version": "1.0.0",
+      "is_active": true,
+      "created_by": "system",
+      "created_at": "2024-01-01T00:00:00Z",
+      "rules": [
+        {
+          "id": "wf301_procurement_cof_escalation",
+          "name": "WF301 Procurement CoF Escalation",
+          "description": "Escalate WF301 Procurement CoF workflow",
+          "workflow_id": "WF301",
+          "state_id": "pending_cof",
+          "escalation_type": "workflow_specific",
+          "timeout_hours": 72,
+          "escalation_actions": [
+            {
+              "action": "notify_supervisor",
+              "recipients": ["ACCO_MANAGER", "FINANCE_MANAGER"],
+              "template": "wf301_procurement_cof_escalation"
+            },
+            {
+              "action": "send_reminder",
+              "recipients": ["FINANCE_MANAGER"],
+              "template": "wf301_procurement_cof_reminder"
+            }
+          ],
+          "priority": "high",
+          "is_active": true
+        },
+        {
+          "id": "wf302_contract_configuration_escalation",
+          "name": "WF302 Contract Configuration Escalation",
+          "description": "Escalate WF302 Contract Configuration workflow",
+          "workflow_id": "WF302",
+          "state_id": "configuration_started",
+          "escalation_type": "workflow_specific",
+          "timeout_hours": 168,
+          "escalation_actions": [
+            {
+              "action": "notify_supervisor",
+              "recipients": ["ACCO_MANAGER"],
+              "template": "wf302_contract_configuration_escalation"
+            },
+            {
+              "action": "send_reminder",
+              "recipients": ["ACCO_STAFF"],
+              "template": "wf302_contract_configuration_reminder"
+            }
+          ],
+          "priority": "medium",
+          "is_active": true
+        },
+        {
+          "id": "wf303_contract_cof_escalation",
+          "name": "WF303 Contract CoF Escalation",
+          "description": "Escalate WF303 Contract CoF workflow",
+          "workflow_id": "WF303",
+          "state_id": "pending_contract_cof",
+          "escalation_type": "workflow_specific",
+          "timeout_hours": 72,
+          "escalation_actions": [
+            {
+              "action": "notify_supervisor",
+              "recipients": ["ACCO_MANAGER", "FINANCE_MANAGER"],
+              "template": "wf303_contract_cof_escalation"
+            },
+            {
+              "action": "send_reminder",
+              "recipients": ["FINANCE_MANAGER"],
+              "template": "wf303_contract_cof_reminder"
+            }
+          ],
+          "priority": "high",
+          "is_active": true
+        },
+        {
+          "id": "wf304_budget_review_escalation",
+          "name": "WF304 Budget Review Escalation",
+          "description": "Escalate WF304 Budget Review workflow",
+          "workflow_id": "WF304",
+          "state_id": "pending_budget_review",
+          "escalation_type": "workflow_specific",
+          "timeout_hours": 48,
+          "escalation_actions": [
+            {
+              "action": "notify_supervisor",
+              "recipients": ["ACCO_MANAGER", "FINANCE_MANAGER"],
+              "template": "wf304_budget_review_escalation"
+            },
+            {
+              "action": "send_reminder",
+              "recipients": ["FINANCE_MANAGER"],
+              "template": "wf304_budget_review_reminder"
+            }
+          ],
+          "priority": "high",
+          "is_active": true
+        },
+        {
+          "id": "wf305_invoice_review_escalation",
+          "name": "WF305 Invoice Review Escalation",
+          "description": "Escalate WF305 Invoice Review workflow",
+          "workflow_id": "WF305",
+          "state_id": "pending_invoice_review",
+          "escalation_type": "workflow_specific",
+          "timeout_hours": 24,
+          "escalation_actions": [
+            {
+              "action": "notify_supervisor",
+              "recipients": ["ACCO_MANAGER", "FINANCE_MANAGER"],
+              "template": "wf305_invoice_review_escalation"
+            },
+            {
+              "action": "send_reminder",
+              "recipients": ["FINANCE_MANAGER"],
+              "template": "wf305_invoice_review_reminder"
+            }
+          ],
+          "priority": "high",
+          "is_active": true
+        }
+      ]
+    },
+    "priority_based_escalation": {
+      "id": "priority_based_escalation",
+      "name": "Priority-Based Escalation",
+      "description": "Escalation rules based on priority from system",
+      "version": "1.0.0",
+      "is_active": true,
+      "created_by": "system",
+      "created_at": "2024-01-01T00:00:00Z",
+      "rules": [
+        {
+          "id": "high_priority_escalation",
+          "name": "High Priority Escalation",
+          "description": "Escalate high priority workflows immediately",
+          "workflow_id": "*",
+          "state_id": "*",
+          "escalation_type": "priority_based",
+          "conditions": [
+            {
+              "field": "workflow.priority",
+              "operator": "equals",
+              "value": "high"
+            }
+          ],
+          "escalation_actions": [
+            {
+              "action": "notify_supervisor",
+              "recipients": ["ACCO_MANAGER", "FINANCE_MANAGER"],
+              "template": "high_priority_escalation"
+            }
+          ],
+          "priority": "high",
+          "is_active": true
+        },
+        {
+          "id": "medium_priority_escalation",
+          "name": "Medium Priority Escalation",
+          "description": "Escalate medium priority workflows after 24 hours",
+          "workflow_id": "*",
+          "state_id": "*",
+          "escalation_type": "priority_based",
+          "timeout_hours": 24,
+          "conditions": [
+            {
+              "field": "workflow.priority",
+              "operator": "equals",
+              "value": "medium"
+            }
+          ],
+          "escalation_actions": [
+            {
+              "action": "send_reminder",
+              "recipients": ["ACCO_MANAGER"],
+              "template": "medium_priority_escalation"
+            }
+          ],
+          "priority": "medium",
+          "is_active": true
+        }
+      ]
+    }
+  },
+  "escalation_types": [
+    {
+      "id": "time_based",
+      "name": "Time-Based Escalation",
+      "description": "Escalate based on time elapsed",
+      "color": "#3B82F6",
+      "icon": "clock"
+    },
+    {
+      "id": "status_based",
+      "name": "Status-Based Escalation",
+      "description": "Escalate based on contract status",
+      "color": "#10B981",
+      "icon": "status"
+    },
+    {
+      "id": "workflow_specific",
+      "name": "Workflow-Specific Escalation",
+      "description": "Escalate based on specific workflow",
+      "color": "#8B5CF6",
+      "icon": "workflow"
+    },
+    {
+      "id": "priority_based",
+      "name": "Priority-Based Escalation",
+      "description": "Escalate based on workflow priority",
+      "color": "#F59E0B",
+      "icon": "exclamation-triangle"
+    }
+  ],
+  "escalation_actions": [
+    {
+      "id": "notify_supervisor",
+      "name": "Notify Supervisor",
+      "description": "Send notification to supervisor",
+      "color": "#EF4444",
+      "icon": "bell"
+    },
+    {
+      "id": "send_reminder",
+      "name": "Send Reminder",
+      "description": "Send reminder to assigned user",
+      "color": "#F59E0B",
+      "icon": "mail"
+    },
+    {
+      "id": "escalate_to_manager",
+      "name": "Escalate to Manager",
+      "description": "Escalate to manager level",
+      "color": "#8B5CF6",
+      "icon": "arrow-up"
+    },
+    {
+      "id": "auto_approve",
+      "name": "Auto Approve",
+      "description": "Automatically approve if conditions are met",
+      "color": "#10B981",
+      "icon": "check"
+    }
+  ],
+  "escalation_priorities": [
+    {
+      "id": "high",
+      "name": "High Priority",
+      "description": "High priority escalations",
+      "color": "#EF4444",
+      "icon": "exclamation-triangle"
+    },
+    {
+      "id": "medium",
+      "name": "Medium Priority",
+      "description": "Medium priority escalations",
+      "color": "#F59E0B",
+      "icon": "exclamation-circle"
+    },
+    {
+      "id": "low",
+      "name": "Low Priority",
+      "description": "Low priority escalations",
+      "color": "#3B82F6",
+      "icon": "information-circle"
+    }
+  ],
+  "metadata": {
+    "created_at": "2024-01-01T00:00:00Z",
+    "created_by": "system",
+    "version": "2.0.0",
+    "description": "Workflow escalation rules from system",
+    "tags": ["escalation_rules", "workflow", "notifications"],
+    "dependencies": [
+      "schema/objects.json",
+      "schema/references.json",
+      "security/roles.json"
+    ]
+  }
+}

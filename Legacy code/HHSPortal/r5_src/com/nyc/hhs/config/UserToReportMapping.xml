@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapping>
+	<user name="provider_org">
+		   <reportName id="fundingSummary_provider" configFile="fundingMapping" reportType="financials">Funding Summary</reportName>
+		   <reportName id="budgetUtilization" configFile="budgetUtilizationConfig" reportType="financials">Budget Utilization</reportName>
+		   <reportName id="budgetCategoryUtilization" configFile="budgetCategoryUtilizationConf" reportType="financials">Budget Category Utilization</reportName>
+		   <reportName id="receivablesReport" configFile="receivablesReportConfig" reportType="financials">Receivables</reportName>
+		   <reportName id="advanceRecoupment" configFile="advaneRecoupmentConf" reportType="financials">Advance Recoupment Status</reportName>
+		   <reportName id="proposalSummary" configFile="proposalSummaryConfig" reportType="procurement">Proposal Summary</reportName>
+	</user>
+	<user name="city_org">
+	 	   <reportName id="fundingSummary_agency" configFile="fundingMapping" reportType="financials">Funding Summary</reportName>
+	 	   <reportName id="budgetUtilization" configFile="budgetUtilizationConfig" reportType="financials">Budget Utilization</reportName>
+	 	   <reportName id="budgetCategoryUtilization" configFile="budgetCategoryUtilizationConf" reportType="financials">Budget Category Utilization</reportName> 
+	 	   <reportName id="receivablesReport_city" configFile="receivablesReportConfig" reportType="financials">Provider Receivables</reportName>
+		   <reportName id="advanceRecoupment" configFile="advaneRecoupmentConf" reportType="financials">Advance Recoupment Status</reportName>
+		   <reportName id="proposalSummary" configFile="proposalSummaryConfig" reportType="procurement">Proposal Summary</reportName>
+	</user>
+	<user name="agency_org">
+	 	   <reportName id="fundingSummary_agency" configFile="fundingMapping" reportType="financials">Funding Summary</reportName>
+	 	   <reportName id="budgetUtilization" configFile="budgetUtilizationConfig" reportType="financials">Budget Utilization</reportName>
+	 	   <reportName id="budgetCategoryUtilization" configFile="budgetCategoryUtilizationConf" reportType="financials">Budget Category Utilization</reportName> 
+	 	   <reportName id="receivablesReport_agency" configFile="receivablesReportConfig" reportType="financials">Provider Receivables</reportName>
+		   <reportName id="advanceRecoupment" configFile="advaneRecoupmentConf" reportType="financials">Advance Recoupment Status</reportName>
+		   <reportName id="proposalSummary" configFile="proposalSummaryConfig" reportType="procurement">Proposal Summary</reportName>
+	</user>
+</mapping>

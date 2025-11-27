@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.SectionMapper">
+
+	<resultMap id="result" type="com.nyc.hhs.model.SectionBean">
+		<result property="sectionId" column="SECTION_ID" />
+		<result property="organizationId" column="ORGANIZATION_ID" />
+		<result property="applicationId" column="BUSINESS_APPLICATION_ID" />
+		<result property="userId" column="USER_ID" />
+		<result property="sectionStatus" column="SECTION_STATUS" />
+		<result property="modifiedBy" column="MODIFIED_BY" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+		<result property="submittedBy" column="SUBMITTED_BY" />
+		<result property="submissionDate" column="SUBMISSION_DATE" />
+		<result property="formId" column="FORM_ID" />
+		<result property="formName" column="FORM_NAME" />
+		<result property="formVersion" column="FORM_VERSION" />
+		<result property="lockFlag" column="LOCK_FLAG" />
+		<result property="statusId" column="STATUS_ID" />
+		<result property="procSectionStatus" column="PROC_SECTION_STATUS" />
+		<result property="procAppStatus" column="PROC_APP_STATUS" />
+		<result property="applicationStatus" column="APPLICATION_STATUS" />		
+	</resultMap>
+	
+	
+	<resultMap id="resultSubSection" type="com.nyc.hhs.model.SubSectionBean">
+		<result property="sectionId" column="SECTION_ID" />
+		<result property="organizationId" column="ORGANIZATION_ID" />
+		<result property="applicationId" column="BUSINESS_APPLICATION_ID" />
+		<result property="userId" column="USER_ID" />
+		<result property="documentCategory" column="DOCUMENT_CATEGORY" />
+		<result property="documentId" column="DOCUMENT_ID" />
+		<result property="documentType" column="DOCUMENT_TYPE" />
+		<result property="subSectionStatus" column="SUB_SECTION_STATUS" />
+		<result property="modifiedBy" column="MODIFIED_BY" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+		<result property="submittedBy" column="SUBMITTED_BY" />
+		<result property="submissionDate" column="SUBMISSION_DATE" />
+		<result property="questionId" column="QUESTION_ID" />
+		<result property="formId" column="FORM_ID" />
+		<result property="formName" column="FORM_NAME" />
+		<result property="formVersion" column="FORM_VERSION" />
+		<result property="procSubSectionType" column="PROC_SUB_SECTION_TYPE" />
+		<result property="procSubSectionStatus" column="PROC_SUB_SECTION_STATUS" />
+				
+	</resultMap>
+	
+	<resultMap id="resultContactUs" type="com.nyc.hhs.model.ContactUsBean">
+		<result property="msTopic" column="TOPIC_NAME" />
+		<result property="msTopicID" column="TOPIC_ID" />
+		<result property="msProviderID" column="PROVIDER_ID" />
+		<result property="msProviderName" column="PROVIDER_NAME" />
+		<result property="msContactMedium" column="MODE_OF_CONTACT" />
+		<result property="msCreationUser" column="SUBMITTED_BY" />
+		<result property="msCreationDate" column="SUBMITTED_DATE" />
+		<result property="msQuestion" column="USER_COMMENTS" />
+	    <result property="msStatus" column="STATUS" />
+		 <result property="msSequenceID" column="CONTACT_US_ID" />		
+	</resultMap>
+	<resultMap id="resultServiceWithdrawl" type="com.nyc.hhs.model.WithdrawalBean">
+		<result property="msWorkFlowId" column="WORKFLOW_ID" />
+		<result property="msServiceApplicationId" column="SERVICE_APPLICATION_ID" />
+		<result property="msBusinessApplicationId" column="BUSINESS_APPLICATION_ID" />
+		<result property="msComments" column="COMMENTS" />
+		<result property="msPWOBNumber" column="P_WORKFLOW_ID" />
+		<result property="msWithDrawalReqId" column="SA_WITHDRAWAL_ID" />
+		<result property="msWithDrawalReqId" column="BA_WITHDRAWAL_ID" />
+	</resultMap>
+	
+	<resultMap id="resultApplicationStatus" type="com.nyc.hhs.model.ProviderStatusBean">
+		<result property="applicationId" column="APPLICATION_ID" />
+		<result property="supersedingStatus" column="SUPER_STATUS" />
+		<result property="applicationStatus" column="APPLICATION_STATUS" />
+	</resultMap>
+	
+	<resultMap id="resultServiceWorkflowIds" type="com.nyc.hhs.model.WorkflowIDServiceBean">
+		<result property="msWorkFlowId" column="WORKFLOW_ID" />
+		<result property="msServiceApplicationId" column="SERVICE_APPLICATION_ID" />
+	</resultMap>
+	
+		<resultMap id="resultNameChange" type="com.nyc.hhs.model.OrgNameChangeBean">
+		<result property="lsCurrentOrgLegalName" column="CURRENT_ORG_LEGAL_NAME" />
+		<result property="lsProposesOrgLegalName" column="PROPOSED_ORG_LEGAL_NAME" />
+		<result property="lsReasonsComments" column="COMMENTS" />
+		<result property="lsModifiedBy" column="LAST_MODIFIED_BY" />
+		<result property="lsModifiedDate" column="MODIFIED_DATE" />
+	
+	</resultMap>
+	<select id="fetchSection" parameterType="hashmap" resultMap="result">
+		SELECT SECTION_ID AS "sectionId" ,ORGANIZATION_ID AS "organizationId",BUSINESS_APPLICATION_ID AS "applicationId",USER_ID AS "userId",SECTION_STATUS AS "sectionStatus",MODIFIED_BY AS "modifiedBy",MODIFIED_DATE AS "modifiedDate",CREATED_BY AS "submittedBy",CREATED_DATE AS "submissionDate",
+ LOCK_FLAG AS "lockFlag",PROC_SECTION_STATUS AS "procSectionStatus" FROM SECTION  WHERE BUSINESS_APPLICATION_ID = #{applicationId}
+	</select>
+	
+		<select id="fetchSubSection" parameterType="hashmap" resultMap="resultSubSection">
+		SELECT SECTION_ID AS "sectionId" ,ORGANIZATION_ID AS "organizationId",BUSINESS_APPLICATION_ID AS "applicationId",USER_ID AS "userId",SUB_SECTION_STATUS AS "SubSectionStatus",MODIFIED_BY AS "modifiedBy",
+		MODIFIED_DATE AS "modifiedDate",CREATED_BY AS "submittedBy",CREATED_DATE AS "submissionDate",FORM_ID AS "formId",FORM_NAME AS  "formName",FORM_VERSION AS "formVersion",PROC_SUB_SECTION_TYPE AS "procSubSectionType",
+		PROC_SUB_SECTION_STATUS AS "procSubSectionStatus" FROM SUB_SECTION_SUMMARY WHERE BUSINESS_APPLICATION_ID = #{applicationId}
+	</select>
+	
+	<update id="updateSectionStatus" parameterType="hashmap" >
+		UPDATE SECTION SET SECTION_STATUS = #{sectionStatus}, MODIFIED_DATE = #{modifiedDate} WHERE SECTION_ID = #{sectionId} and BUSINESS_APPLICATION_ID = #{applicationId}
+	</update>
+	
+		<update id="updateProcessSectionStatus" parameterType="hashmap" >
+		UPDATE SECTION SET PROC_SECTION_STATUS = #{procSectionStatus} WHERE SECTION_ID = #{sectionId} and BUSINESS_APPLICATION_ID = #{applicationId}
+	</update>
+	
+	<update id="updateDocStatus" parameterType="hashmap">
+		UPDATE DOCUMENT SET PROC_DOC_STATUS =#{sectionStatus} WHERE DOCUMENT_ID=#{documentId} and SECTION_ID = #{sectionId} and BUSINESS_APPLICATION_ID = #{applicationId}
+	</update>
+	
+	<update id="updateBRApplicationStatus" parameterType="hashmap" >
+		UPDATE BUSINESS_APPLICATION SET APPLICATION_STATUS = #{applicationStatus} , CITY_STATUS_SET_BY = #{modifiedBy}, CITY_STATUS_SET_DATE = #{modifiedDate}, REPORTING_MODIFIED_DATE=SYSTIMESTAMP, REPORTING_MODIFIED_BY= #{modifiedBy,jdbcType=VARCHAR} WHERE BUSINESS_APPLICATION_ID = #{brApplicationId}
+	</update>
+	<!-- R5 Proposal Activity History and Char 500 history -->
+	<update id="lastApprovedBusinessApprovedCorporateStructure" parameterType="hashmap">
+	update organization set prev_apprvd_bapp_corp_struc_id = corporate_structure_id,prev_apprvd_bapp_entity_id=entity_type_id, REPORTING_MODIFIED_DATE=#{modifiedDate}, REPORTING_MODIFIED_BY=  #{modifiedBy} ,
+	MODIFIED_DATE=#{modifiedDate}, MODIFIED_BY=  #{modifiedBy} where organization_id = 
+	(select organization_id from business_application where business_application_id =#{brApplicationId} and rownum = 1)
+	</update>
+	<!-- R5 Proposal Activity History and Char 500 history -->
+	<update id="updateBRProcAppStatus" parameterType="hashmap" >
+		UPDATE BUSINESS_APPLICATION SET PROC_APP_STATUS = #{procApplStatus},REPORTING_MODIFIED_DATE=SYSTIMESTAMP, REPORTING_MODIFIED_BY= #{userId,jdbcType=VARCHAR} WHERE BUSINESS_APPLICATION_ID = #{brApplicationId}
+	</update>
+	
+	<select id="fetchBRProcAppStatus" parameterType="hashmap" resultMap="result">
+	SELECT APPLICATION_STATUS AS "applicationStatus" FROM BUSINESS_APPLICATION  WHERE BUSINESS_APPLICATION_ID = #{applicationId}
+	</select>
+	
+	<select id="fetchServiceAppStatus" parameterType="hashmap" resultType="String">
+	SELECT SERVICE_STATUS FROM SERVICE_APPLICATION  WHERE BUSINESS_APPLICATION_ID = #{applicationId} AND SERVICE_APPLICATION_ID=#{sectionId}
+	</select>
+	
+	<update id="updateProcDocumentStatus" parameterType="hashmap" >
+		UPDATE DOCUMENT SET PROC_DOC_STATUS = #{procDocStatus} WHERE ORGANIZATION_ID = #{organizationId} and BUSINESS_APPLICATION_ID = #{applicationId}
+	</update>
+	
+	<update id="updateDocumentStatus" parameterType="hashmap" >
+		UPDATE DOCUMENT SET DOCUMENT_STATUS = #{documentStatus} WHERE ORGANIZATION_ID = #{organizationId} and BUSINESS_APPLICATION_ID = #{applicationId}
+	</update>
+	
+	
+	<update id="updateSubSectionStatus" parameterType="hashmap" >
+		UPDATE SUB_SECTION_SUMMARY  SET SUB_SECTION_STATUS = PROC_SUB_SECTION_STATUS WHERE  SECTION_ID = #{sectionId} and BUSINESS_APPLICATION_ID = #{applicationId} and PROC_SUB_SECTION_STATUS is not null
+	</update>
+	
+	<update id="updateProcSubSectionStatus" parameterType="hashmap" >
+		UPDATE SUB_SECTION_SUMMARY SET PROC_SUB_SECTION_STATUS = #{sectionStatus} WHERE SUB_SECTION_ID= #{subSectionId} and SECTION_ID = #{sectionId} and BUSINESS_APPLICATION_ID = #{applicationId}
+	</update>
+	
+		<update id="updateDocWithProcStatus" parameterType="hashmap" >
+		UPDATE DOCUMENT  SET DOCUMENT_STATUS = PROC_DOC_STATUS WHERE  SECTION_ID = #{sectionId} and BUSINESS_APPLICATION_ID = #{applicationId}
+	</update>
+	
+	<update id="updateProcessServiceSectionStatus" parameterType="hashmap" >
+		UPDATE SERVICE_APPLICATION SET PROCESS_STATUS = #{procSectionStatus} , REPORTING_MODIFIED_DATE=SYSTIMESTAMP, REPORTING_MODIFIED_BY= #{modifiedBy,jdbcType=VARCHAR} WHERE SERVICE_APPLICATION_ID = #{sectionId} and BUSINESS_APPLICATION_ID = #{applicationId}
+	</update>
+	
+		<update id="updateServiceSectionStatus" parameterType="hashmap" >
+		UPDATE SERVICE_APPLICATION SET SERVICE_STATUS = #{serviceStatus} , CITY_STATUS_SET_BY = #{modifiedBy}, CITY_STATUS_SET_DATE = #{modifiedDate}, REPORTING_MODIFIED_DATE=SYSTIMESTAMP, REPORTING_MODIFIED_BY= #{modifiedBy,jdbcType=VARCHAR} WHERE SERVICE_APPLICATION_ID = #{sectionId} and BUSINESS_APPLICATION_ID = #{applicationId}
+	</update>
+	
+	<update id="updateSectionStatusDB" parameterType="hashmap" >
+		UPDATE SERVICE_APPLICATION SET WORKFLOW_ID = #{sectionWobNo} , REPORTING_MODIFIED_DATE=SYSTIMESTAMP, REPORTING_MODIFIED_BY= #{modifiedBy,jdbcType=VARCHAR} WHERE SERVICE_APPLICATION_ID = #{sectionId}
+	</update>
+	
+	<select id="fetchOrgExpirationDate" parameterType="hashmap" resultType="Date">
+		SELECT ORGANIZATION_EXPIRATION_DATE FROM ORGANIZATION WHERE ORGANIZATION_ID=#{asOrgId}
+	</select>
+	
+	<select id="fetchproviderDueDate" parameterType="hashmap" resultType="Date">
+		SELECT DUE_DATE FROM DOC_LAPSING_RULES_MASTER WHERE ORGANIZATION_ID= #{asProviderId}
+	</select>
+	
+	
+	<select id="fetchContactUsDetails" parameterType="hashmap" resultMap="resultContactUs">
+		SELECT a.TOPIC_NAME, b.USER_COMMENTS,b.MODE_OF_CONTACT FROM TOPIC a ,CONTACT_US_DETAILS b where a.TOPIC_ID = b.TOPIC_ID
+  		and b.CONTACT_US_ID = #{contactUsId}
+	</select>
+	
+	<update id="updateContactStatus" parameterType="hashmap" >
+       UPDATE  CONTACT_US_DETAILS set STATUS =#{contactUsStatus} where CONTACT_US_ID=#{contactId}
+	</update>
+	
+	<update id="updateFilingDocStatus" parameterType="hashmap" >
+		UPDATE DOC_LAPSING_RULES_TRANS SET PROC_STATUS = #{documentStatus},MODIFIED_BY=#{modifiedBy},MODIFIED_DATE=#{modifiedDate} WHERE  DOCUMENT_ID = #{documentId}
+	</update>
+	
+	<update id="updateDocLapsingMasterForFiling" parameterType="hashmap" >
+		UPDATE DOC_LAPSING_RULES_MASTER SET DUE_DATE =#{dueDate}, DOCUMENT_TYPE =#{nextExpectedDocType},MODIFIED_BY=#{modifiedBy},MODIFIED_DATE=#{modifiedDate},
+		START_MONTH =#{nextStartFiscalMonth}, END_MONTH =#{nextEndFiscalMonth},START_YEAR =#{nextStartFiscalYear}, END_YEAR =#{nextEndFiscalYear}
+		 where ORGANIZATION_ID=#{providerId} AND UPLOAD_ORDER=1
+	</update>
+	<select id="fetchServiceWithdrawalDetails" parameterType="hashmap" resultMap="resultServiceWithdrawl">
+		SELECT A.COMMENTS,A.WORKFLOW_ID,A.SERVICE_APPLICATION_ID, B.WORKFLOW_ID as P_WORKFLOW_ID,A.SA_WITHDRAWAL_ID FROM SERVICE_WITHDRAWAL A, SERVICE_APPLICATION B where SA_WITHDRAWAL_ID = #{saWithdrawalId} and A.SERVICE_APPLICATION_ID = B.SERVICE_APPLICATION_ID
+	</select>
+	
+	<select id="fetchBRWithdrawalDetails" parameterType="hashmap" resultMap="resultServiceWithdrawl">
+		SELECT A.COMMENTS,A.WORKFLOW_ID,A.BUSINESS_APPLICATION_ID, B.WORKFLOW_ID as P_WORKFLOW_ID,A.BA_WITHDRAWAL_ID FROM BUSINESS_WITHDRAWAL A, BUSINESS_APPLICATION B where BA_WITHDRAWAL_ID = #{saWithdrawalId} and A.BUSINESS_APPLICATION_ID = B.BUSINESS_APPLICATION_ID
+	</select>
+	
+	
+	<update id="updateSectionWithdrawalStatusDB" parameterType="hashmap">
+		UPDATE SERVICE_APPLICATION SET SERVICE_STATUS =  #{requestStatus} WHERE SERVICE_APPLICATION_ID = #{serviceAppId}
+	</update>
+	<update id="updateSectionWithdrawalRequestStatusDB" parameterType="hashmap" >
+		UPDATE SERVICE_WITHDRAWAL SET WITHDRAWN_STATUS = #{withdrawStatus},APPROVED_BY=#{approvedBy},APPROVED_DATE=#{approvedDate},MODIFIED_BY=#{approvedBy},MODIFIED_DATE=#{approvedDate} WHERE SA_WITHDRAWAL_ID = #{sectionId}
+	</update>
+	
+	<update id="updateBusinessWithdrawalStatusDB" parameterType="hashmap" >
+		UPDATE BUSINESS_APPLICATION SET APPLICATION_STATUS = #{requestStatus} WHERE BUSINESS_APPLICATION_ID = #{applicationId}
+	</update>
+	<update id="updateBusinessWithdrawalRequestStatusDB" parameterType="hashmap" >
+		UPDATE BUSINESS_WITHDRAWAL SET WITHDRAWN_STATUS = #{withdrawStatus},APPROVED_BY=#{approvedBy},APPROVED_DATE=#{approvedDate},MODIFIED_BY=#{approvedBy},MODIFIED_DATE=#{approvedDate} WHERE BA_WITHDRAWAL_ID = #{sectionId}
+	</update>
+	
+	<insert id="insertAlertAndNotification" parameterType="hashmap">	
+		INSERT INTO NOTIFICATION (NOTIFICATION_TYPE,NOTIFICATION_NAME,NOTIFICATION_DESC,USER_ID,NOTIFICATION_DATE,NOTIFICATION_ID)VALUES(#{notificationType},#{notificationName},#{notificationDesc},#{userIds},#{alertDate},#{notificationId})	
+	</insert>
+
+	<select id="fetchServiceCapacityIds" parameterType="hashmap" resultMap="resultServiceWorkflowIds">
+		SELECT WORKFLOW_ID,SERVICE_APPLICATION_ID FROM SERVICE_APPLICATION WHERE BUSINESS_APPLICATION_ID=#{applicationId}
+	</select>
+	
+	<select id="fetchNonSuspendedServiceCapacityIds" parameterType="hashmap" resultMap="resultServiceWorkflowIds">
+		SELECT WORKFLOW_ID,SERVICE_APPLICATION_ID FROM SERVICE_APPLICATION sa, SUPERSEDING_STATUS ss 
+		WHERE sa.ORGANIZATION_ID=#{orgId} AND sa.BUSINESS_APPLICATION_ID=#{applicationId} AND 
+		sa.SERVICE_APPLICATION_ID = ss.ENTITY_ID(+) AND	(ss.STATUS IS null OR ss.status != 'Suspended')
+	</select>
+	<delete id="deleteEntryFromSuperseding" parameterType="hashmap" >
+       DELETE FROM SUPERSEDING_STATUS WHERE ENTITY_ID=#{entityId}
+	</delete>
+	
+	<update id="updateSupersedingStatus" parameterType="hashmap" >
+       UPDATE  SUPERSEDING_STATUS set STATUS =#{status},FLAG='Y'  where ENTITY_ID=#{entityId} and REQUEST_ID=#{requestId} 
+	</update>
+	
+	<update id="updateOrgRequestStatus" parameterType="hashmap" >
+       UPDATE  ORGANIZATION set PROC_STATUS =#{status},
+      							REPORTING_MODIFIED_BY=#{modifiedBy,jdbcType=VARCHAR},
+            					REPORTING_MODIFIED_DATE=SYSTIMESTAMP
+            					<if test=" status != null and status =='Approved'">
+            					,ORGANIZATION_CREATION_DATE =SYSDATE
+            					</if> 
+        where ORGANIZATION_ID=#{providerID}
+	</update>
+	
+	<update id="updateUserStatus_DB" parameterType="hashmap" >
+       UPDATE STAFF_ORGANIZATION 
+       set 
+       USER_STATUS =#{status},
+       MODIFIED_BY_USER_ID=#{modifiedBy,jdbcType=VARCHAR},
+       MODIFIED_DATE=SYSDATE, 
+       MEMBER_STATUS=#{memberStatus} 
+       where ORGANIZATION_ID=#{providerID} AND USER_STATUS='Pending' AND PERMISSION_LEVEL='Level 2' AND ADMIN_PERMISSION='Yes'
+	</update>
+
+<!-- Query Added as a part of release 3.4.0 defect 6478  - Start -->	
+	<update id="updateUserDN_DB" parameterType="hashmap" >
+       UPDATE STAFF_DETAILS 
+       SET 
+       USER_DN = #{userDn,jdbcType=VARCHAR},
+       MODIFIED_BY=#{modifiedBy,jdbcType=VARCHAR},
+       MODIFIED_DATE=SYSDATE 
+       WHERE STAFF_ID= (SELECT STAFF_ID FROM STAFF_ORGANIZATION WHERE ORGANIZATION_ID=#{providerID} AND USER_STATUS='Pending' 
+       						AND PERMISSION_LEVEL='Level 2' AND ADMIN_PERMISSION='Yes')
+	</update>	
+<!-- Query Added as a part of release 3.4.0 defect 6478 - End -->		
+	<update id="updateUserStatusActiveFlag" parameterType="hashmap" >
+       UPDATE STAFF_ORGANIZATION 
+		set ACTIVE_FLAG ='Yes' where ORGANIZATION_ID=#{providerID} and staff_id IN 
+		(select sd.staff_id from staff_details sd, STAFF_ORGANIZATION som where 
+		som.organization_id=#{providerID} and
+		som.staff_id = sd.staff_id and
+		user_dn is not null)
+	</update>
+		<update id="updateOrganizationActiveFlag" parameterType="hashmap" >
+       UPDATE  ORGANIZATION set ORGANIZATION_ACTIVE_FLAG ='true', REPORTING_MODIFIED_DATE=SYSTIMESTAMP, REPORTING_MODIFIED_BY= #{modifiedBy,jdbcType=VARCHAR} where ORGANIZATION_ID=#{providerID}
+	</update>
+	
+	<select id="getSubsectionForLegalNameUpdateReqTask" parameterType="hashmap" resultMap="resultNameChange">
+		SELECT ONC.CURRENT_ORG_LEGAL_NAME,ONC.PROPOSED_ORG_LEGAL_NAME,ONC.COMMENTS,ONC.MODIFIED_DATE,(sd.FIRST_NAME||' '||sd.MIDDLE_INITIAL||' '||sd.LAST_NAME) as LAST_MODIFIED_BY From ORGANIZATION_NAME_CHANGE ONC INNER JOIN STAFF_DETAILS SD ON  SD.STAFF_ID = ONC.MODIFIED_BY Where WORKFLOW_ID=#{WobNo} 
+	</select>
+	
+		<update id="updateLegalNameRequest" parameterType="hashmap" >
+    UPDATE  ORGANIZATION set ORGANIZATION_LEGAL_NAME =#{newName}, REPORTING_MODIFIED_DATE=SYSTIMESTAMP, REPORTING_MODIFIED_BY= #{modifiedBy,jdbcType=VARCHAR} where ORGANIZATION_ID=#{providerID}
+	</update>
+		<update id="updateLegalNameApprovedRequest" parameterType="hashmap" >
+    UPDATE  ORGANIZATION_NAME_CHANGE set PROC_STATUS =#{status} where REQUEST_ID=#{sectionId}
+	</update>
+	
+	<update id="updateLegalNameRejectedRequest" parameterType="hashmap" >
+       UPDATE  ORGANIZATION_NAME_CHANGE set PROC_STATUS =#{status} where REQUEST_ID=#{sectionId}    
+	</update>
+	<!-- Added check for char500 - extension .. 3.1.0 -->
+	<select id="getCHAR500docFromDocument" parameterType="hashmap" resultType="String">
+		SELECT DOCUMENT_ID FROM DOCUMENT WHERE BUSINESS_APPLICATION_ID=#{brApplicationId} AND ORGANIZATION_ID=#{orgId} AND DOCUMENT_TYPE IN('CHAR 500 + 990 + Audit','CHAR 500 - 1st Extension Document','CHAR500 - 2nd Extension Document','CHAR 500 - Extension') AND DOCUMENT_CATEGORY=#{documentCategory}
+	</select>
+	
+	<select id="approvedApplicationCount" parameterType="hashmap" resultType="int">
+		SELECT count(1) as COUNT FROM BUSINESS_APPLICATION WHERE ORGANIZATION_ID=#{orgId} AND APPLICATION_STATUS=#{status}
+	</select>
+	
+	<insert id="insertDocLapsingMaster" parameterType="hashmap">
+		INSERT INTO DOC_LAPSING_RULES_MASTER (ORGANIZATION_ID,DUE_DATE,DOCUMENT_TYPE,START_MONTH,END_MONTH,START_YEAR,END_YEAR,UPLOAD_ORDER,CREATED_DATE,CREATED_BY,MODIFIED_DATE,MODIFIED_BY) VALUES (#{providerId},#{dueDate},#{nextExpectedDocType},#{nextStartFiscalMonth},#{nextEndFiscalMonth},#{nextStartFiscalYear},#{nextEndFiscalYear},1,#{modifiedDate},#{modifiedBy},#{modifiedDate},#{modifiedBy})	
+	</insert>
+	
+	<update id="updateDocLapsingMasterOrder" parameterType="hashmap">
+		UPDATE 	DOC_LAPSING_RULES_MASTER SET UPLOAD_ORDER=2,MODIFIED_BY=#{modifiedBy},MODIFIED_DATE=#{modifiedDate} WHERE ORGANIZATION_ID=#{providerId}
+	</update>
+	
+	<insert id="insertDocLapsingTrans" parameterType="hashmap">
+		INSERT INTO DOC_LAPSING_RULES_TRANS (ORGANIZATION_ID,DOCUMENT_TYPE,CREATED_BY,CREATED_DATE,PROC_STATUS,DOCUMENT_ID,START_MONTH,END_MONTH,START_YEAR,END_YEAR,IS_SHORT_FILING,MODIFIED_BY,MODIFIED_DATE) VALUES (#{providerId},#{documentType},#{modifiedBy},#{submittedDate},#{procStatus},#{documentId},#{approvedForStartMonth},#{approvedForEndMonth},#{approvedForStartYear},#{approvedForEndYear},'false',#{modifiedBy},#{submittedDate})	
+	</insert>
+	
+	<select id="getBusinessAndServiceStatus" parameterType="hashmap" resultMap="resultApplicationStatus">
+		select  maxTimeView.SUPER_STATUS, maxTimeView.APPLICATION_ID, maxTimeView.APPLICATION_STATUS
+		from (SELECT sup.STATUS SUPER_STATUS, sa.SERVICE_APPLICATION_ID APPLICATION_ID, sa.SERVICE_STATUS APPLICATION_STATUS ,sup.ENTITY_ID, sup.timestamp TimestampNew
+  				from SERVICE_APPLICATION sa, SUPERSEDING_STATUS sup
+ 		 		where sup.ENTITY_ID(+)=sa.SERVICE_APPLICATION_ID AND 
+    		 	sa.BUSINESS_APPLICATION_ID=#{businessAppId} AND 
+     		 	sa.ORGANIZATION_ID = #{providerId} 
+  		union
+  			SELECT  sup.STATUS SUPER_STATUS, bus.BUSINESS_APPLICATION_ID APPLICATION_ID, bus.APPLICATION_STATUS APPLICATION_STATUS ,sup.ENTITY_ID, sup.timestamp TimestampNew
+  				from business_application bus, SUPERSEDING_STATUS sup 
+  			    where sup.ENTITY_ID(+)=bus.BUSINESS_APPLICATION_ID AND 
+  			    bus.BUSINESS_APPLICATION_ID=#{businessAppId} AND 
+    			bus.ORGANIZATION_ID = #{providerId} )maxTimeView
+         FULL OUTER JOIN   (select entity_id, max(timestamp) max_timestamp from SUPERSEDING_STATUS group by ENTITY_ID) max_view on 
+      maxTimeView.ENTITY_ID = max_view.ENTITY_ID and maxTimeView.TimestampNew=max_view.max_timestamp
+      where maxTimeView.APPLICATION_ID is not null order by TimestampNew desc
+      
+	</select>
+	
+	<select id="getBusinessAndServiceStatusBatch" parameterType="hashmap" resultMap="resultApplicationStatus">
+		select  maxTimeView.SUPER_STATUS, maxTimeView.APPLICATION_ID, maxTimeView.APPLICATION_STATUS
+		from (SELECT sup.STATUS SUPER_STATUS, sa.SERVICE_APPLICATION_ID APPLICATION_ID, sa.SERVICE_STATUS APPLICATION_STATUS ,sup.ENTITY_ID, sup.timestamp TimestampNew
+  				from SERVICE_APPLICATION sa, SUPERSEDING_STATUS sup
+ 		 		where sup.ENTITY_ID(+)=sa.SERVICE_APPLICATION_ID AND 
+    		 	sa.BUSINESS_APPLICATION_ID=#{BUSINESS_APPLICATION_ID} AND 
+     		 	sa.ORGANIZATION_ID = #{ORGANIZATION_ID} 
+  		union
+  			SELECT  sup.STATUS SUPER_STATUS, bus.BUSINESS_APPLICATION_ID APPLICATION_ID, bus.APPLICATION_STATUS APPLICATION_STATUS ,sup.ENTITY_ID, sup.timestamp TimestampNew
+  				from business_application bus, SUPERSEDING_STATUS sup 
+  			    where sup.ENTITY_ID(+)=bus.BUSINESS_APPLICATION_ID AND 
+  			    bus.BUSINESS_APPLICATION_ID=#{BUSINESS_APPLICATION_ID} AND 
+    			bus.ORGANIZATION_ID = #{ORGANIZATION_ID} )maxTimeView
+         FULL OUTER JOIN   (select entity_id, max(timestamp) max_timestamp from SUPERSEDING_STATUS group by ENTITY_ID) max_view on 
+      maxTimeView.ENTITY_ID = max_view.ENTITY_ID and maxTimeView.TimestampNew=max_view.max_timestamp
+      where maxTimeView.APPLICATION_ID is not null order by TimestampNew desc
+      
+	</select>	
+	
+	<update id="updateOrganizationStatus" parameterType="hashmap">
+		UPDATE 	ORGANIZATION SET ORGANIZATION_STATUS=#{orgStatus},ORG_STATUS_CHANGE_DATE=#{statusChangeDate}, REPORTING_MODIFIED_DATE=SYSTIMESTAMP, REPORTING_MODIFIED_BY= #{modifiedBy,jdbcType=VARCHAR} WHERE ORGANIZATION_ID=#{providerId}
+	</update>
+	
+	<select id="getCurrentProviderStatus" parameterType="hashmap" resultType="String">
+		SELECT ORGANIZATION_STATUS FROM ORGANIZATION WHERE ORGANIZATION_ID=#{providerId}
+	</select>
+	
+	<insert id="insertSupersedingStatus" parameterType="hashmap">	
+		INSERT INTO SUPERSEDING_STATUS (ENTITY_TYPE,ENTITY_ID,EVENT,FLAG,STATUS,TIMESTAMP,USER_ID,ORGANIZATION_ID,REQUEST_ID,CREATED_BY,CREATED_DATE,SUPERSEDING_STATUS_ID,MODIFIED_BY,MODIFIED_DATE,REPORTING_MODIFIED_BY,REPORTING_MODIFIED_DATE)VALUES(#{entitytype},#{entityId},#{event},#{flag},#{status},#{timestamp},#{userid},#{orgid},#{requestId},#{createdBy},#{createdDate},SEQ_SUPERSEDING_STATUS_ID.NEXTVAL,#{createdBy},#{createdDate},#{userid,jdbcType=VARCHAR},SYSTIMESTAMP)	
+	</insert>
+	
+	<!-- Rel 4.1.0 QC 8280 Begin  Also update Org exp date, if BusApp Exp date is not null -->
+	<update id="setBusinessExpirationDate" parameterType="hashmap" >
+	{
+	call 
+		BEGIN 
+			UPDATE BUSINESS_APPLICATION SET EXPIRATION_DATE = #{expirationDate,jdbcType=DATE},START_DATE = #{startDate,jdbcType=DATE},REPORTING_MODIFIED_DATE=SYSTIMESTAMP, REPORTING_MODIFIED_BY= #{modifiedBy,jdbcType=VARCHAR} WHERE BUSINESS_APPLICATION_ID = #{brApplicationId};
+    	
+    		<if test="orgId != null and orgId !='' and expirationDate != null and expirationDate !=''">
+    		UPDATE ORGANIZATION SET ORGANIZATION_EXPIRATION_DATE = #{expirationDate,jdbcType=DATE}, REPORTING_MODIFIED_DATE=SYSTIMESTAMP, REPORTING_MODIFIED_BY= #{modifiedBy,jdbcType=VARCHAR} WHERE ORGANIZATION_ID = #{orgId};
+			</if>
+    	END
+    }
+    </update>
+    <!-- Rel 4.1.0 QC 8280 End -->
+    
+    <update id="setServiceDates" parameterType="hashmap" >
+		UPDATE SERVICE_APPLICATION SET START_DATE = #{startDate,jdbcType=DATE},EXPIRATION_DATE=#{expirationDate,jdbcType=DATE},REPORTING_MODIFIED_DATE=SYSTIMESTAMP, REPORTING_MODIFIED_BY= #{modifiedBy,jdbcType=VARCHAR} WHERE SERVICE_APPLICATION_ID = #{sectionId} and BUSINESS_APPLICATION_ID = #{applicationId}
+    </update>
+	<select id="fetchServiceElementID" parameterType="hashmap" resultType="String">
+		SELECT ELEMENT_ID FROM SERVICE_APPLICATION WHERE BUSINESS_APPLICATION_ID=#{appID} and SERVICE_APPLICATION_ID = #{srID}
+	</select>
+	
+	<insert id="insertInPrintView" parameterType="hashmap">	
+		INSERT INTO PRINT_VIEW_GENERATION (SEQUENCE_ID,PRINT_VIEW_ID,ORGANIZATION_ID,TASK_TYPE,PROC_STATUS,CREATED_DATE,CREATED_BY,MODIFIED_DATE,MODIFIED_BY,IS_PRINT_GENERATED) VALUES(SEQ_PRINT_VIEW_GEN.NEXTVAL,#{printId},#{orgId},#{taskId},#{procStatus},#{date},#{createdBy},#{date},#{createdBy},0)
+	</insert>
+	
+	<update id="UpdateprintView" parameterType="hashmap" >
+		UPDATE PRINT_VIEW_GENERATION SET TASK_TYPE =#{taskId}, PROC_STATUS =#{procStatus},MODIFIED_BY=#{createdBy},MODIFIED_DATE=#{date},IS_PRINT_GENERATED =0
+		 where ORGANIZATION_ID=#{orgId} AND PRINT_VIEW_ID=#{printId}
+	</update>
+	
+	<select id="GetEmail" parameterType="hashmap" resultType="String">
+	SELECT EMAIL FROM STAFF_DETAILS  WHERE STAFF_ID=#{launchBy}
+	</select>
+	
+	<update id="updateBusinessComments" parameterType="hashmap" >
+		UPDATE BUSINESS_APPLICATION SET PROVIDER_COMMENTS = #{publicComment,jdbcType=VARCHAR} , INTERNAL_COMMENTS = #{internalComment,jdbcType=VARCHAR} , REPORTING_MODIFIED_DATE=SYSTIMESTAMP, REPORTING_MODIFIED_BY= #{modifiedBy,jdbcType=VARCHAR} WHERE BUSINESS_APPLICATION_ID = #{brApplicationId}
+	</update>
+	
+	<update id="updateSectionComments" parameterType="hashmap" >
+		UPDATE  SECTION SET PROVIDER_COMMENTS = #{publicComment,jdbcType=VARCHAR} , INTERNAL_COMMENTS = #{internalComment,jdbcType=VARCHAR} WHERE BUSINESS_APPLICATION_ID = #{brApplicationId} AND SECTION_ID= #{sectionId}
+	</update>
+	
+	<update id="updateServiceComments" parameterType="hashmap" >
+		UPDATE SERVICE_APPLICATION SET PROVIDER_COMMENTS = #{publicComment,jdbcType=VARCHAR} , INTERNAL_COMMENTS = #{internalComment,jdbcType=VARCHAR} , REPORTING_MODIFIED_DATE=SYSTIMESTAMP, REPORTING_MODIFIED_BY= #{modifiedBy,jdbcType=VARCHAR} WHERE BUSINESS_APPLICATION_ID = #{brApplicationId} AND SERVICE_APPLICATION_ID= #{sectionId}
+	</update>
+	
+	<select id="fetchWithdrawalID" parameterType="String" resultType="String">
+		SELECT * FROM(SELECT SA_WITHDRAWAL_ID FROM SERVICE_WITHDRAWAL WHERE SERVICE_APPLICATION_ID=#{asServiceAppID} order by CREATED_DATE desc) where rownum =1
+	</select>
+	
+	<!--
+	<delete id="deleteOrganization" parameterType="hashmap" >
+       DELETE FROM ORGANIZATION WHERE ORGANIZATION_ID=#{providerID}
+	</delete>
+	
+	<delete id="deleteFromStaffDetail" parameterType="hashmap" >
+       DELETE FROM STAFF_DETAILS  
+ 				WHERE  ORGANIZATION_ID = #{providerID}
+	</delete>	
+	-->
+	
+	<!-- Start of changes for Release 3.10.0 : Enhancement 6573-->
+	<select id="fetchBusinessAppIds_DB" parameterType="hashmap" resultType="String">
+		SELECT BUSINESS_APPLICATION_ID FROM BUSINESS_APPLICATION WHERE ORGANIZATION_ID=#{orgId} AND BUSINESS_APPLICATION_ID != #{brApplicationId}
+	</select>
+	
+	<delete id="deleteFromDocLapsingTrans" parameterType="hashmap" >
+       DELETE FROM DOC_LAPSING_RULES_TRANS WHERE ORGANIZATION_ID=#{orgId}
+	</delete>
+	
+	<delete id="deleteFromDocLapsingMaster" parameterType="hashmap" >
+       DELETE FROM DOC_LAPSING_RULES_MASTER WHERE ORGANIZATION_ID=#{orgId}
+	</delete>
+	
+	<delete id="deleteFromSupersedingStatus" parameterType="hashmap" >
+       DELETE FROM SUPERSEDING_STATUS WHERE ORGANIZATION_ID=#{orgId}
+       and ENTITY_ID in <foreach item="items" index="index" collection="appIdList"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach>
+	</delete>
+	
+	<delete id="deleteFromDueDateReminder" parameterType="hashmap" >
+       DELETE FROM DUE_DATE_REMINDER WHERE ORGANIZATION_ID=#{orgId} and NOTIFICATION_EVENT_ID in ('NT022','NT023','NT024') 
+       and ENTITY_ID in <foreach item="items" index="index" collection="appIdList"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach>
+	</delete>
+	
+	<select id="fetchCorporateStructure" parameterType="hashmap" resultType="String">
+		SELECT CORPORATE_STRUCTURE_ID FROM ORGANIZATION WHERE ORGANIZATION_ID=#{orgId}
+	</select>
+	
+	<select id="checkDoclapsingEntry" parameterType="hashmap" resultType="Integer">
+		SELECT count(1) FROM DOC_LAPSING_RULES_MASTER WHERE ORGANIZATION_ID=#{orgId}
+	</select>
+	<!-- End of changes for Release 3.10.0 : Enhancement 6573-->
+	
+	<!-- Start of changes for Release 3.10.0 : Enhancement 6572-->
+	<select id="getSubSectionStatusForFilings" parameterType="String" resultType="int">
+		SELECT COUNT(1) as COUNT FROM SUB_SECTION_SUMMARY WHERE SECTION_ID='filings' AND BUSINESS_APPLICATION_ID=#{asAppId} AND SUB_SECTION_STATUS != 'Not Started'
+	</select>
+	<!-- End of changes for Release 3.10.0 : Enhancement 6572-->
+</mapper>

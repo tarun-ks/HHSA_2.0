@@ -1,0 +1,338 @@
+{
+  "version": "1.0.0",
+  "description": "Reusable section definitions",
+  "sections": [
+    {
+      "id": "contract_dashboard_welcome_card_0",
+      "type": "welcome_card",
+      "config": {
+        "title": "Welcome back, {{user.first_name}}!",
+        "subtitle": "{{user.organization.name}}",
+        "show_quick_actions": true,
+        "quick_actions": [
+          {
+            "label": "Create Contract",
+            "icon": "AddIcon",
+            "path": "/contracts/create",
+            "permission": "contract:create"
+          },
+          {
+            "label": "View Reports",
+            "icon": "ReportIcon",
+            "path": "/reports",
+            "permission": "report:view"
+          }
+        ]
+      },
+      "metadata": {
+        "migrated_from": "ContractDashboard.welcome_card"
+      }
+    },
+    {
+      "id": "contract_dashboard_kpi_cards_1",
+      "type": "kpi_cards",
+      "config": {
+        "cards": [
+          {
+            "title": "Active Contracts",
+            "value": "{{contract_stats.active_count}}",
+            "change": "{{contract_stats.active_change}}",
+            "trend": "up",
+            "icon": "ContractIcon",
+            "color": "primary",
+            "format": "number",
+            "click_action": {
+              "path": "/contracts?status=active"
+            }
+          },
+          {
+            "title": "Pending Tasks",
+            "value": "{{task_stats.pending_count}}",
+            "change": "{{task_stats.pending_change}}",
+            "trend": "down",
+            "icon": "TaskIcon",
+            "color": "warning",
+            "format": "number",
+            "click_action": {
+              "path": "/tasks?status=pending"
+            }
+          },
+          {
+            "title": "Total Value",
+            "value": "{{financial_stats.total_value}}",
+            "change": "{{financial_stats.value_change}}",
+            "trend": "up",
+            "icon": "DollarIcon",
+            "color": "success",
+            "format": "currency",
+            "click_action": {
+              "path": "/reports/financial"
+            }
+          },
+          {
+            "title": "Overdue Items",
+            "value": "{{overdue_stats.count}}",
+            "change": "{{overdue_stats.change}}",
+            "trend": "down",
+            "icon": "AlertIcon",
+            "color": "error",
+            "format": "number",
+            "click_action": {
+              "path": "/contracts?overdue=true"
+            }
+          }
+        ],
+        "layout": "grid",
+        "columns": 4,
+        "spacing": "md"
+      },
+      "metadata": {
+        "migrated_from": "ContractDashboard.kpi_cards"
+      }
+    },
+    {
+      "id": "contract_dashboard_chart_container_2",
+      "type": "chart_container",
+      "config": {
+        "title": "Contract Analytics",
+        "charts": [
+          {
+            "type": "line",
+            "title": "Contract Value Over Time",
+            "data_source": "contract_value_trend",
+            "width": "50%",
+            "height": 300,
+            "responsive": true
+          },
+          {
+            "type": "pie",
+            "title": "Contracts by Status",
+            "data_source": "contract_status_distribution",
+            "width": "50%",
+            "height": 300,
+            "responsive": true
+          }
+        ]
+      },
+      "metadata": {
+        "migrated_from": "ContractDashboard.chart_container"
+      }
+    },
+    {
+      "id": "contract_dashboard_activity_feed_3",
+      "type": "activity_feed",
+      "config": {
+        "title": "Recent Activity",
+        "data_source": "recent_activities",
+        "max_items": 10,
+        "show_avatar": true,
+        "show_timestamp": true,
+        "group_by_date": true
+      },
+      "metadata": {
+        "migrated_from": "ContractDashboard.activity_feed"
+      }
+    },
+    {
+      "id": "contract_dashboard_data_grid_4",
+      "type": "data_grid",
+      "config": {
+        "title": "Recent Contracts",
+        "object_name": "contract",
+        "api_endpoint": "/api/dashboard/contract/contracts",
+        "columns": [
+          {
+            "field": "contract_id",
+            "header": "Contract ID",
+            "type": "text",
+            "sortable": true
+          },
+          {
+            "field": "title",
+            "header": "Title",
+            "type": "text",
+            "sortable": true
+          },
+          {
+            "field": "status",
+            "header": "Status",
+            "type": "badge",
+            "sortable": true,
+            "badge_colors": {
+              "Registered": "bg-emerald-100 text-emerald-800 border border-emerald-200",
+              "In Progress": "bg-blue-100 text-blue-800 border border-blue-200",
+              "Pending Configuration": "bg-amber-100 text-amber-800 border border-amber-200",
+              "Pending Submission": "bg-amber-100 text-amber-800 border border-amber-200",
+              "Draft": "bg-gray-100 text-gray-700 border border-gray-300",
+              "Closed": "bg-rose-100 text-rose-800 border border-rose-200",
+              "Suspended": "bg-slate-100 text-slate-700 border border-slate-200",
+              "Cancelled": "bg-rose-100 text-rose-800 border border-rose-200"
+            }
+          },
+          {
+            "field": "amount",
+            "header": "Amount",
+            "type": "currency",
+            "sortable": true,
+            "format": {
+              "style": "currency",
+              "currency": "USD"
+            }
+          },
+          {
+            "field": "start_date",
+            "header": "Start Date",
+            "type": "date",
+            "sortable": true
+          },
+          {
+            "field": "end_date",
+            "header": "End Date",
+            "type": "date",
+            "sortable": true
+          }
+        ],
+        "pagination": {
+          "enabled": true,
+          "page_size": 10
+        },
+        "filtering": {
+          "enabled": true
+        },
+        "actions": [
+          {
+            "label": "View",
+            "path": "/contracts/{{id}}"
+          },
+          {
+            "label": "Edit",
+            "path": "/contracts/{{id}}/edit"
+          }
+        ]
+      },
+      "metadata": {
+        "migrated_from": "ContractDashboard.data_grid"
+      },
+      "data_source": {
+        "type": "api",
+        "endpoint": "/api/dashboard/contract/contracts"
+      }
+    },
+    {
+      "id": "contract_dashboard_action_buttons_5",
+      "type": "action_buttons",
+      "config": {
+        "title": "Quick Actions",
+        "actions": [
+          {
+            "label": "Create Contract",
+            "icon": "AddIcon",
+            "path": "/contracts/create",
+            "permission": "contract:create",
+            "type": "primary"
+          },
+          {
+            "label": "View Reports",
+            "icon": "ReportIcon",
+            "path": "/reports",
+            "permission": "report:view",
+            "type": "secondary"
+          },
+          {
+            "label": "Manage Organizations",
+            "icon": "OrganizationIcon",
+            "path": "/organizations",
+            "permission": "organization:manage",
+            "type": "secondary"
+          }
+        ]
+      },
+      "metadata": {
+        "migrated_from": "ContractDashboard.action_buttons"
+      }
+    },
+    {
+      "id": "contract_create_form_0",
+      "type": "form",
+      "config": {
+        "fields": [
+          "contract_id",
+          "title",
+          "description"
+        ]
+      }
+    },
+    {
+      "id": "contract_create_form_1",
+      "type": "form",
+      "config": {
+        "fields": [
+          "start_date",
+          "end_date",
+          "amount"
+        ]
+      }
+    },
+    {
+      "id": "contract_create_form_2",
+      "type": "form",
+      "config": {
+        "fields": [
+          "status"
+        ]
+      }
+    },
+    {
+      "id": "contract_edit_form_0",
+      "type": "form",
+      "config": {
+        "fields": [
+          "contract_id",
+          "title",
+          "description"
+        ]
+      }
+    },
+    {
+      "id": "contract_edit_form_1",
+      "type": "form",
+      "config": {
+        "fields": [
+          "start_date",
+          "end_date",
+          "amount"
+        ]
+      }
+    },
+    {
+      "id": "contract_edit_form_2",
+      "type": "form",
+      "config": {
+        "fields": [
+          "status"
+        ]
+      }
+    },
+    {
+      "id": "amendment_create_form_0",
+      "type": "form",
+      "config": {
+        "fields": [
+          "amendment_number",
+          "effective_date",
+          "amount_change"
+        ]
+      }
+    },
+    {
+      "id": "amendment_create_form_1",
+      "type": "form",
+      "config": {
+        "fields": [
+          "description",
+          "reason"
+        ]
+      }
+    }
+  ]
+}

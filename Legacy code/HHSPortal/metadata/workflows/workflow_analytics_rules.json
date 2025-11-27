@@ -1,0 +1,481 @@
+{
+  "version": "2.0.0",
+  "description": "Workflow Analytics Rules - WF301-WF316 from System",
+  "analytics_rules": {
+    "contract_lifecycle_analytics": {
+      "id": "contract_lifecycle_analytics",
+      "name": "Contract Lifecycle Analytics",
+      "description": "Analytics rules for contract lifecycle from system",
+      "version": "1.0.0",
+      "is_active": true,
+      "created_by": "system",
+      "created_at": "2024-01-01T00:00:00Z",
+      "metrics": [
+        {
+          "id": "contract_creation_rate",
+          "name": "Contract Creation Rate",
+          "description": "Number of contracts created per month",
+          "metric_type": "count",
+          "aggregation": "monthly",
+          "dimensions": ["agency_id", "contract_type_id", "status_id"],
+          "filters": [
+            {
+              "field": "contract.created_at",
+              "operator": "greater_than",
+              "value": "{{current_date}} - 30 days"
+            }
+          ],
+          "visualization": "line_chart",
+          "priority": "high"
+        },
+        {
+          "id": "contract_completion_rate",
+          "name": "Contract Completion Rate",
+          "description": "Percentage of contracts completed successfully",
+          "metric_type": "percentage",
+          "aggregation": "monthly",
+          "dimensions": ["agency_id", "contract_type_id"],
+          "filters": [
+            {
+              "field": "contract.status_id",
+              "operator": "equals",
+              "value": "69"
+            }
+          ],
+          "visualization": "donut_chart",
+          "priority": "high"
+        },
+        {
+          "id": "contract_duration_analysis",
+          "name": "Contract Duration Analysis",
+          "description": "Average time from contract creation to completion",
+          "metric_type": "duration",
+          "aggregation": "average",
+          "dimensions": ["agency_id", "contract_type_id"],
+          "filters": [
+            {
+              "field": "contract.status_id",
+              "operator": "equals",
+              "value": "69"
+            }
+          ],
+          "visualization": "bar_chart",
+          "priority": "medium"
+        },
+        {
+          "id": "contract_status_distribution",
+          "name": "Contract Status Distribution",
+          "description": "Distribution of contracts by status",
+          "metric_type": "count",
+          "aggregation": "current",
+          "dimensions": ["status_id"],
+          "filters": [],
+          "visualization": "pie_chart",
+          "priority": "high"
+        }
+      ]
+    },
+    "budget_utilization_analytics": {
+      "id": "budget_utilization_analytics",
+      "name": "Budget Utilization Analytics",
+      "description": "Analytics rules for budget utilization from system",
+      "version": "1.0.0",
+      "is_active": true,
+      "created_by": "system",
+      "created_at": "2024-01-01T00:00:00Z",
+      "metrics": [
+        {
+          "id": "budget_utilization_rate",
+          "name": "Budget Utilization Rate",
+          "description": "Percentage of budget utilized per contract",
+          "metric_type": "percentage",
+          "aggregation": "monthly",
+          "dimensions": ["agency_id", "contract_type_id"],
+          "filters": [
+            {
+              "field": "contract.budget_amount",
+              "operator": "greater_than",
+              "value": "0"
+            }
+          ],
+          "visualization": "gauge_chart",
+          "priority": "high"
+        },
+        {
+          "id": "budget_variance_analysis",
+          "name": "Budget Variance Analysis",
+          "description": "Variance between planned and actual budget",
+          "metric_type": "variance",
+          "aggregation": "monthly",
+          "dimensions": ["agency_id", "contract_type_id"],
+          "filters": [
+            {
+              "field": "contract.budget_amount",
+              "operator": "greater_than",
+              "value": "0"
+            }
+          ],
+          "visualization": "bar_chart",
+          "priority": "medium"
+        },
+        {
+          "id": "budget_approval_time",
+          "name": "Budget Approval Time",
+          "description": "Average time for budget approval",
+          "metric_type": "duration",
+          "aggregation": "average",
+          "dimensions": ["agency_id", "contract_type_id"],
+          "filters": [
+            {
+              "field": "workflow.workflow_id",
+              "operator": "equals",
+              "value": "WF304"
+            }
+          ],
+          "visualization": "line_chart",
+          "priority": "medium"
+        }
+      ]
+    },
+    "payment_processing_analytics": {
+      "id": "payment_processing_analytics",
+      "name": "Payment Processing Analytics",
+      "description": "Analytics rules for payment processing from system",
+      "version": "1.0.0",
+      "is_active": true,
+      "created_by": "system",
+      "created_at": "2024-01-01T00:00:00Z",
+      "metrics": [
+        {
+          "id": "payment_processing_time",
+          "name": "Payment Processing Time",
+          "description": "Average time for payment processing",
+          "metric_type": "duration",
+          "aggregation": "average",
+          "dimensions": ["agency_id", "contract_type_id"],
+          "filters": [
+            {
+              "field": "payment.status_id",
+              "operator": "in",
+              "value": ["75", "76", "77", "78", "79", "80"]
+            }
+          ],
+          "visualization": "bar_chart",
+          "priority": "high"
+        },
+        {
+          "id": "payment_success_rate",
+          "name": "Payment Success Rate",
+          "description": "Percentage of successful payments",
+          "metric_type": "percentage",
+          "aggregation": "monthly",
+          "dimensions": ["agency_id", "contract_type_id"],
+          "filters": [
+            {
+              "field": "payment.status_id",
+              "operator": "equals",
+              "value": "80"
+            }
+          ],
+          "visualization": "donut_chart",
+          "priority": "high"
+        },
+        {
+          "id": "payment_amount_analysis",
+          "name": "Payment Amount Analysis",
+          "description": "Analysis of payment amounts by contract type",
+          "metric_type": "sum",
+          "aggregation": "monthly",
+          "dimensions": ["agency_id", "contract_type_id"],
+          "filters": [
+            {
+              "field": "payment.amount",
+              "operator": "greater_than",
+              "value": "0"
+            }
+          ],
+          "visualization": "bar_chart",
+          "priority": "medium"
+        }
+      ]
+    },
+    "amendment_processing_analytics": {
+      "id": "amendment_processing_analytics",
+      "name": "Amendment Processing Analytics",
+      "description": "Analytics rules for amendment processing from system",
+      "version": "1.0.0",
+      "is_active": true,
+      "created_by": "system",
+      "created_at": "2024-01-01T00:00:00Z",
+      "metrics": [
+        {
+          "id": "amendment_processing_time",
+          "name": "Amendment Processing Time",
+          "description": "Average time for amendment processing",
+          "metric_type": "duration",
+          "aggregation": "average",
+          "dimensions": ["agency_id", "contract_type_id"],
+          "filters": [
+            {
+              "field": "amendment.status_id",
+              "operator": "in",
+              "value": ["70", "71", "72", "73", "74"]
+            }
+          ],
+          "visualization": "line_chart",
+          "priority": "medium"
+        },
+        {
+          "id": "amendment_approval_rate",
+          "name": "Amendment Approval Rate",
+          "description": "Percentage of approved amendments",
+          "metric_type": "percentage",
+          "aggregation": "monthly",
+          "dimensions": ["agency_id", "contract_type_id"],
+          "filters": [
+            {
+              "field": "amendment.status_id",
+              "operator": "equals",
+              "value": "74"
+            }
+          ],
+          "visualization": "donut_chart",
+          "priority": "high"
+        },
+        {
+          "id": "amendment_amount_analysis",
+          "name": "Amendment Amount Analysis",
+          "description": "Analysis of amendment amounts by contract type",
+          "metric_type": "sum",
+          "aggregation": "monthly",
+          "dimensions": ["agency_id", "contract_type_id"],
+          "filters": [
+            {
+              "field": "amendment.amount",
+              "operator": "greater_than",
+              "value": "0"
+            }
+          ],
+          "visualization": "bar_chart",
+          "priority": "medium"
+        }
+      ]
+    },
+    "workflow_performance_analytics": {
+      "id": "workflow_performance_analytics",
+      "name": "Workflow Performance Analytics",
+      "description": "Analytics rules for workflow performance from system",
+      "version": "1.0.0",
+      "is_active": true,
+      "created_by": "system",
+      "created_at": "2024-01-01T00:00:00Z",
+      "metrics": [
+        {
+          "id": "workflow_completion_rate",
+          "name": "Workflow Completion Rate",
+          "description": "Percentage of workflows completed successfully",
+          "metric_type": "percentage",
+          "aggregation": "monthly",
+          "dimensions": ["workflow_id", "agency_id"],
+          "filters": [
+            {
+              "field": "workflow.status",
+              "operator": "equals",
+              "value": "completed"
+            }
+          ],
+          "visualization": "donut_chart",
+          "priority": "high"
+        },
+        {
+          "id": "workflow_processing_time",
+          "name": "Workflow Processing Time",
+          "description": "Average time for workflow processing",
+          "metric_type": "duration",
+          "aggregation": "average",
+          "dimensions": ["workflow_id", "agency_id"],
+          "filters": [
+            {
+              "field": "workflow.status",
+              "operator": "in",
+              "value": ["completed", "failed"]
+            }
+          ],
+          "visualization": "bar_chart",
+          "priority": "high"
+        },
+        {
+          "id": "workflow_bottleneck_analysis",
+          "name": "Workflow Bottleneck Analysis",
+          "description": "Identification of workflow bottlenecks",
+          "metric_type": "duration",
+          "aggregation": "average",
+          "dimensions": ["workflow_id", "state_id"],
+          "filters": [
+            {
+              "field": "workflow.status",
+              "operator": "in",
+              "value": ["completed", "failed"]
+            }
+          ],
+          "visualization": "heatmap",
+          "priority": "medium"
+        },
+        {
+          "id": "workflow_error_rate",
+          "name": "Workflow Error Rate",
+          "description": "Percentage of workflows that failed",
+          "metric_type": "percentage",
+          "aggregation": "monthly",
+          "dimensions": ["workflow_id", "agency_id"],
+          "filters": [
+            {
+              "field": "workflow.status",
+              "operator": "equals",
+              "value": "failed"
+            }
+          ],
+          "visualization": "line_chart",
+          "priority": "high"
+        }
+      ]
+    }
+  },
+  "analytics_categories": [
+    {
+      "id": "contract_lifecycle",
+      "name": "Contract Lifecycle",
+      "description": "Analytics for contract lifecycle management",
+      "color": "#3B82F6",
+      "icon": "document-text"
+    },
+    {
+      "id": "budget_utilization",
+      "name": "Budget Utilization",
+      "description": "Analytics for budget utilization and management",
+      "color": "#10B981",
+      "icon": "currency-dollar"
+    },
+    {
+      "id": "payment_processing",
+      "name": "Payment Processing",
+      "description": "Analytics for payment processing and management",
+      "color": "#F59E0B",
+      "icon": "credit-card"
+    },
+    {
+      "id": "amendment_processing",
+      "name": "Amendment Processing",
+      "description": "Analytics for amendment processing and management",
+      "color": "#8B5CF6",
+      "icon": "document-duplicate"
+    },
+    {
+      "id": "workflow_performance",
+      "name": "Workflow Performance",
+      "description": "Analytics for workflow performance and efficiency",
+      "color": "#EF4444",
+      "icon": "workflow"
+    }
+  ],
+  "metric_types": [
+    {
+      "id": "count",
+      "name": "Count",
+      "description": "Count of records",
+      "color": "#3B82F6",
+      "icon": "calculator"
+    },
+    {
+      "id": "percentage",
+      "name": "Percentage",
+      "description": "Percentage of total",
+      "color": "#10B981",
+      "icon": "percent"
+    },
+    {
+      "id": "duration",
+      "name": "Duration",
+      "description": "Time duration metrics",
+      "color": "#F59E0B",
+      "icon": "clock"
+    },
+    {
+      "id": "sum",
+      "name": "Sum",
+      "description": "Sum of values",
+      "color": "#8B5CF6",
+      "icon": "plus"
+    },
+    {
+      "id": "average",
+      "name": "Average",
+      "description": "Average of values",
+      "color": "#EF4444",
+      "icon": "chart-bar"
+    },
+    {
+      "id": "variance",
+      "name": "Variance",
+      "description": "Variance between values",
+      "color": "#6B7280",
+      "icon": "chart-line"
+    }
+  ],
+  "visualization_types": [
+    {
+      "id": "line_chart",
+      "name": "Line Chart",
+      "description": "Line chart visualization",
+      "color": "#3B82F6",
+      "icon": "chart-line"
+    },
+    {
+      "id": "bar_chart",
+      "name": "Bar Chart",
+      "description": "Bar chart visualization",
+      "color": "#10B981",
+      "icon": "chart-bar"
+    },
+    {
+      "id": "pie_chart",
+      "name": "Pie Chart",
+      "description": "Pie chart visualization",
+      "color": "#F59E0B",
+      "icon": "chart-pie"
+    },
+    {
+      "id": "donut_chart",
+      "name": "Donut Chart",
+      "description": "Donut chart visualization",
+      "color": "#8B5CF6",
+      "icon": "chart-pie"
+    },
+    {
+      "id": "gauge_chart",
+      "name": "Gauge Chart",
+      "description": "Gauge chart visualization",
+      "color": "#EF4444",
+      "icon": "chart-pie"
+    },
+    {
+      "id": "heatmap",
+      "name": "Heatmap",
+      "description": "Heatmap visualization",
+      "color": "#6B7280",
+      "icon": "chart-bar"
+    }
+  ],
+  "metadata": {
+    "created_at": "2024-01-01T00:00:00Z",
+    "created_by": "system",
+    "version": "2.0.0",
+    "description": "Workflow analytics rules from system",
+    "tags": ["analytics_rules", "workflow", "performance"],
+    "dependencies": [
+      "schema/objects.json",
+      "schema/references.json",
+      "security/roles.json"
+    ]
+  }
+}

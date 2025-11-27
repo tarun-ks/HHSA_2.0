@@ -1,0 +1,83 @@
+* {
+	padding: 0px;
+}
+
+input {
+	font-size: 11px;
+	color: #000000;
+}
+
+textarea {
+	font-size: 11px;
+	color: #000000;
+}
+
+select {
+	font-size: 11px;
+	color: #000000;
+}
+
+.file_input_textbox {
+	float: left;
+}
+
+.file_input_div {
+	position: relative;
+	height: 23px;
+	overflow: hidden;
+	height: 26px;
+}
+
+.file_input_hidden {
+	font-size: 45px;
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	opacity: 0;
+	filter: alpha(opacity = 0);
+	-ms-filter: "alpha(opacity=0)";
+	-khtml-opacity: 0;
+	-moz-opacity: 0;
+}
+
+.posi_absolute {
+	POSITION: relative;
+	padding-left: 15px;
+}
+
+.div_fileName {
+	float: left;
+	margin-top: 3px;
+	margin-left: 17px;
+}
+
+.open_safari_chrome_ff {
+	padding-right: 0pt;
+	padding-top: 0px;
+	margin-top: 2px;
+	margin-bottom: -3px;
+	padding-left: 5px;
+}
+
+.button_margin {
+	margin: -2px 17px 10px;
+}
+
+.bottom_padding {
+	padding-top: 0px;
+}
+
+.bottom_right_padding {
+	padding-bottom: 6px;
+	padding-right: 16px;
+}
+input[type="file"] {
+	height: 20px;
+}
+div[id *="uploadElt"] {
+	overflow: hidden;
+}
+
+.mandatory{
+	color:red;
+}

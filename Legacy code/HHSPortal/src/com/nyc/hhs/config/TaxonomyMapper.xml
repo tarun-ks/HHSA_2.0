@@ -1,0 +1,782 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.TaxonomyMapper">
+
+	<!--resultMap id="resultAnswer" type="com.nyc.hhs.model.TaxonomyTree">
+		<result property="msElementid" column="ELEMENT_ID" />
+		<result property="msBranchid" column="BRANCH_ID" />
+		<result property="msElementName" column="ELEMENT_NAME" />
+		<result property="msElementType" column="ELEMENT_TYPE" />
+		<result property="msParentid" column="PARENT_ID"/>
+		<result property="msElementDescription" column="ELEMENT_DESCRIPTION"/>
+		<result property="msEvidenceReqd" column="EVIDENCE_REQUIRED_FLAG"/>
+		<result property="msActiveFlag" column="ACTIVE_FLAG"/>
+		<result property="msSelectionFlag" column="SELECTION_FLAG"/>
+	</resultMap-->
+	
+	<resultMap id="resultAnswer" type="com.nyc.hhs.model.TaxonomyTree">
+		<result property="msElementid" column="ELEMENT_ID" />
+		<result property="msBranchid" column="BRANCH_ID" />
+		<result property="msElementName" column="ELEMENT_NAME" />
+		<result property="msElementType" column="ELEMENT_TYPE" />
+		<result property="msParentid" column="PARENT_ID"/>
+		<result property="msElementDescription" column="ELEMENT_DESCRIPTION"/>
+		<result property="msEvidenceReqd" column="EVIDENCE_REQUIRED_FLAG"/>
+		<result property="msActiveFlag" column="ACTIVE_FLAG"/>
+		<result property="msSelectionFlag" column="SELECTION_FLAG"/>
+		<result property="msDeleteStatus" column="DELETE_STATUS"/>
+		<result property="msLevel" column="BRANCH_LEVEL"/>
+	</resultMap>
+
+	<resultMap id="keyValuePair" type="com.nyc.hhs.model.KeyValue">
+		<result property="key" column="key" />
+		<result property="value" column="value" />
+	</resultMap>
+	
+	<resultMap id="saveServices" type="com.nyc.hhs.model.TaxonomyServiceBean">
+		<result property="serviceApplicationId" column="SERVICE_APPLICATION_ID" />
+		<result property="businessApplicationId" column="BUSINESS_APPLICATION_ID" />
+		<result property="serviceElementId" column="ELEMENT_ID" />
+		<result property="organizationId" column="ORGANIZATION_ID" />
+		<result property="userId" column="USER_ID"/>
+		<result property="submittedBy" column="SUBMITTED_BY"/>
+		<result property="submittionDate" column="SUBMISSION_DATE"/>
+		<result property="modifiedBy" column="MODIFIED_BY"/>
+		<result property="modifiedDate" column="MODIFIED_DATE"/>
+		
+		<result property="startDate" column="START_DATE" />
+		<result property="expirationDate" column="EXPIRATION_DATE" />
+		<result property="removedFlag" column="REMOVED_FLAG" />
+		<result property="inActiveFlag" column="INACTIVE_FLAG" />
+		<result property="statusId" column="STATUS_ID"/>
+		<result property="serviceStatus" column="SERVICE_STATUS"/>
+		<result property="processStatus" column="PROCESS_STATUS"/>
+	</resultMap>
+	<resultMap id="ServiceSummary" type="com.nyc.hhs.model.ServiceSummary">	
+		<result property="msServiceAppId" column="SERVICE_APPLICATION_ID"/>
+		<result property="msBusinessAppId" column="BUSINESS_APPLICATION_ID" />
+		<result property="msServiceName" column="ELEMENT_ID" />
+		<result property="msOrgId" column="ORGANIZATION_ID" />
+		<result property="msUserId" column="USER_ID" />
+		<result property="msSubmittedBy" column="SUBMITTED_BY"/>
+		<result property="msSubmissionDate" column="SUBMISSION_DATE"/>
+		<result property="msModifiedBy" column="MODIFIED_BY"/>
+		<result property="msModifiedDate" column="MODIFIED_DATE"/>
+		<result property="msStartDate" column="START_DATE"/>
+		<result property="msExpirationDate" column="EXPIRATION_DATE"/>
+		<result property="msRemovedFlag" column="REMOVED_FLAG"/>
+		<result property="msInactiveFlag" column="INACTIVE_FLAG"/>
+		<result property="msStatusId" column="STATUS_ID"/>
+		<result property="msServiceStatus" column="SERVICE_STATUS"/>
+		<result property="msProcessStatus" column="PROCESS_STATUS"/>	
+		<result property="msServiceType" column="ELEMENT_TYPE"/>		
+	</resultMap>
+	<select id="selectPopulationTaxonomyTree" parameterType="String" resultMap="resultAnswer">
+	   SELECT * FROM taxonomy_master WHERE ELEMENT_TYPE = #{asTaxonomyType} ORDER BY ELEMENT_NAME ASC
+	</select>
+	
+	<!--select id="selectTaxonomyDetails" parameterType="hashmap" resultMap="resultAnswer">
+	   SELECT BRANCH_ID, ELEMENT_ID, ELEMENT_NAME, ELEMENT_TYPE, ELEMENT_DESCRIPTION, PARENT_ID, 
+	   		EVIDENCE_REQUIRED_FLAG, SELECTION_FLAG,  ACTIVE_FLAG 
+	   FROM taxonomy_master 
+	   ORDER BY BRANCH_ID, PARENT_ID, ELEMENT_NAME ASC
+	</select-->
+	
+	<select id="selectTaxonomyDetails" parameterType="hashmap" resultMap="resultAnswer"> 
+		SELECT level-1 as BRANCH_LEVEL,BRANCH_ID,ELEMENT_ID,TRIM(ELEMENT_NAME) ELEMENT_NAME, ELEMENT_TYPE, TRIM(ELEMENT_DESCRIPTION) ELEMENT_DESCRIPTION, PARENT_ID, 
+		EVIDENCE_REQUIRED_FLAG, SELECTION_FLAG,  ACTIVE_FLAG   
+		FROM   TAXONOMY_MASTER 
+		WHERE DELETE_STATUS='N' CONNECT BY PRIOR ELEMENT_ID=PARENT_ID
+		START WITH trim(lower(PARENT_ID)) ='root' 
+		ORDER BY BRANCH_LEVEL, PARENT_ID, TRIM(ELEMENT_NAME) ASC
+	</select>
+	
+
+	
+	<select id="getTaxonomyTreeByType" parameterType="String" resultMap="resultAnswer">
+	   SELECT ELEMENT_ID,PARENT_ID,ELEMENT_NAME,ELEMENT_DESCRIPTION FROM taxonomy_master
+	   WHERE ELEMENT_TYPE= #{asElementType}
+	</select>
+	
+	<insert id="saveSelectedServices" parameterType="com.nyc.hhs.model.TaxonomyServiceBean">
+		INSERT INTO SERVICE_APPLICATION(SERVICE_APPLICATION_ID,BUSINESS_APPLICATION_ID,ELEMENT_ID,ORGANIZATION_ID,
+		USER_ID,SUBMITTED_BY,SUBMISSION_DATE,MODIFIED_BY,MODIFIED_DATE,START_DATE,EXPIRATION_DATE,REMOVED_FLAG,INACTIVE_FLAG,
+		STATUS_ID,SERVICE_STATUS,PROCESS_STATUS,APPLICATION_ID,CREATED_BY,CREATED_DATE,REPORTING_MODIFIED_BY,
+		REPORTING_MODIFIED_DATE) 
+		VALUES(#{serviceApplicationId},#{businessApplicationId},#{serviceElementId},#{organizationId},
+		 #{userId},#{submittedBy},#{submittionDate,jdbcType=VARCHAR},#{modifiedBy,jdbcType=VARCHAR},SYSDATE,
+		 #{startDate,jdbcType=VARCHAR},#{expirationDate,jdbcType=VARCHAR},#{removedFlag},
+		 #{inActiveFlag},#{statusId},#{serviceStatus},#{processStatus},#{applicationId,jdbcType=VARCHAR}
+		 ,#{createdBy,jdbcType=VARCHAR},SYSTIMESTAMP,#{modifiedBy,jdbcType=VARCHAR},SYSTIMESTAMP)
+		 
+	</insert>
+	
+	<select id="getSelectedService" parameterType="map" resultMap="saveServices">
+	    select * from TAXONOMY_MASTER t, SERVICE_APPLICATION s WHERE s.ELEMENT_ID = t.ELEMENT_ID 
+		and s.BUSINESS_APPLICATION_ID = #{aoBusinessApplicationId} and s.ORGANIZATION_ID = #{asOrgId} and 
+		t.ELEMENT_TYPE IN ('Service Area','Function')
+	</select>
+	
+	<delete id="deleteSelectedService" parameterType="map">
+	   DELETE FROM SERVICE_APPLICATION WHERE BUSINESS_APPLICATION_ID= #{aoBusinessApplicationId}
+	   		 AND ORGANIZATION_ID=#{asOrgId} AND ELEMENT_ID=#{aoServiceElementId}
+	</delete>
+	
+	<update id="updateSelectedService" parameterType="map">
+	   UPDATE SERVICE_APPLICATION SET MODIFIED_BY = #{aoModifiedBy,jdbcType=VARCHAR}, MODIFIED_DATE=SYSDATE,
+	   REPORTING_MODIFIED_BY=#{aoModifiedBy},REPORTING_MODIFIED_DATE=SYSTIMESTAMP 
+	   WHERE BUSINESS_APPLICATION_ID = #{aoBusinessApplicationId} AND ORGANIZATION_ID=#{asOrgId} AND ELEMENT_ID=#{aoServiceElementId}
+	</update>
+	
+	
+	<resultMap id="retrievedSelectedGeography" type="java.lang.String">
+		<result property="loTaxonomyIdList" column="ELEMENT_ID" />		
+	</resultMap>
+	
+	<select id="getSelectedGeography" parameterType="map"  resultMap="retrievedSelectedGeography">
+	 SELECT ELEMENT_ID FROM organization_details  where ELEMENT_TYPE =#{ElementType} AND ORGANIZATION_ID = #{OrgId}
+	</select>
+	
+	<select id="selectServiceSummaryDetails"  resultMap="ServiceSummary" parameterType="map">
+	   SELECT SERVICE_APPLICATION_ID, BUSINESS_APPLICATION_ID, ELEMENT_ID, ORGANIZATION_ID, 
+	   USER_ID, SUBMITTED_BY, SUBMISSION_DATE, MODIFIED_BY, MODIFIED_DATE,  
+	   START_DATE , EXPIRATION_DATE , REMOVED_FLAG, INACTIVE_FLAG, STATUS_ID, SERVICE_STATUS, PROCESS_STATUS   
+	   FROM SERVICE_APPLICATION    
+	   WHERE BUSINESS_APPLICATION_ID = #{asBussAppId} AND ORGANIZATION_ID=#{asOrgId}  
+	</select>
+	
+	<select id="selectServiceSummaryDetailsAfterSubmit"  resultMap="ServiceSummary" parameterType="map">
+	   SELECT SERVICE_APPLICATION_ID, BUSINESS_APPLICATION_ID, ELEMENT_ID, ORGANIZATION_ID, 
+	   USER_ID, SUBMITTED_BY, SUBMISSION_DATE, MODIFIED_BY, MODIFIED_DATE,  
+	   START_DATE , EXPIRATION_DATE , REMOVED_FLAG, INACTIVE_FLAG, STATUS_ID, SERVICE_STATUS, PROCESS_STATUS   
+	   FROM SERVICE_APPLICATION    
+	   WHERE BUSINESS_APPLICATION_ID = #{asBussAppId} AND ORGANIZATION_ID=#{asOrgId}  
+	   AND SERVICE_STATUS IN 
+	   <foreach item="item" index="index" collection="lsAllServiceAppStatus"
+			open="(" separator="," close=")">
+			#{item}
+       </foreach> 
+	</select>
+
+	<resultMap id="retrievedServiceSummary" type="java.lang.String">
+		<result property="lbServiceSummaryList" column="ELEMENT_ID" />		
+	</resultMap>
+	
+	<select id="selectServiceSummary"  resultMap="retrievedServiceSummary" parameterType="map">
+	 SELECT ELEMENT_ID FROM SERVICE_APPLICATION where BUSINESS_APPLICATION_ID = #{asBussAppId} AND ORGANIZATION_ID=#{asOrgId}
+	</select>
+	
+	<delete id="deleteServiceSummaryDetails" parameterType="hashmap">
+		delete from SERVICE_APPLICATION where SERVICE_APPLICATION_ID = #{asServiceId} and ORGANIZATION_ID= #{asOrgId} and  BUSINESS_APPLICATION_ID = #{asBussAppId}
+	</delete>
+	
+	<delete id="deleteFromContractServiceMappingTable" parameterType="hashmap">
+		delete from CONTRACT_SERVICE_MAPPING where SERVICE_APPLICATION_ID = #{asServiceId} and ORGANIZATION_ID= #{asOrgId} and  BUSINESS_APPLICATION_ID = #{asBussAppId}
+	</delete>
+	
+	<delete id="deleteFromStaffServiceMappingTable" parameterType="hashmap">
+		delete from STAFF_SERVICE_MAPPING where SERVICE_APPLICATION_ID = #{asServiceId} and ORGANIZATION_ID= #{asOrgId} and  BUSINESS_APPLICATION_ID = #{asBussAppId}
+	</delete>
+	
+	<delete id="deleteFromServiceQuestionTable" parameterType="hashmap">
+		delete from SERVICE_QUESTIONS where SERVICE_APPLICATION_ID = #{asServiceId} and ORGANIZATION_ID= #{asOrgId} and  BUSINESS_APPLICATION_ID = #{asBussAppId}
+	</delete>
+	<delete id="deleteFromServiceSettingTable" parameterType="hashmap">
+		delete from SERVICE_SETTING where SERVICE_APPLICATION_ID = #{asServiceId} and ORGANIZATION_ID= #{asOrgId}
+	</delete>
+	<delete id="deleteFromDocumentTable" parameterType="hashmap">
+		delete from DOCUMENT where SERVICE_APPLICATION_ID = #{asServiceId} and ORGANIZATION_ID= #{asOrgId} and  BUSINESS_APPLICATION_ID = #{asBussAppId}
+	</delete>
+	<delete id="deleteFromSubSectionSummaryTable" parameterType="hashmap">
+		delete from SUB_SECTION_SUMMARY where SERVICE_APPLICATION_ID = #{asServiceId} and ORGANIZATION_ID= #{asOrgId} and  BUSINESS_APPLICATION_ID = #{asBussAppId}
+	</delete>
+	
+	<select id="getAllSpecilizationSetting" parameterType="map" resultMap="ServiceSummary">
+		SELECT ST.SERVICE_APPLICATION_ID  SERVICE_APPLICATION_ID, ST.ELEMENT_ID ELEMENT_ID, ST.ELEMENT_TYPE ELEMENT_TYPE from SERVICE_SETTING ST, SERVICE_APPLICATION SA 
+		WHERE SA.SERVICE_APPLICATION_ID = ST.SERVICE_APPLICATION_ID 
+		and SA.BUSINESS_APPLICATION_ID = #{asBussAppId} and SA.ORGANIZATION_ID = #{asOrgId}
+	</select>
+	
+	<select id="getDocumentStatus" parameterType="map" resultMap="keyValuePair">
+		select serviceAppId key, count(1) value from(
+			SELECT d.SERVICE_APPLICATION_ID serviceAppId from DOCUMENT d, SERVICE_APPLICATION s 
+			where s.SERVICE_APPLICATION_ID = d.SERVICE_APPLICATION_ID and s.ORGANIZATION_ID = d.ORGANIZATION_ID 
+			AND s.BUSINESS_APPLICATION_ID = #{asBussAppId} 
+			and s.ORGANIZATION_ID = #{asOrgId}
+			and d.DOCUMENT_ID is NULL
+		) GROUP BY serviceAppId
+	</select>
+	
+	<select id="getAppSettingStatus" parameterType="map" resultMap="keyValuePair">
+		select serviceAppId key, count(1) value from(
+			SELECT sq.SERVICE_APPLICATION_ID serviceAppId from SERVICE_QUESTIONS sq, SERVICE_APPLICATION s
+			where s.SERVICE_APPLICATION_ID = SQ.SERVICE_APPLICATION_ID 
+			AND s.BUSINESS_APPLICATION_ID = #{asBussAppId} 
+			and s.ORGANIZATION_ID = #{asOrgId} 
+		) GROUP BY serviceAppId
+	</select>
+	<select id="selectServiceAppIDs" resultType="map" parameterType="map">
+		SELECT s.SERVICE_APPLICATION_ID, t.ELEMENT_NAME  
+		FROM SERVICE_APPLICATION s, TAXONOMY_MASTER t
+		WHERE 
+		s.BUSINESS_APPLICATION_ID = #{asBussAppId} AND 
+		s.ORGANIZATION_ID=#{asOrgId} AND
+		t.ELEMENT_ID = s.ELEMENT_ID
+	</select>
+	
+	<update id="updateBAStatusOnAppSubmission" parameterType="map">
+		UPDATE BUSINESS_APPLICATION 
+		SET 
+		APPLICATION_STATUS = #{asStatus,jdbcType=VARCHAR},
+		PROC_APP_STATUS=#{asStatus,jdbcType=VARCHAR},
+		WORKFLOW_ID=#{asWFID,jdbcType=VARCHAR},
+		SUBMITTED_BY = #{asUserId},
+		MODIFIED_BY = #{asUserId},
+		MODIFIED_DATE= SYSDATE,
+		REPORTING_MODIFIED_BY=#{asUserId},
+		REPORTING_MODIFIED_DATE=SYSTIMESTAMP,
+		SUBMISSION_DATE = #{aoDate},
+		CITY_STATUS_SET_BY = #{aoCityStatusSetBy},
+		EXPIRATION_DATE = #{aoExpirationDate},
+		CITY_STATUS_SET_DATE = #{aoCityStatusSetDate}
+	   	WHERE 
+	   	BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND 
+	   	ORGANIZATION_ID=#{asOrgId}
+	</update>
+	
+	
+	<update id="updateBAStatusOnAppSubmissionForCA" parameterType="map">
+		UPDATE BUSINESS_APPLICATION 
+		SET 
+		APPLICATION_STATUS = #{asStatus,jdbcType=VARCHAR},
+		PROC_APP_STATUS=#{asStatus,jdbcType=VARCHAR},
+		WORKFLOW_ID=#{asWFID,jdbcType=VARCHAR},
+		MODIFIED_BY = #{asUserId},
+		MODIFIED_DATE= SYSDATE,
+		REPORTING_MODIFIED_BY=#{asUserId},
+		REPORTING_MODIFIED_DATE=SYSTIMESTAMP,
+		SUBMITTED_BY = #{asUserId},
+		SUBMISSION_DATE = #{aoDate}
+	   	WHERE 
+	   	BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND 
+	   	ORGANIZATION_ID=#{asOrgId}
+	</update>
+	
+	<update id="updateSAStatusOnAppSubmission" parameterType="map">
+		UPDATE SERVICE_APPLICATION 
+		SET 
+		SERVICE_STATUS = #{asStatus,jdbcType=VARCHAR},
+		SUBMITTED_BY = #{asUserId},
+		SUBMISSION_DATE = #{aoDate},
+		MODIFIED_BY = #{asUserId},
+		MODIFIED_DATE= SYSDATE,
+		CITY_STATUS_SET_BY = #{aoCityStatusSetBy},
+		EXPIRATION_DATE = #{aoExpirationDate},
+		CITY_STATUS_SET_DATE = #{aoCityStatusSetDate},
+		REPORTING_MODIFIED_BY=#{asUserId},REPORTING_MODIFIED_DATE=SYSTIMESTAMP
+	   	WHERE 
+	   	BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND 
+	   	ORGANIZATION_ID=#{asOrgId}
+	</update>
+	
+	<update id="updateSAStatusOnAppSubmissionForCA" parameterType="map">
+		UPDATE SERVICE_APPLICATION 
+		SET 
+		SERVICE_STATUS = #{asStatus,jdbcType=VARCHAR},
+		SUBMITTED_BY = #{asUserId},
+		SUBMISSION_DATE = #{aoDate},
+		MODIFIED_BY = #{asUserId},
+		MODIFIED_DATE= SYSDATE,
+		REPORTING_MODIFIED_BY=#{asUserId},REPORTING_MODIFIED_DATE=SYSTIMESTAMP
+	   	WHERE 
+	   	BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND 
+	   	ORGANIZATION_ID=#{asOrgId}
+	</update>
+	
+	<update id="updateSectionStatusOnAppSubmission" parameterType="map">
+		UPDATE SECTION 
+		SET 
+		SECTION_STATUS = #{asStatus,jdbcType=VARCHAR},
+		MODIFIED_BY = #{asUserId},
+		MODIFIED_DATE = #{aoDate}
+	   	WHERE 
+	   	BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND 
+	   	ORGANIZATION_ID=#{asOrgId}
+	</update>
+	
+	<update id="updateSSSStatusOnAppSubmission" parameterType="map">
+		UPDATE SUB_SECTION_SUMMARY 
+		SET 
+		SUB_SECTION_STATUS = #{asStatus,jdbcType=VARCHAR},
+		MODIFIED_BY = #{asUserId},
+		MODIFIED_DATE = #{aoDate}
+	   	WHERE 
+	   	BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND 
+	   	ORGANIZATION_ID=#{asOrgId}
+	</update>
+	
+	<update id="updateDocumentOnAppSubmission" parameterType="map">
+		UPDATE DOCUMENT 
+		SET 
+		DOCUMENT_STATUS = #{asStatus,jdbcType=VARCHAR},
+		CREATED_BY = #{asUserId},
+		CREATED_DATE = #{aoDate}
+	   	WHERE 
+	   	BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND 
+	   	ORGANIZATION_ID=#{asOrgId}
+	</update>
+	
+	<select id="getServiceInformation" parameterType="map" resultMap="keyValuePair">
+		select ELEMENT_ID key, Element_type value from SERVICE_SETTING where SERVICE_APPLICATION_ID=#{asServiceId} and ORGANIZATION_ID = #{asOrgId}
+	</select>
+	
+	<update id="updateSSSStatusOnServiceSubmission" parameterType="map">
+		UPDATE SUB_SECTION_SUMMARY 
+		SET 
+		SUB_SECTION_STATUS = #{asStatus,jdbcType=VARCHAR},
+		MODIFIED_BY = #{asUserId},
+		MODIFIED_DATE = #{aoDate}
+	   	WHERE 
+	   	BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND 
+	   	ORGANIZATION_ID=#{asOrgId}
+	   	AND SERVICE_APPLICATION_ID = #{asServiceAppId} 
+	</update>
+	
+	<update id="updateDocumentOnServiceSubmission" parameterType="map">
+		UPDATE DOCUMENT 
+		SET 
+		DOCUMENT_STATUS = #{asStatus,jdbcType=VARCHAR},
+		CREATED_BY = #{asUserId},
+		CREATED_DATE = #{aoDate}
+	   	WHERE 
+	   	BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND 
+	   	ORGANIZATION_ID=#{asOrgId}
+	   	AND SERVICE_APPLICATION_ID = #{asServiceAppId} 
+	</update>
+	
+	<update id="updateServiceAppOnServiceSubmission" parameterType="map">
+		UPDATE SERVICE_APPLICATION 
+		SET 
+		CITY_STATUS_SET_BY = #{aoCityStatusSetBy},
+		EXPIRATION_DATE = #{aoExpirationDate},
+		CITY_STATUS_SET_DATE = #{aoCityStatusSetDate},
+		REPORTING_MODIFIED_BY=#{asUserId},REPORTING_MODIFIED_DATE=SYSTIMESTAMP
+	   	WHERE 
+	   	BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND 
+	   	ORGANIZATION_ID=#{asOrgId}
+	</update>
+	
+	<update id="updateServiceAppOnServiceSubmissionForCA" parameterType="map">
+		UPDATE SERVICE_APPLICATION 
+		SET 
+		CITY_STATUS_SET_BY = #{aoCityStatusSetBy},
+		CITY_STATUS_SET_DATE = #{aoCityStatusSetDate},
+		REPORTING_MODIFIED_BY=#{aoCityStatusSetBy},REPORTING_MODIFIED_DATE=SYSTIMESTAMP
+	   	WHERE 
+	   	BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND 
+	   	ORGANIZATION_ID=#{asOrgId}
+	</update>
+	
+	
+	<update id="updateServiceAppOnServicePostSubmission" parameterType="map">
+		UPDATE SERVICE_APPLICATION 
+		SET 
+		CITY_STATUS_SET_BY = #{aoCityStatusSetBy},
+		EXPIRATION_DATE = #{aoExpirationDate},
+		CITY_STATUS_SET_DATE = #{aoCityStatusSetDate},
+		REPORTING_MODIFIED_BY=#{asUserId},REPORTING_MODIFIED_DATE=SYSTIMESTAMP
+	   	WHERE 
+	   	BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND 
+	   	ORGANIZATION_ID=#{asOrgId} AND
+	   	SERVICE_APPLICATION_ID=#{asServiceAppId}
+	</update>
+	
+	<update id="updateServiceAppOnServicePostSubmissionForCA" parameterType="map">
+		UPDATE SERVICE_APPLICATION 
+		SET 
+		CITY_STATUS_SET_BY = #{aoCityStatusSetBy},
+		CITY_STATUS_SET_DATE = #{aoCityStatusSetDate},
+		REPORTING_MODIFIED_BY=#{aoCityStatusSetBy},REPORTING_MODIFIED_DATE=SYSTIMESTAMP
+	   	WHERE 
+	   	BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND 
+	   	ORGANIZATION_ID=#{asOrgId} AND
+	   	SERVICE_APPLICATION_ID=#{asServiceAppId}
+	</update>
+	
+	<select id="getServiceSuperStatus" parameterType="hashmap" resultType="int" >
+	select count(1) from superseding_status where entity_type = #{asEntityType} and entity_id = #{asServiceAppId} and
+	status = #{asCAStatus} and organization_id = #{asOrgId}
+	</select>
+<!-- taxonomy maintenance start -->
+
+    <resultMap id="TaxonomyLinkageResult" type="com.nyc.hhs.model.TaxonomyLinkageBean"> 
+         <result property="msTaxonomyId" column="ELEMENT_ID"/>
+         <result property="msTaxonomyLinkageId" column="ELEMENT_LINKAGE_ID" />
+         <result property="msDeleteStatus" column="DELETE_STATUS" />
+    </resultMap>
+ 
+    <resultMap id="TaxonomySynonymResult" type="com.nyc.hhs.model.TaxonomySynonymBean"> 
+         <result property="msServiceElementIdFk" column="ELEMENT_ID"/>
+         <result property="msTaxonomySyn" column="SYNONYM_NAME" />
+         <result property="msDeleteStatus" column="DELETE_STATUS" />
+    </resultMap>
+    
+	<resultMap id="resultAnswerDB" type="com.nyc.hhs.model.TaxonomyTree">
+	  <result property="msElementid" column="ELEMENT_ID" /> 
+	  <result property="msBranchid" column="BRANCH_ID" /> 
+	  <result property="msElementName" column="ELEMENT_NAME" /> 
+	  <result property="msElementType" column="ELEMENT_TYPE" /> 
+	  <result property="msParentid" column="PARENT_ID" /> 
+	  <result property="msElementDescription" column="ELEMENT_DESCRIPTION" /> 
+	  <result property="msEvidenceReqd" column="EVIDENCE_REQUIRED_FLAG" /> 
+	  <result property="msActiveFlag" column="ACTIVE_FLAG" /> 
+	  <result property="msSelectionFlag" column="SELECTION_FLAG" /> 
+	  <result property="msLevel" column="BRANCHID" /> 
+	  <result property="msCurrentElementId" column="CURRENTELEMENTID" /> 
+	  <result property="msIsDuplicate" column="ISDUPLICATE" /> 
+	</resultMap>
+	    
+
+	<update id="updateTaxonomyDeleteStatus" parameterType="com.nyc.hhs.model.TaxonomyTree">
+        UPDATE TAXONOMY_MASTER 
+        	SET DELETE_STATUS='Y' ,MODIFIED_DATE=#{moTMModifiedDate,jdbcType=VARCHAR},MODIFIED_BY=#{msModifyBy,jdbcType=VARCHAR} 
+        	WHERE ELEMENT_ID = #{msElementid}
+	</update>
+
+	<update id="updateLinkageDeleteStatus" parameterType="com.nyc.hhs.model.TaxonomyTree">
+        UPDATE TAXONOMY_LINKAGE 
+        	SET DELETE_STATUS='Y' ,MODIFIED_DATE=#{moTMModifiedDate,jdbcType=VARCHAR},MODIFIED_BY=#{msModifyBy,jdbcType=VARCHAR} 
+        	WHERE ELEMENT_ID = #{msElementid} OR ELEMENT_LINKAGE_ID = #{msElementid} 
+	</update>
+	
+	<update id="updateSynonymDeleteStatus" parameterType="com.nyc.hhs.model.TaxonomyTree">
+        UPDATE TAXONOMY_SYNONYM 
+         	SET DELETE_STATUS='Y',MODIFIED_DATE=#{moTMModifiedDate,jdbcType=VARCHAR},MODIFIED_BY=#{msModifyBy,jdbcType=VARCHAR}  
+ 			WHERE ELEMENT_ID = #{msElementid} 
+	</update>
+
+	<insert id="insertTaxonomyChangeDetailsLog" parameterType="com.nyc.hhs.model.TaxonomyTree">
+       INSERT INTO TAXONOMY_TRANSACTION_RECORD (ELEMENT_ID, BRANCH_ID, TRANSACTION_EVENT, STATUS, MODIFIED_DATE,TAXONOMY_TRANSACTION_RECORD_ID) 
+        VALUES(#{msElementid},#{msBranchid},#{msTransactionEvent},#{msStatus}, #{moTimeStamp},SEQ_TAXONOMY_TRANS_RECORD_ID.NEXTVAL)  
+	</insert>
+
+    <select id="getTaxonomyLinkageDataLeftMenu" parameterType="String" resultMap="TaxonomyLinkageResult">
+      SELECT * FROM TAXONOMY_LINKAGE WHERE ELEMENT_ID = #{msElementid} and DELETE_STATUS='N'
+    </select>
+  
+    <select id="getTaxonomySynonymDataLeftMenu" parameterType="String" resultMap="TaxonomySynonymResult">
+      SELECT * FROM TAXONOMY_SYNONYM WHERE ELEMENT_ID = #{msElementid}
+    </select>
+
+    <select id="getTaxonomyItemDetailsLeftMenu" parameterType="String" resultMap="resultAnswer">
+      SELECT * FROM TAXONOMY_MASTER WHERE ELEMENT_ID = #{msElementid}
+    </select>
+
+    <insert id="saveNewTaxonomyObject" parameterType="com.nyc.hhs.model.TaxonomyTree">
+	INSERT INTO TAXONOMY_MASTER (element_id,branch_id,element_name,element_type,parent_id,element_description,evidence_required_flag,active_flag,selection_flag,DELETE_STATUS,
+	                             CREATED_DATE,MODIFIED_DATE,CREATED_BY,MODIFIED_BY)
+	VALUES (#{msElementid}, #{msBranchid}||#{msElementid}||',',#{msElementName},#{msElementType},#{msParentid},#{msElementDescription},#{msEvidenceReqd},(select active_flag from taxonomy_master where element_id = #{msParentid}),#{msSelectionFlag},#{msDeleteStatus},
+	#{moCreatedDate},#{moTMModifiedDate},#{msCreatedBy},#{msModifyBy}
+	)
+	</insert>
+	
+	<select id="selectTaxonomyDetailsFromDB" parameterType="hashmap" resultMap="resultAnswerDB">
+      SELECT level-1 as BRANCHID,BRANCH_ID,element_id,element_name, lower(element_name) lowername, ELEMENT_TYPE, ELEMENT_DESCRIPTION, PARENT_ID, 
+                 EVIDENCE_REQUIRED_FLAG, SELECTION_FLAG,  ACTIVE_FLAG   FROM   TAXONOMY_MASTER WHERE DELETE_STATUS='N' CONNECT BY prior element_id=parent_id
+      start with trim(lower(parent_id)) ='root' ORDER BY BRANCHID,lowername,PARENT_ID ASC
+      
+	</select>
+	
+ 
+ 	<select id="getLinkageForSelectedElement" parameterType="com.nyc.hhs.model.TaxonomyTree" resultMap="resultAnswer">
+	    SELECT * FROM TAXONOMY_MASTER WHERE ELEMENT_id IN (select DISTINCT regexp_substr(BRANCH_ID,'[^,]+', 1, level)
+	         from TAXONOMY_MASTER L WHERE ELEMENT_ID = #{msElementid}
+	         connect by regexp_substr(BRANCH_ID,'[^,]+', 1, level) is not null) order by BRANCH_ID ASC
+ 	</select>
+
+ 	<update id="updateTaxonomyItemDetails" parameterType="com.nyc.hhs.model.TaxonomyTree">
+           UPDATE TAXONOMY_MASTER SET  ELEMENT_NAME=#{msElementName}, ELEMENT_DESCRIPTION=#{msElementDescription}, 
+           EVIDENCE_REQUIRED_FLAG=#{msEvidenceReqd}, ACTIVE_FLAG=#{msActiveFlag}, SELECTION_FLAG=#{msSelectionFlag},
+           MODIFIED_DATE=#{moTMModifiedDate},MODIFIED_BY=#{msModifyBy}
+           WHERE ELEMENT_ID = #{msElementid}
+ 	</update>
+ 
+    <insert id="insertTaxonomyLinkageDetails" parameterType="com.nyc.hhs.model.TaxonomyLinkageBean">
+         INSERT INTO TAXONOMY_LINKAGE(ELEMENT_ID, ELEMENT_LINKAGE_ID, DELETE_STATUS,CREATED_DATE,MODIFIED_DATE,CREATED_BY,MODIFIED_BY) 
+         VALUES(#{msTaxonomyId},#{msTaxonomyLinkageId},#{msDeleteStatus},#{moCreatedDate,jdbcType=VARCHAR},#{moTMModifiedDate,jdbcType=VARCHAR},#{msCreatedBy,jdbcType=VARCHAR},#{msModifyBy,jdbcType=VARCHAR})
+         
+    </insert>
+ 
+    <insert id="insertTaxonomySynonymDetails" parameterType="com.nyc.hhs.model.TaxonomySynonymBean">
+         INSERT INTO TAXONOMY_SYNONYM(ELEMENT_ID, SYNONYM_NAME, DELETE_STATUS,CREATED_DATE,MODIFIED_DATE,CREATED_BY,MODIFIED_BY) 
+         VALUES(#{msServiceElementIdFk},#{msTaxonomySyn},#{msDeleteStatus},#{moCreatedDate,jdbcType=VARCHAR},#{moTMModifiedDate,jdbcType=VARCHAR},#{msCreatedBy,jdbcType=VARCHAR},#{msModifyBy,jdbcType=VARCHAR})
+         
+    </insert>
+   
+    <delete id="deleteTaxonomyLinkageDetails" parameterType="com.nyc.hhs.model.TaxonomyTree">
+         delete from TAXONOMY_LINKAGE where ELEMENT_ID = #{msElementid} 
+    </delete>
+   
+    <delete id="deleteTaxonomySynonymDetails" parameterType="com.nyc.hhs.model.TaxonomyTree">
+         delete from TAXONOMY_SYNONYM where ELEMENT_ID = #{msElementid} 
+    </delete>
+     
+    <select id="getTaxonomyItemDetails" parameterType="String" resultMap="resultAnswer">
+      SELECT * FROM TAXONOMY_MASTER WHERE ELEMENT_ID = #{msElementid}
+    </select>
+    
+    <resultMap id="SequeneceID" type="java.lang.Integer">
+		<result property="msSequenceID" column="CURRENTELEMENTID" />
+	</resultMap>
+    
+    <select id="getCurrentSeqFromTable" resultMap="SequeneceID" >
+  		select SEQ_ELEMENT_ID.nextval CURRENTELEMENTID  from dual		
+    </select>
+
+    <select id="isDuplicateElementName" parameterType="String" resultMap="resultAnswerDB">
+      SELECT count(1) as ISDUPLICATE 
+      				FROM TAXONOMY_MASTER 
+      				where 
+      				trim(lower(element_name)) = trim(lower(#{msElementName})) and 
+      				trim(lower(element_type)) = trim(lower(#{msElementType})) and 
+      				delete_status='N'
+    </select>
+
+	<delete id="deleteFromTaxonomyTranRec" parameterType="com.nyc.hhs.model.TaxonomyTree">
+	     delete from TAXONOMY_TRANSACTION_RECORD
+	</delete> 
+	
+   <resultMap id="reCacheEvidenceValidationResult" type="com.nyc.hhs.model.TaxonomyTree"> 
+            <result property="msLeaf" column="LEAF"/>
+	  		<result property="msElementid" column="ELEMENT_ID" /> 
+            <result property="msElementName" column="ELEMENT_NAME" />
+		    <result property="msElementType" column="ELEMENT_TYPE" />
+		    <result property="msEvidenceCount" column="Flag" />
+    </resultMap>
+    
+   <select id="reCacheEvidenceValidation"  resultMap="reCacheEvidenceValidationResult">		
+	SELECT element_id,element_name, 'zero' Flag from TAXONOMY_MASTER 
+	          where element_id in( SELECT leaf from 
+					( SELECT connect_by_root element_id as leaf, element_id, EVIDENCE_REQUIRED_FLAG
+				               FROM   TAXONOMY_MASTER b 
+				               WHERE DELETE_STATUS='N' 
+				               CONNECT BY prior parent_id=element_id
+					                        start with element_id in
+				                                ( SELECT element_id  
+				                                             FROM   (select * from TAXONOMY_MASTER where DELETE_STATUS='N' 
+				                                             and ELEMENT_TYPE IN ('Function','Service Area', 'TAXONOMY') and ACTIVE_FLAG='1') a 
+				                                             WHERE connect_by_isleaf=1 and DELETE_STATUS='N' 
+				                                             and ELEMENT_TYPE IN ('Function','Service Area')and ACTIVE_FLAG='1'
+				                                             CONNECT BY prior element_id=parent_id
+				                                              start with trim(lower(PARENT_ID)) ='root') )
+				     group by leaf  having (sum(EVIDENCE_REQUIRED_FLAG) = '0'))
+             UNION
+                 	SELECT element_id,element_name, 'more' Flag from TAXONOMY_MASTER 
+	          where element_id in( SELECT leaf from 
+					( SELECT connect_by_root element_id as leaf, element_id, EVIDENCE_REQUIRED_FLAG
+				               FROM   TAXONOMY_MASTER b 
+				               WHERE DELETE_STATUS='N' 
+				               CONNECT BY prior parent_id=element_id
+					                        start with element_id in
+				                                ( SELECT element_id  
+				                                             FROM   (select * from TAXONOMY_MASTER where DELETE_STATUS='N' 
+				                                             and ELEMENT_TYPE IN ('Function','Service Area', 'TAXONOMY') and ACTIVE_FLAG='1') a 
+				                                             WHERE connect_by_isleaf=1 and DELETE_STATUS='N' 
+				                                             and ELEMENT_TYPE IN ('Function','Service Area')and ACTIVE_FLAG='1'
+				                                             CONNECT BY prior element_id=parent_id
+				                                              start with trim(lower(PARENT_ID)) ='root') )
+				     group by leaf  having (sum(EVIDENCE_REQUIRED_FLAG) > '1' ))
+
+   </select>
+
+ 	<update id="updateTaxonomyChildrenActiveFlag" parameterType="com.nyc.hhs.model.TaxonomyTree">
+	update taxonomy_master set EVIDENCE_REQUIRED_FLAG='0', active_flag='0', SELECTION_FLAG='0' where branch_id like (#{msBranchid}||'%') AND ACTIVE_FLAG='1' AND ELEMENT_TYPE != 'Populations'
+ 	</update>
+ 	
+   <resultMap id="resultAnswerGeneralAudit" type="com.nyc.hhs.model.GeneralAuditBean"> 
+            <result property="msAuditDate" column="AUDIT_DATE" />
+            <result property="msUserid" column="USER_ID" />
+            <result property="msUserName" column="USER_NAME" />
+   </resultMap>
+
+   <select id="getLastUpdatedTaxonomyRecacheDetails" parameterType="com.nyc.hhs.model.GeneralAuditBean" resultMap="resultAnswerGeneralAudit">
+        SELECT GA.AUDIT_DATE, GA.USER_ID,GA.event_name , CUD.FIRST_NAME || ' ' || CUD.LAST_NAME as USER_NAME from GENERAL_AUDIT GA, CITY_USER_DETAILS CUD
+                             where GA.AUDIT_DATE = (SELECT max(AUDIT_DATE) from GENERAL_AUDIT 
+                                                 where trim(lower(EVENT_NAME)) = trim(lower(#{msEventname})))
+                              and  GA.USER_ID=CUD.USER_ID
+   </select>      
+
+   <select id="getLastUpdatedTaxonomyDetails" parameterType="com.nyc.hhs.model.GeneralAuditBean" resultMap="resultAnswerGeneralAudit">
+   SELECT GA.AUDIT_DATE, GA.USER_ID,GA.event_name , CUD.FIRST_NAME || ' ' || CUD.LAST_NAME as USER_NAME from GENERAL_AUDIT GA, CITY_USER_DETAILS CUD
+                             where GA.AUDIT_DATE = (SELECT max(AUDIT_DATE) from GENERAL_AUDIT 
+                                                 where trim(lower(EVENT_NAME)) = trim(lower(#{msEventname})))
+                              and  GA.USER_ID=CUD.USER_ID  
+   </select>
+   
+   <resultMap id="serviceAppIdCheck" type="com.nyc.hhs.model.WithdrawRequestDetails">
+     <result property="msAppId" column="SERVICE_APPLICATION_ID" />     
+ </resultMap>
+   
+   <select id="checkBeforeAddingService" parameterType="map" resultMap="serviceAppIdCheck">
+      SELECT SERVICE_APPLICATION_ID FROM SERVICE_APPLICATION
+      WHERE BUSINESS_APPLICATION_ID = #{lsBussAppId} 
+	  AND ORGANIZATION_ID = #{lsOrgId} 
+	  AND ELEMENT_ID = #{lsServiceElementId}
+   </select><!--    
+   
+   	<select id="getCacheFlag" parameterType="map" resultType="map">
+      SELECT SETTINGS_VALUE FROM APPLICATION_SETTINGS WHERE COMPONENT_NAME ='Taxonomy' AND SETTINGS_NAME = 'Recache'
+   </select> 
+   
+    <update id="updateRecacheFlag" parameterType="int" >
+       update application_settings set 
+	   settings_value=decode(settings_value, 100,1,settings_value+1)  
+       WHERE COMPONENT_NAME ='Taxonomy' AND SETTINGS_NAME = 'Recache'
+   </update>   
+   
+   --><update id="insertRecacheTime" parameterType="String" >
+      update application_settings
+      set  SETTINGS_VALUE=#{lsCurrentdate}
+      where COMPONENT_NAME='TaxonomyRecache' and   SETTINGS_NAME='LastRecacheTime'
+   </update>
+   
+   <select id="selectRecacheTime" parameterType="map"  resultType="String">
+      Select SETTINGS_VALUE from application_settings where COMPONENT_NAME='TaxonomyRecache' and SETTINGS_NAME='LastRecacheTime'
+   </select>   
+    <!-- taxonomy maintenance end -->	
+	<update id="updateSectionStatus" parameterType="map">
+		 UPDATE SECTION SET 
+            SECTION_STATUS = #{asStatus},
+            PROC_SECTION_STATUS = #{asProcStatus},
+            MODIFIED_BY = #{asUserId},
+			MODIFIED_DATE = #{aoDate}
+         WHERE 
+         	BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND
+			ORGANIZATION_ID = #{asOrgId} AND
+			SECTION_ID =#{asStatusIsReturnedSection}
+    </update>
+    
+    <update id="updateApplicationStatus" parameterType="map">
+		 UPDATE BUSINESS_APPLICATION SET 
+            APPLICATION_STATUS = #{asStatus},
+            PROC_APP_STATUS = #{asProcStatus},
+            SUBMITTED_BY = #{asUserId},
+			SUBMISSION_DATE = #{aoDate},
+			MODIFIED_BY = #{asUserId},
+			MODIFIED_DATE= SYSDATE,
+			REPORTING_MODIFIED_BY=#{asUserId},
+			REPORTING_MODIFIED_DATE=SYSTIMESTAMP,
+			CITY_STATUS_SET_BY = #{aoCityStatusSetBy},
+			EXPIRATION_DATE = #{aoExpirationDate},
+			CITY_STATUS_SET_DATE = #{aoCityStatusSetDate}
+         WHERE 
+         	APPLICATION_ID = #{asAppId} AND
+			ORGANIZATION_ID = #{asOrgId} AND
+			BUSINESS_APPLICATION_ID =#{asBusinessApplicationId}
+    </update>
+    
+     <update id="updateApplicationStatusForCA" parameterType="map">
+		 UPDATE BUSINESS_APPLICATION SET 
+            APPLICATION_STATUS = #{asStatus},
+            PROC_APP_STATUS = #{asProcStatus},
+            SUBMITTED_BY = #{asUserId},
+			SUBMISSION_DATE = #{aoDate},
+			MODIFIED_BY = #{asUserId},
+			MODIFIED_DATE= SYSDATE,
+			REPORTING_MODIFIED_BY=#{asUserId},
+			REPORTING_MODIFIED_DATE=SYSTIMESTAMP
+         WHERE 
+         	APPLICATION_ID = #{asAppId} AND
+			ORGANIZATION_ID = #{asOrgId} AND
+			BUSINESS_APPLICATION_ID =#{asBusinessApplicationId}
+    </update>
+    
+    <update id="updateSubSectionStatus" parameterType="map">
+		 UPDATE SUB_SECTION_SUMMARY SET 
+            SUB_SECTION_STATUS = #{asStatus},
+            PROC_SUB_SECTION_STATUS = #{asProcStatus},
+            MODIFIED_BY = #{asUserId},
+			MODIFIED_DATE = #{aoDate}
+         WHERE 
+         	BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND
+			ORGANIZATION_ID = #{asOrgId} AND
+			SECTION_ID =#{asStatusIsReturnedSection} AND SUB_SECTION_STATUS = 'Complete'
+    </update>
+    
+     <update id="updateDocumentStatus" parameterType="map">
+		 UPDATE DOCUMENT SET 
+            DOCUMENT_STATUS = #{asStatus},
+            PROC_DOC_STATUS = #{asProcStatus},
+            CREATED_BY = #{asUserId},
+			CREATED_DATE = #{aoDate}
+         WHERE 
+         	BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND
+			ORGANIZATION_ID = #{asOrgId} AND
+			SECTION_ID =#{asStatusIsReturnedSection} AND DOCUMENT_STATUS = 'Complete'
+    </update>
+    
+    <update id="updateSubSectionStatusDef" parameterType="map">
+		 UPDATE SUB_SECTION_SUMMARY SET 
+            SUB_SECTION_STATUS = #{asStatus},
+            PROC_SUB_SECTION_STATUS = #{asProcStatus},
+            MODIFIED_BY = #{asUserId},
+			MODIFIED_DATE = #{aoDate}
+         WHERE 
+         	BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND
+			ORGANIZATION_ID = #{asOrgId} AND
+			SECTION_ID =#{asStatusIsReturnedSection}
+    </update>
+    
+     <update id="updateDocumentStatusDef" parameterType="map">
+		 UPDATE DOCUMENT SET 
+            DOCUMENT_STATUS = #{asStatus},
+            PROC_DOC_STATUS = #{asProcStatus},
+            CREATED_BY = #{asUserId},
+			CREATED_DATE = #{aoDate}
+         WHERE 
+         	BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND
+			ORGANIZATION_ID = #{asOrgId} AND
+			SECTION_ID =#{asStatusIsReturnedSection}
+    </update>
+    
+     <select id="totalNoOfServices" parameterType="map" resultType="int">
+		select count(1) from service_application where BUSINESS_APPLICATION_ID=#{bussnessAppId} and 
+		APPLICATION_ID =#{appId} and ORGANIZATION_ID= #{orgId}
+	</select>
+
+<update id="updateBusinessApplication" parameterType="map">
+		update business_application set modified_by = #{asModBy}, modified_date = SYSDATE, REPORTING_MODIFIED_BY=#{asModBy}, REPORTING_MODIFIED_DATE=SYSTIMESTAMP where 
+		application_id = #{asAppId} and organization_id = #{asOrgId} and business_application_id = #{asBussAppId}
+	</update>
+	
+	<update id="updateSectionComments" parameterType="map">
+		 UPDATE SECTION SET PROVIDER_COMMENTS =#{Comments,jdbcType=VARCHAR},INTERNAL_COMMENTS =#{Comments,jdbcType=VARCHAR} WHERE BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND ORGANIZATION_ID = #{asOrgId} AND SECTION_ID =#{asStatusIsReturnedSection}
+    </update>
+    
+    <update id="updateBusinessComments" parameterType="map">
+		 UPDATE BUSINESS_APPLICATION SET PROVIDER_COMMENTS =#{Comments,jdbcType=VARCHAR},INTERNAL_COMMENTS =#{Comments,jdbcType=VARCHAR}, REPORTING_MODIFIED_DATE=SYSTIMESTAMP, REPORTING_MODIFIED_BY= #{asUserId,jdbcType=VARCHAR} WHERE BUSINESS_APPLICATION_ID = #{asBusinessApplicationId} AND ORGANIZATION_ID = #{asOrgId}
+	</update>
+	
+     <select id="plannedProcurementCount" parameterType="map" resultType="int">
+		Select count(1) From Procurement Proc, Procurement_Services Proc_Ser
+		Where 
+		Proc.Procurement_Id = Proc_Ser.Procurement_Id And
+		Proc_Ser.Element_Id = #{serviceElementId} And
+		PROC.STATUS_ID = #{proposalStatusId}
+	</select>	
+	
+     <select id="releasedProcurementCount" parameterType="map" resultType="int">
+		Select count(1) From Procurement Proc, Procurement_Services Proc_Ser
+		Where 
+		Proc.Procurement_Id = Proc_Ser.Procurement_Id And
+		Proc_Ser.Element_Id = #{serviceElementId} And
+		PROC.STATUS_ID = #{proposalStatusId}
+	</select>	
+	<!-- Added below query for defect 8455, Scenario 1 -->
+	<select id="getDocumentIdFromDocumentTable" parameterType="map"  resultType="String">
+	Select DOCUMENT_ID from DOCUMENT where SERVICE_APPLICATION_ID = #{asServiceId} and ORGANIZATION_ID= #{asOrgId} and  BUSINESS_APPLICATION_ID = #{asBussAppId}
+	</select>
+</mapper>

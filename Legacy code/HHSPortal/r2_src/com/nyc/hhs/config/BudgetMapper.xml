@@ -1,0 +1,2481 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.nyc.hhs.service.db.services.application.BudgetMapper">
+      <resultMap id="budgetList" type="com.nyc.hhs.model.BudgetList">
+            <result property="contractTitle" column="CONTRACT_TITLE" />
+            <result property="providerName" column="ORGANIZATION_LEGAL_NAME" />
+            <result property="agencyName" column="AGENCY_ID" />
+            <result property="budgetValue" column="FISCAL_YEAR_AMOUNT" />
+			<!--Start Release 7.12.0 defect 9208-->
+            <result property="dateOfLastUpdate" column="LAST_UPDATE_DATE" />
+			<!--End Release 7.12.0 defect 9208-->
+            <result property="status" column="STATUS" />
+            <result property="orgType" column="ORG_TYPE" />
+            <result property="ctId" column="CT_NUMBER" />
+            <result property="fiscalYear" column="FISCAL_YEAR_ID" />
+            <result property="budgetType" column="BUDGET_TYPE" />
+            <result property="orgId" column="ORGANIZATION_ID" />
+            <result property="agencyId" column="AGENCY_ID" />
+            <result property="budgetId" column="BUDGET_ID" />
+            <result property="contractId" column="CONTRACT_ID" />
+            <result property="statusId" column="STATUS_ID" />
+            <result property="dateLastUpdateFrom" column="BUDGET_START_DATE" />
+            <result property="dateLastUpdateTo" column="BUDGET_END_DATE" />
+            <result property="programId" column="PROGRAM_ID" />
+            <!-- Start : R5 Added -->
+            <result property="orgId" column="ORGANIZATION_ID" />
+            <result property="invoiceCount" column="INVOICE_EXIST_COUNT" />
+            <result property="paymentCount" column="PAYMENT_EXIST_COUNT" />
+            <result property="amendmentCount" column="AMENDMENT_EXIST_COUNT" />
+            <!-- End : R5 Added -->
+            <!-- Start : Added in R7 for defect 8644 part 3 cancel and merge -->
+            <result property="mergeOutYearFlag" column="CancelAmend" />
+            <result property="costCenterOpted" column="COST_CENTER_OPTED" />
+            <result property="autoApprovedFlag" column="IS_AUTO_APPROVED" />
+             <!-- End : Added in R7 -->
+            <!-- Start : R7.7.0 Added -->
+            <result property="negativeAmendCnt" column="NEGATIVEAMENDCNT" />
+            <!-- End : R7.7.0 Added -->
+            <!-- [Start] R9.7.5 QC9719 -->
+            <result property="actionDisable" column= "action_disable"/>
+            <!-- [End] R9.7.5 QC9719 -->
+            <!-- [Start] R9.7.6 QC9730 -->
+            <result property="actionException" column= "action_exception"/>
+            <!-- [End] R9.7.6 QC9730 -->
+            <!-- [Start] R9.7.6 QC9730 -->
+            <result property="invoiceAdvOnly" column= "INVOICE_ADV_ONLY"/>
+            <!-- [End] R9.7.6 QC9730 -->
+      </resultMap>
+     
+      <!-- build 3.2.0, defect id 6384 -->
+      <select id="fetchBudgetListForProviderFandFP" parameterType="com.nyc.hhs.model.BudgetList"
+            resultType="string">
+            select count(1) from staff_organization where staff_id= #{userId} and
+            organization_id = #{orgId} and permission_type in ('F','FP')
+      </select>
+     
+      <!--Made changes for Release 3.10.0 defect 6559 -->
+      <!--Made changes for R7.7.0 QC9149  -->  
+      <select id="fetchBudgetListForProvider" parameterType="com.nyc.hhs.model.BudgetList"
+            resultMap="budgetList">
+			<!--Start Release 7.12.0 defect 9208-->
+           select * from ( select ROWNUM as rnumber,CONTRACT_TITLE,AGENCY_ID, ORG_TYPE, 
+			FISCAL_YEAR_AMOUNT, LAST_UPDATE_DATE, MODIFIED_DATE,
+			STATUS, FISCAL_YEAR_ID, ORGANIZATION_ID, BUDGET_ID, CONTRACT_ID, BUDGET_TYPE, 
+			PROGRAM_ID, CT_NUMBER,FISCAL_YEAR, AGENCY_NAME, INVOICE_EXIST_COUNT,  PAYMENT_EXIST_COUNT, AMENDMENT_EXIST_COUNT,STATUS_ID, rn, negativeAmendCnt 
+			<!-- [Start] R9.7.5 QC9719 -->
+		        , action_disable 
+		    <!-- [End] R9.7.5 QC9719 -->            				
+			<!-- [Start] R9.7.6 QC9730 -->
+		        , action_exception 
+		    <!-- [End] R9.7.6 QC9730 -->    
+		    <!-- [Start] R9.7.8 QC9742 -->
+                , INVOICE_ADV_ONLY
+            <!-- [End] R9.7.8 QC9742 -->        				
+			from ( 
+			<!--End Release 7.12.0 defect 9208-->
+			select  b.CONTRACT_TITLE, b.AGENCY_ID, b.ORG_TYPE, b.FISCAL_YEAR_AMOUNT, b.LAST_UPDATE_DATE, b.MODIFIED_DATE, b.STATUS, b.FISCAL_YEAR_ID,
+            		b.ORGANIZATION_ID, b.BUDGET_ID, b.CONTRACT_ID, b.BUDGET_TYPE, b.PROGRAM_ID, b.CT_NUMBER, b.FISCAL_YEAR_ID as FISCAL_YEAR,b.AGENCY_NAME,
+            <!-- Start : R5 Added -->
+		            (SELECT COUNT(1) FROM INVOICE WHERE CONTRACT_ID = b.CONTRACT_ID AND BUDGET_ID = b.BUDGET_ID AND STATUS_ID IN (70,71,72,73,74,75)) AS INVOICE_EXIST_COUNT,
+		            (SELECT COUNT(1) FROM PAYMENT WHERE CONTRACT_ID = b.CONTRACT_ID AND BUDGET_ID = b.BUDGET_ID AND STATUS_ID IN (65,109,64) AND DELETE_FLAG = 0) AS PAYMENT_EXIST_COUNT,
+		            (SELECT COUNT(1) FROM CONTRACT WHERE PARENT_CONTRACT_ID = b.bCon_CONTRACT_ID and CONTRACT_type_id = 2) AS AMENDMENT_EXIST_COUNT,
+            <!-- End : R5 Added -->
+            		b.STATUS_ID, b.rn , b.negativeAmendCnt
+			            <!-- [Start] R9.7.5 QC9719 -->
+						       , (select count(1) from ACTION_DISABLE_TASK_OBJ aet 
+						               where  aet.CONTRACT_ID = b.CONTRACT_ID and  aet.BUDGET_ID = b.BUDGET_ID and aet.AGENCY_ID = b.AGENCY_ID
+						                 and aet.IS_ACTIVE = 1 and aet.VERSION_NO in ( select  nvl( max(eae.VERSION_NO), 0 ) 
+						                                                             from  ACTION_DISABLE_TASK_OBJ eae 
+						                                                            where  eae.CONTRACT_ID = aet.CONTRACT_ID 
+						                                                              AND  eae.BUDGET_ID =  aet.BUDGET_ID
+						                                                              AND  eae.AGENCY_ID =  aet.AGENCY_ID  ) 
+						         ) action_disable
+			           <!-- [End] R9.7.5 QC9719 -->		
+			           <!-- [Start] R9.7.6 QC9730 -->
+						       , (select count(1) from ACTION_EXCEPTIONAL_OBJ aet 
+						               where  aet.CONTRACT_ID = b.CONTRACT_ID  and aet.AGENCY_ID = b.AGENCY_ID  and INVOICE_ADV_ONLY not in ('11','10','01')
+						                 and aet.IS_ACTIVE = 1 and aet.VERSION_NO in ( select   nvl( max(eae.VERSION_NO), 0 ) 
+						                                                                 from   ACTION_EXCEPTIONAL_OBJ eae 
+						                                                                where   eae.CONTRACT_ID = aet.CONTRACT_ID 
+						                                                                  AND   eae.AGENCY_ID =  aet.AGENCY_ID  ) 
+						         ) action_exception,
+			           <!-- [End] R9.7.6 QC9730 -->
+			           <!-- [Start] R9.7.8 QC9730 -->
+                                 (select INVOICE_ADV_ONLY from ACTION_EXCEPTIONAL_OBJ aet 
+						               where  aet.CONTRACT_ID = b.CONTRACT_ID  and aet.AGENCY_ID = b.AGENCY_ID 
+						                 and aet.IS_ACTIVE = 1 and aet.VERSION_NO in ( select   nvl( max(eae.VERSION_NO), 0 ) 
+						                                                                 from   ACTION_EXCEPTIONAL_OBJ eae 
+						                                                                where   eae.CONTRACT_ID = aet.CONTRACT_ID 
+						                                                                  AND   eae.AGENCY_ID =  aet.AGENCY_ID  ) 
+						         ) INVOICE_ADV_ONLY
+			           <!-- [End] R9.7.8 QC9730 -->
+            from ( Select   a.CONTRACT_TITLE, a.AGENCY_ID,a.AGENCY_NAME, #{orgType} ORG_TYPE, a.FISCAL_YEAR_AMOUNT,a.LAST_UPDATE_DATE, a.MODIFIED_DATE, a.STATUS, a.FISCAL_YEAR_ID,
+            				a.ORGANIZATION_ID, a.BUDGET_ID, a.CONTRACT_ID, a.BUDGET_TYPE, a.PROGRAM_ID, a.CT_NUMBER, a.STATUS_ID,
+            <!-- Start : R5 Added -->
+            				a.bcon_contract_id, 
+            <!-- End : R5 Added -->
+            <!-- Start: R7 Added for Approved Modification -->
+            				a.ACTIVE_FLAG, a.IS_APPROVED_MODIF, a.INPUT_STATUS, NVL(amd.negativeAmendCnt,0)  as negativeAmendCnt ,
+            <!-- R7 End -->
+            				ROWNUM as rn 
+            	  from  (  select 
+						             <!-- Added in R7: to check approved modification -->
+						             CASE WHEN bud.APPROVED_DATE is not null AND
+						             (to_date(TO_CHAR(bud.APPROVED_DATE,'MM/DD/YYYY'),'MM/DD/YYYY') &gt;=
+						        	 TO_DATE((SELECT SUBSTR(SETTINGS_VALUE,0,INSTR(SETTINGS_VALUE,' '))
+									 FROM APPLICATION_SETTINGS WHERE COMPONENT_NAME='AutoApprovalLaunch'),'MM/DD/YYYY'))
+						             THEN 1
+						             ELSE 0
+						             END AS IS_APPROVED_MODIF,bud.ACTIVE_FLAG,bud.STATUS_ID as INPUT_STATUS,
+            <!-- Start : R7.11.0 QC9185 :  base contract title appears where contract renewal title in budget tab  -->
+								         decode(con.contract_type_id, 1, con.contract_title , bCon.contract_title ) as contract_title , 
+            <!-- End : R7.11.0 QC9185 :  base contract title appears where contract renewal title in budget tab  -->
+							         agn.AGENCY_ID,bud.FISCAL_YEAR_AMOUNT, 
+						             <!-- End in R7: to check approved modification -->
+							         agn.AGENCY_NAME, 
+            						 TO_DATE (TO_CHAR (bud.last_update_date, 'DD-MON-YYYY'),'DD-MON-YYYY') AS last_update_date,
+            						 TO_DATE (TO_CHAR (bud.MODIFIED_DATE, 'DD-MON-YYYY'),'DD-MON-YYYY') AS MODIFIED_DATE,
+            						 stat.STATUS,con.parent_contract_id as parentContractId,fis.FISCAL_YEAR_ID, bud.ORGANIZATION_ID , 
+            						 bud.BUDGET_ID ,bud.PROGRAM_ID,con.CONTRACT_ID , bud_tp.BUDGET_TYPE,
+            						 (CASE  WHEN bud.STATUS_ID = 82 THEN 112
+								            WHEN bud.STATUS_ID = 83 THEN  110
+								            WHEN bud.STATUS_ID = 84 THEN 111
+								            WHEN bud.STATUS_ID = 85 THEN 113
+								            WHEN bud.STATUS_ID = 86 THEN 114
+								            WHEN bud.STATUS_ID = 87 THEN 115
+								            WHEN bud.STATUS_ID = 88 THEN 116
+								            WHEN bud.STATUS_ID = 89 THEN 117
+								      End )as STATUS_ID,
+            <!-- Start : R5 Added -->
+            					     bCon.CONTRACT_ID bcon_contract_id,
+            <!-- End : R5 Added -->
+            <!--Start Release 3.10.0 defect 6559 -->
+            						decode(con.contract_type_id,3,con.EXT_CT_NUMBER,bCon.EXT_CT_NUMBER ) CT_NUMBER
+            <!--End Release 3.10.0 defect 6559 -->
+      <!-- [Start] R7.5.0  QC7710 remove Out year canceled, Withdrawn Amendment from populating data list -->
+    	<![CDATA[            
+				            from  ( Select  BUDGET_ID,BUDGET_TYPE_ID,CONTRACT_ID,FISCAL_YEAR_ID,FISCAL_YEAR_AMOUNT,AGENCY_ID,ORGANIZATION_ID,PROGRAM_ID,STATUS_ID,
+					                        LAST_UPDATE_DATE,ACTIVE_FLAG,DELETE_FLAG,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,
+					                        MODIFIED_BY_USERID,PARENT_ID,XML_DOC_ID,APPROVED_DATE,IS_OLD_PI,IS_AUTO_APPROVED
+                                         from  budget
+									minus
+								   Select  BUDGET_ID,BUDGET_TYPE_ID,CONTRACT_ID,FISCAL_YEAR_ID,FISCAL_YEAR_AMOUNT,AGENCY_ID,ORGANIZATION_ID,PROGRAM_ID,STATUS_ID,
+														LAST_UPDATE_DATE,ACTIVE_FLAG,DELETE_FLAG,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,
+														MODIFIED_BY_USERID,PARENT_ID,XML_DOC_ID,APPROVED_DATE,IS_OLD_PI,IS_AUTO_APPROVED
+									  from  budget
+									  where BUDGET_TYPE_ID = 1 
+										and  FISCAL_YEAR_ID >  ( select CASE WHEN to_date('07/01/'||to_char(sysdate,'yyyy'), 'mm/dd/yyyy') < sysdate 
+																			THEN TO_NUMBER(to_char(sysdate,'yyyy') + 1, '99999')
+																							   ELSE TO_NUMBER(to_char(sysdate,'yyyy'), '99999')
+																			 END AS Fiscal_year
+																				  from dual
+															   ) 
+										and  STATUS_ID   in  ( 87, 89) 
+                                      ) bud,  
+	   ]]>
+      <!-- [End] R7.5.0  QC7710 remove Out year canceled, Withdrawn Amendment from populating data list -->
+						            STATUS_MASTER_R2_R3 stat,FISCAL_YEAR fis,CONTRACT con, CONTRACT bCon ,NYC_AGENCY_DETAILS agn, BUDGET_TYPE bud_tp
+                            where  bud.FISCAL_YEAR_ID=fis.FISCAL_YEAR_ID 
+                            and   bud.CONTRACT_ID=con.CONTRACT_ID 
+                            and   bud.STATUS_ID=stat.STATUS_ID 
+                            and   bud.AGENCY_ID=agn.AGENCY_ID 
+                            and   bud.BUDGET_TYPE_ID =  bud_tp.BUDGET_TYPE_ID
+            				and   bud.ORGANIZATION_ID=#{orgId} 
+             <!-- Added in R7 to fetch approved modified budget -->
+             <if test="isApprovedModificationChecked eq false ">
+        					and   bud.ACTIVE_FLAG='1'
+            </if> 
+            <!-- R7 End -->
+            				and   bud.STATUS_ID!='106'
+            <!--Start Release 3.10.0 defect 6559 -->
+            				AND   bCon.contract_id = con.parent_contract_id
+            <!--End Release 3.10.0 defect 6559 -->
+            <if test="programName !=null and programName !=''">
+                  			AND   bud.PROGRAM_ID = #{programName}
+            </if>
+            <if test="agencyName !=null and agencyName!=''">
+                            AND   bud.AGENCY_ID = #{agencyName}
+            </if>
+            <if test=" fiscalYearId != null and  fiscalYearId !=''">
+                  			AND   bud.FISCAL_YEAR_ID = #{fiscalYearId}
+            </if>
+            <if test=" budgetValueFrom != null and    budgetValueFrom !=''">
+                  			AND   bud.FISCAL_YEAR_AMOUNT &gt; = #{budgetValueFrom}
+            </if>
+            <if test="budgetValueTo != null and budgetValueTo !=''">
+                  			AND   bud.FISCAL_YEAR_AMOUNT &lt; = #{budgetValueTo}
+            </if>
+            <!-- Start : R5 Added Removed string comparision on the list-->
+                  <if test="budgetStatusList != null">
+            <!-- End : R5 Added Removed string comparision on the list-->
+                        	AND   stat.STATUS_ID IN
+                        <foreach item="items" index="index" collection="budgetStatusList"  open="(" separator="," close=")">
+                              #{items}
+                        </foreach>
+                  </if>
+            <!-- Start : R5 Added Removed string comparision on the list-->
+            <if test="budgetTypeList != null">
+            <!-- End : R5 Added Removed string comparision on the list-->
+                           AND bud_tp.BUDGET_TYPE IN
+                  <foreach item="items" index="index" collection="budgetTypeList" open="(" separator="," close=")">
+                        #{items}
+                  </foreach>
+            </if>
+            <if test="dateLastUpdateFrom != null and dateLastUpdateFrom !=''">
+                  			AND bud.MODIFIED_DATE &gt; to_date(#{dateLastUpdateFrom, jdbcType=DATE},'MM/dd/YYYY')
+            </if>
+            <if test="dateLastUpdateTo != null and dateLastUpdateTo !=''">
+                  			AND bud.MODIFIED_DATE &lt; to_date(#{dateLastUpdateTo, jdbcType=DATE},'MM/dd/YYYY')
+            </if>
+            <!-- Start : R5 Added -->
+            <choose>
+            	<when test="budgetId != null and budgetId !=''">
+		            		AND Con.CONTRACT_ID = #{contractId,jdbcType=VARCHAR}
+		            		AND bud.BUDGET_ID = #{budgetId,jdbcType=VARCHAR}
+            	</when>
+            	<when test="contractId != null and contractId !=''">
+            	<if test="amendmentContractId != null and amendmentContractId !=''">
+		            		AND Con.CONTRACT_ID = #{amendmentContractId,jdbcType=VARCHAR}
+            	</if>
+            	<if test="!(amendmentContractId != null and amendmentContractId !='')">
+        		    		AND ((bCon.CONTRACT_ID = #{contractId,jdbcType=VARCHAR}
+            						AND con.CONTRACT_TYPE_ID != 3)
+            						OR con.CONTRACT_ID =#{contractId,jdbcType=VARCHAR}
+            				     )
+            	</if>
+            	</when>
+            </choose>
+            <!-- End : R5 Added -->
+            
+            	)a ,
+<!--[Start] R7.7.0 QC9149  -->            	
+    	<![CDATA[
+            ( 
+				select CONTRACT_ID, count(*) as negativeAmendCnt  
+				from CONTRACT
+				where CONTRACT_ID in ( select PARENT_CONTRACT_ID
+				                          from CONTRACT 
+				                          where CONTRACT_TYPE_ID = 2 
+				                           and CONTRACT_AMOUNT < 0 and STATUS_ID in ( 118, 59, 60, 61, 128, 129, 130, 192 ) 
+				                      )
+				group by CONTRACT_ID
+            ) amd
+	   ]]> 
+<!--[End] R7.7.0 QC9149  -->            	
+            <!--Start Release 3.10.0 defect 6559 -->
+               where STATUS is not null
+			<!--[Start] R7.7.0 QC9149  -->            	
+                and a.contract_id = amd.contract_id (+)
+			<!--[End] R7.7.0 QC9149  -->
+             <!-- Added in R7 for Modification -->
+             <if test="isApprovedModificationChecked">
+            	and (( BUDGET_TYPE ='Budget Modification' 
+ 						and INPUT_STATUS=86 
+ 						and IS_APPROVED_MODIF=1
+ 					)
+				 or (  active_flag=1
+ 		  <if test="budgetStatusList != null">
+                   		AND INPUT_STATUS IN
+              <foreach item="items" index="index" collection="budgetStatusList"
+                         open="(" separator="," close=")">
+                          #{items}
+              </foreach>
+          </if>
+ 		<if test="budgetTypeList != null">
+                    	AND BUDGET_TYPE IN
+             <foreach item="items" index="index" collection="budgetTypeList"
+                    open="(" separator="," close=")">
+                    			#{items}
+        	 </foreach>
+         </if>
+			 ))
+			 </if>
+            <!-- R7 End -->
+            <if test="ctId != null and ctId !=''">
+                  AND lower(ct_number) = lower(#{ctId})
+            </if>
+            <if test="contractTitle != null and contractTitle !=''">
+                  and (lower(CONTRACT_TITLE) LIKE
+                  lower('%${contractTitle}%'))
+            </if>
+            <!--End Release 3.10.0 defect 6559 -->
+            
+			)b          
+			 <!--Start Release 7.12.0 defect 9208-->
+			 WHERE AGENCY_ID is not null			
+			 ORDER BY
+            <choose>
+                  <when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+                  <otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+            </choose>
+            <if test="secondSort != null">
+                  <choose>
+                        <when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+                        <otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+                  </choose>
+            </if>
+				) c )
+			 <!--End Release 7.12.0 defect 9208-->
+			where rnumber BETWEEN #{startNode} AND  #{endNode}			
+			
+      </select>
+     
+      <!--Made changes for Release 3.10.0 defect 6559 -->
+      <select id="fetchBudgetListForProviderCount" parameterType="com.nyc.hhs.model.BudgetList"    resultType="int">
+            select  count(CONTRACT_TITLE)
+            from ( Select IS_APPROVED_MODIF,ACTIVE_FLAG,INPUT_STATUS,CONTRACT_TITLE,AGENCY_ID,#{orgType}
+            				ORG_TYPE,FISCAL_YEAR_AMOUNT,LAST_UPDATE_DATE,MODIFIED_DATE,STATUS,FISCAL_YEAR_ID,
+            				ORGANIZATION_ID, BUDGET_ID, CONTRACT_ID, BUDGET_TYPE,PROGRAM_ID, 
+            				CT_NUMBER, STATUS_ID, ROWNUM  as rn 
+            		 from (  select 
+						             <!-- Added in R7: to check approved modification -->
+									 CASE WHEN bud.APPROVED_DATE is not null AND
+						             (to_date(TO_CHAR(bud.APPROVED_DATE,'MM/DD/YYYY'),'MM/DD/YYYY') &gt;=
+						        	 TO_DATE((SELECT SUBSTR(SETTINGS_VALUE,0,INSTR(SETTINGS_VALUE,' '))
+									 FROM APPLICATION_SETTINGS WHERE COMPONENT_NAME='AutoApprovalLaunch'),'MM/DD/YYYY'))             
+									 THEN 1
+						             ELSE 0
+						             END AS IS_APPROVED_MODIF, bud.ACTIVE_FLAG,bud.STATUS_ID AS INPUT_STATUS,
+						             <!-- End in R7: to check approved modification -->
+            <!-- Start : R7.11.0 QC9185 :  base contract title appears where contract renewal title in budget tab  -->
+							         decode(con.contract_type_id, 1, con.contract_title , bCon.contract_title ) as contract_title , 
+            <!-- End : R7.11.0 QC9185 :  base contract title appears where contract renewal title in budget tab  -->
+							         agn.AGENCY_ID, bud.FISCAL_YEAR_AMOUNT, 
+            						 TO_DATE (TO_CHAR (bud.last_update_date, 'DD-MON-YYYY'),  'DD-MON-YYYY') AS last_update_date,
+            						 TO_DATE (TO_CHAR (bud.MODIFIED_DATE, 'DD-MON-YYYY'),'DD-MON-YYYY') AS MODIFIED_DATE,
+            						 stat.STATUS,con.parent_contract_id as parentContractId,  fis.FISCAL_YEAR_ID, bud.ORGANIZATION_ID , 
+            						 bud.BUDGET_ID ,bud.PROGRAM_ID, con.CONTRACT_ID , bud_tp.BUDGET_TYPE,
+            						 (CASE  WHEN bud.STATUS_ID = 82 THEN 112
+								            WHEN bud.STATUS_ID = 83 THEN 110
+								            WHEN bud.STATUS_ID = 84 THEN 111
+								            WHEN bud.STATUS_ID = 85 THEN 113
+								            WHEN bud.STATUS_ID = 86 THEN 114
+								            WHEN bud.STATUS_ID = 87 THEN 115
+								            WHEN bud.STATUS_ID = 88 THEN 116
+								            WHEN bud.STATUS_ID = 89 THEN 117
+								       End) as STATUS_ID,
+            <!--Start Release 3.10.0 defect 6559 -->
+            						decode(con.contract_type_id,3,con.EXT_CT_NUMBER,bCon.EXT_CT_NUMBER ) CT_NUMBER
+            <!--End Release 3.10.0 defect 6559 -->
+      <!-- [Start] R7.5.0  QC7710 remove Out year canceled, Withdrawn Amendment from populating data list -->
+    	<![CDATA[ 
+					            from  ( Select  BUDGET_ID,BUDGET_TYPE_ID,CONTRACT_ID,FISCAL_YEAR_ID,FISCAL_YEAR_AMOUNT,AGENCY_ID,ORGANIZATION_ID,PROGRAM_ID,STATUS_ID,
+						                        LAST_UPDATE_DATE,ACTIVE_FLAG,DELETE_FLAG,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,
+						                        MODIFIED_BY_USERID,PARENT_ID,XML_DOC_ID,APPROVED_DATE,IS_OLD_PI,IS_AUTO_APPROVED
+                                          from  budget
+										minus
+									   Select  BUDGET_ID,BUDGET_TYPE_ID,CONTRACT_ID,FISCAL_YEAR_ID,FISCAL_YEAR_AMOUNT,AGENCY_ID,ORGANIZATION_ID,PROGRAM_ID,STATUS_ID,
+															LAST_UPDATE_DATE,ACTIVE_FLAG,DELETE_FLAG,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,
+															MODIFIED_BY_USERID,PARENT_ID,XML_DOC_ID,APPROVED_DATE,IS_OLD_PI,IS_AUTO_APPROVED
+										  from  budget
+										  where BUDGET_TYPE_ID = 1 
+											and  FISCAL_YEAR_ID >  ( select CASE WHEN to_date('07/01/'||to_char(sysdate,'yyyy'), 'mm/dd/yyyy') < sysdate 
+																				THEN TO_NUMBER(to_char(sysdate,'yyyy') + 1, '99999')
+																								   ELSE TO_NUMBER(to_char(sysdate,'yyyy'), '99999')
+																				 END AS Fiscal_year
+																					  from dual
+																   ) 
+											and  STATUS_ID   in  ( 87, 89) 
+                                       ) bud,  
+	   ]]>
+      <!-- [End] R7.5.0  QC7710 remove Out year canceled, Withdrawn Amendment from populating data list -->
+                                       STATUS_MASTER_R2_R3 stat,FISCAL_YEAR fis,CONTRACT con,
+            						   CONTRACT bCon , NYC_AGENCY_DETAILS agn, BUDGET_TYPE bud_tp
+            					where  bud.FISCAL_YEAR_ID=fis.FISCAL_YEAR_ID 
+            					 and   bud.CONTRACT_ID=con.CONTRACT_ID 
+            					 and   bud.STATUS_ID=stat.STATUS_ID 
+            					 and   bud.AGENCY_ID=agn.AGENCY_ID 
+            					 and   bud.BUDGET_TYPE_ID = bud_tp.BUDGET_TYPE_ID
+            					 and   bud.ORGANIZATION_ID=#{orgId} 
+            <!-- Added in R7 -->
+            <if test="isApprovedModificationChecked eq false">
+            					 and   bud.ACTIVE_FLAG='1'
+            </if> 
+            <!-- R7 End -->
+            					and bud.STATUS_ID!='106'
+            <!--Start Release 3.10.0 defect 6559 -->
+            					AND bCon.contract_id = con.parent_contract_id
+            <!--End Release 3.10.0 defect 6559 -->
+            <if test="programName !=null and programName !=''">
+                  				AND bud.PROGRAM_ID = #{programName}
+            </if>
+            <if test="agencyName !=null and agencyName!=''">
+                  				AND bud.AGENCY_ID = #{agencyName}
+            </if>
+            <if test=" fiscalYearId != null and  fiscalYearId !=''">
+                  				AND bud.FISCAL_YEAR_ID = #{fiscalYearId}
+            </if>
+            <if test=" budgetValueFrom != null and    budgetValueFrom !=''">
+                  				AND bud.FISCAL_YEAR_AMOUNT &gt; = #{budgetValueFrom}
+            </if>
+            <if test="budgetValueTo != null and budgetValueTo !=''">
+                  				AND bud.FISCAL_YEAR_AMOUNT &lt; = #{budgetValueTo}
+            </if>
+            <!-- Start : R5 Added Removed string comparision on the list-->
+                  <if test="budgetStatusList != null">
+            <!-- End : R5 Added Removed string comparision on the list-->    
+                  				AND stat.STATUS_ID IN
+                        <foreach item="items" index="index" collection="budgetStatusList"
+                              open="(" separator="," close=")">
+                                              #{items}
+                  </foreach>
+                  </if>
+            <!-- Start : R5 Added Removed string comparision on the list-->
+            <if test="budgetTypeList != null">
+            <!-- End : R5 Added Removed string comparision on the list-->
+                  				AND bud_tp.BUDGET_TYPE IN
+                  <foreach item="items" index="index" collection="budgetTypeList"
+                        open="(" separator="," close=")">
+                        #{items}
+            		</foreach>
+            </if>
+            <if test="dateLastUpdateFrom != null and dateLastUpdateFrom !=''">
+                  				AND bud.MODIFIED_DATE &gt;  to_date(#{dateLastUpdateFrom,jdbcType=DATE},'MM/dd/YYYY')
+            </if>
+            <if test="dateLastUpdateTo != null and dateLastUpdateTo !=''">
+                  				AND bud.MODIFIED_DATE &lt; to_date(#{dateLastUpdateTo,jdbcType=DATE},'MM/dd/YYYY')
+            </if>
+            <!-- Start : R5 Added -->
+            <choose>
+            	<when test="budgetId != null and budgetId !=''">
+                  				AND Con.CONTRACT_ID = #{contractId,jdbcType=VARCHAR}
+                  				AND bud.BUDGET_ID = #{budgetId,jdbcType=VARCHAR}
+            	</when>
+            	<when test="contractId != null and contractId !=''">
+            	<if test="amendmentContractId != null and amendmentContractId !=''">
+                  				AND Con.CONTRACT_ID = #{amendmentContractId,jdbcType=VARCHAR}
+            	</if>
+            	<if test="!(amendmentContractId != null and amendmentContractId !='')">
+                  				AND (( bCon.CONTRACT_ID = #{contractId,jdbcType=VARCHAR}
+                  				       AND con.CONTRACT_TYPE_ID != 3)
+                  				       OR con.CONTRACT_ID =#{contractId,jdbcType=VARCHAR}
+                  				    )
+            	</if>
+            	</when>
+            </choose>
+            <!-- End : R5 Added -->
+                     ORDER BY
+            <choose>
+                  <when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+                  <otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+            </choose>
+            <if test="secondSort != null">
+                  <choose>
+                        <when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+                        <otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+                  </choose>
+            </if>
+            )a
+            <!--Start Release 3.10.0 defect 6559 -->
+            where STATUS is not null 
+            <!-- Added in R7 for APPROVED Modification -->
+             <if test="isApprovedModificationChecked">
+            and (( BUDGET_TYPE ='Budget Modification' 
+ 				and INPUT_STATUS=86  
+ 			AND IS_APPROVED_MODIF=1
+ 				)
+				 or 
+ 			(  active_flag=1
+ 		  <if test="budgetStatusList != null">
+                   AND INPUT_STATUS IN
+              <foreach item="items" index="index" collection="budgetStatusList"
+                         open="(" separator="," close=")">
+                          #{items}
+              </foreach>
+          </if>
+ 		<if test="budgetTypeList != null">
+                    AND BUDGET_TYPE IN
+             <foreach item="items" index="index" collection="budgetTypeList"
+                    open="(" separator="," close=")">
+                    #{items}
+        	 </foreach>
+         </if>
+			 ))
+			 </if>
+            <!-- R7 End --> 
+            <if test="ctId != null and ctId !=''">
+                  AND lower(ct_number) = lower(#{ctId})
+            </if>
+            <if test="contractTitle != null and contractTitle !=''">
+                  and (lower(CONTRACT_TITLE) LIKE
+                  lower('%${contractTitle}%'))
+            </if>
+            <!--End Release 3.10.0 defect 6559 -->
+            )b
+ 
+      </select>
+     
+      <!-- Made changes in this query for defect id 6248 release 3.3.0  -->
+      <!--Made changes for Release 3.10.0 defect 6559 -->
+      <!--Made changes for R7.7.0 QC9149  -->  
+      <select id="fetchBudgetListForAgency" parameterType="com.nyc.hhs.model.BudgetList"
+            resultMap="budgetList">          
+   <!--Start Release 7.12.0 defect 9208-->
+   <!-- Start QC 9396 R 8.1 add autoApprovedFlag to the agency budget list selection -->
+   <!-- select *
+    from ( select ROWNUM as rnumber,CONTRACT_TITLE,ORGANIZATION_LEGAL_NAME,AGENCY_ID, ORG_TYPE,
+    FISCAL_YEAR_AMOUNT, LAST_UPDATE_DATE, MODIFIED_DATE,
+    STATUS, FISCAL_YEAR_ID, ORGANIZATION_ID, BUDGET_ID, CONTRACT_ID, BUDGET_TYPE,
+    CT_NUMBER,FISCAL_YEAR, INVOICE_EXIST_COUNT, 
+    PAYMENT_EXIST_COUNT, AMENDMENT_EXIST_COUNT,STATUS_ID, rn, negativeAmendCnt
+     --> 
+   select
+	RNUMBER,
+	CONTRACT_TITLE,
+	ORGANIZATION_LEGAL_NAME,
+	AGENCY_ID,
+	ORG_TYPE,
+	FISCAL_YEAR_AMOUNT,
+	LAST_UPDATE_DATE,
+	MODIFIED_DATE,
+	STATUS,
+	FISCAL_YEAR_ID,
+	ORGANIZATION_ID,
+	BUDGET_ID,
+	CONTRACT_ID,
+	BUDGET_TYPE,
+	CT_NUMBER,
+	FISCAL_YEAR,
+	INVOICE_EXIST_COUNT,
+	PAYMENT_EXIST_COUNT,
+	AMENDMENT_EXIST_COUNT,
+	STATUS_ID,
+	RN,
+	IS_AUTO_APPROVED,
+	NEGATIVEAMENDCNT 
+	<!-- [Start] R9.7.5 QC9719 -->
+	,  action_disable 
+    <!-- [End] R9.7.5 QC9719 -->		
+	<!-- [Start] R9.7.6 QC9730 -->
+        , action_exception 
+    <!-- [End] R9.7.6 QC9730 -->
+    	<!-- [Start] R9.7.8 QC9742  -->            				
+     ,INVOICE_ADV_ONLY
+     <!-- [End] R9.7.8 QC9742 -->
+	from ( 
+	select 
+		ROWNUM as rnumber,
+		CONTRACT_TITLE,
+		ORGANIZATION_LEGAL_NAME,
+		AGENCY_ID, 
+		ORG_TYPE, 
+		FISCAL_YEAR_AMOUNT, 
+		LAST_UPDATE_DATE, 
+		MODIFIED_DATE, 
+		STATUS, 
+		FISCAL_YEAR_ID, 
+		ORGANIZATION_ID, 
+		BUDGET_ID, 
+		CONTRACT_ID, 
+		BUDGET_TYPE, 
+		CT_NUMBER,
+		FISCAL_YEAR, 
+		INVOICE_EXIST_COUNT, 
+		PAYMENT_EXIST_COUNT, 
+		AMENDMENT_EXIST_COUNT,
+		STATUS_ID, 
+		rn,
+		IS_AUTO_APPROVED,
+    <!-- End QC 9396 R 8.1 add autoApprovedFlag to the budget list selection -->
+        negativeAmendCnt 
+        <!-- [Start] R9.7.5 QC9719 -->
+        ,(select count(1) from ACTION_DISABLE_TASK_OBJ aet 
+               where  aet.CONTRACT_ID = c.CONTRACT_ID and  aet.BUDGET_ID = c.BUDGET_ID and aet.AGENCY_ID = c.AGENCY_ID
+                 and aet.IS_ACTIVE = 1 and aet.VERSION_NO in ( select  nvl( max(eae.VERSION_NO), 0 ) 
+                                                             from  ACTION_DISABLE_TASK_OBJ eae 
+                                                            where  eae.CONTRACT_ID = aet.CONTRACT_ID 
+                                                              AND  eae.BUDGET_ID =  aet.BUDGET_ID
+                                                              AND  eae.AGENCY_ID =  aet.AGENCY_ID  ) 
+         ) action_disable
+        <!-- [End] R9.7.5 QC9719 -->
+
+        <!-- [Start] R9.7.6 QC9730 -->
+        ,(select count(1) from ACTION_EXCEPTIONAL_OBJ aet 
+               where  aet.CONTRACT_ID = c.CONTRACT_ID and aet.AGENCY_ID = c.AGENCY_ID  and INVOICE_ADV_ONLY not in ('11','10','01')
+                 and aet.IS_ACTIVE = 1 and aet.VERSION_NO in ( select  nvl( max(eae.VERSION_NO), 0 ) 
+                                                             from  ACTION_EXCEPTIONAL_OBJ eae 
+                                                            where  eae.CONTRACT_ID = aet.CONTRACT_ID 
+                                                              AND  eae.AGENCY_ID =  aet.AGENCY_ID  ) 
+         ) action_exception ,
+        <!-- [End] R9.7.6 QC9730 -->		        
+          <!-- [Start] R9.7.8 QC9742 -->
+                             (select INVOICE_ADV_ONLY from ACTION_EXCEPTIONAL_OBJ aet 
+		               where  aet.CONTRACT_ID = c.CONTRACT_ID  and aet.AGENCY_ID = c.AGENCY_ID 
+		                 and aet.IS_ACTIVE = 1 and aet.VERSION_NO in ( select   nvl( max(eae.VERSION_NO), 0 ) 
+		                                                                 from   ACTION_EXCEPTIONAL_OBJ eae 
+		                                                                where   eae.CONTRACT_ID = aet.CONTRACT_ID 
+		                                                                  AND   eae.AGENCY_ID =  aet.AGENCY_ID  ) 
+		         ) INVOICE_ADV_ONLY
+          <!-- [End] R9.7.8 QC9742 -->
+    	from ( 
+	<!--End Release 7.12.0 defect 9208-->
+           select  b.CONTRACT_TITLE, b.ORGANIZATION_LEGAL_NAME, b.CT_NUMBER, b.ORG_TYPE, b.FISCAL_YEAR_AMOUNT, b.LAST_UPDATE_DATE, b.MODIFIED_DATE, b.STATUS, b.FISCAL_YEAR_ID, b.AGENCY_ID,
+            <!-- Start : R5 Added -->
+                    b.FISCAL_YEAR_ID as FISCAL_YEAR,b.ORGANIZATION_ID,
+		            (SELECT COUNT(1) FROM INVOICE WHERE CONTRACT_ID = b.CONTRACT_ID AND BUDGET_ID = b.BUDGET_ID AND STATUS_ID IN (71,72,73,74,75)) AS INVOICE_EXIST_COUNT,
+		            (SELECT COUNT(1) FROM PAYMENT WHERE CONTRACT_ID = b.CONTRACT_ID AND BUDGET_ID = b.BUDGET_ID AND STATUS_ID IN (109,63,64,65,66) AND DELETE_FLAG = 0) AS PAYMENT_EXIST_COUNT,
+		            (SELECT COUNT(1) FROM CONTRACT WHERE PARENT_CONTRACT_ID = b.bcon_CONTRACT_ID and CONTRACT_type_id = 2) AS AMENDMENT_EXIST_COUNT,
+            <!-- End : R5 Added -->
+            <!-- Start: R7 Added for defect 8979-->
+            <!-- Start QC 9396 R 8.1 add autoApprovedFlag to the budget list selection -->
+	            b.IS_AUTO_APPROVED as IS_AUTO_APPROVED,
+            <!-- End: R7 -->
+            <!-- End QC 9396 R 8.1 add autoApprovedFlag to the budget list selection -->
+    		        b.BUDGET_ID, b.CONTRACT_ID, b.BUDGET_TYPE, b.STATUS_ID, b.rn  , b.negativeAmendCnt 
+          from (Select a.CONTRACT_TITLE, a.ORGANIZATION_LEGAL_NAME,  #{orgType} ORG_TYPE, a.FISCAL_YEAR_AMOUNT, a.LAST_UPDATE_DATE, a.MODIFIED_DATE,
+                       a.STATUS, a.FISCAL_YEAR_ID, a.AGENCY_ID, a.CT_NUMBER, a.BUDGET_ID, a.CONTRACT_ID, a.BUDGET_TYPE, a.STATUS_ID,
+			            <!-- Start : R5 Added -->
+			            a.ORGANIZATION_ID, a.bcon_contract_id,
+			            <!-- End : R5 Added -->
+			            <!-- Start: R7 Added for approved modifications -->
+			            a.IS_APPROVED_MODIF,a.ACTIVE_FLAG,a.IS_AUTO_APPROVED, NVL(amd.negativeAmendCnt,0)  as negativeAmendCnt ,
+			            <!--End R7  -->
+			            ROWNUM as rn 
+			     from  (  select 
+			<!-- Added in R7: to check approved modification -->
+					             CASE WHEN bud.APPROVED_DATE is not null AND
+					             (to_date(TO_CHAR(bud.APPROVED_DATE,'MM/DD/YYYY'),'MM/DD/YYYY') &gt;=
+					        	 TO_DATE((SELECT SUBSTR(SETTINGS_VALUE,0,INSTR(SETTINGS_VALUE,' '))
+								 FROM APPLICATION_SETTINGS WHERE COMPONENT_NAME='AutoApprovalLaunch'),'MM/DD/YYYY'))
+					             THEN 1
+					             ELSE 0
+					             END AS IS_APPROVED_MODIF, bud.ACTIVE_FLAG,bud.IS_AUTO_APPROVED,
+			<!-- End in R7: to check approved modification -->
+			<!-- [Start]  R7.11.0  QC9185:  base contract title appears where contract renewal title in budget tab -->
+					            decode(con.contract_type_id, 1, con.contract_title , bCon.contract_title ) as contract_title ,
+			<!-- [End]  R7.11.0  QC9185:  base contract title appears where contract renewal title in budget tab --> 
+					            org.ORGANIZATION_LEGAL_NAME,bud.FISCAL_YEAR_AMOUNT,
+            					TO_DATE (TO_CHAR (bud.last_update_date, 'DD-MON-YYYY'), 'DD-MON-YYYY') AS last_update_date,
+            					TO_DATE (TO_CHAR (bud.MODIFIED_DATE, 'DD-MON-YYYY'),'DD-MON-YYYY') AS MODIFIED_DATE,
+            					stat.STATUS,fis.FISCAL_YEAR_ID,con.AGENCY_ID, bud.BUDGET_ID , con.CONTRACT_ID ,bud_tp.BUDGET_TYPE,
+            					bud.STATUS_ID,con.parent_contract_id as parentContractId,
+			<!-- Start : R5 Added -->
+					            org.ORGANIZATION_ID,bCon.CONTRACT_ID bcon_contract_id,
+			<!-- End : R5 Added -->
+            <!--Start Release 3.10.0 defect 6559 -->
+								decode(con.contract_type_id,3,con.EXT_CT_NUMBER,bCon.EXT_CT_NUMBER ) CT_NUMBER
+            <!--End Release 3.10.0 defect 6559 -->
+      <!-- [Start] R7.5.0  QC7710 remove Out year canceled, Withdrawn Amendment from populating data list -->
+    	<![CDATA[            
+					            from  ( Select  BUDGET_ID,BUDGET_TYPE_ID,CONTRACT_ID,FISCAL_YEAR_ID,FISCAL_YEAR_AMOUNT,AGENCY_ID,ORGANIZATION_ID,PROGRAM_ID,STATUS_ID,
+						                        LAST_UPDATE_DATE,ACTIVE_FLAG,DELETE_FLAG,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,
+						                        MODIFIED_BY_USERID,PARENT_ID,XML_DOC_ID,APPROVED_DATE,IS_OLD_PI,IS_AUTO_APPROVED
+                                          from  budget
+										minus
+									   Select  BUDGET_ID,BUDGET_TYPE_ID,CONTRACT_ID,FISCAL_YEAR_ID,FISCAL_YEAR_AMOUNT,AGENCY_ID,ORGANIZATION_ID,PROGRAM_ID,STATUS_ID,
+															LAST_UPDATE_DATE,ACTIVE_FLAG,DELETE_FLAG,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,
+															MODIFIED_BY_USERID,PARENT_ID,XML_DOC_ID,APPROVED_DATE,IS_OLD_PI,IS_AUTO_APPROVED
+										  from  budget
+										  where BUDGET_TYPE_ID = 1 
+											and  FISCAL_YEAR_ID >  ( select CASE WHEN to_date('07/01/'||to_char(sysdate,'yyyy'), 'mm/dd/yyyy') < sysdate 
+																				THEN TO_NUMBER(to_char(sysdate,'yyyy') + 1, '99999')
+																								   ELSE TO_NUMBER(to_char(sysdate,'yyyy'), '99999')
+																				 END AS Fiscal_year
+																					  from dual
+																   ) 
+											and  STATUS_ID   in  ( 87, 89) 
+                                       ) bud,  
+	   ]]>
+       <!-- [End] R7.5.0  QC7710 remove Out year canceled, Withdrawn Amendment from populating data list -->
+            							STATUS_MASTER_R2_R3 stat,FISCAL_YEAR fis,CONTRACT con, CONTRACT bCon ,ORGANIZATION org, BUDGET_TYPE bud_tp
+            					where   bud.FISCAL_YEAR_ID = fis.FISCAL_YEAR_ID 
+            					  and   bud.CONTRACT_ID = con.CONTRACT_ID 
+            					  and   bud.STATUS_ID = stat.STATUS_ID 
+            					  and   bud.ORGANIZATION_ID = org.ORGANIZATION_ID 
+            					  and   bud.BUDGET_TYPE_ID = bud_tp.BUDGET_TYPE_ID
+                                  and   bud.AGENCY_ID= #{orgId} 
+             <!-- Added in R7 to fetch approved modified budget -->
+             <if test="isApprovedModificationChecked eq false ">
+        	                      and   bud.ACTIVE_FLAG='1'
+            </if> 
+            <!-- R7 End -->
+                                  and bud.STATUS_ID!='106'
+            <!--Start Release 3.10.0 defect 6559 -->
+						          AND bCon.contract_id = con.parent_contract_id
+            <!--End Release 3.10.0 defect 6559 -->
+            <if test="programName !=null and programName !=''">
+                  				  AND bud.PROGRAM_ID = #{programName}
+            </if>
+            <if test=" providerName !=null and providerName !=''">
+                  				  AND  lower(org.ORGANIZATION_ID) LIKE lower('${providerId}')
+            </if>
+            <if test=" fiscalYearId != null and  fiscalYearId !=''">
+                                  AND  bud.FISCAL_YEAR_ID = #{fiscalYearId}
+            </if>
+            <if test=" budgetValueFrom != null and    budgetValueFrom !=''">
+                  				  AND bud.FISCAL_YEAR_AMOUNT &gt; = #{budgetValueFrom}
+            </if>
+            <if test="budgetValueTo != null and budgetValueTo !=''">
+                  				  AND bud.FISCAL_YEAR_AMOUNT &lt; = #{budgetValueTo}
+            </if>
+            <if test="awardEpin != null and awardEpin !=''">
+                                  AND lower(con.EXT_EPIN) = lower(#{awardEpin})
+            </if>
+            <!-- Start : R5 Added Removed string comparision on the list-->
+                  <if test="budgetStatusList != null">
+            <!-- End : R5 Added Removed string comparision on the list-->    
+                                  AND stat.STATUS_ID IN
+                        <foreach item="items" index="index" collection="budgetStatusList"
+                              open="(" separator="," close=")">
+                              #{items}
+                        </foreach>
+                  </if>
+            <!-- Start : R5 Added Removed string comparision on the list-->
+            <if test="budgetTypeList != null">
+            <!-- End : R5 Added Removed string comparision on the list-->
+                                 AND bud_tp.BUDGET_TYPE IN
+                  <foreach item="items" index="index" collection="budgetTypeList" open="(" separator="," close=")">
+                        			#{items}
+                  </foreach>
+            </if>
+            <if test="dateLastUpdateFrom != null and dateLastUpdateFrom !=''">
+                               AND bud.MODIFIED_DATE &gt; to_date(#{dateLastUpdateFrom, jdbcType=DATE},'MM/dd/YYYY')
+            </if>
+            <if test="dateLastUpdateTo != null and dateLastUpdateTo !=''">
+                  AND bud.MODIFIED_DATE &lt;   to_date(#{dateLastUpdateTo, jdbcType=DATE},'MM/dd/YYYY')
+            </if>
+            <!-- Start : R5 Added -->
+            <choose>
+            	<when test="budgetId != null and budgetId !=''">
+            		AND Con.CONTRACT_ID = #{contractId,jdbcType=VARCHAR}
+            		AND bud.BUDGET_ID = #{budgetId,jdbcType=VARCHAR}
+            	</when>
+            	<when test="contractId != null and contractId !=''">
+            	<if test="amendmentContractId != null and amendmentContractId !=''">
+            		AND Con.CONTRACT_ID = #{amendmentContractId,jdbcType=VARCHAR}
+            	</if>
+            	<if test="!(amendmentContractId != null and amendmentContractId !='')">
+            		AND ((bCon.CONTRACT_ID = #{contractId,jdbcType=VARCHAR}
+            		AND con.CONTRACT_TYPE_ID != 3)
+            		OR con.CONTRACT_ID =#{contractId,jdbcType=VARCHAR})
+            	</if>
+            	</when>
+            </choose>
+            <!-- End : R5 Added -->
+           
+            )a ,
+    	<![CDATA[
+            (  
+				select CONTRACT_ID, count(*) as negativeAmendCnt  
+				from CONTRACT
+				where CONTRACT_ID in ( select PARENT_CONTRACT_ID
+				                          from CONTRACT 
+				                          where CONTRACT_TYPE_ID = 2 
+				                           and CONTRACT_AMOUNT < 0 and STATUS_ID in ( 118, 59, 60, 61, 128, 129, 130, 192 ) 
+				                      )
+				group by CONTRACT_ID
+            ) amd
+	   ]]>            
+            <!--Start Release 3.10.0 defect 6559 -->
+            where STATUS is not null
+            and  a.contract_id =  amd.contract_id (+)
+            <!-- Added in R7 for Modification -->
+             <if test="isApprovedModificationChecked">
+            and (( BUDGET_TYPE ='Budget Modification' 
+ 				and STATUS_ID=86 
+ 				and IS_APPROVED_MODIF=1
+ 				)
+				 or 
+ 			(  active_flag=1
+ 		  <if test="budgetStatusList != null">
+                   AND STATUS_ID IN
+              <foreach item="items" index="index" collection="budgetStatusList"
+                         open="(" separator="," close=")">
+                          #{items}
+              </foreach>
+          </if>
+ 		<if test="budgetTypeList != null">
+                    AND BUDGET_TYPE IN
+             <foreach item="items" index="index" collection="budgetTypeList"
+                    open="(" separator="," close=")">
+                    #{items}
+        	 </foreach>
+         </if>
+			 ))
+			 </if>
+            <!-- R7 End -->
+            
+            <if test="ctId != null and ctId !=''">
+                  AND lower(ct_number) = lower(#{ctId})
+            </if>
+            <if test="contractTitle != null and contractTitle !=''">
+                  and (lower(CONTRACT_TITLE) LIKE
+                  lower('%${contractTitle}%'))
+            </if>
+            <!--End Release 3.10.0 defect 6559 -->
+            )b 
+            <!--Start Release 7.12.0 defect 9208-->
+            WHERE AGENCY_ID is not null
+            ORDER BY
+           <choose>
+             <when test="firstSort == 'bud.STATUS_ID'">lower(STATUS_ID) ${firstSortType}</when>
+			 <when test="firstSortDate != false and firstSort != 'bud.STATUS_ID'">${firstSort} ${firstSortType}</when>
+             <otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+            </choose>
+           <if test="secondSort != null">
+           <choose>
+		    <when test="secondSort == 'bud.STATUS_ID'">, lower(STATUS_ID) ${secondSortType}</when>
+            <when test="secondSortDate != false and secondSort != 'bud.STATUS_ID'">, ${secondSort} ${secondSortType}</when>
+            <otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+           </choose>
+            </if>            
+           ) c )
+          where rnumber BETWEEN #{startNode} AND  #{endNode}
+          <!--End Release 7.12.0 defect 9208-->	
+
+      </select>
+ 
+      <!--Made changes for Release 3.10.0 defect 6559 -->
+      <select id="fetchBudgetListForAgencyCount" parameterType="com.nyc.hhs.model.BudgetList"
+            resultType="int">
+            select count(CONTRACT_TITLE)
+            from (Select IS_APPROVED_MODIF,ACTIVE_FLAG, CONTRACT_TITLE,ORGANIZATION_LEGAL_NAME, #{orgType} ORG_TYPE,FISCAL_YEAR_AMOUNT,
+                         LAST_UPDATE_DATE,MODIFIED_DATE,STATUS,FISCAL_YEAR_ID,AGENCY_ID, CT_NUMBER, BUDGET_ID, CONTRACT_ID, BUDGET_TYPE,STATUS_ID,
+            			ROWNUM as rn 
+            	    from ( select 
+					             <!-- Added in R7: to check approved modification -->
+					              CASE WHEN bud.APPROVED_DATE is not null AND
+					             (to_date(TO_CHAR(bud.APPROVED_DATE,'MM/DD/YYYY'),'MM/DD/YYYY') &gt;=
+					        	 TO_DATE((SELECT SUBSTR(SETTINGS_VALUE,0,INSTR(SETTINGS_VALUE,' '))
+								 FROM APPLICATION_SETTINGS WHERE COMPONENT_NAME='AutoApprovalLaunch'),'MM/DD/YYYY'))
+					             THEN 1
+					             ELSE 0
+					             END AS IS_APPROVED_MODIF,bud.ACTIVE_FLAG,
+					             <!-- End in R7: to check approved modification -->
+            <!-- Start : R7.11.0 QC9185 :  base contract title appears where contract renewal title in budget tab  -->
+								         decode(con.contract_type_id, 1, con.contract_title , bCon.contract_title ) as contract_title , 
+            <!-- End : R7.11.0 QC9185 :  base contract title appears where contract renewal title in budget tab  -->
+            					 org.ORGANIZATION_LEGAL_NAME,bud.FISCAL_YEAR_AMOUNT,  
+            					 TO_DATE (TO_CHAR (bud.last_update_date, 'DD-MON-YYYY'), 'DD-MON-YYYY') AS last_update_date,
+            					 TO_DATE (TO_CHAR (bud.MODIFIED_DATE, 'DD-MON-YYYY'), 'DD-MON-YYYY') AS MODIFIED_DATE,
+            					 stat.STATUS,fis.FISCAL_YEAR_ID,con.AGENCY_ID, bud.BUDGET_ID , con.CONTRACT_ID ,
+            					 bud_tp.BUDGET_TYPE,bud.STATUS_ID,con.parent_contract_id as parentContractId,
+            <!--Start Release 3.10.0 defect 6559 -->
+					            decode(con.contract_type_id,3,con.EXT_CT_NUMBER,bCon.EXT_CT_NUMBER ) CT_NUMBER
+            <!--End Release 3.10.0 defect 6559 -->
+      <!-- [Start] R7.5.0  QC7710 remove Out year canceled, Withdrawn Amendment from populating data list -->
+    	<![CDATA[            
+					            from  ( Select  BUDGET_ID,BUDGET_TYPE_ID,CONTRACT_ID,FISCAL_YEAR_ID,FISCAL_YEAR_AMOUNT,AGENCY_ID,ORGANIZATION_ID,PROGRAM_ID,STATUS_ID,
+						                        LAST_UPDATE_DATE,ACTIVE_FLAG,DELETE_FLAG,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,
+						                        MODIFIED_BY_USERID,PARENT_ID,XML_DOC_ID,APPROVED_DATE,IS_OLD_PI,IS_AUTO_APPROVED
+                                          from  budget
+										minus
+									   Select  BUDGET_ID,BUDGET_TYPE_ID,CONTRACT_ID,FISCAL_YEAR_ID,FISCAL_YEAR_AMOUNT,AGENCY_ID,ORGANIZATION_ID,PROGRAM_ID,STATUS_ID,
+															LAST_UPDATE_DATE,ACTIVE_FLAG,DELETE_FLAG,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,
+															MODIFIED_BY_USERID,PARENT_ID,XML_DOC_ID,APPROVED_DATE,IS_OLD_PI,IS_AUTO_APPROVED
+										  from  budget
+										  where BUDGET_TYPE_ID = 1 
+											and  FISCAL_YEAR_ID >  ( select CASE WHEN to_date('07/01/'||to_char(sysdate,'yyyy'), 'mm/dd/yyyy') < sysdate 
+																				THEN TO_NUMBER(to_char(sysdate,'yyyy') + 1, '99999')
+																								   ELSE TO_NUMBER(to_char(sysdate,'yyyy'), '99999')
+																				 END AS Fiscal_year
+																					  from dual
+																   ) 
+											and  STATUS_ID   in  ( 87, 89) 
+                                       ) bud,  
+	   ]]>
+      <!-- [End] R7.5.0  QC7710 remove Out year canceled, Withdrawn Amendment from populating data list -->
+                                    STATUS_MASTER_R2_R3 stat,FISCAL_YEAR fis,CONTRACT con, CONTRACT bCon , ORGANIZATION org, BUDGET_TYPE bud_tp
+                           where  bud.FISCAL_YEAR_ID = fis.FISCAL_YEAR_ID 
+                             and  bud.CONTRACT_ID = con.CONTRACT_ID 
+                             and  bud.STATUS_ID = stat.STATUS_ID 
+                             and  bud.ORGANIZATION_ID = org.ORGANIZATION_ID 
+                             and  bud.BUDGET_TYPE_ID = bud_tp.BUDGET_TYPE_ID
+            			     and  bud.AGENCY_ID= #{orgId} 
+              <!-- Added in R7 -->
+            <if test="isApprovedModificationChecked eq false">
+             				 and   bud.ACTIVE_FLAG='1'
+            </if> 
+            <!-- R7 End -->
+            				 and bud.STATUS_ID!='106'
+            <!--Start Release 3.10.0 defect 6559 -->
+            				 AND bCon.contract_id = con.parent_contract_id
+            <!--End Release 3.10.0 defect 6559 -->
+            <if test="programName !=null and programName !=''">
+                  			 AND bud.PROGRAM_ID = #{programName}
+            </if>
+            <if test=" providerName !=null and providerName !=''">
+                  			 AND lower(org.ORGANIZATION_ID) LIKE  lower('${providerId}')
+            </if>
+            <if test=" fiscalYearId != null and  fiscalYearId !=''">
+                  			 AND bud.FISCAL_YEAR_ID = #{fiscalYearId}
+            </if>
+            <if test=" budgetValueFrom != null and    budgetValueFrom !=''">
+                  			 AND bud.FISCAL_YEAR_AMOUNT &gt; = #{budgetValueFrom}
+            </if>
+            <if test="budgetValueTo != null and budgetValueTo !=''">
+                  			 AND bud.FISCAL_YEAR_AMOUNT &lt; = #{budgetValueTo}
+            </if>
+            <if test="awardEpin != null and awardEpin !=''">
+                  			 AND lower(con.EXT_EPIN) = lower(#{awardEpin})
+            </if>
+            <!-- Start : R5 Added Removed string comparision on the list-->
+                  <if test="budgetStatusList != null">
+            <!-- End : R5 Added Removed string comparision on the list-->    
+                        	AND stat.STATUS_ID IN
+                        <foreach item="items" index="index" collection="budgetStatusList"
+                              open="(" separator="," close=")">
+                              #{items}
+                   		</foreach>
+                  </if>
+            <!-- Start : R5 Added Removed string comparision on the list-->
+            <if test="budgetTypeList != null">
+            <!-- End : R5 Added Removed string comparision on the list-->
+                  			AND bud_tp.BUDGET_TYPE IN
+                  <foreach item="items" index="index" collection="budgetTypeList"
+                        open="(" separator="," close=")">
+                        #{items}
+            	  </foreach>
+            </if>
+            <if test="dateLastUpdateFrom != null and dateLastUpdateFrom !=''">
+                  AND bud.MODIFIED_DATE &gt; to_date(#{dateLastUpdateFrom, jdbcType=DATE},'MM/dd/YYYY')
+            </if>
+            <if test="dateLastUpdateTo != null and dateLastUpdateTo !=''">
+                  AND bud.MODIFIED_DATE &lt;  to_date(#{dateLastUpdateTo, jdbcType=DATE},'MM/dd/YYYY')
+            </if>
+            <!-- Start : R5 Added -->
+            <choose>
+            	<when test="budgetId != null and budgetId !=''">
+            		AND Con.CONTRACT_ID = #{contractId,jdbcType=VARCHAR}
+            		AND bud.BUDGET_ID = #{budgetId,jdbcType=VARCHAR}
+            	</when>
+            	<when test="contractId != null and contractId !=''">
+            	<if test="amendmentContractId != null and amendmentContractId !=''">
+            		AND Con.CONTRACT_ID = #{amendmentContractId,jdbcType=VARCHAR}
+            	</if>
+            	<if test="!(amendmentContractId != null and amendmentContractId !='')">
+            		AND ((bCon.CONTRACT_ID = #{contractId,jdbcType=VARCHAR}
+            		AND con.CONTRACT_TYPE_ID != 3)
+            		OR con.CONTRACT_ID =#{contractId,jdbcType=VARCHAR})
+            	</if>
+            	</when>
+            </choose>
+            <!-- End : R5 Added -->
+            ORDER BY
+            <choose>
+                  <when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+                  <otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+            </choose>
+            <if test="secondSort != null">
+                  <choose>
+                        <when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+                        <otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+                  </choose>
+            </if>
+            )a
+            <!--Start Release 3.10.0 defect 6559 -->
+            where STATUS is not null 
+             <!-- Added in R7 for Modification -->
+             <if test="isApprovedModificationChecked">
+            and (( BUDGET_TYPE ='Budget Modification' 
+ 				and STATUS_ID=86  
+ 			AND IS_APPROVED_MODIF=1
+ 				)
+				 or 
+ 			(  active_flag=1
+ 		  <if test="budgetStatusList != null">
+                   AND STATUS_ID IN
+              <foreach item="items" index="index" collection="budgetStatusList"
+                         open="(" separator="," close=")">
+                          #{items}
+              </foreach>
+          </if>
+ 		<if test="budgetTypeList != null">
+                    AND BUDGET_TYPE IN
+             <foreach item="items" index="index" collection="budgetTypeList"
+                    open="(" separator="," close=")">
+                    #{items}
+        	 </foreach>
+         </if>
+			 ))
+			 </if>
+            <!-- R7 End -->
+            <if test="ctId != null and ctId !=''">
+                  AND lower(ct_number) = lower(#{ctId})
+            </if>
+            <if test="contractTitle != null and contractTitle !=''">
+                  and (lower(CONTRACT_TITLE) LIKE
+                  lower('%${contractTitle}%'))
+            </if>
+            <!--End Release 3.10.0 defect 6559 -->
+            )b
+      </select>
+ 
+      <!-- Made changes in this query for defect id 6248 release 3.3.0  -->
+      <!--Made changes for Release 3.10.0 defect 6559 -->
+      <select id="fetchBudgetListForCity" parameterType="com.nyc.hhs.model.BudgetList"  resultMap="budgetList">
+            select   ( SELECT COUNT(1) FROM INVOICE WHERE CONTRACT_ID = b.CONTRACT_ID AND BUDGET_ID = b.BUDGET_ID AND STATUS_ID IN (71,72,73,74,75)) AS INVOICE_EXIST_COUNT,
+            <!-- Start : R7 for defect 8644 part 3 added -->
+                     (Select   Count(1) From Budget Bud, Contract Con, Ref_Contracts_H Ref 
+                       Where   Bud.Contract_Id=Con.Contract_Id And Bud.Budget_Id=B.Budget_Id
+  			             And Con.Ext_Epin=Ref.Trkg_No and con.contract_id=b.CONTRACT_ID and con.IS_AMENDMENT_REGISTERED_IN_FMS=1
+ 			            and fiscal_year_id = (select max(fiscal_year_id) 
+ 			                                    from Budget 
+ 			                                   where contract_id= (Select  Parent_Contract_Id 
+ 			                                                         From  contract where contract_id=b.CONTRACT_ID) and status_id !=106)
+ 			         ) As CancelAmend,
+            <!-- Start: Added in R7 for Cost center -->
+                    (  CASE WHEN  (select   CONTRACT_type_id from contract where contract_id=b.CONTRACT_ID)= 3 
+                            Then  (SELECT   COUNT(1) FROM CONTRACT 
+                                    WHERE   CONTRACT_ID = b.CONTRACT_ID and COST_CENTER_OPTED = 2)
+                            ELSE (SELECT COUNT(1) FROM CONTRACT WHERE PARENT_CONTRACT_ID = b.bCon_CONTRACT_ID and COST_CENTER_OPTED = 2) 
+                        END
+                     ) AS COST_CENTER_OPTED,
+            <!-- End : R7 added -->
+            <!-- Start: R7 added for 8979 defect -->
+			        IS_AUTO_APPROVED,
+            <!-- End: defect 8979 -->
+		            (SELECT COUNT(1) FROM PAYMENT WHERE CONTRACT_ID = b.CONTRACT_ID AND BUDGET_ID = b.BUDGET_ID AND STATUS_ID IN (109,63,64,65,66) AND DELETE_FLAG = 0) AS PAYMENT_EXIST_COUNT,
+		            (SELECT COUNT(1) FROM CONTRACT WHERE PARENT_CONTRACT_ID = b.bCon_CONTRACT_ID and CONTRACT_type_id = 2) AS AMENDMENT_EXIST_COUNT,
+		            CONTRACT_TITLE,ORGANIZATION_LEGAL_NAME,CT_NUMBER, ORG_TYPE,FISCAL_YEAR_AMOUNT,LAST_UPDATE_DATE,MODIFIED_DATE,STATUS,FISCAL_YEAR_ID,AGENCY_ID,
+		            <!-- Start : R5 Added -->
+		            ORGANIZATION_ID,
+		            <!-- End : R5 Added -->
+		            BUDGET_ID, CONTRACT_ID, BUDGET_TYPE,STATUS_ID,rn
+		            <!-- [Start] R9.7.5 QC9719 -->
+		            , action_disable 
+                    <!-- [End] R9.7.5 QC9719 -->
+					<!-- [Start] R9.7.6 QC9730 -->
+				      , action_exception 
+				    <!-- [End] R9.7.6 QC9730 -->  
+				    <!-- [Start] R9.7.8 QC9742  -->  
+				    ,INVOICE_ADV_ONLY
+				    <!-- [End] R9.7.8 QC9742 -->      
+            from (  Select    CONTRACT_TITLE,ORGANIZATION_LEGAL_NAME, #{orgType} AS ORG_TYPE,FISCAL_YEAR_AMOUNT,LAST_UPDATE_DATE,MODIFIED_DATE,STATUS,FISCAL_YEAR_ID,AGENCY_ID,
+                              CT_NUMBER, BUDGET_ID, CONTRACT_ID, BUDGET_TYPE,STATUS_ID,
+				              <!-- Start : R5 Added -->
+				              ORGANIZATION_ID, bcon_contract_id,
+				              <!-- End : R5 Added -->
+				              <!-- Start: R7 Added for approved modifications -->
+				              IS_APPROVED_MODIF,ACTIVE_FLAG,IS_AUTO_APPROVED,
+				              <!-- End R7 -->
+				              ROWNUM as rn 
+				              <!-- [Start] R9.7.5 QC9719 -->
+						        ,(select count(1) from ACTION_DISABLE_TASK_OBJ aet 
+						               where  aet.CONTRACT_ID = a.CONTRACT_ID and  aet.BUDGET_ID = a.BUDGET_ID and aet.AGENCY_ID = a.AGENCY_ID
+						                 and aet.IS_ACTIVE = 1 and aet.VERSION_NO in ( select  nvl( max(eae.VERSION_NO), 0 ) 
+						                                                             from  ACTION_DISABLE_TASK_OBJ eae 
+						                                                            where  eae.CONTRACT_ID = aet.CONTRACT_ID 
+						                                                              AND  eae.BUDGET_ID =  aet.BUDGET_ID
+						                                                              AND  eae.AGENCY_ID =  aet.AGENCY_ID  ) 
+						         ) action_disable
+						        <!-- [End] R9.7.5 QC9719 -->
+                                <!-- [Start] R9.7.6 QC9730 -->
+						        ,(select count(1) from ACTION_EXCEPTIONAL_OBJ aet 
+						               where  aet.CONTRACT_ID = a.CONTRACT_ID and  aet.AGENCY_ID = a.AGENCY_ID  and INVOICE_ADV_ONLY not in ('11','10','01')
+						                 and aet.IS_ACTIVE = 1 and aet.VERSION_NO in ( select  nvl( max(eae.VERSION_NO), 0 ) 
+						                                                             from  ACTION_EXCEPTIONAL_OBJ eae 
+						                                                            where  eae.CONTRACT_ID = aet.CONTRACT_ID 
+						                                                              AND  eae.AGENCY_ID =  aet.AGENCY_ID  ) 
+						         ) action_exception ,
+                                <!-- [End] R9.7.6 QC9730 -->
+                                <!-- [Start] R9.7.8 QC9742 -->
+                                 (select INVOICE_ADV_ONLY from ACTION_EXCEPTIONAL_OBJ aet 
+						               where  aet.CONTRACT_ID = a.CONTRACT_ID  and aet.AGENCY_ID = a.AGENCY_ID 
+						                 and aet.IS_ACTIVE = 1 and aet.VERSION_NO in ( select   nvl( max(eae.VERSION_NO), 0 ) 
+						                                                                 from   ACTION_EXCEPTIONAL_OBJ eae 
+						                                                                where   eae.CONTRACT_ID = aet.CONTRACT_ID 
+						                                                                  AND   eae.AGENCY_ID =  aet.AGENCY_ID  ) 
+						         ) INVOICE_ADV_ONLY
+			                     <!-- [End] R9.7.8 QC9742 -->
+                                        
+				      from    ( select 
+            							<!-- Added in R7: to check approved modification -->
+             							CASE WHEN bud.APPROVED_DATE is not null 
+             							     AND (to_date(TO_CHAR(bud.APPROVED_DATE,'MM/DD/YYYY'),'MM/DD/YYYY') &gt;=  
+             							            TO_DATE((SELECT   SUBSTR(SETTINGS_VALUE,0,INSTR(SETTINGS_VALUE,' '))
+			                                                   FROM   APPLICATION_SETTINGS WHERE COMPONENT_NAME='AutoApprovalLaunch'),'MM/DD/YYYY')
+			                                     )
+								             THEN 1
+								             ELSE 0
+							             END AS IS_APPROVED_MODIF,
+             <!-- End in R7: to check approved modification -->
+								         bud.IS_AUTO_APPROVED, 
+            <!-- Start : R7.11.0 QC9185 :  base contract title appears where contract renewal title in budget tab  -->
+								         decode(con.contract_type_id, 1, con.contract_title , bCon.contract_title ) as contract_title , 
+            <!-- End : R7.11.0 QC9185 :  base contract title appears where contract renewal title in budget tab  -->
+								         org.ORGANIZATION_LEGAL_NAME, bud.FISCAL_YEAR_AMOUNT,      
+                                        TO_DATE (TO_CHAR (bud.last_update_date, 'DD-MON-YYYY'), 'DD-MON-YYYY') AS last_update_date,
+                                        TO_DATE (TO_CHAR (bud.MODIFIED_DATE, 'DD-MON-YYYY'), 'DD-MON-YYYY') AS MODIFIED_DATE,stat.STATUS,fis.FISCAL_YEAR_ID,con.AGENCY_ID,
+                                        bud.BUDGET_ID , con.CONTRACT_ID,bud_tp.BUDGET_TYPE,bud.STATUS_ID,con.parent_contract_id as parentContractId,
+            <!-- Start : R5 Added -->
+							            bCon.CONTRACT_ID bcon_contract_id, org.ORGANIZATION_ID,
+            <!-- End : R5 Added -->
+            <!--Start Release 3.10.0 defect 6559 -->
+            							decode(con.contract_type_id,3,con.EXT_CT_NUMBER,bCon.EXT_CT_NUMBER ) CT_NUMBER,bud.ACTIVE_FLAG
+            <!--End Release 3.10.0 defect 6559 -->
+      <!-- [Start] R7.5.0  QC7710 remove Out year canceled, Withdrawn Amendment from populating data list -->
+    	<![CDATA[            
+					            from  ( Select  BUDGET_ID,BUDGET_TYPE_ID,CONTRACT_ID,FISCAL_YEAR_ID,FISCAL_YEAR_AMOUNT,AGENCY_ID,ORGANIZATION_ID,PROGRAM_ID,STATUS_ID,
+						                        LAST_UPDATE_DATE,ACTIVE_FLAG,DELETE_FLAG,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,
+						                        MODIFIED_BY_USERID,PARENT_ID,XML_DOC_ID,APPROVED_DATE,IS_OLD_PI,IS_AUTO_APPROVED
+                                          from  budget
+										minus
+									   Select  BUDGET_ID,BUDGET_TYPE_ID,CONTRACT_ID,FISCAL_YEAR_ID,FISCAL_YEAR_AMOUNT,AGENCY_ID,ORGANIZATION_ID,PROGRAM_ID,STATUS_ID,
+															LAST_UPDATE_DATE,ACTIVE_FLAG,DELETE_FLAG,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,
+															MODIFIED_BY_USERID,PARENT_ID,XML_DOC_ID,APPROVED_DATE,IS_OLD_PI,IS_AUTO_APPROVED
+										  from  budget
+										  where BUDGET_TYPE_ID = 1 
+											and  FISCAL_YEAR_ID >  ( select CASE WHEN to_date('07/01/'||to_char(sysdate,'yyyy'), 'mm/dd/yyyy') < sysdate 
+																				THEN TO_NUMBER(to_char(sysdate,'yyyy') + 1, '99999')
+																								   ELSE TO_NUMBER(to_char(sysdate,'yyyy'), '99999')
+																				 END AS Fiscal_year
+																					  from dual
+																   ) 
+											and  STATUS_ID   in  ( 87, 89) 
+                                       ) bud,  
+	   ]]>
+       <!-- [End] R7.5.0  QC7710 remove Out year canceled, Withdrawn Amendment from populating data list -->
+                                       STATUS_MASTER_R2_R3 stat, FISCAL_YEAR fis, CONTRACT con, CONTRACT bCon, ORGANIZATION org, BUDGET_TYPE bud_tp
+					            where  bud.FISCAL_YEAR_ID=fis.FISCAL_YEAR_ID 
+					              and  bud.CONTRACT_ID=con.CONTRACT_ID and bud.STATUS_ID=stat.STATUS_ID
+					              and  bud.ORGANIZATION_ID=org.ORGANIZATION_ID
+					              and bud.BUDGET_TYPE_ID = bud_tp.BUDGET_TYPE_ID
+        	<!-- Added in R7 -->
+            <if test="isApprovedModificationChecked eq false">
+					              and   bud.ACTIVE_FLAG='1'
+            </if> 
+            <!-- R7 End -->
+            					  and bud.STATUS_ID!='106'
+            <!--Start Release 3.10.0 defect 6559 -->
+            					  AND bCon.contract_id = con.parent_contract_id
+            <!--End Release 3.10.0 defect 6559 -->
+            <if test="programName !=null and programName !=''">
+                                  AND bud.PROGRAM_ID = #{programName}
+            </if>
+            <if test=" providerName !=null and providerName !=''">
+                  				  AND  lower(org.ORGANIZATION_ID) LIKE   lower('${providerId}')
+            </if>
+            <if test="agencyName !=null and agencyName!=''">
+                                  AND bud.AGENCY_ID = #{agencyName}
+            </if>
+            <if test=" fiscalYearId != null and  fiscalYearId !=''">
+                                 AND bud.FISCAL_YEAR_ID = #{fiscalYearId}
+            </if>
+            <if test=" budgetValueFrom != null and    budgetValueFrom !=''">
+                                 AND bud.FISCAL_YEAR_AMOUNT &gt; = #{budgetValueFrom}
+            </if>
+            <if test="budgetValueTo != null and budgetValueTo !=''">
+                                 AND bud.FISCAL_YEAR_AMOUNT &lt; = #{budgetValueTo}
+            </if>
+            <if test="awardEpin != null and awardEpin !=''">
+                                 AND lower(con.EXT_EPIN) = lower(#{awardEpin})
+            </if>
+            <!-- Start : R5 Added Removed string comparision on the list-->
+                  <if test="budgetStatusList != null">
+            <!-- End : R5 Added Removed string comparision on the list-->    
+                                AND stat.STATUS_ID IN
+                        <foreach item="items" index="index" collection="budgetStatusList" open="(" separator="," close=")">
+                              #{items}
+                        </foreach>
+            </if>
+            <!-- Start : R5 Added Removed string comparision on the list-->
+            <if test="budgetTypeList != null">
+            <!-- End : R5 Added Removed string comparision on the list-->
+                                AND bud_tp.BUDGET_TYPE IN
+                  <foreach item="items" index="index" collection="budgetTypeList" open="(" separator="," close=")">
+                             #{items}
+            </foreach>
+            </if>
+            <if test="dateLastUpdateFrom != null and dateLastUpdateFrom !=''">
+                            AND bud.MODIFIED_DATE &gt; to_date(#{dateLastUpdateFrom, jdbcType=DATE},'MM/dd/YYYY')
+            </if>
+            <if test="dateLastUpdateTo != null and dateLastUpdateTo !=''">
+                           AND bud.MODIFIED_DATE &lt;  to_date(#{dateLastUpdateTo, jdbcType=DATE},'MM/dd/YYYY')
+            </if>
+            <!-- Start : R5 Added -->
+            <choose>
+            	<when test="budgetId != null and budgetId !=''">
+            		       AND Con.CONTRACT_ID = #{contractId,jdbcType=VARCHAR}
+            		       AND bud.BUDGET_ID = #{budgetId,jdbcType=VARCHAR}
+            	</when>
+            	<when test="contractId != null and contractId !=''">
+            	<if test="amendmentContractId != null and amendmentContractId !=''">
+            		      AND Con.CONTRACT_ID = #{amendmentContractId,jdbcType=VARCHAR}
+            	</if>
+            	<if test="!(amendmentContractId != null and amendmentContractId !='')">
+            		      AND ((bCon.CONTRACT_ID = #{contractId,jdbcType=VARCHAR}
+            		            AND con.CONTRACT_TYPE_ID != 3)
+            		            OR con.CONTRACT_ID =#{contractId,jdbcType=VARCHAR})
+            	</if>
+            	</when>
+            </choose>
+            <!-- End : R5 Added -->
+            ORDER BY
+            <choose>
+                  <when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+                  <otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+            </choose>
+            <if test="secondSort != null">
+                  <choose>
+                        <when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+                        <otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+                  </choose>
+            </if>
+            )a
+            <!--Start Release 3.10.0 defect 6559 -->
+            where STATUS is not null
+             <!-- Added in R7 for Modification -->
+             <if test="isApprovedModificationChecked">
+            and (( BUDGET_TYPE ='Budget Modification' 
+ 				and STATUS_ID=86 
+ 				and IS_APPROVED_MODIF=1
+ 				)
+				 or 
+ 			(  active_flag=1
+ 		  <if test="budgetStatusList != null">
+                   AND STATUS_ID IN
+              <foreach item="items" index="index" collection="budgetStatusList"
+                         open="(" separator="," close=")">
+                          #{items}
+              </foreach>
+          </if>
+ 		<if test="budgetTypeList != null">
+                    AND BUDGET_TYPE IN
+             <foreach item="items" index="index" collection="budgetTypeList"
+                    open="(" separator="," close=")">
+                    #{items}
+        	 </foreach>
+         </if>
+			 ))
+			 </if>
+            <!-- R7 End -->
+            
+            <if test="ctId != null and ctId !=''">
+                  AND lower(ct_number) = lower(#{ctId})
+            </if>
+            <if test="contractTitle != null and contractTitle !=''">
+                  and (lower(CONTRACT_TITLE) LIKE
+                  lower('%${contractTitle}%'))
+            </if>
+            <!--End Release 3.10.0 defect 6559 -->
+            )b where rn
+            BETWEEN #{startNode} AND
+            #{endNode}
+ 
+      </select>
+
+      <!--Made changes for Release 3.10.0 defect 6559 -->
+      <select id="fetchBudgetListForCityCount" parameterType="com.nyc.hhs.model.BudgetList" resultType="int">
+            select  count(CONTRACT_TITLE)
+            from (  Select IS_APPROVED_MODIF,ACTIVE_FLAG, CONTRACT_TITLE,ORGANIZATION_LEGAL_NAME, #{orgType}
+                            ORG_TYPE,FISCAL_YEAR_AMOUNT,LAST_UPDATE_DATE,MODIFIED_DATE,STATUS,FISCAL_YEAR_ID,AGENCY_ID,
+                            CT_NUMBER, BUDGET_ID, CONTRACT_ID, BUDGET_TYPE,STATUS_ID,ROWNUM as rn 
+                    from  ( select 
+	 	<!-- Added in R7: to check approved modification -->
+						             CASE WHEN bud.APPROVED_DATE is not null 
+						                   AND  (to_date(TO_CHAR(bud.APPROVED_DATE,'MM/DD/YYYY'),'MM/DD/YYYY') &gt;=  
+						                           TO_DATE((SELECT SUBSTR(SETTINGS_VALUE,0,INSTR(SETTINGS_VALUE,' '))
+							                                  FROM APPLICATION_SETTINGS WHERE COMPONENT_NAME='AutoApprovalLaunch'),'MM/DD/YYYY'))
+						                  THEN 1
+						                  ELSE 0
+						             END AS IS_APPROVED_MODIF,
+	 	<!-- End in R7: to check approved modification -->
+            <!-- Start : R7.11.0 QC9185 :  base contract title appears where contract renewal title in budget tab  -->
+								         decode(con.contract_type_id, 1, con.contract_title , bCon.contract_title ) as contract_title , 
+            <!-- End : R7.11.0 QC9185 :  base contract title appears where contract renewal title in budget tab  -->
+                                     org.ORGANIZATION_LEGAL_NAME, bud.FISCAL_YEAR_AMOUNT,
+                                     TO_DATE (TO_CHAR (bud.last_update_date, 'DD-MON-YYYY'),'DD-MON-YYYY') AS last_update_date,
+                                     TO_DATE (TO_CHAR (bud.MODIFIED_DATE, 'DD-MON-YYYY'),'DD-MON-YYYY') AS MODIFIED_DATE,
+                                     stat.STATUS,fis.FISCAL_YEAR_ID,con.AGENCY_ID, bud.BUDGET_ID , con.CONTRACT_ID, 
+                                     bud_tp.BUDGET_TYPE,bud.STATUS_ID,con.parent_contract_id as parentContractId,
+	 	<!--Start Release 3.10.0 defect 6559 -->
+						            decode(con.contract_type_id,3,con.EXT_CT_NUMBER,bCon.EXT_CT_NUMBER ) CT_NUMBER, bud.ACTIVE_FLAG
+	 	<!--End Release 3.10.0 defect 6559 -->
+      <!-- [Start] R7.5.0  QC7710 remove Out year canceled, Withdrawn Amendment from populating data list -->
+    	<![CDATA[						            
+					            from  ( Select  BUDGET_ID,BUDGET_TYPE_ID,CONTRACT_ID,FISCAL_YEAR_ID,FISCAL_YEAR_AMOUNT,AGENCY_ID,ORGANIZATION_ID,PROGRAM_ID,STATUS_ID,
+						                        LAST_UPDATE_DATE,ACTIVE_FLAG,DELETE_FLAG,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,
+						                        MODIFIED_BY_USERID,PARENT_ID,XML_DOC_ID,APPROVED_DATE,IS_OLD_PI,IS_AUTO_APPROVED
+                                          from  budget
+										minus
+									   Select  BUDGET_ID,BUDGET_TYPE_ID,CONTRACT_ID,FISCAL_YEAR_ID,FISCAL_YEAR_AMOUNT,AGENCY_ID,ORGANIZATION_ID,PROGRAM_ID,STATUS_ID,
+															LAST_UPDATE_DATE,ACTIVE_FLAG,DELETE_FLAG,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,
+															MODIFIED_BY_USERID,PARENT_ID,XML_DOC_ID,APPROVED_DATE,IS_OLD_PI,IS_AUTO_APPROVED
+										  from  budget
+										  where BUDGET_TYPE_ID = 1 
+											and  FISCAL_YEAR_ID >  ( select CASE WHEN to_date('07/01/'||to_char(sysdate,'yyyy'), 'mm/dd/yyyy') < sysdate 
+																				THEN TO_NUMBER(to_char(sysdate,'yyyy') + 1, '99999')
+																								   ELSE TO_NUMBER(to_char(sysdate,'yyyy'), '99999')
+																				 END AS Fiscal_year
+																					  from dual
+																   ) 
+											and  STATUS_ID   in  ( 87, 89) 
+                                       ) bud,  
+	   ]]>
+       <!-- [End] R7.5.0  QC7710 remove Out year canceled, Withdrawn Amendment from populating data list -->
+	                                 STATUS_MASTER_R2_R3 stat,FISCAL_YEAR fis,CONTRACT con,
+                                     CONTRACT bCon,ORGANIZATION org, BUDGET_TYPE bud_tp
+                              where   bud.FISCAL_YEAR_ID  =  fis.FISCAL_YEAR_ID 
+                                and   bud.CONTRACT_ID  =  con.CONTRACT_ID 
+                                and   bud.STATUS_ID  =  stat.STATUS_ID
+                                and   bud.ORGANIZATION_ID  =  org.ORGANIZATION_ID
+                                and   bud.BUDGET_TYPE_ID = bud_tp.BUDGET_TYPE_ID
+           <!-- Added in R7 --> 
+            <if test="isApprovedModificationChecked eq false">
+                                and   bud.ACTIVE_FLAG='1'
+            </if> 
+                                and bud.STATUS_ID!='106'
+            <!--Start Release 3.10.0 defect 6559 -->
+                                AND bCon.contract_id = con.parent_contract_id
+            <!--End Release 3.10.0 defect 6559 -->
+            <if test="programName !=null and programName !=''">
+                                AND bud.PROGRAM_ID = #{programName}
+            </if>
+            <if test=" providerName !=null and providerName !=''">
+                  	             AND lower(org.ORGANIZATION_ID) LIKE lower('${providerId}')
+            </if>
+            <if test="agencyName !=null and agencyName!=''">
+    	             AND bud.AGENCY_ID = #{agencyName}
+            </if>
+            <if test=" fiscalYearId != null and  fiscalYearId !=''">
+      	             AND bud.FISCAL_YEAR_ID = #{fiscalYearId}
+            </if>
+            <if test=" budgetValueFrom != null and    budgetValueFrom !=''">
+       	             AND bud.FISCAL_YEAR_AMOUNT &gt; = #{budgetValueFrom}
+            </if>
+            <if test="budgetValueTo != null and budgetValueTo !=''">
+                     AND bud.FISCAL_YEAR_AMOUNT &lt; = #{budgetValueTo}
+            </if>
+            <if test="awardEpin != null and awardEpin !=''">
+                     AND lower(con.EXT_EPIN) = lower(#{awardEpin})
+            </if>
+            <!-- Start : R5 Added Removed string comparision on the list-->
+                  <if test="budgetStatusList != null">
+            <!-- End : R5 Added Removed string comparision on the list-->    
+                     AND stat.STATUS_ID IN
+                     <foreach item="items" index="index" collection="budgetStatusList"
+                              open="(" separator="," close=")">
+                              #{items}
+                     </foreach>
+                  </if>
+            <!-- Start : R5 Added Removed string comparision on the list-->
+            <if test="budgetTypeList != null">
+            <!-- End : R5 Added Removed string comparision on the list-->
+                    AND bud_tp.BUDGET_TYPE IN
+                  <foreach item="items" index="index" collection="budgetTypeList"  open="(" separator="," close=")">
+                        #{items}
+                  </foreach>
+            </if>
+            <if test="dateLastUpdateFrom != null and dateLastUpdateFrom !=''">
+                  AND bud.MODIFIED_DATE &gt; to_date(#{dateLastUpdateFrom, jdbcType=DATE},'MM/dd/YYYY')
+            </if>
+            <if test="dateLastUpdateTo != null and dateLastUpdateTo !=''">
+                  AND bud.MODIFIED_DATE &lt; to_date(#{dateLastUpdateTo, jdbcType=DATE},'MM/dd/YYYY')
+            </if>
+            <!-- Start : R5 Added -->
+            <choose>
+            	<when test="budgetId != null and budgetId !=''">
+            		AND Con.CONTRACT_ID = #{contractId,jdbcType=VARCHAR}
+            		AND bud.BUDGET_ID = #{budgetId,jdbcType=VARCHAR}
+            	</when>
+            	<when test="contractId != null and contractId !=''">
+            	<if test="amendmentContractId != null and amendmentContractId !=''">
+            		AND Con.CONTRACT_ID = #{amendmentContractId,jdbcType=VARCHAR}
+            	</if>
+            	<if test="!(amendmentContractId != null and amendmentContractId !='')">
+            		AND (   (   bCon.CONTRACT_ID = #{contractId,jdbcType=VARCHAR} AND con.CONTRACT_TYPE_ID != 3 )
+            		        OR con.CONTRACT_ID =#{contractId,jdbcType=VARCHAR})
+            	</if>
+            	</when>
+            </choose>
+            <!-- End : R5 Added -->
+            ORDER BY
+            <choose>
+                  <when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+                  <otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+            </choose>
+            <if test="secondSort != null">
+                  <choose>
+                        <when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+                        <otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+                  </choose>
+            </if>
+            )a
+            <!--Start Release 3.10.0 defect 6559 -->
+            where STATUS is not null
+            <!-- Added in R7 for Modification --> 
+             <if test="isApprovedModificationChecked">
+            and (( BUDGET_TYPE ='Budget Modification' 
+ 				and STATUS_ID=86  
+ 			AND IS_APPROVED_MODIF=1
+ 				)
+				 or 
+ 			(  active_flag=1
+ 		  <if test="budgetStatusList != null">
+                   AND STATUS_ID IN
+              <foreach item="items" index="index" collection="budgetStatusList"
+                         open="(" separator="," close=")">
+                          #{items}
+              </foreach>
+          </if>
+ 		<if test="budgetTypeList != null">
+                    AND BUDGET_TYPE IN
+             <foreach item="items" index="index" collection="budgetTypeList"
+                    open="(" separator="," close=")">
+                    #{items}
+        	 </foreach>
+         </if>
+			 ))
+			 </if>
+            <!-- R7 End -->
+            <if test="ctId != null and ctId !=''">
+                  AND lower(ct_number) = lower(#{ctId})
+            </if>
+            <if test="contractTitle != null and contractTitle !=''">
+                  and (lower(CONTRACT_TITLE) LIKE
+                  lower('%${contractTitle}%'))
+            </if>
+            <!--End Release 3.10.0 defect 6559 -->
+            )b
+      </select>
+       <!-- [End] R7.5.0  QC7710 remove Out year canceled, Withdrawn Amendment from populating data list -->
+ 
+      <resultMap id="ContractConfigDetails" type="com.nyc.hhs.model.ProcurementCOF">
+            <result property="procurementId" column="PROCUREMENT_ID" />
+            <result property="procurementValue" column="ESTIMATED_PROCUREMENT_VALUE" />
+            <result property="contractStartDate" column="CONTRACT_START_DATE" />
+            <result property="contractEndDate" column="CONTRACT_END_DATE" />
+            <result property="contractValue" column="CONTRACT_AMOUNT" />
+      </resultMap>
+ 
+      <select id="fetchContractConfigDetails" parameterType="map"
+            resultMap="ContractConfigDetails">
+            SELECT P.ESTIMATED_PROCUREMENT_VALUE
+            FROM PROCUREMENT P
+            INNER
+            JOIN CONTRACT C
+            ON P.PROCUREMENT_ID = c.PROCUREMENT_ID
+            WHERE
+            C.CONTRACT_ID =#{asContractId}
+      </select>
+ 
+      <resultMap id="subBudgetDetailsList" type="com.nyc.hhs.model.ContractBudgetBean">
+            <result property="id" column="SUB_BUDGET_ID" />
+            <result property="budgetId" column="BUDGET_ID" />
+            <result property="subbudgetName" column="SUB_BUDGET_NAME" />
+            <result property="subbudgetAmount" column="SUB_BUDGET_AMOUNT" />
+            <result property="budgetfiscalYear" column="FISCAL_YEAR_ID" />
+      </resultMap>
+ 
+      <select id="fetchContractConfSubBudgetDetailsOld" parameterType="HashMap"
+            resultMap="subBudgetDetailsList">
+            SELECT
+            s.SUB_BUDGET_ID,
+            B.BUDGET_ID,
+            S.SUB_BUDGET_NAME,
+            S.SUB_BUDGET_AMOUNT,
+            S.FISCAL_YEAR_ID
+            FROM BUDGET B
+            INNER join CONTRACT C
+            on B.CONTRACT_ID = C.CONTRACT_ID
+            INNER join SUB_BUDGET S
+            on B.BUDGET_ID
+            = S.BUDGET_ID
+            WHERE C.CONTRACT_ID = #{asContractId}
+            AND B.BUDGET_TYPE_ID
+            = 2
+            ORDER BY S.FISCAL_YEAR_ID     
+      </select>
+ 
+      <select id="fetchContractConfSubBudgetDetails" parameterType="HashMap"
+            resultMap="subBudgetDetailsList">
+            SELECT
+            B.BUDGET_ID,
+            s.sub_budget_name,
+            s.sub_budget_amount,
+            s.fiscal_year_id
+            FROM BUDGET B
+            INNER join CONTRACT C
+            on B.CONTRACT_ID =
+            C.CONTRACT_ID
+            INNER join SUB_BUDGET S
+            on B.BUDGET_ID = S.BUDGET_ID
+            WHERE
+            C.CONTRACT_ID = #{asContractId} AND
+            S.FISCAL_YEAR_ID=#{asFiscalYearId}
+            AND B.BUDGET_TYPE_ID = 2
+            ORDER BY S.FISCAL_YEAR_ID
+      </select>
+ 
+      <insert id="insertContractConfSubBudgetDetails" parameterType="com.nyc.hhs.model.ContractBudgetBean">
+      </insert>
+ 
+      <update id="editContractConfSubBudgetDetails" parameterType="com.nyc.hhs.model.ContractBudgetBean">
+            UPDATE SUB_BUDGET SET SUB_BUDGET_NAME = 'testsubbudget14_1224455667',
+            SUB_BUDGET_AMOUNT =1000 WHERE SUB_BUDGET_ID = 7
+      </update>
+ 
+      <delete id="delContractConfSubBudgetDetails" parameterType="java.lang.String">
+            DELETE *
+            from SUB_BUDGET_ID WHERE SUB_BUDGET_ID = #{asSubBudgetId}
+      </delete>
+ 
+      <!--Delete query for deleting the Procurement details on the basis of Procurement
+            ID -->
+      <delete id="deleteProcurementDetails" parameterType="java.lang.String">
+            DELETE *
+            from PROCUREMENT_FINANCIALS WHERE CONTRACT_FINANCIALS_ID =
+            #{asContractFinancialId}
+      </delete>
+ 
+ 
+      <update id="setContractStatus" parameterType="com.nyc.hhs.model.BudgetList">
+            update contract set
+            status_Id = (select status_id from STATUS_MASTER_R2_R3 where status =
+            'Closed' and process_type = Budget)
+            where contract_id = #{contract_id}
+      </update>
+ 
+      <!-- build 2.6.0, defect id 5683 -->
+      <update id="setContractBudgetStatus" parameterType="com.nyc.hhs.model.BudgetList">
+            update budget
+            set PREV_STATUS_ID  = STATUS_ID, status_Id = (select status_id from STATUS_MASTER_R2_R3 where
+            status = 'Closed' and process_type = Budget)
+            where
+            budget_id=#{budget_id}
+      </update>
+ 
+      <resultMap id="requestAdvanceDetails" type="com.nyc.hhs.model.BudgetAdvanceBean">
+            <result property="ctNumber" column="EXT_CT_NUMBER" />
+            <result property="providerName" column="ORGANIZATION_LEGAL_NAME" />
+            <result property="fiscalYear" column="FISCAL_YEAR_ID" />
+            <result property="advRequestedDate" column="ADVANCE_REQ_DATE" />
+            <result property="contractId" column="CONTRACT_ID" />
+      </resultMap>
+ 
+      <select id="fetchRequestAdvance" parameterType="HashMap"
+            resultMap="requestAdvanceDetails">
+            SELECT con.EXT_CT_NUMBER,
+            org.ORGANIZATION_LEGAL_NAME,bud.FISCAL_YEAR_ID, TO_CHAR(SYSDATE,
+            'MM/DD/YYYY') as ADVANCE_REQ_DATE, bud.CONTRACT_ID
+            FROM BUDGET bud
+            inner join CONTRACT con
+            on con.CONTRACT_ID = bud.CONTRACT_ID
+            inner join
+            ORGANIZATION org
+            on
+            org.ORGANIZATION_ID = bud.ORGANIZATION_ID
+            WHERE
+            bud.BUDGET_ID = #{asBudgetId}
+      </select>
+      <!-- made changes for defect id 6398 -->
+      <select id="numberOfAmendmentsInProgress" parameterType="String"
+            resultType="int">
+            select count(1) from contract where parent_contract_id = (select
+            contract_id from budget where budget_id = #{asBudgetId})
+            and
+            contract_type_id='2' and status_id not in ('62','69') and delete_flag='0'
+            and contract_amount &lt; 0
+      </select>
+      <!-- made changes for defect id 6398 -->
+      <select id="contractAmendmentsIdsInProgress" parameterType="String"
+            resultType="string">
+            select contract_id from contract where parent_contract_id = (select
+            contract_id from budget where budget_id = #{asBudgetId})
+            and
+            contract_type_id='2' and status_id not in ('62','69') and delete_flag='0'
+      </select>
+     
+      <select id="contractUpdateIdsInProgress" parameterType="String"
+            resultType="string">
+            select
+            contract_id from budget where budget_id = #{asBudgetId}
+      </select>
+     
+      <!-- made changes for defect id 6398 -->
+      <select id="numberOfBudgetAmendmentsOrModificationsOrUpdatesInProgress"
+            parameterType="hashmap" resultType="int">
+            select count(1) from budget where
+            parent_id=#{BudgetId} and budget_type_id=#{budgetType}
+            and status_id in
+            (82,83,84) and active_flag='1'
+            <if test ="budgetType == 1">
+            and fiscal_year_amount &lt; 0
+            </if>
+      </select>
+      <select id="numberOfInvoicesInProgress" parameterType="String"
+            resultType="int">
+            select count(1) from invoice where budget_id =
+            #{asBudgetId} and status_id in (70,71,72) and delete_flag='0'
+      </select>
+      <!-- Start enhancement 6591 release 3.10.0 -->
+      <select id="numberOfPaymentsInProgress" parameterType="String"
+            resultType="int">
+            select count(1) from payment where budget_id =
+            #{asBudgetId} and status_id not in ('64' ,'65') and delete_flag='0'
+      </select>
+     
+      <select id="numberOfPaymentsInProgressWhenInvoiceApproved" parameterType="String"
+            resultType="int">
+            SELECT count(invoice_id)
+               FROM invoice
+              WHERE invoice_id NOT IN
+              (SELECT invoice_id
+                 FROM payment
+                WHERE budget_id = #{asBudgetId}
+              AND delete_flag   =0
+              AND invoice_id   IS NOT NULL
+              )
+            AND status_id  =73
+            AND delete_flag=0
+            AND budget_id  = #{asBudgetId}
+      </select>
+      <!-- End enhancement 6591 release 3.10.0 -->
+     
+      <update id="setModificationBudgetStatus" parameterType="String">
+            UPDATE
+            BUDGET
+            SET STATUS_ID = (SELECT STATUS_ID FROM STATUS_MASTER_R2_R3 WHERE
+            STATUS = 'Cancelled' and PROCESS_TYPE = 'Budget'),ACTIVE_FLAG = 0
+            WHERE BUDGET_ID = #{asBudgetId}
+      </update>
+ 
+      <select id="fetchWorkflowIdForBudget" parameterType="HashMap"
+            resultType="java.lang.String">
+            SELECT WORKFLOW_ID FROM BUDGET WHERE BUDGET_ID =
+            #{asBudgetId}
+      </select>
+      <resultMap id="contractCofTaskDetails" type="com.nyc.hhs.model.ProcurementCOF">
+            <result property="agencyName" column="AGENCY_NAME" />
+            <result property="agencyId" column="AGENCY_CODE" />
+            <result property="contractValue" column="CONTRACT_AMOUNT" />
+            <result property="procurementTitle" column="PROCUREMENT_TITLE" />
+            <result property="contractStartDate" column="CONTRACT_START_DATE" />
+            <result property="contractEndDate" column="CONTRACT_END_DATE" />
+            <result property="providerName" column="ORGANIZATION_LEGAL_NAME" />
+            <result property="createdDate" column="CREATED_DATE" />
+            <result property="createdByUserId" column="CREATED_BY_USERID" />
+            <result property="modifiedDate" column="MODIFIED_DATE" />
+            <result property="modifiedByUserId" column="MODIFIED_BY_USERID" />
+            <result property="userFirstName" column="FIRST_NAME" />
+            <result property="userLastName" column="LAST_NAME" />
+            <result property="approverFirstName" column="APPROVED_FN" />
+            <result property="approverLastName" column="APPROVED_LN" />
+            <result property="approvedDate" column="APPROVED_DATE" />
+            <result property="awardEpin" column="EXT_EPIN" />
+            <result property="procEpin" column="PROC_EPIN" />
+            <result property="amendedContractValue" column="AMENDED_CONTRACT_AMOUNT" />
+            <result property="contractTypeId" column="CONTRACT_TYPE_ID" />
+            <result property="procurementValue" column="PROCUREMENT_VALUE" />
+            <result property="amendmentTitle" column="amendment_title" />
+            <result property="amendmentEpin" column="ext_epin" />
+            <result property="amendmentStartDate" column="amendment_start_date" />
+            <result property="amendmentEndDate" column="amendment_end_date" />
+      </resultMap>
+ 
+ 
+      <select id="fetchContractCofTaskDetails" parameterType="String"
+            resultMap="contractCofTaskDetails">
+            SELECT agn.AGENCY_NAME, agn.AGENCY_CODE,
+            con.CONTRACT_AMOUNT,
+            (CASE
+            WHEN
+            con.PROCUREMENT_ID IS NOT NULL
+            THEN
+            con.PROCUREMENT_TITLE
+            ELSE
+            con.CONTRACT_TITLE
+            END) AS PROCUREMENT_TITLE,
+            TO_CHAR(con.CONTRACT_START_DATE,'MM/DD/YYYY')AS
+            CONTRACT_START_DATE,TO_CHAR(con.CONTRACT_END_DATE,'MM/DD/YYYY')AS
+            CONTRACT_END_DATE,
+            org.ORGANIZATION_LEGAL_NAME
+            FROM NYC_AGENCY_DETAILS
+            agn, CONTRACT con, ORGANIZATION org
+            WHERE agn.AGENCY_ID = con.AGENCY_ID
+            AND org.ORGANIZATION_ID = con.ORGANIZATION_ID
+            AND CONTRACT_ID =
+            #{asContractId}
+      </select>
+ 
+      <select id="fetchR2ContractCofDetails" parameterType="String"
+                  resultMap="contractCofTaskDetails">
+            WITH APPROVED_BY_DETAILS(APPROVED_FN, APPROVED_LN) AS
+            (SELECT
+            (
+            CASE
+            WHEN approved_by IS NOT NULL
+            THEN user1.FIRST_NAME
+            ELSE ' '
+            END) AS APPROVED_FN,
+            (
+            CASE
+            WHEN approved_by IS NOT NULL
+            THEN user1.LAST_NAME
+            ELSE ' '
+            END) AS APPROVED_LN
+     
+            FROM CONTRACT con,
+            CITY_USER_DETAILS user1,
+            CONTRACT_FINANCIALS CF
+            WHERE CF.CONTRACT_ID = #{asContractId}
+            AND CF.approved_by = user1.user_id(+)
+            )
+     
+            SELECT
+            App.APPROVED_FN,
+            App.APPROVED_LN,
+            agn.AGENCY_NAME,
+            agn.AGENCY_CODE,
+            con.CONTRACT_AMOUNT,
+            con.PROCUREMENT_ID ,
+            TO_CHAR(con.CONTRACT_START_DATE,'MM/DD/YYYY') AS CONTRACT_START_DATE,
+            TO_CHAR(con.CONTRACT_END_DATE,'MM/DD/YYYY')AS CONTRACT_END_DATE,
+            org.ORGANIZATION_LEGAL_NAME,
+            TO_CHAR(CF.MODIFIED_DATE,'MM/DD/YYYY' ) AS MODIFIED_DATE,
+            CF.MODIFIED_BY_USERID,
+            user1.FIRST_NAME ,
+            user1.LAST_NAME,
+            CF.Approved_by,
+            (
+            CASE
+            WHEN CF.Approved_date IS NOT NULL
+            THEN TO_CHAR(CF.Approved_date,'MM/DD/YYYY' )
+            ELSE ' '
+            END) AS Approved_date,
+            con.EXT_EPIN,
+            con.CONTRACT_TYPE_ID,
+            pr.ESTIMATED_PROCUREMENT_VALUE AS PROCUREMENT_VALUE,
+            pr.EPIN AS PROC_EPIN,
+            TO_CHAR(CF.MODIFIED_DATE,'MM/DD/YYYY' ) AS MODIFIED_DATE,
+            (CASE
+            WHEN
+            con.PROCUREMENT_ID IS NOT NULL
+            THEN
+            con.PROCUREMENT_TITLE
+            ELSE
+            con.CONTRACT_TITLE
+            END) AS PROCUREMENT_TITLE
+     
+            FROM CONTRACT con,
+            PROCUREMENT pr,
+            NYC_AGENCY_DETAILS agn,
+            ORGANIZATION org,
+            CITY_USER_DETAILS user1,
+            CONTRACT_FINANCIALS CF,
+            APPROVED_BY_DETAILS App
+     
+            WHERE CF.CONTRACT_ID = #{asContractId}
+            AND Agn.AGENCY_ID = con.AGENCY_ID
+            AND CF.MODIFIED_BY_USERID = user1.USER_ID
+            AND pr.PROCUREMENT_ID(+) =con.PROCUREMENT_ID
+            AND org.ORGANIZATION_ID = con.ORGANIZATION_ID
+            AND con.contract_id = cf.contract_id 
+            AND rownum ='1'
+ 
+      </select>
+ 
+      <select id="fetchBaseContractAmount" parameterType="String"
+                  resultType="string">
+      select contract_amount from contract where parent_contract_id = #{asContractId}
+      and contract_type_id = 6
+      </select>
+      <!-- R6: Changes done as part of Release 6 to allow non APT epins -->
+      <select id="fetchR3ContractCofDetails" parameterType="String"
+            resultType="Map">
+            select
+            AWARD_AMOUNT AS PROCUREMENT_VALUE,
+            PROCUREMENT_AWARD_EPIN AS PROC_EPIN
+            FROM
+            REF_APT_EPIN_MASTER
+            where
+            REF_APT_EPIN_ID =(select PROCUREMENT_EPIN_ID from REF_APT_EPIN_MASTER
+            where REF_APT_EPIN_ID =(select REF_APT_EPIN_ID from CONTRACT
+            where
+            CONTRACT_ID=(SELECT PARENT_CONTRACT_ID FROM CONTRACT WHERE CONTRACT_ID=#{asContractId})))
+      </select>
+     
+      <update id="updateSubmittedInfoForCOFDoc" parameterType="com.nyc.hhs.model.TaskDetailsBean">
+            <!-- to update/edit the Chart of accounts details -->
+            UPDATE CONTRACT_FINANCIALS
+          SET
+        MODIFIED_BY_USERID =  #{userId},
+        MODIFIED_DATE = SYSTIMESTAMP   
+        WHERE
+        CONTRACT_ID = #{contractId}
+     </update>
+    
+     <update id="updateApprovedInfoForCOFDoc" parameterType="com.nyc.hhs.model.TaskDetailsBean">
+            <!-- to update/edit the Chart of accounts details -->
+            UPDATE CONTRACT_FINANCIALS
+          SET
+        APPROVED_BY =  #{userId},
+        APPROVED_DATE = SYSTIMESTAMP    
+        WHERE
+        CONTRACT_ID = #{contractId}
+     </update>
+ 
+      <select id="fetchAdvanceCount" resultType="int">
+ 
+            SELECT SUM(Count)
+            from
+            (
+            SELECT count(1) AS Count
+            FROM BUDGET_ADVANCE
+            WHERE
+            EXTRACT(MONTH FROM REQUEST_DATE) = EXTRACT(MONTH FROM
+            SYSDATE)
+            and
+            EXTRACT(YEAR FROM REQUEST_DATE)=EXTRACT(YEAR FROM SYSDATE)
+     
+            UNION ALL
+     
+            SELECT count(1) AS Count
+            FROM INVOICE
+            WHERE
+            EXTRACT(MONTH FROM CREATED_DATE) = EXTRACT(MONTH FROM
+            SYSDATE)
+            and
+            EXTRACT(YEAR FROM CREATED_DATE)=EXTRACT(YEAR FROM SYSDATE)
+            )
+      </select>
+     
+     
+      <select id="fetchAdvanceNumberCount" parameterType="String"
+      resultType="int">
+           
+            SELECT SUM(Count)
+            from
+            (
+            select count(1) AS Count from budget_advance where budget_advance_number = #{asAdvanceNumber}
+     
+            UNION ALL
+     
+            select count(1) AS Count from invoice where INVOICE_NUMBER = #{asAdvanceNumber}
+            )
+      </select>
+     
+      <insert id="insertBudgetAdvanceDetail" parameterType="com.nyc.hhs.model.BudgetAdvanceBean">
+            insert into
+            BUDGET_ADVANCE
+            (BUDGET_ADVANCE_ID,CONTRACT_ID, BUDGET_ID,
+            ADVANCE_DESCRIPTION, AMOUNT,STATUS_ID,REQUEST_DATE,
+      REQUEST_USERID,DELETE_FLAG,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,MODIFIED_BY_USERID,REQUEST_STAFFID,MODIFIED_BY_STAFFID,CREATED_BY_STAFFID,BUDGET_ADVANCE_NUMBER)
+            values
+            (#{budgetAdvanceId}, #{contractId}, #{budgetId},
+            #{description},#{advAmntRequested},#{status},SYSTIMESTAMP,
+      #{modifyByAgency,jdbcType=VARCHAR},'0',SYSTIMESTAMP,#{modifyByAgency,jdbcType=VARCHAR},SYSTIMESTAMP,#{modifyByAgency,jdbcType=VARCHAR},#{modifyByProvider,jdbcType=VARCHAR},#{modifyByProvider,jdbcType=VARCHAR},#{modifyByProvider,jdbcType=VARCHAR},#{advanceNumber})
+      </insert>
+ 
+      <select id="fetchBaseAmendmentContractAmount" parameterType="String"
+            resultMap="contractCofTaskDetails">
+            SELECT (CASE
+                            WHEN a.CONTRACT_TYPE_ID = 1
+                              THEN a.CONTRACT_AMOUNT
+                            ELSE
+                              b.PREV_CONTRACT_AMOUNT
+                        END) as CONTRACT_AMOUNT,
+              a.contract_title as PROCUREMENT_TITLE,
+              b.CONTRACT_AMOUNT as AMENDED_CONTRACT_AMOUNT,
+              b.contract_title as amendment_title,
+              b.ext_epin,
+            TO_CHAR(b.contract_start_date,'MM/DD/YYYY') as  amendment_start_date,
+            TO_CHAR(b.contract_end_date,'MM/DD/YYYY') as  amendment_end_date
+            FROM contract a ,
+              contract b
+            WHERE
+            b.CONTRACT_ID = #{asContractId}
+            and b.parent_contract_id = a.contract_id
+      </select>
+ 
+      <select id="getBudgetAdvanceNextSeq" resultMap="SequeneceID">
+            select
+            SEQ_BUDGET_ADVANCE_ID.NEXTVAL CURRENTELEMENTID from dual         
+</select>
+ 
+ 
+      <resultMap id="SequeneceID" type="java.lang.Integer">
+            <result property="msSequenceID" column="CURRENTELEMENTID" />
+      </resultMap>     
+     
+     
+      <select id="numberOfNegAmendmentsInProgress" parameterType="String" resultType="Integer">
+            select count(1) from contract where parent_contract_id = (select
+            contract_id from budget where budget_id = #{asBudgetId}) and
+            contract_type_id='2' and contract_amount &lt; 0 and status_id !='62' and delete_flag='0'
+      </select>  
+           
+      <select id="contractNegAmendmentsIdsInProgress" parameterType="String"
+            resultType="string">
+            select contract_id from contract where parent_contract_id = (select
+            contract_id from budget where budget_id = #{asBudgetId})
+            and
+            contract_type_id='2' and contract_amount &lt; 0 and status_id !='62' and delete_flag='0'
+      </select>
+     
+      <select id="fetchBudgetAdvanceFromETL"    resultType="java.util.HashMap">
+            SELECT      BUDGET_ADVANCE.BUDGET_ADVANCE_ID,
+                        BUDGET.CT_NUMBER,
+                        CONTRACT.CONTRACT_ID,
+                        BUDGET.BUDGET_ID,
+                        CONTRACT.AGENCY_ID,
+                        CONTRACT.ORGANIZATION_ID
+            FROM BUDGET
+            INNER JOIN CONTRACT ON CONTRACT.CONTRACT_ID = BUDGET.CONTRACT_ID
+            INNER JOIN BUDGET_ADVANCE ON BUDGET_ADVANCE.BUDGET_ID    = BUDGET.BUDGET_ID AND BUDGET_ADVANCE.CONTRACT_ID = CONTRACT.CONTRACT_ID
+            WHERE BUDGET_ADVANCE.STATUS_ID = 93 AND IS_ETL_RECORD = 'Y' AND IS_RECORD_PROCESSED = 'N'
+      </select>
+     
+      <update id="updateBudgetAdvanceIdForBatch" parameterType="java.util.HashMap">
+            UPDATE BUDGET_ADVANCE
+            SET IS_RECORD_PROCESSED = 'Y',
+                  MODIFIED_DATE = SYSTIMESTAMP
+            WHERE BUDGET_ADVANCE_ID=#{BudgetAdvanceId,jdbcType=CHAR}
+      </update>
+     
+      <!-- Release 3.2.0, enhancement :6262 -->
+      <!-- Release 3.10.0, enhancement 6576 -->
+      <select id="fetchContractAmountForValidation" parameterType="String"
+            resultType="string">
+            SELECT (SELECT FISCAL_YEAR_AMOUNT
+                  FROM BUDGET
+                  WHERE BUDGET_ID = #{asBudgetId}) -
+            ((SELECT (NVL(SUM(payment_amount),0)) 
+                  FROM payment
+                  WHERE budget_id =#{asBudgetId}
+                  AND status_id  IN ('109','63','64','65')
+                  AND delete_flag = '0'
+            )  +
+            (SELECT (NVL(SUM(invoice_amount),0)) 
+                  FROM invoice_details
+                  WHERE invoice_id IN
+                  (SELECT invoice_id
+                        FROM invoice
+                        WHERE budget_id =#{asBudgetId}
+                        AND status_id  IN (<!-- '70','71',-->'72')
+                        AND entry_type_id not in (11,14)
+                        AND delete_flag = '0'
+                  )
+            )
+            - (SELECT (NVL(SUM(amount_recouped),0)) 
+                  FROM invoice_advance
+                  WHERE invoice_id IN
+                  (SELECT invoice_id
+                        FROM invoice
+                        WHERE budget_id =#{asBudgetId}
+                        AND status_id  IN (<!-- '70','71',-->'72')
+                        AND delete_flag = '0'
+                  ) )
+      + (select (NVL(SUM(amount),0)) from budget_advance where budget_id =#{asBudgetId} and status_id='92' and delete_flag='0'    )
+            ) as remaining_amount from dual
+      </select>
+     
+      <update id="removeContractDetails" parameterType="hashmap">
+            update BUDGET set active_flag=0 where contra = #{evaluationPoolMappingId}
+      </update>
+      <!-- Start: Added for R7 Defect 8644  -->
+      <select id="fetchBudgetIdsForDeletion" parameterType="java.util.Map" resultType="String">
+     	Select budget_id From Budget Where  Contract_Id In (Select Contract_Id From Contract 
+		where   fiscal_year_id= #{fiscalYearID} and 
+		Contract_Id IN
+		( select contract_id from contract where contract_id = #{contractId}
+			union
+		  select parent_contract_id from contract where contract_id = #{contractId}
+		)) 
+	</select>
+	<!-- End: Added for R7 Defect 8644 -->
+     <!-- R7 Start for modification-->
+      <select id="fetchDetailsForBudget" parameterType="String" resultMap="detailsMap">
+            select contract_id,agency_id from budget where budget_id = #{asBudgetId}
+      </select>
+       <resultMap id="detailsMap" type="com.nyc.hhs.model.ContractBudgetBean">
+       		<result property="contractId" column="contract_id" />
+            <result property="agencyId" column="agency_id" />
+      </resultMap> 
+     <!-- R7 End for modification--> 
+     <!--R7 Start: Added in R7 to fetch the list of Approved modifications budget -->
+     <select id="fetchBudgetListForModificationsBudget" parameterType="com.nyc.hhs.model.BudgetList"
+            resultMap="budgetList">
+     SELECT CONTRACT_TITLE,
+            (SELECT COUNT(1) FROM CONTRACT WHERE PARENT_CONTRACT_ID = b.bCon_CONTRACT_ID  AND CONTRACT_type_id in (1,3,5) and COST_CENTER_OPTED = 2
+  				) AS COST_CENTER_OPTED,
+            <!-- End : R7 added -->
+  ORGANIZATION_LEGAL_NAME,
+  CT_NUMBER,
+  ORG_TYPE,
+  FISCAL_YEAR_AMOUNT,
+  LAST_UPDATE_DATE,
+  MODIFIED_DATE,
+  STATUS,
+  FISCAL_YEAR_ID,
+  AGENCY_ID,
+  ORGANIZATION_ID,
+  (SELECT COUNT(1)
+  FROM INVOICE
+  WHERE CONTRACT_ID = b.CONTRACT_ID
+  AND BUDGET_ID     = b.BUDGET_ID
+  AND STATUS_ID    IN (71,72,73,74,75)
+  ) AS INVOICE_EXIST_COUNT,
+  (SELECT COUNT(1)
+  FROM PAYMENT
+  WHERE CONTRACT_ID = b.CONTRACT_ID
+  AND BUDGET_ID     = b.BUDGET_ID
+  AND STATUS_ID    IN (109,63,64,65,66)
+  AND DELETE_FLAG   = 0
+  ) AS PAYMENT_EXIST_COUNT,
+  (SELECT COUNT(1)
+  FROM CONTRACT
+  WHERE PARENT_CONTRACT_ID = b.bcon_CONTRACT_ID
+  AND CONTRACT_type_id     = 2
+  ) AS AMENDMENT_EXIST_COUNT,
+  BUDGET_ID,
+  CONTRACT_ID,
+  BUDGET_TYPE,
+  STATUS_ID,IS_AUTO_APPROVED,
+  rn
+  <!-- [Start] R9.7.5 QC9719 -->
+  ,  action_disable 
+  <!-- [End] R9.7.5 QC9719 -->	
+  <!-- [Start] R9.7.6 QC9730 -->
+	       , action_exception 
+  <!-- [End] R9.7.6 QC9730 -->            				
+FROM
+  (SELECT CONTRACT_TITLE,IS_AUTO_APPROVED,
+    ORGANIZATION_LEGAL_NAME,
+    #{orgType} ORG_TYPE,
+    FISCAL_YEAR_AMOUNT,
+    LAST_UPDATE_DATE,
+    MODIFIED_DATE,
+    STATUS,
+    FISCAL_YEAR_ID,
+    AGENCY_ID,
+    CT_NUMBER,
+    BUDGET_ID,
+    CONTRACT_ID,
+    BUDGET_TYPE,
+    STATUS_ID,
+    ORGANIZATION_ID,
+    bcon_contract_id,
+    ROWNUM AS rn
+        <!-- [Start] R9.7.5 QC9719 -->
+        ,(select count(1) from ACTION_DISABLE_TASK_OBJ aet 
+               where  aet.CONTRACT_ID = a.CONTRACT_ID and  aet.BUDGET_ID = a.BUDGET_ID and aet.AGENCY_ID = a.AGENCY_ID
+                 and aet.IS_ACTIVE = 1 and aet.VERSION_NO in ( select  nvl( max(eae.VERSION_NO), 0 ) 
+                                                             from  ACTION_DISABLE_TASK_OBJ eae 
+                                                            where  eae.CONTRACT_ID = aet.CONTRACT_ID 
+                                                              AND  eae.BUDGET_ID =  aet.BUDGET_ID
+                                                              AND  eae.AGENCY_ID =  aet.AGENCY_ID  ) 
+         ) action_disable
+        <!-- [End] R9.7.5 QC9719 -->
+        <!-- [Start] R9.7.6 QC9730 -->
+        ,(select count(1) from ACTION_DISABLE_TASK_OBJ aet 
+               where  aet.CONTRACT_ID = a.CONTRACT_ID  and aet.AGENCY_ID = a.AGENCY_ID
+                 and aet.IS_ACTIVE = 1 and aet.VERSION_NO in ( select  nvl( max(eae.VERSION_NO), 0 ) 
+                                                             from  ACTION_DISABLE_TASK_OBJ eae 
+                                                            where  eae.CONTRACT_ID = aet.CONTRACT_ID 
+                                                              AND  eae.AGENCY_ID =  aet.AGENCY_ID  ) 
+         )  action_exception 
+		<!-- [End] R9.7.6 QC9730 -->
+  FROM
+    (SELECT bCon.contract_title AS contract_title,bud.IS_AUTO_APPROVED,
+      org.ORGANIZATION_LEGAL_NAME,
+      bud.FISCAL_YEAR_AMOUNT,
+      TO_DATE (TO_CHAR (bud.last_update_date, 'DD-MON-YYYY'), 'DD-MON-YYYY') AS last_update_date,
+      TO_DATE (TO_CHAR (bud.MODIFIED_DATE, 'DD-MON-YYYY'), 'DD-MON-YYYY')    AS MODIFIED_DATE,
+      stat.STATUS,
+      fis.FISCAL_YEAR_ID,
+      con.AGENCY_ID,
+      bud.BUDGET_ID ,
+      con.CONTRACT_ID ,
+      bud_tp.BUDGET_TYPE,
+      bud.STATUS_ID,
+      con.parent_contract_id AS parentContractId,
+      org.ORGANIZATION_ID,
+      bCon.CONTRACT_ID bcon_contract_id,
+      DECODE(con.contract_type_id,3,con.EXT_CT_NUMBER,bCon.EXT_CT_NUMBER ) CT_NUMBER
+    FROM BUDGET bud,
+      STATUS_MASTER_R2_R3 stat,
+      FISCAL_YEAR fis,
+      CONTRACT con,
+      CONTRACT bCon ,
+      ORGANIZATION org,
+      BUDGET_TYPE bud_tp
+    WHERE bud.FISCAL_YEAR_ID=fis.FISCAL_YEAR_ID
+    AND bud.CONTRACT_ID     =con.CONTRACT_ID
+    AND bud.STATUS_ID       =stat.STATUS_ID
+    AND bud.ORGANIZATION_ID =org.ORGANIZATION_ID
+    AND bud.BUDGET_TYPE_ID  = bud_tp.BUDGET_TYPE_ID
+   <!--  AND bud.AGENCY_ID       = #{orgId} -->
+    AND bCon.contract_id    = con.parent_contract_id
+    AND stat.STATUS_ID     IN (86)
+    AND bud_tp.BUDGET_TYPE IN ('Budget Modification')
+    and bud.parent_id=(select parent_id from budget where budget_id=  #{budgetId,jdbcType=VARCHAR})
+    ORDER BY  bud.last_update_date DESC
+    )a
+  WHERE STATUS IS NOT NULL
+  )b where rn
+   BETWEEN #{startNode} AND
+   #{endNode}
+     </select>
+     <!-- R7 End: -->
+           <select id="fetchModificationsBudgetListCount" parameterType="com.nyc.hhs.model.BudgetList"
+            resultType="int">
+          select count(*) from (SELECT CONTRACT_TITLE,
+         (SELECT COUNT(1) FROM CONTRACT WHERE PARENT_CONTRACT_ID = b.bCon_CONTRACT_ID  AND CONTRACT_type_id in (1,3,5) and COST_CENTER_OPTED = 2
+  				) AS COST_CENTER_OPTED,
+            <!-- End : R7 added -->
+  ORGANIZATION_LEGAL_NAME,
+  CT_NUMBER,
+  ORG_TYPE,
+  FISCAL_YEAR_AMOUNT,
+  LAST_UPDATE_DATE,
+  MODIFIED_DATE,
+  STATUS,
+  FISCAL_YEAR_ID,
+  AGENCY_ID,
+  ORGANIZATION_ID,
+  (SELECT COUNT(1)
+  FROM INVOICE
+  WHERE CONTRACT_ID = b.CONTRACT_ID
+  AND BUDGET_ID     = b.BUDGET_ID
+  AND STATUS_ID    IN (71,72,73,74,75)
+  ) AS INVOICE_EXIST_COUNT,
+  (SELECT COUNT(1)
+  FROM PAYMENT
+  WHERE CONTRACT_ID = b.CONTRACT_ID
+  AND BUDGET_ID     = b.BUDGET_ID
+  AND STATUS_ID    IN (109,63,64,65,66)
+  AND DELETE_FLAG   = 0
+  ) AS PAYMENT_EXIST_COUNT,
+  (SELECT COUNT(1)
+  FROM CONTRACT
+  WHERE PARENT_CONTRACT_ID = b.bcon_CONTRACT_ID
+  AND CONTRACT_type_id     = 2
+  ) AS AMENDMENT_EXIST_COUNT,
+  BUDGET_ID,
+  CONTRACT_ID,
+  BUDGET_TYPE,
+  STATUS_ID,
+  rn
+FROM
+  (SELECT CONTRACT_TITLE,
+    ORGANIZATION_LEGAL_NAME,
+    #{orgType} ORG_TYPE,
+    FISCAL_YEAR_AMOUNT,
+    LAST_UPDATE_DATE,
+    MODIFIED_DATE,
+    STATUS,
+    FISCAL_YEAR_ID,
+    AGENCY_ID,
+    CT_NUMBER,
+    BUDGET_ID,
+    CONTRACT_ID,
+    BUDGET_TYPE,
+    STATUS_ID,
+    ORGANIZATION_ID,
+    bcon_contract_id,
+    ROWNUM AS rn
+  FROM
+    (SELECT bCon.contract_title AS contract_title,
+      org.ORGANIZATION_LEGAL_NAME,
+      bud.FISCAL_YEAR_AMOUNT,
+      TO_DATE (TO_CHAR (bud.last_update_date, 'DD-MON-YYYY'), 'DD-MON-YYYY') AS last_update_date,
+      TO_DATE (TO_CHAR (bud.MODIFIED_DATE, 'DD-MON-YYYY'), 'DD-MON-YYYY')    AS MODIFIED_DATE,
+      stat.STATUS,
+      fis.FISCAL_YEAR_ID,
+      con.AGENCY_ID,
+      bud.BUDGET_ID ,
+      con.CONTRACT_ID ,
+      bud_tp.BUDGET_TYPE,
+      bud.STATUS_ID,
+      con.parent_contract_id AS parentContractId,
+      org.ORGANIZATION_ID,
+      bCon.CONTRACT_ID bcon_contract_id,
+      DECODE(con.contract_type_id,3,con.EXT_CT_NUMBER,bCon.EXT_CT_NUMBER ) CT_NUMBER
+    FROM BUDGET bud,
+      STATUS_MASTER_R2_R3 stat,
+      FISCAL_YEAR fis,
+      CONTRACT con,
+      CONTRACT bCon ,
+      ORGANIZATION org,
+      BUDGET_TYPE bud_tp
+    WHERE bud.FISCAL_YEAR_ID=fis.FISCAL_YEAR_ID
+    AND bud.CONTRACT_ID     =con.CONTRACT_ID
+    AND bud.STATUS_ID       =stat.STATUS_ID
+    AND bud.ORGANIZATION_ID =org.ORGANIZATION_ID
+    AND bud.BUDGET_TYPE_ID  = bud_tp.BUDGET_TYPE_ID
+    <!-- AND bud.AGENCY_ID       = #{orgId} -->
+    AND bCon.contract_id    = con.parent_contract_id
+    AND stat.STATUS_ID     IN (86)
+    AND bud_tp.BUDGET_TYPE IN ('Budget Modification')
+    and bud.parent_id=(select parent_id from budget where budget_id=  #{budgetId,jdbcType=VARCHAR})
+    ORDER BY lower(bud.STATUS_ID) ASC ,
+      LAST_UPDATE_DATE ASC
+    )a
+  WHERE STATUS IS NOT NULL
+  )b ) c
+     </select>
+     
+      <!-- Start: Added in R7 for Cost Center -->
+     <update id="updateBudgetServicesConfig" parameterType="hashmap">
+            update
+            BUDGET_SERVICES_CONFIGURATION set active_flag = #{activeFlag} where
+			<choose>
+			<when test="ContractType == 1">
+				budget_id = #{budgetID}		
+			</when>
+			<otherwise>
+				(SELECT budget_id FROM budget WHERE contract_id = ( select contract_id from contract
+  				where parent_contract_id = #{contractId} and contract_type_id = #{ContractType} and status_id = 59) AND fiscal_year_id = #{fiscalYearID})
+			</otherwise>
+		</choose>
+            and COST_CENTER_SERVICE_MAPPING_ID = #{selectedMappingId}
+      </update>
+      <insert id="insertUpdatedServicesConf" parameterType="hashmap">
+      INSERT INTO BUDGET_SERVICES_CONFIGURATION
+      	(
+		    BUDGET_SERVICES_CONFIG_ID,
+		    BUDGET_ID,
+		    COST_CENTER_SERVICE_MAPPING_ID,
+		    CREATED_DATE ,
+		    CREATED_BY_USERID ,
+		    MODIFIED_DATE ,
+		    MODIFIED_BY_USERID ,
+		    ACTIVE_FLAG,
+		    PARENT_ID
+		)
+		 ( select
+		    SEQ_BUDGET_SERVICES_CONFIG.nextval,
+		    <choose> <when test="ContractType == 1">
+		    #{budgetID}
+		    </when>
+		    <when test="ContractType == 2">
+		    (SELECT budget_id
+		    FROM budget
+		    WHERE contract_id  = #{AmendContractId}
+		    AND fiscal_year_id = #{fiscalYearID}
+		    )
+		    </when>
+		    <otherwise>
+		    (SELECT budget_id FROM budget WHERE contract_id =(SELECT contract_id
+		      FROM contract WHERE parent_contract_id = #{contractId}
+		      AND contract_type_id     = #{ContractType}
+		      AND status_id            = 59
+		      AND delete_flag=0
+		      )
+		    AND fiscal_year_id = #{fiscalYearID}
+		    )
+		    </otherwise> </choose> ,COST_CENTER_SERVICE_MAPPING_ID,
+		    sysdate,
+		    #{userId},
+		    sysdate,
+		    #{userId},
+		    '1' ,
+		    SEQ_BUDGET_SERVICES_CONFIG.currval from cost_center_services_mapping
+        	where COST_CENTER_SERVICE_MAPPING_ID in  <foreach item="items" index="index" collection="selectedServicesList"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach> and COST_CENTER_SERVICE_MAPPING_ID not in( select COST_CENTER_SERVICE_MAPPING_ID from
+        	BUDGET_SERVICES_CONFIGURATION where budget_id in 
+        	<choose> <when test="ContractType == 1">
+		    #{budgetID}
+		    </when>
+		    <when test="ContractType == 2">
+		    (SELECT budget_id
+		    FROM budget
+		    WHERE contract_id  = #{AmendContractId}
+		    AND fiscal_year_id = #{fiscalYearID}
+		    )
+		    </when>
+		    <otherwise>
+		    (SELECT budget_id FROM budget WHERE contract_id =(SELECT contract_id
+		      FROM contract WHERE parent_contract_id = #{contractId}
+		      AND contract_type_id     = #{ContractType}
+		      AND status_id            = 59
+		      AND delete_flag=0
+		      )
+		    AND fiscal_year_id = #{fiscalYearID}
+		    )
+		    </otherwise> </choose>))
+    </insert>
+    <delete id="updatedServicesConf" parameterType="hashmap">
+      		update BUDGET_SERVICES_CONFIGURATION set active_flag= #{activeFlag} where budget_id in 
+		    <choose> <when test="ContractType == 1">
+		    #{budgetID}
+		    </when>
+		    <when test="ContractType == 2">
+		    (SELECT budget_id
+		    FROM budget
+		    WHERE contract_id  = #{AmendContractId}
+		    AND fiscal_year_id = #{fiscalYearID}
+		    )
+		    </when>
+		    <otherwise>
+		    (SELECT budget_id FROM budget WHERE contract_id =(SELECT contract_id
+		      FROM contract WHERE parent_contract_id = #{contractId}
+		      AND contract_type_id     = #{ContractType}
+		      AND status_id            = 59
+		      AND delete_flag = 0
+		      )
+		    AND fiscal_year_id = #{fiscalYearID}
+		    )
+		    </otherwise> </choose>  and COST_CENTER_SERVICE_MAPPING_ID in
+		    <foreach item="items" index="index" collection="DeleteItemsList"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach>
+    </delete>
+    
+    <select id="fetchBaseBudgetStatus" parameterType="com.nyc.hhs.model.CBGridBean"
+	resultType="java.lang.String">
+			select 
+			status_id from budget where 
+			contract_id = #{contractID}  AND fiscal_year_id = #{fiscalYearID} and budget_type_id = 2
+	</select>
+      <!-- End: Added in R7 for Cost Center -->
+      <!--Start: Added in R7 for defect 8705  -->
+     <delete id="deleteServices" parameterType="String">
+	delete from bc_services_details where budget_services_config_id in (select budget_services_config_id
+	from budget_services_configuration where budget_id=#{asBudgetId})
+	</delete>
+	
+	<delete id="deleteServicesBudget" parameterType="String">
+	delete from bc_services_details where budget_id in (SELECT budget_id FROM BUDGET
+	 WHERE BUDGET_ID = #{asBudgetId})
+	</delete>
+	
+	<delete id="deleteCostCenter" parameterType="String">
+	DELETE
+	FROM COST_CENTER_DETAILS
+	WHERE budget_id IN
+  	(SELECT budget_id FROM BUDGET WHERE BUDGET_ID = #{asBudgetId})
+	</delete>
+	
+	<delete id="deleteServicesConfig" parameterType="String">
+	DELETE
+	FROM BUDGET_SERVICES_CONFIGURATION
+	WHERE budget_id IN
+  	(SELECT budget_id FROM BUDGET WHERE BUDGET_ID = #{asBudgetId})
+	</delete>
+	
+	 <update id="updateIsOldPiFlagForNewFyFinish" parameterType="hashmap">
+   	update budget set is_old_pi = 0 where budget_id IN (
+	select budget_id from budget where parent_id =
+	(select budget_id from budget where contract_id=#{contractId} and fiscal_year_id = #{fiscalYearId})
+ 	and active_flag=1)
+            
+      </update>
+      <!--End  -->
+      
+      <!--Start: Changes added in R7 for defect 8644  -->
+      <select id="fetchBudgetList" parameterType="String" resultType="String">
+      	select budget_id from budget where contract_id=(select parent_contract_id
+		from contract where contract_id=(select parent_contract_id from contract where contract_id=#{lsContractId})) and budget_type_id=2 and status_id=86
+      </select>
+      <!--End-->
+      
+      <!-- BEGIN Fix Multi-Tab Browsing QC8691 R7.1-->
+      <select id="getBudgetIdFromSubBudget" parameterType="String" resultType="String">
+			select BUDGET_ID from SUB_BUDGET where SUB_BUDGET_ID = #{subBudgetId}
+	  </select>
+      <!-- END Fix Multi-Tab Browsing -->
+      
+      
+     <!--   [Start] QC 9490 R 8.4 validate  Budget Update(s) for deletion -->
+     <select id="countBudgetUpdateApproved" parameterType="java.lang.String" resultType="java.lang.Integer">
+     	SELECT count(1) as count
+	 	FROM budget 
+	 	WHERE contract_id =#{asContractId}
+          and STATUS_ID in (85, 86)
+          and budget_type_id = 4
+     </select>  
+     <!--   [End] QC 9490 R 8.4 validate  Budget Update(s) for deletion --> 
+   
+     <!--   [Start] QC9681 QC9702 R9.7.3   Contract Update Config Muliti-Tab Browsing & CostCenter  -->
+     <select id="fetchContractUpdateBudgetStatus" parameterType="com.nyc.hhs.model.CBGridBean" resultType="hashmap">
+         select      to_char( bu.status_id )  as BUDGET_STATUS_ID , to_char( con.status_id ) as CONTRACT_STATUS_ID
+		   from    ( select  contract_id, status_id from contract  
+		              where  parent_contract_id  in  (select parent_contract_id  from contract where contract_id = #{contractID} )
+		                and  contract_type_id = 4 and status_id = 59 )     con,
+		           ( select  contract_id, status_id from budget 
+		              where  contract_id  in  ( select   contract_id   from contract 
+                                                 where   parent_contract_id = (select parent_contract_id  from contract where contract_id =  #{contractID}) 
+                                                   and   contract_type_id = 4 
+                                                   and   status_id = 59
+                                                   and   delete_flag = 0
+                                               )
+		                and  fiscal_year_id  =  #{fiscalYearID}  and   budget_type_id = 4 )     bu
+		  where    con.contract_id = bu.contract_id
+	 </select>
+    <!--   [End] QC9681 QC9702 R9.7.3     --> 
+   
+   
+	<!-- [Start] R7.6.0:QC9605 //setModificationBudgetStatus -->
+      <update id="cancelBudgetMod" parameterType="java.util.HashMap">
+        {call
+	        BEGIN
+
+<!--                  UPDATE BUDGET 
+                    SET   STATUS_ID = (SELECT  STATUS_ID FROM STATUS_MASTER_R2_R3 
+                                        WHERE  STATUS = 'Cancelled' and PROCESS_TYPE = 'Budget')
+                        , ACTIVE_FLAG = 0
+                        , modified_date  = SYSTIMESTAMP
+                  WHERE BUDGET_ID = #{asBudgetId}  ;
+-->
+
+                 UPDATE sub_budget SET ACTIVE_FLAG = 0 , modified_date  = SYSTIMESTAMP
+                  WHERE BUDGET_ID = #{asBudgetId}  ;
+                  
+                 UPDATE CONTRACTED_SERVICE SET ACTIVE_FLAG = 0 , modified_date  = SYSTIMESTAMP 
+                  WHERE BUDGET_ID = #{asBudgetId}  ;
+                  
+                 UPDATE PERSONNEL_SERVICE SET ACTIVE_FLAG = 0 , modified_date  = SYSTIMESTAMP 
+                  WHERE BUDGET_ID = #{asBudgetId}  ;
+
+                 UPDATE RATE SET ACTIVE_FLAG = 0 , modified_date  = SYSTIMESTAMP 
+                  WHERE BUDGET_ID = #{asBudgetId}  ;
+                  
+                 UPDATE UNALLOCATED SET ACTIVE_FLAG = 0 , modified_date  = SYSTIMESTAMP 
+                  WHERE BUDGET_ID = #{asBudgetId}  ;
+
+                 UPDATE OPERATIONS_AND_SUPPORT SET ACTIVE_FLAG = 0 , modified_date  = SYSTIMESTAMP 
+                  WHERE BUDGET_ID = #{asBudgetId}  ;
+                  
+                 UPDATE BC_SERVICES_DETAILS SET ACTIVE_FLAG = 0 , modified_date  = SYSTIMESTAMP 
+                  WHERE BUDGET_ID = #{asBudgetId}  ;
+                  
+                 UPDATE RENT SET ACTIVE_FLAG = 0 , modified_date  = SYSTIMESTAMP 
+                  WHERE BUDGET_ID = #{asBudgetId}  ;
+                  
+                 UPDATE FRINGE_BENEFIT SET ACTIVE_FLAG = 0 , modified_date  = SYSTIMESTAMP 
+                  WHERE BUDGET_ID = #{asBudgetId}  ;
+                  
+                 UPDATE FRINGE_BENEFIT_DETAIL SET ACTIVE_FLAG = 0 , modified_date  = SYSTIMESTAMP 
+                  WHERE BUDGET_ID = #{asBudgetId}  ;
+                  
+                 UPDATE INDIRECT_RATE SET ACTIVE_FLAG = 0 , modified_date  = SYSTIMESTAMP 
+                  WHERE BUDGET_ID = #{asBudgetId}  ;
+                  
+                 UPDATE MILESTONE SET ACTIVE_FLAG = 0 , modified_date  = SYSTIMESTAMP 
+                  WHERE BUDGET_ID = #{asBudgetId}  ;
+
+                 UPDATE EQUIPMENT SET ACTIVE_FLAG = 0 , modified_date  = SYSTIMESTAMP 
+                  WHERE BUDGET_ID = #{asBudgetId}  ;
+                  
+                 UPDATE PROFESSIONAL_SERVICE SET ACTIVE_FLAG = 0 , modified_date  = SYSTIMESTAMP 
+                  WHERE BUDGET_ID = #{asBudgetId}  ;
+
+                 UPDATE PERSONNEL_SERVICE_DETAIL SET ACTIVE_FLAG = 0 , modified_date  = SYSTIMESTAMP 
+                  WHERE BUDGET_ID = #{asBudgetId}  ;
+                  
+                 UPDATE UTILITIES SET ACTIVE_FLAG = 0 , modified_date  = SYSTIMESTAMP 
+                  WHERE BUDGET_ID = #{asBudgetId}  ;
+                  
+                 UPDATE COST_CENTER_DETAILS SET ACTIVE_FLAG = 0 , modified_date  = SYSTIMESTAMP 
+                  WHERE BUDGET_ID = #{asBudgetId}  ;
+                  
+                 UPDATE PROGRAM_INCOME SET ACTIVE_FLAG = 0 , modified_date  = SYSTIMESTAMP 
+                  WHERE BUDGET_ID = #{asBudgetId}  ;
+
+	        END
+	    }
+        </update>
+	<!-- [End] R7.6.0:QC9605  -->
+
+
+</mapper>

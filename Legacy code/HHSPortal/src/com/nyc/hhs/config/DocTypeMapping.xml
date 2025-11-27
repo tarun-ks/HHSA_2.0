@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctypes>
+	<doctype name="Annual Report">
+		<field name="" type="text" filenetfield="" mandatory="true" schemaname="" typeofvalue="i" id=""></field>
+	</doctype>
+	<doctype name="Board Minutes">
+		<field name="" type="text" filenetfield="" mandatory="true" schemaname="" typeofvalue="i" id=""></field>
+	</doctype>
+</doctypes>

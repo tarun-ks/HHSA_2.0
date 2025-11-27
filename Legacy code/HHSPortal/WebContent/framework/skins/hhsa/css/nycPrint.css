@@ -1,0 +1,44 @@
+@charset "utf-8";
+
+body {
+	line-height: 17px;
+	font-size: 12px;
+	color: #333333;
+}
+
+.hhs_header {
+	background-color: #F8F8F8;
+	border: 2px solid #EEEEEE;
+	clear: both;
+	height: 74px;
+	margin-top: 5px;
+	width: 100%;
+	padding: 5px 0 0 5px;
+}
+
+table {
+	width: 100%;
+}
+
+td .print-td {
+	text-align: left;
+	width: 200px;
+}
+
+table .print-heading {
+	background: none;
+	font-size: 17px;
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+#main-wrapper {
+	margin: 0 0;
+}
+
+.documentTablePrint, .documentTablePrint th, .documentTablePrint td{
+	border: 1px solid #000000;
+}
+.linkPrint, .iconQuestion, .footer{
+	display: none !important;
+}

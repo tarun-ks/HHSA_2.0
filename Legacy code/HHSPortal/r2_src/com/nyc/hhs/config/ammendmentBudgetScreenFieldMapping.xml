@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fields>
+	<contract-fields>
+	<field-name Label="Agency:" value="agencyName" isCurrency="false"></field-name>
+	<field-name Label="Agency Code:" value="agencyId" isCurrency="false"></field-name>
+	<field-name Label="Provider:" value="providerName" isCurrency="false"></field-name>
+	<field-name Label="Procurement Title:" value="procurementTitle" isCurrency="false"></field-name>
+	<field-name Label="Amendment Title:" value="amendmentTitle" isCurrency="false"></field-name>
+	<field-name Label="Procurement E-PIN:" value="procEpin" isCurrency="false"></field-name>
+	<field-name Label="Award E-PIN:" value="awardEpin" isCurrency="false"></field-name>
+	<field-name Label="Amendment E-PIN:" value="amendmentEpin" isCurrency="false"></field-name>
+	<field-name Label="Contract Term:" value="contractTermDate" isCurrency="false"></field-name>
+	<field-name Label="Amendment Term:" value="amendmentTermDate" isCurrency="false"></field-name>
+	<field-name Label="Procurement Value:" value="procurementValue" isCurrency="true"></field-name>
+	<field-name Label="Contract Value:" value="contractValue" isCurrency="true"></field-name>
+	<field-name Label="Amendment Value:" value="amendedContractValue" isCurrency="true"></field-name>
+	<field-name Label="Submitted By:" value="userFirstName,userLastName" isCurrency="false"></field-name>
+	<field-name Label="Date Submitted:" value="modifiedDate" isCurrency="false"></field-name>
+	<field-name Label="Approved By:" value="approverFirstName,approverLastName" isCurrency="false"></field-name>
+	<field-name Label="Date Approved:" value="approvedDate" isCurrency="false"></field-name>
+	</contract-fields>
+	<procurement-fields>
+	<field-name Label="Agency:" value="AgencyName" isCurrency="false"></field-name>
+	<field-name Label="Agency Code:" value="AgencyCode" isCurrency="false"></field-name>
+	<field-name Label="Contract Value:" value="OrigContractValue" isCurrency="true"></field-name>
+	<field-name Label="Procurement Title:" value="ProcurementTitle" isCurrency="false"></field-name>
+	<field-name Label="Procurement E-PIN:" value="ProcEpin" isCurrency="false"></field-name>
+	<field-name Label="Contract Start Date:" value="OrigContractStartDate" isCurrency="false"></field-name>
+	<field-name Label="Contract End Date:" value="OrigContractEndDate" isCurrency="false"></field-name>
+	<field-name Label="Submitted By:" value="UserFirstName,UserLastName" isCurrency="false"></field-name>
+	<field-name Label="Date Submitted:" value="CreatedDate" isCurrency="false"></field-name>
+	<field-name Label="Approved By:" value="ApproverFirstName,ApproverLastName" isCurrency="false"></field-name>
+	<field-name Label="Date Approved:" value="ApprovedDate" isCurrency="false"></field-name>
+	</procurement-fields>
+	
+	<contract-Certification-fields>
+	<field-name Label="Agency:" value="AgencyName"></field-name>
+	<field-name Label="Agency Code:" value="agencyId"></field-name>
+	<field-name Label="Contract Value:" value="contractValue"></field-name>
+	<field-name Label="Procurement Title:" value="procurementTitle"></field-name>
+	<field-name Label="Procurement E-PIN:" value="procEpin"></field-name>
+	<field-name Label="Award E-PIN:" value="awardEpin"></field-name>	
+	<field-name Label="Contract Term:" value="contractTermDate" ></field-name>
+	<field-name Label="Submitted By:" value="userFirstName,userLastName"></field-name>
+	<field-name Label="Date Submitted:" value="modifiedDate"></field-name>
+	<field-name Label="Approved By:" value="approverFirstName,approverLastName"></field-name>
+	<field-name Label="Date Approved:" value="approvedDate"></field-name>
+	</contract-Certification-fields>
+		
+	<Budget-Summary-Details tableCount="13">
+			<header>
+			<field-name Label="Agency:" value="contractAgencyName"></field-name>
+			<field-name Label="CT#:" value="extCT"></field-name>
+			<field-name Label="Procurement/Contract Title:" value="contractTitle"></field-name>
+			<field-name Label="Contract Start Date:" value="contractStartDate"></field-name>
+			<field-name Label="Provider:" value="provider"></field-name>
+			<field-name Label="Contract End Date:" value="contractEndDate"></field-name>
+			<field-name Label="Procurement E-PIN:" value="procEpin"></field-name>
+			<field-name Label="Contract Amount:" value="contractValue" isCurrency="true"></field-name>
+			<field-name Label="Award E-PIN:" value="awardEpin"></field-name>
+			<field-name Label="Program Name:" value="programName"></field-name>
+			<field-name Label="Fiscal Year:" value="fyConfigFiscalYear" isCurrency="false"></field-name>
+			</header>
+		
+		<header-Amendment>
+			<field-name Label="Agency:" value="contractAgencyName"></field-name>
+			<field-name Label="CT#:" value="extCT"></field-name>
+			<field-name Label="Procurement/Contract Title:" value="contractTitle"></field-name>
+			<field-name Label="Contract Start Date:" value="contractStartDate"></field-name>
+			<field-name Label="Provider:" value="provider"></field-name>
+			<field-name Label="Contract End Date:" value="contractEndDate"></field-name>
+			<field-name Label="Procurement E-PIN:" value="procEpin"></field-name>
+			<field-name Label="Contract Amount:" value="contractValue" isCurrency="true"></field-name>
+			<field-name Label="Award E-PIN:" value="awardEpin"></field-name>
+			<field-name Label="Program Name:" value="programName"></field-name>
+			<field-name Label="Amendment E-PIN:" value="amendEpin"></field-name>
+			<field-name Label="Amendment Amount:" value="amendAmount" isCurrency="true"></field-name>
+			<field-name Label="Fiscal Year:" value="fyConfigFiscalYear" isCurrency="false"></field-name>
+			</header-Amendment>
+		
+		
+		<field-name Label="Total City Funded Budget" values="approvedBudget,ytdInvoicedAmount,remainingAmount,modificationAmount" beanValue="totalCityFundedBudget" tableId="tab1"/>
+		<field-name Label="         Total Direct Cost" values="approvedBudget,ytdInvoicedAmount,remainingAmount,modificationAmount" beanValue="totalDirectsCosts" tableId="tab2"/>
+		<field-name Label="           Total Salary and Fringe" values="approvedBudget,ytdInvoicedAmount,remainingAmount,modificationAmount" beanValue="totalSalaryAndFringesAmount" tableId="tab3"/>
+		<field-name Label="                     Total Salary " values="approvedBudget,ytdInvoicedAmount,remainingAmount,modificationAmount" beanValue="totalSalary" tableId="tab3"/>
+		<field-name Label="                     Total Fringe" values="approvedBudget,ytdInvoicedAmount,remainingAmount,modificationAmount" beanValue="totalFringes" tableId="tab3"/>
+		<field-name Label="           Total OTPS" values="approvedBudget,ytdInvoicedAmount,remainingAmount,modificationAmount" beanValue="totalOTPSAmount" tableId="tab4"/>
+		<field-name Label="                     Operations, Support and Equipment" values="approvedBudget,ytdInvoicedAmount,remainingAmount,modificationAmount" beanValue="operationsSupportAndEquipmentAmount" tableId="tab4"/>
+		<field-name Label="                     Utilities" values="approvedBudget,ytdInvoicedAmount,remainingAmount,modificationAmount" beanValue="utilitiesAmount" tableId="tab4"/>
+		<field-name Label="                     Professional Services" values="approvedBudget,ytdInvoicedAmount,remainingAmount,modificationAmount" beanValue="professionalServicesAmount" tableId="tab4"/>
+		<field-name Label="                     Rent &amp; Occupancy" values="approvedBudget,ytdInvoicedAmount,remainingAmount,modificationAmount" beanValue="rentAndOccupancyAmount" tableId="tab4"/>
+		<field-name Label="                     Contracted Services" values="approvedBudget,ytdInvoicedAmount,remainingAmount,modificationAmount" beanValue="contractedServicesAmount" tableId="tab4"/>
+		<field-name Label="           Total Rate Based" values="approvedBudget,ytdInvoicedAmount,remainingAmount,modificationAmount" beanValue="totalRateBasedAmount" tableId="tab5"/>
+		<field-name Label="           Total Milestone Based" values="approvedBudget,ytdInvoicedAmount,remainingAmount,modificationAmount" beanValue="totalMilestoneBasedAmount" tableId="tab6"/>
+		<field-name Label="           Unallocated Funds" values="approvedBudget,ytdInvoicedAmount,remainingAmount,modificationAmount" beanValue="unallocatedFunds" tableId="tab7"/>
+		<field-name Label="         Total Indirect Costs" values="" beanValue="" tableId="tab8"/>
+		<field-name Label="           Indirect Rate" values=" " beanValue="" tableId="tab9"/>
+		<field-name Label="           Total Indirect Costs" values="approvedBudget,ytdInvoicedAmount,remainingAmount,modificationAmount" beanValue="totalIndirectCosts" tableId="tab10"/>
+		<field-name Label="Total Program Income (Excluded from City Funded Budget; Not Invoiced)" values="approvedBudget,ytdInvoicedAmount,remainingAmount,modificationAmount" beanValue="totalProgramIncome" tableId="tab11"/>
+		<field-name Label="Total Program Budget (City Funded Budget + Program Income)" values="approvedBudget,ytdInvoicedAmount,remainingAmount,modificationAmount" beanValue="totalProgramBudget" tableId="tab12"/>
+	</Budget-Summary-Details>
+	
+</fields>

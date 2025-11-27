@@ -1,0 +1,430 @@
+{
+  "version": "1.0.0",
+  "description": "Enterprise Business Rules Engine Configuration",
+  "business_rules_engine": {
+    "rule_sets": {
+      "contract_approval": {
+        "id": "contract_approval",
+        "name": "Contract Approval Rules",
+        "description": "Complex approval workflow based on multiple factors",
+        "priority": 1,
+        "enabled": true,
+        "conditions": [
+          {
+            "id": "amount_threshold",
+            "type": "numeric_comparison",
+            "field": "current_contract_amount",
+            "operator": "greater_than",
+            "value": 100000,
+            "weight": 0.4
+          },
+          {
+            "id": "contract_type_risk",
+            "type": "lookup",
+            "field": "contract_type_id",
+            "operator": "in",
+            "value": ["CT3", "CT4"],
+            "weight": 0.3
+          },
+          {
+            "id": "provider_experience",
+            "type": "calculated",
+            "expression": "provider.contracts_completed >= 5 AND provider.success_rate > 0.8",
+            "weight": 0.2
+          },
+          {
+            "id": "budget_availability",
+            "type": "external_api",
+            "endpoint": "/api/budget/check",
+            "method": "POST",
+            "payload": {
+              "agency_id": "{{agency_id}}",
+              "amount": "{{current_contract_amount}}",
+              "program_id": "{{program_id}}"
+            },
+            "response_field": "available",
+            "weight": 0.1
+          }
+        ],
+        "rules": [
+          {
+            "id": "auto_approve_low_risk",
+            "name": "Auto Approve Low Risk Contracts",
+            "condition": "amount_threshold.weight < 0.3 AND contract_type_risk.weight < 0.3",
+            "action": {
+              "type": "status_change",
+              "target_status": "{{references.contract_statuses.REGISTERED.code}}",
+              "notify": ["{{references.user_roles.CONTRACT_OWNER.code}}"],
+              "log": "Auto-approved due to low risk factors"
+            }
+          },
+          {
+            "id": "require_finance_approval",
+            "name": "Require Finance Approval",
+            "condition": "amount_threshold.weight >= 0.4 OR contract_type_risk.weight >= 0.3",
+            "action": {
+              "type": "workflow_trigger",
+              "workflow": "finance_approval",
+              "assign_to": "{{references.user_roles.FINANCE_MANAGER.code}}",
+              "sla_hours": 48,
+              "escalation": {
+                "after_hours": 24,
+                "escalate_to": "{{references.user_roles.FINANCE_MANAGER.code}}"
+              }
+            }
+          },
+          {
+            "id": "require_legal_review",
+            "name": "Require Legal Review",
+            "condition": "contract_type_risk.weight >= 0.5 OR amount_threshold.weight >= 0.7",
+            "action": {
+              "type": "parallel_workflow",
+              "workflows": [
+                {
+                  "name": "legal_review",
+                  "assign_to": "{{references.user_roles.ACCO_MANAGER.code}}",
+                  "sla_hours": 72
+                },
+                {
+                  "name": "risk_assessment",
+                  "assign_to": "{{references.user_roles.ACCO_MANAGER.code}}",
+                  "sla_hours": 48
+                }
+              ]
+            }
+          }
+        ],
+        "fallback_action": {
+          "type": "manual_review",
+          "assign_to": "{{references.user_roles.ACCO_MANAGER.code}}",
+          "reason": "Complex approval required"
+        }
+      },
+      "contract_renewal": {
+        "id": "contract_renewal",
+        "name": "Contract Renewal Rules",
+        "description": "Automated contract renewal based on performance and budget",
+        "priority": 2,
+        "enabled": true,
+        "triggers": [
+          {
+            "type": "scheduled",
+            "cron": "0 0 1 * *",
+            "description": "Monthly renewal check"
+          },
+          {
+            "type": "date_based",
+            "field": "end_date",
+            "days_before": 90,
+            "description": "90 days before expiration"
+          }
+        ],
+        "conditions": [
+          {
+            "id": "performance_score",
+            "type": "calculated",
+            "expression": "AVG(performance_reviews.rating) >= 4.0",
+            "weight": 0.4
+          },
+          {
+            "id": "budget_available",
+            "type": "external_api",
+            "endpoint": "/api/budget/check_renewal",
+            "method": "POST",
+            "payload": {
+              "contract_id": "{{id}}",
+              "renewal_amount": "{{current_contract_amount * 1.05}}"
+            },
+            "weight": 0.3
+          },
+          {
+            "id": "compliance_status",
+            "type": "lookup",
+            "field": "provider.is_active",
+            "operator": "equals",
+            "value": true,
+            "weight": 0.2
+          },
+          {
+            "id": "renewal_count",
+            "type": "calculated",
+            "expression": "amendments.length < 3",
+            "weight": 0.1
+          }
+        ],
+        "rules": [
+          {
+            "id": "auto_renew",
+            "name": "Auto Renew Contract",
+            "condition": "performance_score.weight >= 0.8 AND budget_available.weight >= 0.8",
+            "action": {
+              "type": "contract_renewal",
+              "renewal_period": "1_year",
+              "amount_adjustment": "5_percent_increase",
+              "notify": ["created_by", "provider_id"],
+              "create_amendment": true
+            }
+          },
+          {
+            "id": "conditional_renewal",
+            "name": "Conditional Renewal",
+            "condition": "performance_score.weight >= 0.6 AND budget_available.weight >= 0.6",
+            "action": {
+              "type": "workflow_trigger",
+              "workflow": "renewal_review",
+              "assign_to": "{{references.user_roles.ACCO_MANAGER.code}}",
+              "sla_hours": 72
+            }
+          }
+        ]
+      },
+      "budget_allocation": {
+        "id": "budget_allocation",
+        "name": "Budget Allocation Rules",
+        "description": "Dynamic budget allocation based on program priorities",
+        "priority": 3,
+        "enabled": true,
+        "conditions": [
+          {
+            "id": "program_priority",
+            "type": "lookup",
+            "field": "program.is_active",
+            "operator": "equals",
+            "value": true,
+            "weight": 0.5
+          },
+          {
+            "id": "available_budget",
+            "type": "calculated",
+            "expression": "program.allocated_budget - program.spent_budget - program.committed_budget",
+            "weight": 0.3
+          },
+          {
+            "id": "fiscal_year_remaining",
+            "type": "calculated",
+            "expression": "DAYS_BETWEEN(TODAY(), fiscal_year_end) / 365",
+            "weight": 0.2
+          }
+        ],
+        "rules": [
+          {
+            "id": "allocate_budget",
+            "name": "Allocate Budget",
+            "condition": "program_priority.weight >= 0.8 AND available_budget.weight >= 0.5",
+            "action": {
+              "type": "budget_allocation",
+              "amount": "{{current_contract_amount}}",
+              "reserve_percentage": 10,
+              "notify": ["{{references.user_roles.FINANCE_MANAGER.code}}", "{{references.user_roles.PROGRAM_MANAGER.code}}"]
+            }
+          }
+        ]
+      },
+      "contract_validation": {
+        "id": "contract_validation",
+        "name": "Contract Validation Rules",
+        "description": "Business rules for contract validation and status transitions",
+        "priority": 4,
+        "enabled": true,
+        "conditions": [
+          {
+            "id": "contract_id_format",
+            "type": "regex",
+            "field": "contract_id",
+            "pattern": "^\\d{0,22}$",
+            "weight": 1.0
+          },
+          {
+            "id": "contract_type_validation",
+            "type": "lookup",
+            "field": "contract_type_id",
+            "operator": "in",
+            "value": ["CT1", "CT2", "CT3", "CT4"],
+            "weight": 1.0
+          },
+          {
+            "id": "status_transition_valid",
+            "type": "calculated",
+            "expression": "isValidStatusTransition(current_status, new_status)",
+            "weight": 1.0
+          },
+          {
+            "id": "discrepancy_check",
+            "type": "calculated",
+            "expression": "discrepancyFlag === '0' OR (discrepancyInContractAmount === false AND discrepancyInStartDate === false AND discrepancyInEndDate === false)",
+            "weight": 0.8
+          }
+        ],
+        "rules": [
+          {
+            "id": "validate_contract_id",
+            "name": "Validate Contract ID Format",
+            "condition": "contract_id_format.weight < 1.0",
+            "action": {
+              "type": "validation_error",
+              "message": "Contract ID must be numeric and maximum 22 digits",
+              "field": "contract_id"
+            }
+          },
+          {
+            "id": "validate_contract_type",
+            "name": "Validate Contract Type",
+            "condition": "contract_type_validation.weight < 1.0",
+            "action": {
+              "type": "validation_error",
+              "message": "Contract type must be valid (CT1, CT2, CT3, CT4)",
+              "field": "contract_type_id"
+            }
+          },
+          {
+            "id": "validate_status_transition",
+            "name": "Validate Status Transition",
+            "condition": "status_transition_valid.weight < 1.0",
+            "action": {
+              "type": "validation_error",
+              "message": "Invalid status transition from {{current_status}} to {{new_status}}",
+              "field": "status_id"
+            }
+          },
+          {
+            "id": "check_discrepancies",
+            "name": "Check for Data Discrepancies",
+            "condition": "discrepancy_check.weight < 0.8",
+            "action": {
+              "type": "warning",
+              "message": "Data discrepancies detected. Please review contract amount, start date, and end date.",
+              "requires_acknowledgment": true
+            }
+          }
+        ]
+      },
+      "amendment_rules": {
+        "id": "amendment_rules",
+        "name": "Amendment Rules",
+        "description": "Business rules for contract amendments",
+        "priority": 5,
+        "enabled": true,
+        "conditions": [
+          {
+            "id": "amendment_amount_positive",
+            "type": "numeric_comparison",
+            "field": "amendment_amount",
+            "operator": "greater_than",
+            "value": 0,
+            "weight": 1.0
+          },
+          {
+            "id": "amendment_dates_valid",
+            "type": "calculated",
+            "expression": "amendment_start_date <= amendment_end_date AND amendment_start_date >= contract.start_date",
+            "weight": 1.0
+          },
+          {
+            "id": "amendment_reason_required",
+            "type": "string_validation",
+            "field": "amendReason",
+            "operator": "not_empty",
+            "weight": 1.0
+          }
+        ],
+        "rules": [
+          {
+            "id": "validate_amendment_amount",
+            "name": "Validate Amendment Amount",
+            "condition": "amendment_amount_positive.weight < 1.0",
+            "action": {
+              "type": "validation_error",
+              "message": "Amendment amount must be greater than 0",
+              "field": "amendment_amount"
+            }
+          },
+          {
+            "id": "validate_amendment_dates",
+            "name": "Validate Amendment Dates",
+            "condition": "amendment_dates_valid.weight < 1.0",
+            "action": {
+              "type": "validation_error",
+              "message": "Amendment dates must be valid and within contract period",
+              "field": "amendment_start_date"
+            }
+          },
+          {
+            "id": "require_amendment_reason",
+            "name": "Require Amendment Reason",
+            "condition": "amendment_reason_required.weight < 1.0",
+            "action": {
+              "type": "validation_error",
+              "message": "Amendment reason is required",
+              "field": "amendReason"
+            }
+          }
+        ]
+      },
+      "workflow_rules": {
+        "id": "workflow_rules",
+        "name": "Workflow Rules",
+        "description": "Business rules for Process Engine workflows",
+        "priority": 6,
+        "enabled": true,
+        "conditions": [
+          {
+            "id": "workflow_launch_conditions",
+            "type": "calculated",
+            "expression": "contract.status === 'DRAFT' AND contract.title && contract.agency_id && contract.provider_id",
+            "weight": 1.0
+          },
+          {
+            "id": "workflow_assignment_valid",
+            "type": "calculated",
+            "expression": "assigned_to && assigned_to.role in ['ACCO_MANAGER', 'ACCO_STAFF', 'FINANCE_MANAGER']",
+            "weight": 1.0
+          }
+        ],
+        "rules": [
+          {
+            "id": "validate_workflow_launch",
+            "name": "Validate Workflow Launch",
+            "condition": "workflow_launch_conditions.weight < 1.0",
+            "action": {
+              "type": "validation_error",
+              "message": "Contract must be in DRAFT status with required fields completed to launch workflow",
+              "field": "status_id"
+            }
+          },
+          {
+            "id": "validate_workflow_assignment",
+            "name": "Validate Workflow Assignment",
+            "condition": "workflow_assignment_valid.weight < 1.0",
+            "action": {
+              "type": "validation_error",
+              "message": "Workflow must be assigned to a valid user with appropriate role",
+              "field": "assigned_to"
+            }
+          }
+        ]
+      }
+    },
+    "rule_engine_config": {
+      "execution_mode": "parallel",
+      "timeout_seconds": 30,
+      "retry_attempts": 3,
+      "logging_level": "DEBUG",
+      "cache_results": true,
+      "cache_ttl": 3600
+    },
+    "external_integrations": {
+      "budget_system": {
+        "endpoint": "/api/budget",
+        "authentication": "oauth2",
+        "timeout": 10,
+        "retry_attempts": 3
+      },
+      "performance_system": {
+        "endpoint": "/api/performance",
+        "authentication": "api_key",
+        "timeout": 15,
+        "retry_attempts": 2
+      }
+    }
+  }
+}

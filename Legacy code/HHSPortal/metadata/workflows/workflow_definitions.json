@@ -1,0 +1,891 @@
+{
+  "version": "2.0.0",
+  "description": "Workflow Definitions - WF301-WF316 from System",
+  "workflow_engine": {
+    "async_support": true,
+    "parallel_execution": true,
+    "external_integration": true,
+    "event_driven": true,
+    "timer_support": true,
+    "sub_workflow_support": true,
+    "system_integration": true
+  },
+  "workflows": {
+    "WF301": {
+      "id": "WF301",
+      "name": "WF301 - Procurement CoF",
+      "display_name": "Procurement Certification of Funds",
+      "description": "Procurement certification of funds workflow from system",
+      "object_name": "contract",
+      "is_system_workflow": true,
+      "created_by": "system",
+      "version": "1.0.0",
+      "workflow_id": 15,
+      "workflow_type": "PROCUREMENT",
+      "system_integration": true,
+      "states": [
+        {
+          "id": "initiated",
+          "name": "Initiated",
+          "display_name": "Workflow Initiated",
+          "description": "Procurement CoF workflow has been initiated",
+          "is_initial": true,
+          "is_final": false,
+          "is_error": false,
+          "state_type": "manual",
+          "permissions": {
+            "view": ["ACCO_MANAGER", "ACCO_STAFF", "FINANCE_MANAGER"],
+            "edit": ["ACCO_MANAGER", "ACCO_STAFF"],
+            "approve": ["FINANCE_MANAGER"]
+          },
+          "actions": [
+            {
+              "id": "submit_for_cof",
+              "name": "Submit for CoF",
+              "type": "transition",
+              "target_state": "pending_cof",
+              "permissions": ["ACCO_MANAGER", "ACCO_STAFF"],
+              "async": false
+            }
+          ],
+          "timers": [
+            {
+              "id": "draft_timeout",
+              "duration_hours": 168,
+              "action": "send_reminder",
+              "recipients": ["ACCO_MANAGER", "ACCO_STAFF"]
+            }
+          ],
+          "attributes": {
+            "color": "#3B82F6",
+            "icon": "play",
+            "priority": "high"
+          }
+        },
+        {
+          "id": "pending_cof",
+          "name": "Pending CoF",
+          "display_name": "Pending Certification of Funds",
+          "description": "Waiting for finance manager to certify funds",
+          "is_initial": false,
+          "is_final": false,
+          "is_error": false,
+          "state_type": "manual",
+          "assignment_strategy": "role_based",
+          "assigned_to": "FINANCE_MANAGER",
+          "permissions": {
+            "view": ["ACCO_MANAGER", "ACCO_STAFF", "FINANCE_MANAGER"],
+            "edit": ["FINANCE_MANAGER"],
+            "approve": ["FINANCE_MANAGER"]
+          },
+          "actions": [
+            {
+              "id": "approve_cof",
+              "name": "Approve CoF",
+              "type": "transition",
+              "target_state": "cof_approved",
+              "permissions": ["FINANCE_MANAGER"],
+              "async": false
+            },
+            {
+              "id": "reject_cof",
+              "name": "Reject CoF",
+              "type": "transition",
+              "target_state": "cof_rejected",
+              "permissions": ["FINANCE_MANAGER"],
+              "async": false
+            }
+          ],
+          "timers": [
+            {
+              "id": "cof_timeout",
+              "duration_hours": 72,
+              "action": "escalate",
+              "recipients": ["ACCO_MANAGER", "FINANCE_MANAGER"]
+            }
+          ],
+          "attributes": {
+            "color": "#F59E0B",
+            "icon": "clock",
+            "priority": "high"
+          }
+        },
+        {
+          "id": "cof_approved",
+          "name": "CoF Approved",
+          "display_name": "Certification of Funds Approved",
+          "description": "Certification of funds has been approved",
+          "is_initial": false,
+          "is_final": true,
+          "is_error": false,
+          "state_type": "manual",
+          "permissions": {
+            "view": ["ACCO_MANAGER", "ACCO_STAFF", "FINANCE_MANAGER"]
+          },
+          "actions": [],
+          "attributes": {
+            "color": "#10B981",
+            "icon": "check",
+            "priority": "normal"
+          }
+        },
+        {
+          "id": "cof_rejected",
+          "name": "CoF Rejected",
+          "display_name": "Certification of Funds Rejected",
+          "description": "Certification of funds has been rejected",
+          "is_initial": false,
+          "is_final": true,
+          "is_error": true,
+          "state_type": "manual",
+          "permissions": {
+            "view": ["ACCO_MANAGER", "ACCO_STAFF", "FINANCE_MANAGER"]
+          },
+          "actions": [],
+          "attributes": {
+            "color": "#EF4444",
+            "icon": "x",
+            "priority": "high"
+          }
+        }
+      ],
+      "transitions": [
+        {
+          "from": "initiated",
+          "to": "pending_cof",
+          "action": "submit_for_cof",
+          "conditions": ["contract_has_budget"],
+          "async": false
+        },
+        {
+          "from": "pending_cof",
+          "to": "cof_approved",
+          "action": "approve_cof",
+          "conditions": ["funds_available"],
+          "async": false
+        },
+        {
+          "from": "pending_cof",
+          "to": "cof_rejected",
+          "action": "reject_cof",
+          "conditions": ["funds_unavailable"],
+          "async": false
+        }
+      ],
+      "business_rules": [
+        {
+          "id": "contract_has_budget",
+          "name": "Contract Has Budget",
+          "description": "Contract must have budget information before CoF submission",
+          "expression": "{{contract.budget_amount}} > 0"
+        },
+        {
+          "id": "funds_available",
+          "name": "Funds Available",
+          "description": "Sufficient funds must be available for the contract",
+          "expression": "{{contract.budget_amount}} <= {{available_funds}}"
+        },
+        {
+          "id": "funds_unavailable",
+          "name": "Funds Unavailable",
+          "description": "Insufficient funds for the contract",
+          "expression": "{{contract.budget_amount}} > {{available_funds}}"
+        }
+      ],
+      "notifications": [
+        {
+          "event": "workflow_started",
+          "template": "procurement_cof_started",
+          "recipients": ["ACCO_MANAGER", "FINANCE_MANAGER"]
+        },
+        {
+          "event": "cof_approved",
+          "template": "procurement_cof_approved",
+          "recipients": ["ACCO_MANAGER", "ACCO_STAFF"]
+        },
+        {
+          "event": "cof_rejected",
+          "template": "procurement_cof_rejected",
+          "recipients": ["ACCO_MANAGER", "ACCO_STAFF"]
+        }
+      ]
+    },
+    "WF302": {
+      "id": "WF302",
+      "name": "WF302 - Contract Configuration",
+      "display_name": "Contract Configuration",
+      "description": "Contract configuration and setup workflow from system",
+      "object_name": "contract",
+      "is_system_workflow": true,
+      "created_by": "system",
+      "version": "1.0.0",
+      "workflow_id": 8,
+      "workflow_type": "CONTRACT",
+      "system_integration": true,
+      "states": [
+        {
+          "id": "configuration_started",
+          "name": "Configuration Started",
+          "display_name": "Configuration Started",
+          "description": "Contract configuration workflow has been initiated",
+          "is_initial": true,
+          "is_final": false,
+          "is_error": false,
+          "state_type": "manual",
+          "permissions": {
+            "view": ["ACCO_MANAGER", "ACCO_STAFF"],
+            "edit": ["ACCO_MANAGER", "ACCO_STAFF"]
+          },
+          "actions": [
+            {
+              "id": "complete_configuration",
+              "name": "Complete Configuration",
+              "type": "transition",
+              "target_state": "configuration_completed",
+              "permissions": ["ACCO_MANAGER", "ACCO_STAFF"],
+              "async": false
+            }
+          ],
+          "attributes": {
+            "color": "#3B82F6",
+            "icon": "settings",
+            "priority": "normal"
+          }
+        },
+        {
+          "id": "configuration_completed",
+          "name": "Configuration Completed",
+          "display_name": "Configuration Completed",
+          "description": "Contract configuration has been completed",
+          "is_initial": false,
+          "is_final": true,
+          "is_error": false,
+          "state_type": "manual",
+          "permissions": {
+            "view": ["ACCO_MANAGER", "ACCO_STAFF"]
+          },
+          "actions": [],
+          "attributes": {
+            "color": "#10B981",
+            "icon": "check",
+            "priority": "normal"
+          }
+        }
+      ],
+      "transitions": [
+        {
+          "from": "configuration_started",
+          "to": "configuration_completed",
+          "action": "complete_configuration",
+          "conditions": ["contract_configured"],
+          "async": false
+        }
+      ],
+      "business_rules": [
+        {
+          "id": "contract_configured",
+          "name": "Contract Configured",
+          "description": "Contract must have all required configuration fields completed",
+          "expression": "{{contract.title}} && {{contract.agency_id}} && {{contract.provider_id}} && {{contract.contract_type_id}}"
+        }
+      ],
+      "notifications": [
+        {
+          "event": "workflow_started",
+          "template": "contract_configuration_started",
+          "recipients": ["ACCO_MANAGER", "ACCO_STAFF"]
+        },
+        {
+          "event": "configuration_completed",
+          "template": "contract_configuration_completed",
+          "recipients": ["ACCO_MANAGER", "ACCO_STAFF"]
+        }
+      ]
+    },
+    "WF303": {
+      "id": "WF303",
+      "name": "WF303 - Contract Certification of Funds",
+      "display_name": "Contract Certification of Funds",
+      "description": "Contract certification of funds workflow from system",
+      "object_name": "contract",
+      "is_system_workflow": true,
+      "created_by": "system",
+      "version": "1.0.0",
+      "workflow_id": 8,
+      "workflow_type": "CONTRACT",
+      "system_integration": true,
+      "states": [
+        {
+          "id": "cof_initiated",
+          "name": "CoF Initiated",
+          "display_name": "Certification of Funds Initiated",
+          "description": "Contract certification of funds workflow has been initiated",
+          "is_initial": true,
+          "is_final": false,
+          "is_error": false,
+          "state_type": "manual",
+          "permissions": {
+            "view": ["ACCO_MANAGER", "ACCO_STAFF", "FINANCE_MANAGER"],
+            "edit": ["ACCO_MANAGER", "ACCO_STAFF"],
+            "approve": ["FINANCE_MANAGER"]
+          },
+          "actions": [
+            {
+              "id": "submit_contract_cof",
+              "name": "Submit Contract CoF",
+              "type": "transition",
+              "target_state": "pending_contract_cof",
+              "permissions": ["ACCO_MANAGER", "ACCO_STAFF"],
+              "async": false
+            }
+          ],
+          "attributes": {
+            "color": "#3B82F6",
+            "icon": "play",
+            "priority": "high"
+          }
+        },
+        {
+          "id": "pending_contract_cof",
+          "name": "Pending Contract CoF",
+          "display_name": "Pending Contract Certification of Funds",
+          "description": "Waiting for finance manager to certify contract funds",
+          "is_initial": false,
+          "is_final": false,
+          "is_error": false,
+          "state_type": "manual",
+          "assignment_strategy": "role_based",
+          "assigned_to": "FINANCE_MANAGER",
+          "permissions": {
+            "view": ["ACCO_MANAGER", "ACCO_STAFF", "FINANCE_MANAGER"],
+            "edit": ["FINANCE_MANAGER"],
+            "approve": ["FINANCE_MANAGER"]
+          },
+          "actions": [
+            {
+              "id": "approve_contract_cof",
+              "name": "Approve Contract CoF",
+              "type": "transition",
+              "target_state": "contract_cof_approved",
+              "permissions": ["FINANCE_MANAGER"],
+              "async": false
+            },
+            {
+              "id": "reject_contract_cof",
+              "name": "Reject Contract CoF",
+              "type": "transition",
+              "target_state": "contract_cof_rejected",
+              "permissions": ["FINANCE_MANAGER"],
+              "async": false
+            }
+          ],
+          "timers": [
+            {
+              "id": "contract_cof_timeout",
+              "duration_hours": 72,
+              "action": "escalate",
+              "recipients": ["ACCO_MANAGER", "FINANCE_MANAGER"]
+            }
+          ],
+          "attributes": {
+            "color": "#F59E0B",
+            "icon": "clock",
+            "priority": "high"
+          }
+        },
+        {
+          "id": "contract_cof_approved",
+          "name": "Contract CoF Approved",
+          "display_name": "Contract Certification of Funds Approved",
+          "description": "Contract certification of funds has been approved",
+          "is_initial": false,
+          "is_final": true,
+          "is_error": false,
+          "state_type": "manual",
+          "permissions": {
+            "view": ["ACCO_MANAGER", "ACCO_STAFF", "FINANCE_MANAGER"]
+          },
+          "actions": [],
+          "attributes": {
+            "color": "#10B981",
+            "icon": "check",
+            "priority": "normal"
+          }
+        },
+        {
+          "id": "contract_cof_rejected",
+          "name": "Contract CoF Rejected",
+          "display_name": "Contract Certification of Funds Rejected",
+          "description": "Contract certification of funds has been rejected",
+          "is_initial": false,
+          "is_final": true,
+          "is_error": true,
+          "state_type": "manual",
+          "permissions": {
+            "view": ["ACCO_MANAGER", "ACCO_STAFF", "FINANCE_MANAGER"]
+          },
+          "actions": [],
+          "attributes": {
+            "color": "#EF4444",
+            "icon": "x",
+            "priority": "high"
+          }
+        }
+      ],
+      "transitions": [
+        {
+          "from": "cof_initiated",
+          "to": "pending_contract_cof",
+          "action": "submit_contract_cof",
+          "conditions": ["contract_has_budget"],
+          "async": false
+        },
+        {
+          "from": "pending_contract_cof",
+          "to": "contract_cof_approved",
+          "action": "approve_contract_cof",
+          "conditions": ["funds_available"],
+          "async": false
+        },
+        {
+          "from": "pending_contract_cof",
+          "to": "contract_cof_rejected",
+          "action": "reject_contract_cof",
+          "conditions": ["funds_unavailable"],
+          "async": false
+        }
+      ],
+      "business_rules": [
+        {
+          "id": "contract_has_budget",
+          "name": "Contract Has Budget",
+          "description": "Contract must have budget information before CoF submission",
+          "expression": "{{contract.budget_amount}} > 0"
+        },
+        {
+          "id": "funds_available",
+          "name": "Funds Available",
+          "description": "Sufficient funds must be available for the contract",
+          "expression": "{{contract.budget_amount}} <= {{available_funds}}"
+        },
+        {
+          "id": "funds_unavailable",
+          "name": "Funds Unavailable",
+          "description": "Insufficient funds for the contract",
+          "expression": "{{contract.budget_amount}} > {{available_funds}}"
+        }
+      ],
+      "notifications": [
+        {
+          "event": "workflow_started",
+          "template": "contract_cof_started",
+          "recipients": ["ACCO_MANAGER", "FINANCE_MANAGER"]
+        },
+        {
+          "event": "contract_cof_approved",
+          "template": "contract_cof_approved",
+          "recipients": ["ACCO_MANAGER", "ACCO_STAFF"]
+        },
+        {
+          "event": "contract_cof_rejected",
+          "template": "contract_cof_rejected",
+          "recipients": ["ACCO_MANAGER", "ACCO_STAFF"]
+        }
+      ]
+    },
+    "WF304": {
+      "id": "WF304",
+      "name": "WF304 - Contract Budget",
+      "display_name": "Contract Budget",
+      "description": "Contract budget management workflow from system",
+      "object_name": "contract",
+      "is_system_workflow": true,
+      "created_by": "system",
+      "version": "1.0.0",
+      "workflow_id": 6,
+      "workflow_type": "BUDGET",
+      "system_integration": true,
+      "states": [
+        {
+          "id": "budget_review_started",
+          "name": "Budget Review Started",
+          "display_name": "Budget Review Started",
+          "description": "Contract budget review workflow has been initiated",
+          "is_initial": true,
+          "is_final": false,
+          "is_error": false,
+          "state_type": "manual",
+          "permissions": {
+            "view": ["ACCO_MANAGER", "ACCO_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF"],
+            "edit": ["ACCO_MANAGER", "ACCO_STAFF"],
+            "approve": ["FINANCE_MANAGER"]
+          },
+          "actions": [
+            {
+              "id": "submit_budget_review",
+              "name": "Submit Budget Review",
+              "type": "transition",
+              "target_state": "pending_budget_review",
+              "permissions": ["ACCO_MANAGER", "ACCO_STAFF"],
+              "async": false
+            }
+          ],
+          "attributes": {
+            "color": "#3B82F6",
+            "icon": "play",
+            "priority": "normal"
+          }
+        },
+        {
+          "id": "pending_budget_review",
+          "name": "Pending Budget Review",
+          "display_name": "Pending Budget Review",
+          "description": "Waiting for finance team to review budget",
+          "is_initial": false,
+          "is_final": false,
+          "is_error": false,
+          "state_type": "manual",
+          "assignment_strategy": "role_based",
+          "assigned_to": "FINANCE_MANAGER",
+          "permissions": {
+            "view": ["ACCO_MANAGER", "ACCO_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF"],
+            "edit": ["FINANCE_MANAGER", "FINANCE_STAFF"],
+            "approve": ["FINANCE_MANAGER"]
+          },
+          "actions": [
+            {
+              "id": "approve_budget",
+              "name": "Approve Budget",
+              "type": "transition",
+              "target_state": "budget_approved",
+              "permissions": ["FINANCE_MANAGER"],
+              "async": false
+            },
+            {
+              "id": "reject_budget",
+              "name": "Reject Budget",
+              "type": "transition",
+              "target_state": "budget_rejected",
+              "permissions": ["FINANCE_MANAGER"],
+              "async": false
+            }
+          ],
+          "timers": [
+            {
+              "id": "budget_review_timeout",
+              "duration_hours": 48,
+              "action": "escalate",
+              "recipients": ["ACCO_MANAGER", "FINANCE_MANAGER"]
+            }
+          ],
+          "attributes": {
+            "color": "#F59E0B",
+            "icon": "clock",
+            "priority": "normal"
+          }
+        },
+        {
+          "id": "budget_approved",
+          "name": "Budget Approved",
+          "display_name": "Budget Approved",
+          "description": "Contract budget has been approved",
+          "is_initial": false,
+          "is_final": true,
+          "is_error": false,
+          "state_type": "manual",
+          "permissions": {
+            "view": ["ACCO_MANAGER", "ACCO_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF"]
+          },
+          "actions": [],
+          "attributes": {
+            "color": "#10B981",
+            "icon": "check",
+            "priority": "normal"
+          }
+        },
+        {
+          "id": "budget_rejected",
+          "name": "Budget Rejected",
+          "display_name": "Budget Rejected",
+          "description": "Contract budget has been rejected",
+          "is_initial": false,
+          "is_final": true,
+          "is_error": true,
+          "state_type": "manual",
+          "permissions": {
+            "view": ["ACCO_MANAGER", "ACCO_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF"]
+          },
+          "actions": [],
+          "attributes": {
+            "color": "#EF4444",
+            "icon": "x",
+            "priority": "high"
+          }
+        }
+      ],
+      "transitions": [
+        {
+          "from": "budget_review_started",
+          "to": "pending_budget_review",
+          "action": "submit_budget_review",
+          "conditions": ["budget_configured"],
+          "async": false
+        },
+        {
+          "from": "pending_budget_review",
+          "to": "budget_approved",
+          "action": "approve_budget",
+          "conditions": ["budget_valid"],
+          "async": false
+        },
+        {
+          "from": "pending_budget_review",
+          "to": "budget_rejected",
+          "action": "reject_budget",
+          "conditions": ["budget_invalid"],
+          "async": false
+        }
+      ],
+      "business_rules": [
+        {
+          "id": "budget_configured",
+          "name": "Budget Configured",
+          "description": "Contract must have budget information configured",
+          "expression": "{{contract.budget_amount}} > 0 && {{contract.budget_start_year}}"
+        },
+        {
+          "id": "budget_valid",
+          "name": "Budget Valid",
+          "description": "Budget must be valid and within limits",
+          "expression": "{{contract.budget_amount}} <= {{available_budget}} && {{contract.budget_amount}} > 0"
+        },
+        {
+          "id": "budget_invalid",
+          "name": "Budget Invalid",
+          "description": "Budget is invalid or exceeds limits",
+          "expression": "{{contract.budget_amount}} > {{available_budget}} || {{contract.budget_amount}} <= 0"
+        }
+      ],
+      "notifications": [
+        {
+          "event": "workflow_started",
+          "template": "budget_review_started",
+          "recipients": ["ACCO_MANAGER", "FINANCE_MANAGER"]
+        },
+        {
+          "event": "budget_approved",
+          "template": "budget_approved",
+          "recipients": ["ACCO_MANAGER", "ACCO_STAFF"]
+        },
+        {
+          "event": "budget_rejected",
+          "template": "budget_rejected",
+          "recipients": ["ACCO_MANAGER", "ACCO_STAFF"]
+        }
+      ]
+    },
+    "WF305": {
+      "id": "WF305",
+      "name": "WF305 - Invoice Review",
+      "display_name": "Invoice Review",
+      "description": "Invoice review and approval workflow from system",
+      "object_name": "invoice",
+      "is_system_workflow": true,
+      "created_by": "system",
+      "version": "1.0.0",
+      "workflow_id": 12,
+      "workflow_type": "INVOICE",
+      "system_integration": true,
+      "states": [
+        {
+          "id": "invoice_submitted",
+          "name": "Invoice Submitted",
+          "display_name": "Invoice Submitted",
+          "description": "Invoice has been submitted for review",
+          "is_initial": true,
+          "is_final": false,
+          "is_error": false,
+          "state_type": "manual",
+          "permissions": {
+            "view": ["ACCO_MANAGER", "ACCO_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF"],
+            "edit": ["ACCO_MANAGER", "ACCO_STAFF"],
+            "approve": ["FINANCE_MANAGER"]
+          },
+          "actions": [
+            {
+              "id": "submit_invoice_review",
+              "name": "Submit Invoice Review",
+              "type": "transition",
+              "target_state": "pending_invoice_review",
+              "permissions": ["ACCO_MANAGER", "ACCO_STAFF"],
+              "async": false
+            }
+          ],
+          "attributes": {
+            "color": "#3B82F6",
+            "icon": "play",
+            "priority": "normal"
+          }
+        },
+        {
+          "id": "pending_invoice_review",
+          "name": "Pending Invoice Review",
+          "display_name": "Pending Invoice Review",
+          "description": "Waiting for finance team to review invoice",
+          "is_initial": false,
+          "is_final": false,
+          "is_error": false,
+          "state_type": "manual",
+          "assignment_strategy": "role_based",
+          "assigned_to": "FINANCE_MANAGER",
+          "permissions": {
+            "view": ["ACCO_MANAGER", "ACCO_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF"],
+            "edit": ["FINANCE_MANAGER", "FINANCE_STAFF"],
+            "approve": ["FINANCE_MANAGER"]
+          },
+          "actions": [
+            {
+              "id": "approve_invoice",
+              "name": "Approve Invoice",
+              "type": "transition",
+              "target_state": "invoice_approved",
+              "permissions": ["FINANCE_MANAGER"],
+              "async": false
+            },
+            {
+              "id": "reject_invoice",
+              "name": "Reject Invoice",
+              "type": "transition",
+              "target_state": "invoice_rejected",
+              "permissions": ["FINANCE_MANAGER"],
+              "async": false
+            }
+          ],
+          "timers": [
+            {
+              "id": "invoice_review_timeout",
+              "duration_hours": 24,
+              "action": "escalate",
+              "recipients": ["ACCO_MANAGER", "FINANCE_MANAGER"]
+            }
+          ],
+          "attributes": {
+            "color": "#F59E0B",
+            "icon": "clock",
+            "priority": "normal"
+          }
+        },
+        {
+          "id": "invoice_approved",
+          "name": "Invoice Approved",
+          "display_name": "Invoice Approved",
+          "description": "Invoice has been approved",
+          "is_initial": false,
+          "is_final": true,
+          "is_error": false,
+          "state_type": "manual",
+          "permissions": {
+            "view": ["ACCO_MANAGER", "ACCO_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF"]
+          },
+          "actions": [],
+          "attributes": {
+            "color": "#10B981",
+            "icon": "check",
+            "priority": "normal"
+          }
+        },
+        {
+          "id": "invoice_rejected",
+          "name": "Invoice Rejected",
+          "display_name": "Invoice Rejected",
+          "description": "Invoice has been rejected",
+          "is_initial": false,
+          "is_final": true,
+          "is_error": true,
+          "state_type": "manual",
+          "permissions": {
+            "view": ["ACCO_MANAGER", "ACCO_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF"]
+          },
+          "actions": [],
+          "attributes": {
+            "color": "#EF4444",
+            "icon": "x",
+            "priority": "high"
+          }
+        }
+      ],
+      "transitions": [
+        {
+          "from": "invoice_submitted",
+          "to": "pending_invoice_review",
+          "action": "submit_invoice_review",
+          "conditions": ["invoice_valid"],
+          "async": false
+        },
+        {
+          "from": "pending_invoice_review",
+          "to": "invoice_approved",
+          "action": "approve_invoice",
+          "conditions": ["invoice_approved_conditions"],
+          "async": false
+        },
+        {
+          "from": "pending_invoice_review",
+          "to": "invoice_rejected",
+          "action": "reject_invoice",
+          "conditions": ["invoice_rejected_conditions"],
+          "async": false
+        }
+      ],
+      "business_rules": [
+        {
+          "id": "invoice_valid",
+          "name": "Invoice Valid",
+          "description": "Invoice must be valid and complete",
+          "expression": "{{invoice.amount}} > 0 && {{invoice.invoice_number}} && {{invoice.invoice_date}}"
+        },
+        {
+          "id": "invoice_approved_conditions",
+          "name": "Invoice Approved Conditions",
+          "description": "Conditions for invoice approval",
+          "expression": "{{invoice.amount}} <= {{contract.budget_amount}} && {{invoice.amount}} > 0"
+        },
+        {
+          "id": "invoice_rejected_conditions",
+          "name": "Invoice Rejected Conditions",
+          "description": "Conditions for invoice rejection",
+          "expression": "{{invoice.amount}} > {{contract.budget_amount}} || {{invoice.amount}} <= 0"
+        }
+      ],
+      "notifications": [
+        {
+          "event": "workflow_started",
+          "template": "invoice_review_started",
+          "recipients": ["ACCO_MANAGER", "FINANCE_MANAGER"]
+        },
+        {
+          "event": "invoice_approved",
+          "template": "invoice_approved",
+          "recipients": ["ACCO_MANAGER", "ACCO_STAFF"]
+        },
+        {
+          "event": "invoice_rejected",
+          "template": "invoice_rejected",
+          "recipients": ["ACCO_MANAGER", "ACCO_STAFF"]
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2024-01-01T00:00:00Z",
+    "created_by": "system",
+    "version": "2.0.0",
+    "description": "Workflow definitions with system integration",
+    "tags": ["workflows", "contract_management", "system_integration"],
+    "dependencies": [
+      "schema/references.json",
+      "security/roles.json",
+      "security/permissions.json"
+    ]
+  }
+}

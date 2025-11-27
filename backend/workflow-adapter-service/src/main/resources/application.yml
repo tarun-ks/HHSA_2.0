@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: workflow-adapter-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/eprocurement
+    username: postgres
+    password: admin
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  flyway:
+    enabled: false
+    # No migrations for workflow-adapter-service (uses common tables only)
+
+server:
+  port: 8093
+
+# Camunda 8 (Zeebe) Configuration
+zeebe:
+  gateway:
+    address: ${ZEEBE_GATEWAY_ADDRESS:localhost:26500}
+  client:
+    max-jobs-active: 32
+    num-job-worker-execution-threads: 1
+    default-job-timeout: 5m
+    default-request-timeout: 20s
+
+# External Service URLs
+services:
+  contract:
+    base-url: ${CONTRACT_SERVICE_URL:http://localhost:8095}
+
+logging:
+  level:
+    root: INFO
+    com.hhsa: DEBUG
+    io.camunda: DEBUG
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html

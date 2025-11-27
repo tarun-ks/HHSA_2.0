@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rulesets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="ruleset.xsd">
+
+	<!-- Test rulesets for testing purpose starts -->
+	<ruleset id="testRuleSet1" rules="testRule1">
+		<if value="Hello Test" />
+		<else value="" />
+	</ruleset>
+	<ruleset id="testRuleId2WithoutRules" rules="testRuleInvalid">
+		<if value="Hello Test" />
+		<else value="" />
+	</ruleset>
+
+	<ruleset id="testRuleId2WithoutValueOrAltRuleSet" rules="testRuleInvalid">
+		<if />
+		<else />
+	</ruleset>
+	<ruleset id="testRuleSet2" rules="testRule2">
+		<if return="ArrayList" type="Integer" separator="," value="12, 20, 44, 3434" />
+		<else value="" />
+	</ruleset>
+	<ruleset id="testRuleSet3" rules="testRule3">
+		<if return="ArrayList" type="String" separator=","
+			value="Hello, NYC, Accelerator" />
+		<else value="Hello, how, are, you, ?" />
+	</ruleset>
+	<ruleset id="testAltRuleSet3" rules="testRule3a">
+		<if return="ArrayList" type="String" separator=","
+			value="Hello, NYC, Accelerator" />
+		<else value="" />
+	</ruleset>
+
+	<!-- Test rulesets for testing purpose ends -->
+
+	<ruleset id="ruleSetContractStatusToActionMapping1" rules="contractList1">
+		<if return="ArrayList" type="String"
+			value="1View Contact CoF, View Contact Configuration, Update Contract Configuration, Amend Contract, Renew Contract, Suspend Contract, Close Contract" />
+		<else value="" altRuleSet="ruleSetContractStatusToActionMapping2" />
+	</ruleset>
+	<ruleset id="ruleSetContractStatusToActionMapping2" rules="contractList2">
+		<if value="1,312,423534,2345435.9" return="ArrayList" type="Float" />
+		<else value="" altRuleSet="ruleSetContractStatusToActionMapping3" />
+	</ruleset>
+	<ruleset id="ruleSetContractStatusToActionMapping3" rules="contractList3">
+		<if
+			value="View Contact CoF, View Contract Configuration, Unsuspend Contract" />
+		<else value="" altRuleSet="ruleSetContractStatusToActionMapping4" />
+	</ruleset>
+	<ruleset id="ruleSetContractStatusToActionMapping4" rules="contractList4">
+		<if value="View Contact CoF, View Contact Configuration" return="ArrayList"
+			type="Float" />
+		<else value="" altRuleSet="ruleSetContractStatusToActionMapping5" />
+	</ruleset>
+	<ruleset id="ruleSetContractStatusToActionMapping5" rules="contractList5">
+		<if value="Cancel Contract" />
+		<else value="Empty" />
+	</ruleset>
+
+	<ruleset id="isProposalReturnedForRevision" rules="isProposalReturnedForRevision">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	<ruleset id="isProposalSubmitted" rules="isProposalSubmitted">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	<ruleset id="ruleset1" rules="rule1, rule2 ">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	<ruleset
+		id="WithdrawInvoiceIfInvoiceStatusReturnedForRevisionAndIsProvider"
+		rules="WithdrawInvoiceIfInvoiceStatusReturnedForRevisionAndIsProvider">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	<ruleset
+		id="deleteInvoiceIfInvoiceStatusPendingForSubmissionAndIsProvider"
+		rules="deleteInvoiceIfInvoiceStatusPendingForSubmissionAndIsProvider">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	<ruleset id="RFPDocumentStatusRule" rules="RFPDocumentStatusRule">
+		<if value="26" />
+		<else value="29" />
+	</ruleset>
+	<ruleset id="ProposalConfigurationSaveRule" rules="ProposalConfigurationSaveRule">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	<ruleset id="RFPDocumentUploadRule" rules="RFPDocumentUploadRule">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	<ruleset id="ServiceSelectionBackRule" rules="ServiceSelectionBackRule">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	<ruleset id="ServiceSelectionSaveRule" rules="ServiceSelectionSaveRule">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="ServiceSelectionNextRule" rules="ServiceSelectionNextRule">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="displayCancelCloseProcHyperlinks" rules="displayCancelCloseProcHyperlinks">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="disableFieldsForDraftStatus" rules="disableFieldsForDraftStatus">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="disableFieldsForPlannedStatus" rules="disableFieldsForPlannedStatus">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="disableProgramNameDropDown" rules="disableProgramNameDropDown">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="disableAccUserDropDown" rules="disableAccUserDropDown">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="disableAgencyUserDropDown" rules="disableAgencyUserDropDown">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="makeChangesForAgency" rules="makeChangesForAgency">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="isAgencyUser" rules="makeChangesForAgency">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	<ruleset id="isCityUser" rules="cityInstruction">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	<ruleset id="isAccoAgencyUser" rules="isAccoAgencyUser">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	
+	<ruleset id="rfpDocumentScreenReadonlyRule" rules="rfpDocumentScreenReadonlyRule">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+
+	<!--Approved providers start -->
+	<ruleset id="DisableGenerateListButton" rules="DisableGenerateListButton">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	<ruleset id="DisableSelectionBoxDropDown" rules="DisableSelectionBoxDropDown">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	<ruleset id="hideNextButtonApprovedProv" rules="hideNextButtonApprovedProv">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	<!--Approved providers end -->
+
+	<ruleset id="UpdateConfigurationErrorRule01" rules="UpdateConfigurationErrorRule01">
+		<if value="! Configuration/Budget Update already in progress." />
+		<else value="" altRuleSet="UpdateConfigurationErrorRule03" />
+	</ruleset>
+
+	<!--<ruleset id="UpdateConfigurationErrorRule02" rules="UpdateConfigurationErrorRule02">
+		<if
+			value="! Cannot initiate update while a negative amendment is in progress and the amendment budget has not been approved" />
+		<else value="" altRuleSet="UpdateConfigurationErrorRule03" />
+	</ruleset>
+
+	--><ruleset id="UpdateConfigurationErrorRule03" rules="UpdateConfigurationErrorRule03">
+		<if
+			value="! Cannot initiate update while budget modification is in progress." />
+		<else value="" altRuleSet="UpdateConfigurationErrorRule05" />
+	</ruleset>
+
+	<ruleset id="UpdateConfigurationErrorRule05" rules="UpdateConfigurationErrorRule05">
+		<if
+			value="! Cannot initiate update while New FY Configuration Task is in progress." />
+		<else value="" altRuleSet="UpdateConfigurationErrorRule06" />
+	</ruleset>
+	<!-- Release 3.8.0 Enhancement 6481 -->
+	<ruleset id="UpdateConfigurationErrorRule06" rules="UpdateConfigurationErrorRule06">
+		<if
+			value="! Cannot initiate update in status pending registration unless its budget is not approved" />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="CloseContractErrorRule01" rules="CloseContractErrorRule01">
+		<if
+			value="! Cannot close contract until all open tasks related to this contract are completed." />
+		<else value="" altRuleSet="CloseContractErrorRule02" />
+	</ruleset>
+
+	<ruleset id="CloseContractErrorRule02" rules="CloseContractErrorRule02">
+		<if
+			value="! Cannot close contract until all budget modifications, amendments and updates have been approved." />
+		<else value="" altRuleSet="CloseContractErrorRule03" />
+	</ruleset>
+
+	<ruleset id="CloseContractErrorRule03" rules="CloseContractErrorRule03">
+		<if
+			value="! Cannot close contract until all invoices have been approved and all payments have been disbursed for this contract." />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="AmendContractErrorRuleSet01" rules="AmendContractErrorRule01">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="AmendContractErrorRuleSet02" rules="AmendContractErrorRule02">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="AmendContractErrorRuleSet03" rules="AmendContractErrorRule03">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="DisableProposalDetails" rules="DisableProposalDetails">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="showProposalCommentLinkPropDetalis" rules="showProposalCommentLinkPropDetalis">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	<ruleset id="checkStatusForSuspended" rules="checkStatusForSuspended">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="checkStatusForUnSuspended" rules="checkStatusForUnSuspended">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="cancelContractRuleForAccelerator" rules="cancelContractRuleForAccelerator">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="cancelContractRuleForAgency" rules="cancelContractRuleForAgency">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="NewFYConfigErrorRule01" rules="NewFYConfigErrorRule01">
+		<if value="! Configuration Update already in progress." />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="NewFYConfigErrorRule02" rules="NewFYConfigErrorRule02">
+		<if
+			value="! New FY Configuration already in progress." />
+		<else value="false" />
+	</ruleset>
+	
+	<ruleset id="NewFYConfigErrorRule03" rules="NewFYConfigErrorRule03">
+		<if
+			value="! Cannot initiate new Fiscal Year Configuration while an amendment is in progress and the Amendment Certification of Funds has not been approved." />
+		<else value="false" />
+	</ruleset>
+
+	<ruleset id="proposalDocScreenReadOnlyRule" rules="proposalDocScreenReadOnlyRule">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	<ruleset id="proposalDocStatusCompletedRule" rules="proposalDocStatusCompletedRule">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	<ruleset id="proposalDocStatusSubmittedRule" rules="proposalDocStatusSubmittedRule">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	
+	<ruleset id="readOnlyPageAttributeRule" rules="readOnlyPageAttributeBusinessRule">
+		<if value="false" />
+		<else value="true" />
+	</ruleset>
+	
+	<ruleset id="readOnlyPageAttributeRuleInvoice" rules="readOnlyPageAttributeBusinessRuleInvoice">
+		<if value="false" />
+		<else value="true" />
+	</ruleset>
+	
+	<ruleset id="editableFinancialScreenUser" rules="editableFinancialScreenUser">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	
+	<ruleset id="proposalReadOnly" rules="proposalReadOnly">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	
+	<ruleset id="checkProposalEditSubmit" rules="checkProposalEditSubmit">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	
+	<ruleset id="sendEvalButtonStatus" rules="sendEvalButtonStatus">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	
+	<ruleset id="evalSummaryAccoUserCheck" rules="evalSummaryAccoUserCheck">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+	
+	<ruleset id="evalSummaryNonAccoUserCheck" rules="evalSummaryNonAccoUserCheck">
+		<if value="true" />
+		<else value="false" />
+	</ruleset>
+</rulesets>

@@ -1,0 +1,960 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transactions>
+	
+<!-- Transactions for Batch Process Start -->
+	
+	<transaction id="fetchContractsForBatchProcess"
+		useslocaldbconnection="true" useslocalfilenetconnection="true">
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="fetchContractsForBatchProcess">
+				<param name="aoHMArgs" type="java.util.HashMap" />
+			</method>
+			<output name="aoContractBeanList" type="java.util.List"></output>
+		</service>
+	</transaction>
+
+	<transaction id="fetchAmendmentContractsForBatchProcess"
+		useslocaldbconnection="true" useslocalfilenetconnection="false">
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="fetchAmendmentContractsForBatchProcess">
+				<param name="aoHMArgs" type="java.util.HashMap" />
+			</method>
+			<output name="aoContractBeanList" type="java.util.List"></output>
+		</service>
+	</transaction>
+
+	<transaction id="runBatchBaseContractWithNoDisc"
+		useslocaldbconnection="true" useslocalfilenetconnection="true">
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="setContractStatusAsRegistered">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoStatusChangeResult" type="java.lang.Boolean"></output>
+		</service>
+		
+		<!-- Start Release 3.8.0 Enhancement 6481 -->
+		
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="fetchContractForUpdateTask">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="contractID" type="java.lang.String" />
+			</method>
+			<output name="asContractId" type="java.lang.String" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="fetchBudgetsForContract">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="asContractId" type="java.lang.String" />
+				<param name="lbErrorCheckRule" type="java.lang.Boolean" />
+			</method>
+			<output name="budgetList" type="java.util.List" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="fetchContractBudgetDocs">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="asContractId" type="java.lang.String" />
+				<param name="lbErrorCheckRule" type="java.lang.Boolean" />
+			</method>
+			<output name="loUnlinkedContractDocsList" type="java.util.List" />
+		</service>
+		<service
+			classname="com.nyc.hhs.service.filenetmanager.p8services.P8ContentService"
+			servicetype="">
+			<method name="saveContractDocumentProps">
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="loUnlinkedContractDocsList" type="java.util.List" />
+				<param name="loHmDocReqProps" type="java.util.HashMap" />
+			</method>
+			<output name="saveStatus" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="deleteContract">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="asContractId" type="java.lang.String" />
+				<param name="lbErrorCheckRule" type="java.lang.Boolean" />
+			</method>
+			<output name="lbStatus" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="terminateDeleteContractUpdateWorkFlowsBatch">
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="lbErrorCheckRule" type="java.lang.Boolean" />
+				<param name="contractID" type="java.lang.String" />
+			</method>
+			<output name="lbTerminateStatus" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="terminateDeleteContractUpdateWorkFlowsBatch">
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="lbErrorCheckRule" type="java.lang.Boolean" />
+				<param name="asContractId" type="java.lang.String" />
+			</method>
+			<output name="lbTerminateStatus" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.HhsAuditService"
+			servicetype="">
+			<method name="hhsauditInsert">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="auditBean" type="com.nyc.hhs.model.HhsAuditBean" />
+				<param name="budgetList" type="java.util.List" />
+				<param name="lbTerminateStatus" type="java.lang.Boolean" />
+			</method>
+			<output name="lbAuditStatus" type="java.lang.Boolean" />
+		</service>
+		<!-- End Release 3.8.0 Enhancement 6481 -->
+	</transaction>
+
+	<transaction id="runBatchBaseContractWithDisc"
+		useslocaldbconnection="true" useslocalfilenetconnection="true">
+		
+		
+		
+		<!-- Start Release 3.8.0 Enhancement 6481 -->
+		
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="fetchContractForUpdateTask">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="contractID" type="java.lang.String" />
+			</method>
+			<output name="asContractId" type="java.lang.String" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="fetchBudgetsForContract">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="asContractId" type="java.lang.String" />
+				<param name="lbErrorCheckRule" type="java.lang.Boolean" />
+			</method>
+			<output name="budgetList" type="java.util.List" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="fetchContractBudgetDocs">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="asContractId" type="java.lang.String" />
+				<param name="lbErrorCheckRule" type="java.lang.Boolean" />
+			</method>
+			<output name="loUnlinkedContractDocsList" type="java.util.List" />
+		</service>
+		<service
+			classname="com.nyc.hhs.service.filenetmanager.p8services.P8ContentService"
+			servicetype="">
+			<method name="saveContractDocumentProps">
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="loUnlinkedContractDocsList" type="java.util.List" />
+				<param name="loHmDocReqProps" type="java.util.HashMap" />
+			</method>
+			<output name="saveStatus" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="deleteContract">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="asContractId" type="java.lang.String" />
+				<param name="lbErrorCheckRule" type="java.lang.Boolean" />
+			</method>
+			<output name="lbStatus" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="terminateDeleteContractUpdateWorkFlowsBatch">
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="lbErrorCheckRule" type="java.lang.Boolean" />
+				<param name="contractID" type="java.lang.String" />
+			</method>
+			<output name="lbTerminateStatus" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="terminateDeleteContractUpdateWorkFlowsBatch">
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="lbErrorCheckRule" type="java.lang.Boolean" />
+				<param name="asContractId" type="java.lang.String" />
+			</method>
+			<output name="lbTerminateStatus" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.HhsAuditService"
+			servicetype="">
+			<method name="hhsauditInsert">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="auditBean" type="com.nyc.hhs.model.HhsAuditBean" />
+				<param name="budgetList" type="java.util.List" />
+				<param name="lbTerminateStatus" type="java.lang.Boolean" />
+			</method>
+			<output name="lbAuditStatus" type="java.lang.Boolean" />
+		</service>
+		<!-- End Release 3.8.0 Enhancement 6481 -->
+		
+		
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="closeAppropriateTasks">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoCloseTasksResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="updateBudgetModificationAndUpdateStatus">
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoBudgetStatusUpdateResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="setContractStatusAsRegistered">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoStatusChangeResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="setWFPropForContConfUpdateTask">
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoHMWFRequiredProps" type="java.util.HashMap"></output>
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="getFinancialWFProperty">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHMWFRequiredProps" type="java.util.HashMap" />
+			</method>
+			<output name="aoHMWFRequiredProps" type="java.util.HashMap" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.TaskService"
+			servicetype="">
+			<method name="launchFinancialWorkflow">
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHMWFRequiredProps" type="java.util.HashMap" />
+				<param name="lbAuthStatusFlag" type="java.lang.Boolean" />
+			</method>
+			<output name="auditBean" type="com.nyc.hhs.model.HhsAuditBean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.HhsAuditService"
+			servicetype="">
+			<method name="hhsauditInsert">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="auditBean" type="com.nyc.hhs.model.HhsAuditBean" />
+				<param name="lbAuthStatusFlag" type="java.lang.Boolean" />
+			</method>
+			<output name="hhsaudit_result" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="resetDiscrepancyStatus">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoDiscrepancyStatusChangeResult" type="java.lang.Boolean"></output>
+		</service>
+	</transaction>
+
+	<transaction id="runBatchBaseContractWithDiscNoBaseStrChange"
+		useslocaldbconnection="true" useslocalfilenetconnection="true">
+		
+		
+		<!-- Start Release 3.8.0 Enhancement 6481 -->
+		
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="fetchContractForUpdateTask">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="contractID" type="java.lang.String" />
+			</method>
+			<output name="asContractId" type="java.lang.String" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="fetchBudgetsForContract">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="asContractId" type="java.lang.String" />
+				<param name="lbErrorCheckRule" type="java.lang.Boolean" />
+			</method>
+			<output name="budgetList" type="java.util.List" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="fetchContractBudgetDocs">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="asContractId" type="java.lang.String" />
+				<param name="lbErrorCheckRule" type="java.lang.Boolean" />
+			</method>
+			<output name="loUnlinkedContractDocsList" type="java.util.List" />
+		</service>
+		<service
+			classname="com.nyc.hhs.service.filenetmanager.p8services.P8ContentService"
+			servicetype="">
+			<method name="saveContractDocumentProps">
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="loUnlinkedContractDocsList" type="java.util.List" />
+				<param name="loHmDocReqProps" type="java.util.HashMap" />
+			</method>
+			<output name="saveStatus" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="deleteContract">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="asContractId" type="java.lang.String" />
+				<param name="lbErrorCheckRule" type="java.lang.Boolean" />
+			</method>
+			<output name="lbStatus" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="terminateDeleteContractUpdateWorkFlowsBatch">
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="lbErrorCheckRule" type="java.lang.Boolean" />
+				<param name="contractID" type="java.lang.String" />
+			</method>
+			<output name="lbTerminateStatus" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="terminateDeleteContractUpdateWorkFlowsBatch">
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="lbErrorCheckRule" type="java.lang.Boolean" />
+				<param name="asContractId" type="java.lang.String" />
+			</method>
+			<output name="lbTerminateStatus" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.HhsAuditService"
+			servicetype="">
+			<method name="hhsauditInsert">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="auditBean" type="com.nyc.hhs.model.HhsAuditBean" />
+				<param name="budgetList" type="java.util.List" />
+				<param name="lbTerminateStatus" type="java.lang.Boolean" />
+			</method>
+			<output name="lbAuditStatus" type="java.lang.Boolean" />
+		</service>
+		<!-- End Release 3.8.0 Enhancement 6481 -->
+		
+		
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="setContractStatusAsRegistered">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoStatusChangeResult" type="java.lang.Boolean"></output>
+		</service>		
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="removeContractDiscrepancies">
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoContractDiscRemovalResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="resetDiscrepancyStatus">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoDiscrepancyStatusChangeResult" type="java.lang.Boolean"></output>
+		</service>
+	</transaction>
+	
+
+	<transaction id="runBatchPositiveAmendmentWithNoDisc"
+		useslocaldbconnection="true" useslocalfilenetconnection="true" usesfilenetconnection="true">
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="mergeAmendmentInBaseContract">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoAmendmentMergeResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="mergeBaseBudCustomization">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoBaseBudCustomizationResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="setContractStatusAsRegistered">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoStatusChangeResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="fetchAmendAffectedBaseBudgetIds">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoAmendAffectedBaseBudgetIds" type="java.lang.String"></output>
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsService"
+			servicetype="">
+			<method name="updateYtdAndRemainingAmountInLineItems">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoAmendAffectedBaseBudgetIds" type="java.lang.String" />
+				<param name="lbFinalFinish" type="java.lang.Boolean" />
+				<!-- This service updated for Release 3.12.0 enhancement 6644-->
+				<param name="asUserId" type="java.lang.String" />
+			</method>
+			<output name="lbSuccessfullyUpdatedLineItems" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsService"
+			servicetype="">
+			<method name="updateYtdAndRemainingAmountInBudgetAndSubBudget">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoAmendAffectedBaseBudgetIds" type="java.lang.String" />
+				<param name="lbFinalFinish" type="java.lang.Boolean" />
+				<!-- This service updated for Release 3.12.0 enhancement 6644-->
+				<param name="asUserId" type="java.lang.String" />
+			</method>
+			<output name="lbSuccessfullyUpdatedSubBudget" type="java.lang.Boolean" />
+		</service>	
+	</transaction>
+	
+	
+	<transaction id="runBatchPositiveAmendmentWithDiscNoBaseStrChange"
+		useslocaldbconnection="true" useslocalfilenetconnection="true" usesfilenetconnection="true">		
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="mergeAmendmentInBaseContract">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoAmendmentMergeResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="mergeBaseBudCustomization">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoBaseBudCustomizationResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="removeContractDiscrepancies">
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoContractDiscRemovalResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="setContractStatusAsRegistered">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoStatusChangeResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="resetDiscrepancyStatus">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoDiscrepancyStatusChangeResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="fetchAmendAffectedBaseBudgetIds">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoAmendAffectedBaseBudgetIds" type="java.lang.String"></output>
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsService"
+			servicetype="">
+			<method name="updateYtdAndRemainingAmountInLineItems">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoAmendAffectedBaseBudgetIds" type="java.lang.String" />
+				<param name="lbFinalFinish" type="java.lang.Boolean" />
+				<!-- This service updated for Release 3.12.0 enhancement 6644-->
+				<param name="asUserId" type="java.lang.String" />
+			</method>
+			<output name="lbSuccessfullyUpdatedLineItems" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsService"
+			servicetype="">
+			<method name="updateYtdAndRemainingAmountInBudgetAndSubBudget">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoAmendAffectedBaseBudgetIds" type="java.lang.String" />
+				<param name="lbFinalFinish" type="java.lang.Boolean" />
+				<!-- This service updated for Release 3.12.0 enhancement 6644-->
+				<param name="asUserId" type="java.lang.String" />
+			</method>
+			<output name="lbSuccessfullyUpdatedSubBudget" type="java.lang.Boolean" />
+		</service>				
+	</transaction>
+	
+	
+	<transaction id="runBatchPositiveAmendmentWithDisc"
+		useslocaldbconnection="true" useslocalfilenetconnection="true" usesfilenetconnection="true">
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="closeAppropriateTasks">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoCloseParentTasksResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="updateBudgetModificationAndUpdateStatus">
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoParentBudgetStatusUpdateResult" type="java.lang.Boolean"></output>
+		</service>		
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="mergeAmendmentInBaseContract">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoAmendmentMergeResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="mergeBaseBudCustomization">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoBaseBudCustomizationResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="setContractStatusAsRegistered">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoStatusChangeResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="fetchAmendAffectedBaseBudgetIds">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoAmendAffectedBaseBudgetIds" type="java.lang.String"></output>
+		</service>	
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsService"
+			servicetype="">
+			<method name="updateYtdAndRemainingAmountInLineItems">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoAmendAffectedBaseBudgetIds" type="java.lang.String" />
+				<param name="lbFinalFinish" type="java.lang.Boolean" />
+				<!-- This service updated for Release 3.12.0 enhancement 6644-->
+				<param name="asUserId" type="java.lang.String" />
+			</method>
+			<output name="lbSuccessfullyUpdatedLineItems" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsService"
+			servicetype="">
+			<method name="updateYtdAndRemainingAmountInBudgetAndSubBudget">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoAmendAffectedBaseBudgetIds" type="java.lang.String" />
+				<param name="lbFinalFinish" type="java.lang.Boolean" />
+				<!-- This service updated for Release 3.12.0 enhancement 6644-->
+				<param name="asUserId" type="java.lang.String" />
+			</method>
+			<output name="lbSuccessfullyUpdatedSubBudget" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="setWFPropForContConfUpdateTask">
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoHMWFRequiredProps" type="java.util.HashMap"></output>
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="getFinancialWFProperty">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHMWFRequiredProps" type="java.util.HashMap" />
+			</method>
+			<output name="aoHMWFRequiredProps" type="java.util.HashMap" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.TaskService"
+			servicetype="">
+			<method name="launchFinancialWorkflow">
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHMWFRequiredProps" type="java.util.HashMap" />
+				<param name="lbAuthStatusFlag" type="java.lang.Boolean" />
+			</method>
+			<output name="auditBean" type="com.nyc.hhs.model.HhsAuditBean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.HhsAuditService"
+			servicetype="">
+			<method name="hhsauditInsert">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="auditBean" type="com.nyc.hhs.model.HhsAuditBean" />
+				<param name="lbAuthStatusFlag" type="java.lang.Boolean" />
+			</method>
+			<output name="hhsaudit_result" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="resetDiscrepancyStatus">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoDiscrepancyStatusChangeResult" type="java.lang.Boolean"></output>
+		</service>				
+	</transaction>
+	
+	
+	<transaction id="runBatchNegativeAmendmentWithNoDisc"
+		useslocaldbconnection="true" useslocalfilenetconnection="true">		
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="setContractStatusAsRegistered">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoStatusChangeResult" type="java.lang.Boolean"></output>
+		</service>		
+	</transaction>
+	
+	
+	<transaction id="runBatchNegativeAmendmentWithDiscNoBaseStrChange"
+		useslocaldbconnection="true" useslocalfilenetconnection="true">		
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="setContractStatusAsRegistered">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoStatusChangeResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="removeContractDiscrepancies">
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoContractDiscRemovalResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="resetDiscrepancyStatus">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoDiscrepancyStatusChangeResult" type="java.lang.Boolean"></output>
+		</service>						
+	</transaction>
+	
+	
+	<transaction id="runBatchNegativeAmendmentWithDisc"
+		useslocaldbconnection="true" useslocalfilenetconnection="true">
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="closeAppropriateTasks">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoCloseParentTasksResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="updateBudgetModificationAndUpdateStatus">
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoParentBudgetStatusUpdateResult" type="java.lang.Boolean"></output>
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="setContractStatusAsRegistered">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoStatusChangeResult" type="java.lang.Boolean"></output>
+		</service>		
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="setWFPropForContConfUpdateTask">
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoHMWFRequiredProps" type="java.util.HashMap"></output>
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="getFinancialWFProperty">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHMWFRequiredProps" type="java.util.HashMap" />
+			</method>
+			<output name="aoHMWFRequiredProps" type="java.util.HashMap" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.TaskService"
+			servicetype="">
+			<method name="launchFinancialWorkflow">
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHMWFRequiredProps" type="java.util.HashMap" />
+				<param name="lbAuthStatusFlag" type="java.lang.Boolean" />
+			</method>
+			<output name="auditBean" type="com.nyc.hhs.model.HhsAuditBean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.HhsAuditService"
+			servicetype="">
+			<method name="hhsauditInsert">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="auditBean" type="com.nyc.hhs.model.HhsAuditBean" />
+				<param name="lbAuthStatusFlag" type="java.lang.Boolean" />
+			</method>
+			<output name="hhsaudit_result" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.TaskAuditService"
+			servicetype="">
+			<method name="insertAuditForLaunchWorkflow">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="auditBean" type="com.nyc.hhs.model.HhsAuditBean" />
+			</method>
+			<output name="taskAuditStatus" type="java.lang.Boolean" />
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="resetDiscrepancyStatus">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoContractBean" type="com.nyc.hhs.model.ContractBean" />
+			</method>
+			<output name="aoDiscrepancyStatusChangeResult" type="java.lang.Boolean"></output>
+		</service>				
+	</transaction>
+	
+	<!-- Transactions for Batch Process Ends -->
+	
+	<transaction id="getInvoiceDetailsForBatch"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="system" >
+			<method name="fetchApproveInvoiceFromETL">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+			</method>
+			<output name="loInvoiceDetails" type="java.util.ArrayList" />
+		</service>
+	</transaction>
+	
+	<transaction id="updateInvoiceIdForBatch"
+		useslocaldbconnection="true" useslocalfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="getFinancialWFProperty">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHMWFRequiredProps" type="java.util.HashMap" />
+			</method>
+			<output name="aoHMWFRequiredProps" type="java.util.HashMap" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.TaskService"
+			servicetype="">
+			<method name="launchFinancialWorkflow">
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHMWFRequiredProps" type="java.util.HashMap" />
+				<param name="lbAuthStatusFlag" type="java.lang.Boolean" />
+			</method>
+			<output name="auditBean" type="com.nyc.hhs.model.HhsAuditBean" />
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="">
+			<method name="updateInvoiceIdForBatch">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHMWFRequiredProps" type="java.util.HashMap" />
+			</method>
+			<output name="aoUpdateStatus" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+	
+	<transaction id="getBudgetAdvanceForBatch"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="">
+			<method name="fetchBudgetAdvanceFromETL">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+			</method>
+			<output name="loBudgetAdvanceDetails" type="java.util.ArrayList" />
+		</service>
+	</transaction>
+	
+	<transaction id="updateBudgetAdvanceIdForBatch"
+		useslocaldbconnection="true" useslocalfilenetconnection="false">
+	 	<service classname="com.nyc.hhs.daomanager.service.FinancialsListService"
+			servicetype="">
+			<method name="getFinancialWFProperty">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHMWFRequiredProps" type="java.util.HashMap" />
+			</method>
+			<output name="aoHMWFRequiredProps" type="java.util.HashMap" />
+		</service>
+		<service classname="com.nyc.hhs.daomanager.service.TaskService"
+			servicetype="">
+			<method name="launchFinancialWorkflow">
+				<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHMWFRequiredProps" type="java.util.HashMap" />
+				<param name="lbAuthStatusFlag" type="java.lang.Boolean" />
+			</method>
+			<output name="auditBean" type="com.nyc.hhs.model.HhsAuditBean" />
+		</service>
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="">
+			<method name="updateBudgetAdvanceIdForBatch">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHMWFRequiredProps" type="java.util.HashMap" />
+			</method>
+			<output name="aoUpdateStatus" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+	<transaction id="applicationSettingDB_batch" useslocaldbconnection="true"
+		usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.ApplicationService"
+			servicetype="">
+			<method name="getApplicationSettingFromDB">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+			</method>
+			<output name="loAppliocationSettingMap" type="java.util.List" />
+		</service>
+	</transaction>
+	<!-- Start of Release 3.12.0 Enhancement 6601 -->
+	<transaction id="markAmendmentETLRegistredWhichAreRegisteredInFMS"
+		useslocaldbconnection="true" useslocalfilenetconnection="false">
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="">
+			<method name="markAmendmentETLRegistredWhichAreRegisteredInFMS">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHashMap" type="java.util.HashMap" />
+			</method>
+			<output name="lbStatus" type="java.lang.Boolean"></output>
+		</service>
+		<!-- Start: R7 defect 8644 part 3 : This Service is added to update the contract 
+		which are partially merged with the call of city user, by selecting the option
+		Mark Amendment as Registered -->
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="">
+			<method name="markAmendmentETLRegistredWithPartialMergeRequest">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHashMap" type="java.util.HashMap" />
+			</method>
+			<output name="lbStatus" type="java.lang.Boolean"></output>
+		</service>
+		
+		<!-- End: R7 defect 8644 part 3 -->
+	</transaction>
+	
+	<transaction id="getAmendmentRegisterdInFms"
+		useslocaldbconnection="true" useslocalfilenetconnection="false">
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="">
+			<method name="getAmendmentRegisterdInFms">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHashMap" type="java.util.HashMap" />
+			</method>
+			<output name="lsAmendmentContractList" type="java.util.List"></output>
+		</service>
+		<!-- Add a service which will add the contract id-->
+		<!-- Change in R7 defect 8644 start : Added this service to get the list of the contracts
+		which are requested for the parial merge by the City user by choosing the option Mark Amendment as Registered.-->
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="">
+			<method name="getPartialMergeRequestList">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHashMap" type="java.util.HashMap" />
+			</method>
+			<output name="lsPartialMergeContractList" type="java.util.List"></output>
+		</service>
+		<!-- Change in R7 defect 8644 end -->
+	</transaction>
+	<transaction id="updateAndPartialMergeAmendmentRegisteredInFMS"
+		useslocaldbconnection="true" useslocalfilenetconnection="false">
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="">
+			<method name="updateAndPartialMergeAmendmentRegisteredInFMS">
+			<param name="aoFilenetSession"
+					type="com.nyc.hhs.service.filenetmanager.p8transferobject.P8UserSession" />
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="aoHashMap" type="java.util.HashMap" />
+				<param name="lsAmendmentContractId" type="java.lang.String" />
+			</method>
+			<output name="lbStatus" type="java.lang.Boolean"></output>
+		</service>
+	</transaction>
+	
+	
+	<!-- End of Release 3.12.0 Enhancement 6601 -->
+		<!--Start: Added in R7 for defect 8644  -->
+	<transaction id="UpdateAmendContractsBudgetPartialMerge"
+		useslocaldbconnection="true" useslocalfilenetconnection="false">
+			<!--Start:Added in R7.This service added for defect 8644 to update the budget status.  -->
+			<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="">
+			<method name="updateBudgetStatus">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="allContractList" type="java.util.List" />
+			</method>
+			<output name="aiBudgetsStatusUpdated" type="java.lang.Boolean"></output>
+			</service>
+			<!--End  -->
+	<!--Start: Added in R7 for defect 8705  -->
+	</transaction>
+		<transaction id="updateBudgetEndDateWithAmendEndDate"
+		useslocaldbconnection="true" useslocalfilenetconnection="false">
+		<service classname="com.nyc.hhs.contractsbatch.service.ContractsBatchService"
+			servicetype="">
+			<method name="updateBaseBudgetEndDate">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+				<param name="asContractId" type="java.lang.String" />
+			</method>
+			<output name="aiBudgetsUpdated" type="java.lang.Boolean"></output>
+			</service>
+	</transaction>
+<!--End: Added in R7 for defect 8705  -->
+</transactions>

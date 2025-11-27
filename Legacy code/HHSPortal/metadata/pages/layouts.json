@@ -1,0 +1,365 @@
+{
+  "version": "1.0.0",
+  "description": "Complete Contract Management Page Layouts - All screen layouts and components",
+  "global_actions": {
+    "enabled": true,
+    "default_position": "sticky_bottom",
+    "default_actions": ["save", "cancel", "close"],
+    "keyboard_shortcuts": {
+      "save": "Ctrl+S",
+      "cancel": "Escape", 
+      "close": "Ctrl+W"
+    },
+    "unsaved_changes_warning": true,
+    "auto_save": {
+      "enabled": false,
+      "interval": 30000
+    }
+  },
+  "layouts": {
+    "contract_dashboard_layout": {
+      "id": "contract_dashboard_layout",
+      "name": "Contract Dashboard Layout",
+      "description": "Main dashboard for contract management overview",
+      "type": "dashboard",
+      "object": "contract",
+      "sections": [
+        {
+          "id": "dashboard_header",
+          "type": "header",
+          "title": "Contract Management Dashboard",
+          "subtitle": "Overview of contract activities and key metrics",
+          "actions": [
+            {
+              "id": "create_contract",
+              "label": "Create Contract",
+              "type": "button",
+              "variant": "primary",
+              "icon": "Plus",
+              "action": "navigate",
+              "target": "/contracts/create",
+              "permissions": ["contract:create"]
+            },
+            {
+              "id": "export_data",
+              "label": "Export Data",
+              "type": "button",
+              "variant": "outline",
+              "icon": "Download",
+              "action": "export",
+              "permissions": ["contract:export"]
+            }
+          ]
+        },
+        {
+          "id": "kpi_cards",
+          "type": "kpi_grid",
+          "title": "Key Performance Indicators",
+          "columns": 4,
+          "cards": [
+            {
+              "id": "total_contracts",
+              "title": "Total Contracts",
+              "value": "{{contracts.total_count}}",
+              "icon": "FileText",
+              "color": "blue",
+              "trend": {
+                "value": "{{contracts.monthly_growth}}",
+                "direction": "up"
+              }
+            },
+            {
+              "id": "active_contracts",
+              "title": "Active Contracts",
+              "value": "{{contracts.active_count}}",
+              "icon": "CheckCircle",
+              "color": "green",
+              "subtitle": "{{contracts.active_percentage}}% of total"
+            },
+            {
+              "id": "pending_approval",
+              "title": "Pending Approval",
+              "value": "{{contracts.pending_count}}",
+              "icon": "Clock",
+              "color": "orange",
+              "subtitle": "{{contracts.pending_percentage}}% of total"
+            },
+            {
+              "id": "total_value",
+              "title": "Total Contract Value",
+              "value": "{{contracts.total_value}}",
+              "icon": "DollarSign",
+              "color": "purple",
+              "format": "currency"
+            }
+          ]
+        },
+        {
+          "id": "charts_section",
+          "type": "chart_grid",
+          "title": "Contract Analytics",
+          "columns": 2,
+          "charts": [
+            {
+              "id": "status_distribution",
+              "type": "pie_chart",
+              "title": "Contract Status Distribution",
+              "data_source": "contracts.status_distribution",
+              "height": 300
+            },
+            {
+              "id": "value_trend",
+              "type": "line_chart",
+              "title": "Contract Value Trend",
+              "data_source": "contracts.value_trend",
+              "height": 300,
+              "x_axis": "month",
+              "y_axis": "value"
+            },
+            {
+              "id": "agency_distribution",
+              "type": "bar_chart",
+              "title": "Contracts by Agency",
+              "data_source": "contracts.agency_distribution",
+              "height": 300,
+              "x_axis": "agency",
+              "y_axis": "count"
+            },
+            {
+              "id": "monthly_activity",
+              "type": "bar_chart",
+              "title": "Monthly Contract Activity",
+              "data_source": "contracts.monthly_activity",
+              "height": 300,
+              "x_axis": "month",
+              "y_axis": "count"
+            }
+          ]
+        },
+        {
+          "id": "recent_activity",
+          "type": "activity_feed",
+          "title": "Recent Activity",
+          "data_source": "contracts.recent_activity",
+          "limit": 10,
+          "actions": [
+            {
+              "id": "view_all_activity",
+              "label": "View All Activity",
+              "type": "link",
+              "action": "navigate",
+              "target": "/contracts/activity"
+            }
+          ]
+        },
+        {
+          "id": "quick_actions",
+          "type": "action_grid",
+          "title": "Quick Actions",
+          "columns": 3,
+          "actions": [
+            {
+              "id": "view_contracts",
+              "label": "View All Contracts",
+              "description": "Browse and manage all contracts",
+              "icon": "List",
+              "action": "navigate",
+              "target": "/contracts",
+              "permissions": ["contract:view"]
+            },
+            {
+              "id": "pending_approvals",
+              "label": "Pending Approvals",
+              "description": "Review contracts awaiting approval",
+              "icon": "Clock",
+              "action": "navigate",
+              "target": "/contracts?status={{references.contract_statuses.PENDING_APPROVAL.code}}",
+              "permissions": ["contract:approve"]
+            },
+            {
+              "id": "create_amendment",
+              "label": "Create Amendment",
+              "description": "Add amendments to existing contracts",
+              "icon": "Edit",
+              "action": "navigate",
+              "target": "/contracts/amendments/create",
+              "permissions": ["contract:create_amendment"]
+            }
+          ]
+        }
+      ]
+    },
+    "contract_create_layout": {
+      "id": "contract_create_layout",
+      "name": "Contract Create Layout",
+      "description": "Layout for creating new contracts with global actions",
+      "type": "form",
+      "object": "contract",
+      "global_actions": {
+        "enabled": true,
+        "position": "sticky_bottom",
+        "actions": ["save", "cancel", "close"],
+        "save_action": {
+          "type": "submit_form",
+          "target": "contract_form",
+          "success_message": "Contract created successfully",
+          "error_message": "Failed to create contract"
+        },
+        "cancel_action": {
+          "type": "reset_form",
+          "target": "contract_form",
+          "confirm_discard": true
+        },
+        "close_action": {
+          "type": "navigate",
+          "target": "/contracts",
+          "confirm_discard": true
+        }
+      },
+      "sections": [
+        {
+          "id": "form_header",
+          "type": "header",
+          "title": "Create New Contract",
+          "subtitle": "Fill in the contract details below",
+          "show_breadcrumbs": true
+        },
+        {
+          "id": "contract_form",
+          "type": "form",
+          "form_id": "contract_create_form",
+          "sections": [
+            {
+              "id": "basic_information",
+              "title": "Basic Information",
+              "fields": ["contract_id", "contract_name", "contract_type", "start_date", "end_date"]
+            },
+            {
+              "id": "parties_information",
+              "title": "Parties Information", 
+              "fields": ["agency_id", "provider_id", "contract_value", "currency"]
+            },
+            {
+              "id": "additional_details",
+              "title": "Additional Details",
+              "fields": ["description", "terms_conditions", "special_requirements"]
+            }
+          ]
+        }
+      ]
+    },
+    "contract_edit_layout": {
+      "id": "contract_edit_layout", 
+      "name": "Contract Edit Layout",
+      "description": "Layout for editing existing contracts with global actions",
+      "type": "form",
+      "object": "contract",
+      "global_actions": {
+        "enabled": true,
+        "position": "sticky_bottom",
+        "actions": ["save", "cancel", "close"],
+        "save_action": {
+          "type": "submit_form",
+          "target": "contract_edit_form",
+          "success_message": "Contract updated successfully",
+          "error_message": "Failed to update contract"
+        },
+        "cancel_action": {
+          "type": "reset_form",
+          "target": "contract_edit_form",
+          "confirm_discard": true
+        },
+        "close_action": {
+          "type": "navigate",
+          "target": "/contracts",
+          "confirm_discard": true
+        }
+      },
+      "sections": [
+        {
+          "id": "form_header",
+          "type": "header",
+          "title": "Edit Contract",
+          "subtitle": "Update contract information",
+          "show_breadcrumbs": true
+        },
+        {
+          "id": "contract_edit_form",
+          "type": "form",
+          "form_id": "contract_edit_form",
+          "sections": [
+            {
+              "id": "basic_information",
+              "title": "Basic Information",
+              "fields": ["contract_id", "contract_name", "contract_type", "start_date", "end_date", "status"]
+            },
+            {
+              "id": "parties_information",
+              "title": "Parties Information",
+              "fields": ["agency_id", "provider_id", "contract_value", "currency"]
+            },
+            {
+              "id": "additional_details", 
+              "title": "Additional Details",
+              "fields": ["description", "terms_conditions", "special_requirements"]
+            }
+          ]
+        }
+      ]
+    },
+    "amendment_create_layout": {
+      "id": "amendment_create_layout",
+      "name": "Amendment Create Layout", 
+      "description": "Layout for creating contract amendments with global actions",
+      "type": "form",
+      "object": "amendment",
+      "global_actions": {
+        "enabled": true,
+        "position": "sticky_bottom",
+        "actions": ["save", "cancel", "close"],
+        "save_action": {
+          "type": "submit_form",
+          "target": "amendment_form",
+          "success_message": "Amendment created successfully",
+          "error_message": "Failed to create amendment"
+        },
+        "cancel_action": {
+          "type": "reset_form",
+          "target": "amendment_form",
+          "confirm_discard": true
+        },
+        "close_action": {
+          "type": "navigate",
+          "target": "/contracts",
+          "confirm_discard": true
+        }
+      },
+      "sections": [
+        {
+          "id": "form_header",
+          "type": "header",
+          "title": "Create Amendment",
+          "subtitle": "Add amendment to existing contract",
+          "show_breadcrumbs": true
+        },
+        {
+          "id": "amendment_form",
+          "type": "form",
+          "form_id": "amendment_create_form",
+          "sections": [
+            {
+              "id": "amendment_details",
+              "title": "Amendment Details",
+              "fields": ["amendment_id", "contract_id", "amendment_type", "effective_date", "description"]
+            },
+            {
+              "id": "changes",
+              "title": "Changes",
+              "fields": ["change_description", "old_value", "new_value", "justification"]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

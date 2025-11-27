@@ -1,0 +1,25 @@
+<taglib>
+	<tlib-version>1.0</tlib-version>
+	<jsp-version>2.0</jsp-version>
+	<short-name>Birt Custom Tld</short-name>
+	<tag>
+		<name>birt</name>
+		<tag-class>com.nyc.hhs.report.framework.utils.BirtTag</tag-class>
+		<body-content>scriptless</body-content>
+		<attribute>
+			<name>reportId</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>height</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>width</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+</taglib>

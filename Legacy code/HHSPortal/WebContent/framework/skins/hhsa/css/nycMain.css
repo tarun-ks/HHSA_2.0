@@ -1,0 +1,3496 @@
+@charset "utf-8";
+/*  ---- reset: ---- */
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, dfn, em, img, ins, kbd, q, s, samp, small, sub, sup, tt, var, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td 
+	{
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-family: Verdana, sans-serif;
+	color:#333;
+	font-weight:normal;
+	text-decoration:none
+}
+html {overflow-y:scroll}
+body {
+	line-height: 17px;
+	font-size: 12px
+}
+img, a img {border:0}
+ol, ul {list-style: none}
+table {
+	border-collapse: collapse;
+	border-spacing: 0
+}
+caption, th, td {
+	text-align: left;
+	font-weight: normal
+}
+blockquote, q {quotes: none}
+blockquote:before,blockquote:after,q:before,q:after {
+	content: '';
+	content: none
+}
+:focus  {outline: none}
+/* ---- End $_reset: ---- */
+
+/* ---- Internal Page structure ---- */
+#main-wrapper {
+	margin: 0 auto;
+	width: 967px
+}
+
+/* ---- nyc.gov top bar ---- */
+.nycgov_header {
+	background:url(../images/background.png) 0 -49px repeat-x;
+	width: 100%;
+	height: 48px;
+	color: #fff
+}
+.nycgov_header .nycgov_logo {
+	margin: 0;
+	padding: 6px 0 0 6px;
+	float: left
+}
+.nycgov_logo{
+	background: url(../images/logos.png) no-repeat 8px 6px transparent;
+	height: 38px;
+	width: 42px
+}
+.nycgov_header ul {
+	float:right;
+	padding-top:15px 
+}
+	.nycgov_header ul li {
+		border-right: 1px solid #EFEFEF;
+	    color: #EFEFEF;
+	    display: inline;
+	    font-size: 0.917em;
+	    list-style-type: none;
+	    padding: 0 9px 0 4px
+	}
+		.nycgov_header ul li a {
+			color:#efefef;
+			/*font-size:11px*/			
+		}
+.newcolor, a.newcolor{
+	color:#fbc406 !important;
+	/*font-size:11px*/
+}
+
+/* ---- Login Screen styles start ---- */
+.login_info {
+	clear:both;
+	padding:20px
+}
+	.login_info a {color:#09377b}
+.login_holder {
+	background:url(../images/login_bg.jpg) #F6F7F7 repeat-x center bottom;
+	border: 1px solid #EBECEC;
+	border-bottom:0;
+	border-top:0;
+    display: block;
+    margin: 0 auto;
+    overflow: hidden;
+	padding-bottom:15px;
+    width: 500px;
+	position:relative
+}
+.login_holder_info {
+	background: url(../images/login_img.jpg) no-repeat scroll right center transparent;
+    color: #2172ba;
+    display: block;
+    font-weight: bold;
+    padding: 16px 0 6px 20px;
+    position: absolute;
+    right: 35px;
+    text-transform: uppercase;
+    top: -4px;
+    width: 98px
+}
+.logincontainer {
+	clear:both;
+	padding:30px 5px 5px
+}
+	.logincontainer .row {
+		clear: both;
+	    overflow:hidden;
+	    padding: 0;
+		margin:0;
+		min-height:22px
+	}
+	.row a {color:#09377b}
+		.logincontainer .row span.label {
+		    float: left;
+		    margin: 0 8px 3px 0;
+		    min-height: 20px;
+		    padding: 4px 5px 4px 0;
+		    text-align: right;
+		    width: 245px
+		}
+		.logincontainer .row span.formfield {
+			float: right;
+		    min-height: 20px;
+		    padding: 4px 0;
+		    text-align: left;
+		    width: 230px
+		}
+	.logincontainer input {
+		width: 200px;
+		border:1px solid #CCC
+	}
+	 .logincontainer .button{
+			width:auto !important
+		}
+/* ---- Login Screen styles end ---- */
+
+
+/* ---- HHS header ---- */
+.hhs_header {
+	background-color: #F8F8F8;
+    border-bottom: 6px solid #1569B2;
+    border-top: 2px solid #FFF;
+    height: 74px;
+    width: 100%;
+	clear:both
+}
+/*** QC-9317 for new NCID header ?v=1 is added *********/
+h1 {
+	background: url(../images/logos.png?v=1) no-repeat 8px -48px transparent;
+    height: 59px;
+    padding: 5px;
+    text-indent: -999px;
+	width:13%;
+	float:left
+}
+
+	.hhs_header ul {
+		float: left;
+	    margin-left: 10px;
+	    z-index: 99
+	}
+		.hhs_header ul li {
+		   	list-style: none outside none;
+		  	margin: 31px 0 0 4px;
+			float:left;
+			position:relative
+		}
+		.hhs_header ul li a {
+			background-color: #FFF;
+		    border-color: #F2F2F2;
+		    border-style: solid solid none;
+		    border-width: 1px 1px 0;
+		    color: #1569B2;
+			display:block;
+		    float: left;
+		    font-size: 13px;
+		    font-weight: bold;
+		    height: 32px;
+		    line-height: 15px;    
+		    padding: 10px 3px 0 3px;
+		    text-align: center;
+		    /* ---- Release 5 changes done for provider centric reports ---- */
+		    width: 101px;
+		   	/*word-break:hyphenate*/
+		}
+			.hhs_header ul li a:hover {
+				background-color: #1569B2;
+			    border-color: #F2F2F2;
+			    border-style: solid solid none;
+			    border-width: 1px 1px 0;
+			    color: #fff  
+			}
+.active {
+  	background-color: #1569B2!important;
+    border-color: #1569B3!important;;
+    color: #fff!important
+}
+/* ---- Sub/Dropdown Menu Starts ---- */
+.hhs_header ul li ul {
+   left:-9999px;
+   position:absolute;
+   margin:43px 0 0 0;
+   background:#fff;
+   border:1px solid #f2f2f2 
+}
+	.hhs_header ul li ul li {
+		list-style-type:none;
+		background: none;
+		padding:0;
+		clear:both;
+		margin:0;
+		border:1px solid #f2f2f2;
+		white-space:nowrap;
+		width:100%
+	}
+.hhs_header ul li:hover ul {
+   left:1px
+}
+	.hhs_header ul li:hover {
+		background-color: #1569B2   
+	}
+.hhs_header ul li ul li a {
+	background-color: transparent;
+    border-width: 0;
+   	color:#1569B2!important;
+	font-size: 12px;
+    font-weight: normal;
+    height: auto;
+    line-height: 15px;    
+    padding:8px 20px;
+    width: auto	
+}
+	.hhs_header ul li ul li a:hover {
+		border:0;
+		color:#fff!important
+	}
+/* ---- Sub Menu Ends ---- */
+/* Toolbar Icons (home,reports,inbox,help,logout) related css starts */
+.toolbar {
+	float:right;	
+	height:41px;
+	width:23%
+}
+	.toolbar ul {
+		background-color:#f2f3f3;
+		margin: 12px 5px 0 4px;
+		float: right
+	}
+		.toolbar ul li {
+			float: left;
+			height: 36px;
+			margin: 0;
+			padding: 3px
+		}
+.textresize {
+	text-align:right;
+	padding-right:5px
+}
+.textresize ul {
+	margin:0;
+	background-color:transparent!important;
+	height:20px!important;
+	float:right
+}
+	.textresize ul li {
+		float:left;
+		list-style-type:none;
+		margin:0;
+		height:20px!important;
+		padding:0
+	}
+		.textresize ul li a {
+			padding:1px 4px 4px 4px!important;
+			width:15px!important;
+			border:0!important;
+			background-color:transparent!important;
+			font-weight:normal!important;
+			color:#333;
+			height:18px!important
+		}
+			.textresize ul li a:hover {
+				background-color:#03F!important;
+				font-weight:normal!important;
+				color:#fff
+			}
+.activetext {
+	background-color: #F2F3F3 !important;
+    border: 1px solid #C1C1C1;
+    color: #FFF;
+    font-weight: normal !important;
+    height: 17px !important;
+    padding: 1px !important;
+    text-align: center !important
+}
+
+.textmedium {font-size:14px!important}
+.textbig {font-size:17px!important}
+
+.homeicon, .reportsicon, .inboxicon, .helpicon, .switchaccounticon, .logouticon, .alerticon {
+	width: 30px
+}
+
+.empty_disabled_icon {
+	width: 30px
+}
+.empty_disabled_icon a{
+	background: url(../images/toolbar_icons.png) 0px 4px no-repeat transparent !important;
+	border: 0 none !important;
+	height: 30px !important;
+    text-indent: -9999px;
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.6;
+}
+.empty_disabled_icon a {background-position: -295px 4px !important} 
+
+.homeicon a, .reportsicon a, .inboxicon a, .helpicon a, .switchaccounticon a, .logouticon a, .alerticon a {
+	background: url(../images/toolbar_icons.png) 0px 4px no-repeat transparent !important;
+	border: 0 none !important;
+	height: 30px !important;
+	text-indent: -9999px;
+	width: 28px !important
+}
+.reportsicon a { background-position: -39px 4px !important}
+.inboxicon a {background-position: -85px 3px !important}
+.helpicon a {background-position: -125px 2px !important}
+.logouticon a {background-position: -167px 4px !important}
+.alerticon a {background-position: -211px 4px !important}
+.switchaccounticon a {background-position: -253px 4px !important}
+.homeicon a:hover, .reportsicon a:hover, .inboxicon a:hover, .helpicon a:hover, .switchaccounticon a:hover, .logouticon a:hover, .alerticon a:hover {	
+    background: url(../images/toolbar_icons.png) 0px -35px no-repeat transparent      
+}
+.reportsicon a:hover {background-position:-39px -35px}
+.inboxicon a:hover {background-position: -85px -36px}
+.helpicon a:hover {background-position:-125px -37px}
+.logouticon a:hover {background-position: -167px -35px}
+.alerticon a:hover {background-position: -211px -35px}
+.switchaccounticon a:hover {background-position: -253px -35px}
+/*.empty_disabled_icon a:hover {background-position: -295px -35px} */
+/* Toolbar Icons (home,reports,inbox,help,logout) related css Ends */
+/* ---- HHS header Ends ---- */
+
+/* ---- HHS Breadcrumb Starts ---- */
+.breadcrumb, .maintainanceWrapper .breadcrumb{
+	width:100%;
+	font-weight:normal;
+	background:url(../images/trans_bg.png) repeat-x 0 0 #efefef;
+	height:25px;
+	border-bottom:1px solid #8bc612;
+	clear:both
+}
+.maintainanceWrapper .breadcrumb{
+	background:transparent !important;
+	clear:both;
+	border: none !important;
+	height: auto !important
+}
+	.breadcrumb ul li, .maintainanceWrapper .breadcrumb ul li{
+		color:#09377b;
+		list-style-type:none;
+		float:left;
+		padding:3px 0 3px 5px;
+		font-size:0.833em
+	}
+		.breadcrumb li a, .maintainanceWrapper .breadcrumb li a{
+			color:#09377b;
+			/*font-size:10px*/
+		}
+			.breadcrumb li a:hover, .maintainanceWrapper .breadcrumb li a:hover {
+				text-decoration:underline
+			}
+/* ---- HHS Breadcrumb Ends  ---- */
+
+/* ---- HHS Login User Info Starts ---- */
+.logininfo {
+	float:right;
+	padding:3px 10px 0 0
+}
+	.logininfo span {
+		float:left;
+		padding-left:5px;
+		font-size:0.833em
+	}
+/* [Start] QC9720 */
+.loginmessageboard {
+	float:left;
+	padding:3px 10px 0 0
+}
+	.loginmessageboard span {
+		float:left;
+		padding-left:5px;
+		font-size:0.833em
+	}
+/* [End] QC9720 */
+/* ---- Common Class ---- */
+.bold {font-weight:bold}
+.nobdr {border:0 !important}
+.inactive{color:#D3D3DD}
+.font11{font-size:0.833em}
+.inactive a{
+ 	color: #D3D3DD !important;
+ 	cursor: default	
+}
+.input{
+	width: 250px;
+	border:1px solid #CCC
+}
+#providerSharedOrgId{
+	float:right;	
+}
+textarea.input{
+	height: 100px;
+	resize: none;
+	width: 250px
+}
+.textarealabel{
+	height:106px
+}
+.readonly,[readonly], input[readonly], textarea[readonly]{
+	background: #d2d2d2 !important;
+	color: #666;
+	cursor: default
+}
+.gridfixedHeight {
+	height: 514px;
+}
+.clearHeight {
+	height: auto;
+	min-height:inherit !important
+}
+.inputStretched {
+	width: 93% !important
+}
+.textarea{
+	resize:none;
+	font-size:100%;
+	width:99%
+}
+.hr{
+	border-bottom:1px solid #F2F2F2;
+	clear: both;
+	display: block;
+	height: 2px;
+	margin: 1px 5px 6px 1px
+}
+
+.hrBold {
+    border-bottom: 2px solid #898989;
+    clear: both;
+    display: block;
+    height: 2px;
+    margin: 1px 5px 6px 1px;
+}
+
+.required{
+	color:#ff0000;
+	padding-right:3px
+}
+
+/* Added on 17Sep13 - Required fields for task, comments */
+#tabs-1 .required, #tabs-2 .required{
+	float: left;
+	width:100%
+}
+
+.left {float: left}
+.right {float: right}
+.clear {clear: both}
+.padLft{padding-left: 14px !important}
+.pad10 {padding:10px 0}
+
+/* H2 is used for all Page Titles */
+h2 {
+	color: #5077AA;
+    font-size: 1.42em; 
+    font-weight: bold;
+    padding: 10px 0 8px;
+    float:left;
+    width:97%
+}
+	h2 label {
+		color: #5077AA;
+		 font-size: 100%; 
+	    font-weight: bold;
+	    padding:2px 0
+	}
+		h2 label label {
+	    	font-weight: normal;
+	    	color:#333
+	}
+/* H3 is used for all content Headers */
+h3 {
+	color: #5077AA;
+    font-size: 1.1em;
+    font-weight: bold;
+    line-height: 18px;
+    padding: 6px 0 5px 0;
+	clear:both
+}
+h4 {
+	background:#ccc url(../images/background.png) 0 -230px;
+	color: #333;
+    font-size: 13px;
+    font-weight: bold;
+    line-height: 18px;
+    padding: 10px;
+	clear:both
+}
+h5{
+	color: #5077AA;
+    clear:both;
+    font-size: 1.20em;
+    font-weight: bold;
+    /*padding: 10px 0 8px;*/
+}
+h6{
+	font-size: 1.2em;
+	font-weight: bold;
+	line-height: 18px;
+	padding: 6px 0 5px 0;
+	clear:both
+	}
+p {
+	padding:5px 0;
+	clear:both
+}
+
+/* ---- HHS Login User Info Starts / Body Container Starts ---- */
+.bodycontainer{
+	background:#fbfcfd;
+	width:955px;
+	padding: 6px;
+}
+.container{
+	display:block;
+	/* position:relative; */
+	background:#fff;
+	min-height:480px;
+	padding:0 8px;
+	overflow: hidden;
+	clear: both
+}
+.containerpanel {
+	background: #FFF;
+	border: 1px solid #CDCDCD;
+	display: block;
+	overflow: hidden;
+	padding: 5px
+}
+.termspanel {
+	height:250px;
+	overflow:auto;
+	border: 1px solid #f1f1f1;
+	padding:5px;
+	margin-bottom:10px
+}
+
+.formcontainer{	display:block}
+.formcontainer .note{
+	 float:left;
+	 font-style:italic;
+	 color:#666;
+	 text-align:center;
+	 padding-bottom:10px
+}
+.noteOverlapped{
+	 text-align:left !important;
+	 float:left !important; 
+	 width:95%
+}
+.formcontainer .row {
+	clear: both;
+    overflow:hidden;
+    padding: 0;
+	margin:0;
+	min-height:22px
+}
+	.formcontainer .row span.label {
+		background: none repeat scroll 0 0 #F2F2F2;
+	    float: left;
+	    margin: 0 8px 3px 0;
+	    min-height: 20px;
+	    padding: 4px 5px 4px 0;
+	    text-align: right;
+	    width:35%;
+	    font-weight: bold
+	}
+	/* Added For R5 */
+	
+	.formcontainer .row span.widelabel {
+		background: none repeat scroll 0 0 #F2F2F2;
+	    float: left;
+	    margin: 0 8px 3px 0;
+	    min-height: 150px;
+	    padding: 4px 5px 4px 0;
+	    text-align: center;
+	    width:35%;
+	    font-weight: bold
+	}
+	
+	/* End */
+#contactDiv .formcontainer .row span.label{
+	width:200px !important
+}
+.formcontainer .row span.formfield{
+	float: left;
+	min-height: 20px;
+	padding: 4px 0;
+	text-align: left;
+	width:29%
+}
+
+.formcontainer .row span.formfield1{
+	float: left;
+	min-height: 20px;
+	padding: 4px 0;
+	text-align: left;
+	width:29%;
+	white-space:nowrap;
+}
+.formcontainer .row span.formfieldTimestamp{
+	float: left;
+	min-height: 20px;
+	padding: 4px 0;
+	text-align: left;
+	
+}
+.formcontainer .row span.error{
+	float: left;
+	padding: 4px 0;
+	text-align: left; 
+	color:red;
+	width:30%
+}
+.formcontainer .row span.formfield .button{
+	background:url(../images/trans_bg.png) repeat-x scroll 0 0 #26B83F;
+	padding:3px 4px;
+	border:1px solid;
+	border-color:#fff #666 #666 #fff;
+	cursor:pointer;
+	color:#fff;
+	font-size:10px;
+	font-weight:bold;
+	font-family: verdana, sans-serif
+}
+.formcontainer .row span.formfield .radio{
+	width: auto !important
+}
+
+/* All Buttons - Grey/Red/Default(Green) */
+.buttonholder{
+	text-align:right;
+	display:block;
+	height:35px;
+	clear:both;
+	padding-top:5px
+}
+.buttonholder input, .graybtutton, .button{
+	background:url(../images/trans_bg.png) repeat-x scroll 0 0 #26B83F;
+	padding:5px;
+	margin-left:8px;
+	border:1px solid #1DA52D;
+	cursor:pointer;
+	color:#fff;
+	font-size:0.9em;
+	font-weight:bold;
+	font-family: verdana, sans-serif
+}
+.buttonholder input:hover{
+	border: 1px solid #666;
+	background:none #26B83F
+}
+.graybtutton{
+	background:url(../images/trans_bg.png) repeat-x scroll 0 0 #ccc !important;
+	color:#333 !important;
+	width:auto !important;
+	border: 1px solid #999 !important
+}
+.graybtutton:hover {background:none #ccc !important}
+.graybtutton1{
+	background:url(../images/trans_bg.png) repeat-x scroll 0 0 #ccc !important;
+	color:#333 !important;
+	width:auto !important;
+	border: 1px solid #999 !important
+}
+.redbtutton {
+   background:url(../images/trans_bg.png) repeat-x scroll 0 0 #F00 !important;
+   border:1px solid #B92801 !important
+}
+[disabled]{
+    background-color:#d2d2d2 !important;
+	color:#999 !important;
+	border:1px solid #d2d2d3 !important;	
+	cursor:default !important
+}
+
+/* Footer */
+.footer{
+	padding:10px;
+	background:#4c4c4c;
+	color:#fff;
+	font-size:0.833em;
+	clear:both;
+	overflow:hidden
+}
+	.footer .copyright{
+		float:left;
+		color:#fff;
+		/*font-size:10px;*/
+		width:50%
+	}
+	.footer .fotterlinks{
+		float:right;
+		text-align:right
+	}
+		.footer .fotterlinks ul li{
+			border-right: 1px solid #CCC;
+			color: #FBC406 !important;
+			float: left;
+			list-style-type: none;
+			padding: 0 10px 0 5px
+		}
+			.footer .fotterlinks a{
+				color: #FBC406 !important;
+			   /* font-size: 10px */
+			}
+
+.roundcorners { 
+/* Shadow  
+	-moz-box-shadow: 3px 3px 4px #000; 
+	-webkit-box-shadow: 3px 3px 4px #000;
+	box-shadow: 3px 3px 4px #000; */	
+	/* Round Corners */  
+	-moz-border-radius: 4px; /* Firefox */
+	-webkit-border-radius: 4px; /* Safari and Chrome */
+	border-radius: 4px;
+	/* Opera 10.5+, future browsers, and now also Internet Explorer 6+ using IE-CSS3 */
+	/* behavior: url(css/ie-css3.htc); */
+	/* This lets IE know to call the script on all elements which get the 'box' class */
+	position:relative;	
+	z-index:9
+}
+/* ---- Body Container Ends ---- */
+
+/* ---- Application Main Starts ---- */
+.appnavbar{	height: 33px;
+			float: left}
+	.appnavbar ul{
+		background:url(../images/background.png) repeat-x #EFEFEF 0 0;
+		border: 1px solid #CDCDCD;
+		float: left;
+		height: 33px;
+		margin-right: 10px
+	}
+	
+ @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+/* .iconQuestion{
+        margin-top: 25px !important;
+    } */
+.iconQuestion.iconQuestion-align{
+        margin-top: 5px !important;
+    }
+    .graphHelpText li{
+	margin-left:20px;
+}
+#step2selectOrg.step2selectOrg-align
+{
+	padding-left:25px;
+}
+    
+}
+	.appnavbar ul li{
+		border-right: 1px solid #dcdce9;
+		float: left;
+		height: 26px;
+		padding-top: 8px
+	}
+li.appnavbar-align
+{   
+	display: table-cell;
+    border: 0px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+}
+		.appnavbar ul li a{
+			/* color: #333; */
+			font-weight: bold;
+			padding: 9px 7px 10px;
+			
+		}
+		.appnavbarApplication ul li a{
+			/* color: #333; */
+			font-weight: bold;
+			padding: 9px 20px 9px 28px;
+			
+		}
+		
+		.appnavbarListAction ul li a{
+		padding: 9px 18px 9px 20px;
+		}
+		.appnavbar ul li a:hover{
+			color: #1569B2
+		}
+	.appnavbar .firstcurrent{
+		background-color: #26b83f;
+		color:#fff;
+		-moz-border-radius:4px 0 0 4px;
+		 border-radius: 4px 0 0 4px
+	}
+.firstcurrent a, .current a, .appnavbar .current:hover {
+	color:#fff!important
+}
+
+/* ---- current class is used for selected app nav ---- */
+.current {
+	color:#fff;
+	cursor: default;
+	padding: 9px 20px 9px 28px;
+	background-color:rgb(38, 184, 63);
+} 
+.notstarted, .started, .draft, .complete{
+	background-image: url(../images/app_nav_bar_status.png);
+    background-position: 6px 7px;
+    background-repeat: no-repeat;
+	text-transform: capitalize;
+	padding-left:28px !important
+}
+.started, .draft {background-position: 6px -23px}
+.complete {background-position: 6px -53px}
+
+/* ---- Application Main Ends ---- */
+
+/* ---- Overwirting Jquery-ui-Classes -- Starts  ---- */
+.ui-state-default,.ui-widget-content .ui-state-default,.ui-widget-header .ui-state-default{
+   	background:#fff;
+    border: 1px solid #CCC !important;
+    color: #aa9999;
+    font-weight: bold
+}
+.ui-state-default a, .ui-state-default a:link, .ui-state-default a:visited{
+	color: #aa9999
+}
+.ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr {
+    border-top-right-radius: 0;
+    border-top-left-radius: 0
+}
+.ui-tabs .ui-tabs-nav li {
+	margin-left: 4px
+}
+.ui-state-active,.ui-widget-content .ui-state-active,.ui-widget-header .ui-state-active	{
+	 border:1px solid #D9DADD;
+	 background:url(../images/trans_bg.png) repeat-x scroll 0 0 #4297E2 !important;
+	 background-repeat:repeat-x;
+	 font-weight: bold; 
+	 color: #216daf 
+	 }
+.ui-accordion .ui-accordion-content {
+    background: none repeat scroll 0 0 #F1F1F1;
+    display: none;
+    margin-bottom: 2px;
+    margin-top: -2px;
+    overflow: auto;
+    padding: 1em 2.2em;
+    position: relative;
+    top: 1px
+}
+.ui-tabs .ui-tabs-nav li a {
+    float: left;
+    padding: 0.5em 1.1em 0.4em 2.5em;
+    text-decoration: none
+}
+
+.ui-tabs .ui-tabs-nav li a {
+	padding-left: 0.5em 2.7em 0.5em 0.4em !important
+}
+
+.ui-tabs .ui-tabs-panel {
+    background: #FFF;
+    border-width: 1px;
+    display: block;
+    overflow: hidden;
+    padding: 1em
+}
+.ui-accordion-icons .ui-accordion-header a {
+    color: #737373;
+    font-weight: bold;
+    padding-left: 2.2em
+}
+.accrodinWrapper .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
+    background: none repeat-x scroll 0 0 #4297E2 !important;
+    word-break: break-all;
+}
+.accrodinWrapper ul li label.submit, .accrodinWrapper ul li label.printer, .accrodinWrapper ul li label.remove {
+	 font-size: 0.9em;
+    font-weight: normal
+}
+.sub-notstarted {
+	background: url(../images/app_nav_bar_status.png) 6px 4px no-repeat;
+	text-transform: capitalize
+}
+.sub-started, .sub-draft, .sub-complete {
+	background-image: url(../images/app_nav_bar_status.png);
+	background-position: 6px -26px;
+	background-repeat: no-repeat;	
+	text-transform: capitalize
+}
+.sub-complete {background-position: 6px -56px}
+.ui-accordion {
+    margin-top: 15px;
+    width: 100%
+}
+.ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited {
+	color: #fff !important;
+	font-weight: bold
+	}
+	.ui-tabs .ui-tabs-nav li a{
+		padding:0.5em 1em 0.4em 1em !important
+		}
+
+/*Tab Step starts */
+.ui-tabs .ui-tabs-nav li a {
+    float: left;
+    padding: 0.5em 1.1em 0.4em 2.5em;
+    text-decoration: none
+}
+.ui-tabs .ui-tabs-panel {
+    background: #FFF;
+    border-width: 1px;
+    display: block;
+    overflow: hidden;
+    padding: 1em
+}
+/* ---- Overwirting Jquery-ui-Classes -- Ends ---- */
+
+/* Tabular Data Starts */
+	.tabularWrapper h4{		
+		color: #5077AA;
+		font-size: 13px;
+		font-weight: bold;
+		line-height: 18px;
+		padding: 0 0 10px
+		}
+		.tabularWrapper table{
+			width:100%;
+			border:1px solid #E4E4E4;
+			margin:0;
+			float: left
+			}
+#evalTable th{
+	padding:10px 9px;
+	 /* max-width: 100px; */
+	 min-width: 100px;
+	/*  width: 100px; */
+	 word-wrap:break-word;
+	border-bottom: 0px solid #e4e4e4;
+	 background: 0 0 #e4e4e4;
+	 text-align:center;
+}
+#evalTable tr{
+	height:auto;
+	display:block;
+}
+.nowrapping{
+	    white-space: nowrap;
+	    padding-left:15px;
+	    padding-right:15px;
+}
+.activelink{
+	color:blue;
+}
+.relatedInfoLinks{
+    position: relative;
+    top: 25px;
+}
+#alert_icon{
+	position: relative;
+	 display: inline-block;
+	 right: 5px;
+}
+.alert_msg {
+    z-index: 1;
+    cursor: pointer;
+    background-color: #1B6391;
+    border-radius: 10px;
+    color: white;
+    padding: 0px 3px;
+    font-size: 10px;
+    position: absolute;
+    width: 25px;
+    top: 2px;
+    left: 12px;
+    font-weight: 500;
+    text-align: center;
+}
+#paymentDetail{
+	padding-bottom: 10px;
+}
+td.widthadjust{
+	width:7%;
+}
+div #evalTable{
+	border: 1px solid lightgrey;
+	border-collapse: collapse;
+}
+ #evalTable tbody{
+display: block;
+} 
+#evalTable thead{
+	display: block;
+	background: 0 0 #e4e4e4;
+}
+
+#tableWrapper table td{
+	width:7.5%;
+	word-wrap:break-word;
+	padding:12px 12px;
+	text-align: center;
+}
+#tableWrapper{
+	overflow:auto;
+	max-height:400px;
+}
+.evalsummary{
+	margin-bottom:10px;
+}
+.viewprogressBtn{
+    background:url("../images/tick-mark.png") no-repeat -5px -1px;
+	background-color: #f5f5f5;
+	background-size:30px 30px;
+}
+.red-ex-mark:before{
+	content: '!';
+    position: relative;
+    top: 5px;
+    padding-right: 5px;
+    font-weight: 700;
+    font-style: inherit;
+    font-size: 27px;
+    color: #B6121C;
+    font-family: -webkit-body;
+}
+
+.red-ex-mark-documentVault:before{
+    top: 1px !important;
+}
+.exporttasklink{
+	float:right;
+	background-image: url(../images/export_task_new.PNG);
+	background-repeat:no-repeat;
+	background-size:22px;
+    padding:5px 3px;
+    background-position-y: 2px;
+}
+.exporttasklink a
+{
+color: -webkit-link;
+text-decoration: underline;
+padding-left: 20px;
+}
+.tabularWrapper table th{
+					font-weight:bold;
+					/*font-size:12px;*/
+					color:#000;
+					background: url(../images/trans_bg.png) repeat-x scroll 0 0 #E4E4E4;
+					padding:5px 3px;
+					border-bottom: 1px solid #adadad
+					}
+					.tabularWrapper table td{
+						padding:5px 3px					
+					}
+				.tabularWrapper table tr.alternate{
+						background:#F2F2F2
+					}
+				.tabularWrapper table a{
+						text-decoration:underline;
+						color:#5077AA
+					}
+					a.redcolor{
+					color:#B6121C !important;
+					}
+					.tabularWrapper table td select, #documentValuePop .formfield select, #documentValuePop .formfield input, select, input{
+						font-size:1em !important;
+						font-family: Verdana, sans-serif;
+						color:#333;
+						font-weight:normal;
+					}					
+/* Tabular Data Ends */
+
+/*  Document Upload Step Wizard Starts- Added for Release 5*/
+.wizardUploadTabs {
+	display:block
+}
+	.wizardUploadTabs .hr{
+		height:0 !important;
+		margin:5px !important
+	}
+.wizardUploadTabs ul{
+	float:left;
+    width:100%;
+    margin:10px 5px 10px 0
+}
+.noRecordCityBudgetDiv-align{
+	margin-top:30px;
+	text-align:center;
+}
+
+.wizardUploadTabs ul li, .wizardUploadTabs ul li.default, .wizardUploadTabs ul li.last, .wizardUploadTabs ul li
+	{
+   background: url(../images/tab_step_default_grayBg.png) no-repeat scroll right center transparent;
+	float: left;
+	line-height: 33px;
+	/*padding: 0 0.94em;*/
+	width: 32%;
+	padding:0;
+	margin:0;
+	font-size:12px !important
+}
+:root .wizardUploadTabs ul li, 
+	.wizardUploadTabs ul li,
+:root .wizardUploadTabs ul li.default, 
+	.wizardUploadTabs ul li.default,
+	:root .wizardTabber ul li,
+	.wizardTabber ul li
+	 { 
+	width:30% \0/IE8+9;
+	padding-left:0px \0/IE8+9;
+	height:29px;  
+}
+
+:root .wizardUploadTabs ul li.last{width:24%; white-space:nowrap;}
+:root #step1confirmDoc{
+	padding-left:20px \0/IE8+9;
+	width:21%\0/IE8+9;
+}
+.buttonholder-align1{
+	margin-right:-45px;
+}
+ #treeStructure ul{
+	margin:0px;
+}
+.formcontainernopad{
+	margin:0px !important;
+}
+#overlaytree ul.jstree-children{
+	margin-left: -12px !important;
+}
+@-moz-document url-prefix() {
+   #container1{
+	left:131px !important;
+}
+    #container2{
+	left:131px !important;
+}
+}
+.wizardUploadTabs ul li.default{
+	z-index: 13;
+	position: relative;
+	margin-left: 14px;
+	background: url(../images/tab_step_default_blueBg.png) no-repeat right center transparent !important;
+	padding-left:4px
+}
+.wizardUploadTabs ul li.active, .wizardUploadTabs ul li.activeLast{
+     background:url(../images/tab_step_selected.png) no-repeat right !important;
+     font-weight:bold;
+     z-index: 12;
+     padding-left:12px;
+     position: relative;
+     right: -14px;
+     font-size:12px !important;
+     line-height:32px;
+     height:29px;  
+}
+.wizardUploadTabs ul li.active, .wizardUploadTabs ul li.activeLast{
+    height:33px\0/IE8+9; 
+}
+.wizardUploadTabs ul li.activeLast{
+	right:14px;
+	color:#fff	
+}
+.wizardUploadTabs ul li.last{
+     background: url(../images/tab_step_default.png) no-repeat scroll right center transparent;
+     padding: 0 20px;
+      font-size:12px !important
+}
+.wizardUploadTabs ul li.last{
+	padding: 0px\0/IE8+9; 
+}
+.wizardUploadTabs .formfield radio {width:auto !important}
+.tabularWrapper a{
+	  color:#006;
+	  text-decoration:underline
+	  }
+/* Document Upload Step Wizard Ends*/
+/* Document Share Step Wizard Starts*/
+.wizardTabs {
+	display:block
+}
+	.wizardTabs .hr{
+		height:0 !important;
+		margin:5px !important
+	}
+.wizardTabs ul, .wizardTabber ul{
+	float:left;
+    width:100%;
+    margin:10px 5px 10px 0
+}
+#sharewiz{margin-left: 10px}
+
+.wizardTabber ul#sharewiz li{
+	height:33px !important;
+}
+#sharewiz #step1confirmDoc{
+	padding-left:10px;
+}
+.wizardUlStep1 {
+	    background: url(../images/tab_all_steps.png) no-repeat 0 0 !important;
+	    float:left
+	 }
+	 .wizardUlStep1 #step1confirmDoc {color: #fff;
+	 padding-left: 10px;}	 
+.wizardUlStep2{
+	    background: url(../images/tab_all_steps.png) no-repeat 0 -51px !important;
+	    float:left
+}
+	.wizardUlStep2 #step2selectOrg {color: #fff}	
+.wizardUlStep3{
+	    background: url(../images/tab_all_steps.png) no-repeat 0 -101px !important;
+	    float:left   
+}
+	.wizardUlStep3 #step3selectNycAgency {color: #fff}	
+.wizardUlStep4{
+	    background: url(../images/tab_all_steps.png) no-repeat 0 -151px !important;
+	    float:left
+}
+	.wizardUlStep4 #step4confirmSel {color: #fff}
+
+.wizardTabs ul li, .wizardTabs ul li.default, .wizardTabs ul li.last, .wizardTabber ul li
+	{
+   background: url(../images/tab_step_default_grayBg.png) no-repeat scroll right center transparent;
+	float: left;
+	line-height: 33px;
+	/*padding: 0 0.94em;*/
+	width: 24%;
+	padding:0;
+	margin:0;
+	font-size:12px !important
+}
+:root .wizardTabs ul li, 
+	.wizardTabs ul li,
+:root .wizardTabs ul li.default, 
+	.wizardTabs ul li.default,
+	:root .wizardTabber ul li,
+	.wizardTabber ul li
+	 { 
+	width:21% \0/IE8+9;
+	padding-left:5px \0/IE8+9;  
+}
+:root .wizardTabs ul li.last{width:24%; white-space:nowrap;}
+:root #step1confirmDoc{
+	padding-left:20px \0/IE8+9;
+	width:21%\0/IE8+9;
+}
+
+.wizardTabber ul li{background: none}
+.wizardTabs ul li.default{
+	z-index: 13;
+	position: relative;
+	margin-left: 14px;
+	background: url(../images/tab_step_default_blueBg.png) no-repeat right center transparent !important;
+	padding-left:4px
+}
+.wizardTabs ul li.active, .wizardTabs ul li.activeLast{
+     background:url(../images/tab_step_selected.png) no-repeat right !important;
+     font-weight:bold;
+     z-index: 12;
+     padding-left:12px;
+     position: relative;
+     right: -14px;
+     font-size:12px !important
+}
+.wizardTabs ul li.activeLast{
+	right:14px;
+	color:#fff	
+}
+.wizardTabs ul li.last{
+     background: url(../images/tab_step_default.png) no-repeat scroll right center transparent;
+     padding: 0 20px;
+     font-size:12px !important
+}
+.wizardTabs .formfield radio {width:auto !important}
+.tabularWrapper a{
+	  color:#006;
+	  text-decoration:underline
+	  }
+/* Document Share Step Wizard Ends*/
+
+/*Task Filter starts */
+.tasktopfilter {
+	clear: both;
+	display: block;
+	height: 36px;
+	margin-top: 5px;
+	width: 100%;
+	/*font-size:10px*/
+}
+.taskfilter{
+	float:left;
+	position:relative;
+	width:200px;
+	white-space: nowrap
+}
+.wizardUploadTabs-align ul li{
+	width:28% !important;
+}
+.taskreassign{float:right}
+
+
+/* New Class added for Task Details Page */
+	.commonBox{
+	background: none repeat scroll 0 0 #fff;
+    border:1px solid #ccc;
+    display: block;
+    overflow: hidden;
+    padding: 1%;
+	width:98%;
+	margin:0 auto;
+	border-top: 0
+}
+.assignBox{background:#fbfcfd}
+
+.complianceWrapper{
+	padding:0 0 1% 0 ;
+	margin:0;
+	text-align:left
+}
+	.complianceWrapper h4{
+		color: #fff;
+		font-size: 13px;
+		font-weight: bold;
+		padding: 6px 10px;	
+		background:#277cc8;
+		margin-bottom:4px;
+		clear:both
+	}
+.complianceWrapper .ui-tabs .ui-tabs-nav {
+    margin-top: 8px;
+    padding: 0.2em 0 0 1em
+}
+	.complianceWrapper .ui-tabs .ui-tabs-nav .graybtutton{
+		cursor: pointer;   
+	    font-size: 11px;
+	    font-weight: bold;   
+	    padding: 5px
+	}
+.Column1{
+	text-align:left; 
+	min-height:700px;  
+	height:auto !important;
+	height:700px;
+	width:23%; 
+	border:1px solid #D0D0D0; 
+	float:left;
+	/* font-size:12px; */
+	margin-right:8px
+}
+/* New added for iframe scroll on task */
+.newColumn { 
+    border: 1px solid #D0D0D0;
+    float: left;
+    font-size: 12px;
+    height: 550px;
+    margin-right: 0;
+    max-height: 680px !important;
+    overflow: hidden;
+   	padding: 10px;
+    text-align: left;
+    width: 680px
+    }
+.Column1 label, .Column3 label{
+	font-weight:bold;
+	display:block;
+	float:left;
+	width:90%;
+	padding:4px 4px 0 10px
+}
+.Column1 div, .Column3 div{
+	display:block;
+	width:90%;
+	padding:2px 4px 5px 10px;
+	overflow:hidden;
+	float:left
+}
+.Column1 div a, .Column3 div a{
+	text-decoration:underline !important;
+	color:blue !important
+}
+
+.Column2{
+	border:1px solid #D0D0D0;
+	float:left;
+	/* font-size:12px; */
+	height:680px;
+	margin-right:0;	
+	height:auto;	
+	min-height:680px !important; 
+	overflow:auto;
+	overflow:scroll;
+	overflow-x:hidden;
+	padding:10px;	
+	text-align:left; 
+	width:680px	
+}
+.Column3{
+	text-align:left; 
+	min-height:700px;
+	height:auto !important;
+	height:700px;
+	width:23%; 
+	float:left;
+	font-size:12px
+}
+.tabularWrapper a.taskNormal{
+	padding-left:16px !important;		
+	margin-left:4px;
+	display: inline-block
+	}
+.tabularWrapper a.taskSelected{
+	padding:2px 0 2px 16px !important;
+	background:url(../images/arrow.png) no-repeat 0 center;
+	margin-left:4px;
+	display: inline-block
+	}
+
+.heading { 
+  background: url(../images/trans_bg.png) repeat-x scroll 0 0 #E4E4E4;
+  padding: 5px
+}
+.oddRows{
+  background-color: #F2F2F2;
+  padding: 5px
+}
+.evenRows{
+  background-color: #fff;
+  padding: 5px
+}
+
+.evenRows a, .oddRows a {
+	color:#5077AA;
+	text-decoration:underline
+}
+
+/*
+.blueTabs ul{
+	float:left;
+	width:100%;
+	margin:4px 0 12px 0
+}
+.blueTabs ul li{
+	background:#F2F2F2;
+	float:left;
+	width:auto;
+	line-height:33px;
+	padding:0 24px 0 12px;
+	margin-right: 2px
+}
+.blueTabs ul li.active{
+	background:#277CC8;
+	font-weight:bold;
+	color:#fff
+}
+.blueTabs ul li:hover{
+		background:#277CC8;
+		color: #fff !important
+	}
+.blueTabs ul li.active a, .blueTabs ul li:hover a {color: #fff}	
+*/
+
+/* New Class added for Task Details Page Ends */
+/* FB Related Starts */
+.questionlabel{
+	background:#f0efef;
+	color:#666;
+	border:1px solid #CCC;
+	float: left;
+	margin: 0 8px 3px 0;
+	padding: 4px 5px 4px 0;
+	text-align: right
+}
+
+.fblabel{
+	background: #F2F2F2;
+	float: left;
+	margin: 0 8px 3px 0;
+	min-height: 20px;
+	padding: 4px 5px 4px 0;
+	text-align: right;
+	width: 447px
+}
+/* FB Related ends */
+
+
+/* Sub customised tabs starts */
+.customtabs {
+	display: block;
+	border-bottom: 1px solid #ccc
+}
+	.customtabs ul {
+		padding-left: 8px;
+		overflow: hidden
+	}
+	li.subsection-align {
+    margin: 0px !important;
+}
+.customtabul-mo{
+	padding:0px !important;
+}
+.customtabs-mo{
+	border-bottom:5px solid #ccc;
+}
+.customtabs-mo ul li
+{
+            height: 23px;
+			text-align: center;
+}
+.subtab-mo{
+	padding: 0px 10px !important;
+}
+.customtabs-mo ul li a{
+	float: none !important;
+	padding: 0px !important;
+}
+.formcontainer-align{
+	border-left: 1px solid #ccc;
+	border-right: 1px solid #ccc;
+	padding-left:10px;
+}
+		.customtabs ul li {
+			float: left;
+			list-style: none outside none;
+			margin: 0 0.3em 1px 0;
+			padding: 0;
+			position: relative;
+			top: 1px;
+			white-space: nowrap;
+			background:#fff;
+			border: 1px solid #CCC;
+			border-bottom: 0 none !important;
+			color: #ccc;
+			font-weight: bold
+		}
+		.totalproposal{
+		    position: relative;
+            top: 9px;
+		}
+			.customtabs ul li a {
+				float: left;
+				padding: 0.5em 1em 0.4em 1.2em;
+				text-decoration: none;
+				color: #aa9999;
+				cursor:pointer
+			}
+				.customtabs ul li a:hover {color: #aa9999}
+	.customtabs .selected {
+		background:url(../images/background.png) repeat-x #bdbdbd 0 -295px;
+		display: block;
+		color: #333;
+	 	font-weight:bold
+	}
+li.subsection-align{
+	min-width:140px;
+	max-width:180px;
+	border-radius:5px;
+	}
+.customtabs .selected a,.customtabs .selected a:hover {
+	color: #333;
+	font-weight: bold;
+	cursor:pointer
+}
+
+.customtabsR2 ul{
+	padding-left: 4px;
+}
+
+.fblabel {
+	text-align: right;
+	font-weight:bold;    
+	display:block
+}
+
+
+.formcontainer .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active{
+	color:#fff !important
+}
+.formcontainer .formcontainer .ui-widget-content, .ui-state-hover-hover{
+	background:#fff !important
+}
+.ui-datepicker .ui-datepicker-calendar .ui-state-hover{
+	background:#F2F2F2 !important;
+	border-color:grey !important;
+	color:#1C94C4 !important
+}
+.formfield img{
+	cursor:pointer;
+	padding-left:2px
+}
+/* Date picker Customised Class End */
+
+
+/* All Erroe messages */
+.error{
+	color: #D63301
+}
+ul.errorMessages {
+	border: 1px solid #E80000;
+	margin: 10px;
+	padding: 8px;
+	width: 99%;
+	clear: both;
+	background: #FFCCBA url(../images/iconError.png) no-repeat 8px center;
+	list-style-type: disc;
+	list-style-position: inside;
+	line-height: 31px
+}
+	ul.errorMessages li {
+		padding-left: 44px;
+		line-height: normal !important;
+		margin-top: -6px;
+		margin-bottom: -6px;
+		color: #D63301 !important
+	}
+		ul.errorMessages li label {
+			color: #D63301 !important
+		}
+.individualError {
+	font-size: 11px;
+	color: red;
+	float:right
+}
+.txtArearequireError {
+	font-size: 11px;
+	color: red;
+	float: left;
+	padding-left: 8px
+}
+
+.termsTextarea {
+	font-family: verdana;
+	font-size: 1.083em;
+	width: 100%;
+	resize: none
+}
+
+.holder {
+	display:block;
+	overflow:hidden
+}
+
+#myform table {border: 1px solid #EFEFEF}
+
+#tabs-container {
+	border: 2px solid #EFEFEF;
+	padding: 8px;
+	overflow:hidden
+}
+
+.bluelink {
+	text-decoration: underline !important;
+	color: blue !important
+}
+	a.blueLink {
+		text-decoration:underline;
+		color:#1569B2
+	}
+
+/* task based filter Popup - To overwrite on row structure on Document vault popup */
+#documentValuePop{
+	position: absolute;
+	left: 0;
+	top: 28px;
+	background: #f9f9f9;
+	width: 420px;
+	padding: 16px 4px 0;
+	color: black;
+	border: #CDCDCD 2px solid;
+	display: none;
+	z-index:0;
+	box-shadow: 4px 4px 4px #888888;
+	/*font-size:12px;*/
+	
+	/* For IE 8 */
+	-ms-filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#888888');
+	/* For IE 5.5 - 7 */
+	filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#888888');
+}
+#documentValuePop .buttonholder{height:30px}
+#documentValuePop .close{
+	position: absolute;
+    right: 5px;
+    top: 0
+}
+#documentValuePop .label{
+	width: 39%;
+	background: #f9f9f9;
+	text-align:left;
+	white-space: nowrap
+}
+#documentValuePop .formfield{
+	width: 57%;
+	white-space: nowrap
+}
+#documentValuePop select{
+	width:236px;
+	cursor: default
+}
+#documentValuePop input{
+	cursor: default;
+	padding: 2px;
+	margin: 0;
+	width:229px
+}
+#documentValuePop .buttonholder input, .button{
+	cursor: pointer;
+	width:auto !important;
+	margin: 0 2px;
+	padding:4px
+}
+#documentValuePop .buttonholder [disabled].graybtutton, [disabled].button,
+	[disabled] input, [disabled].redbtutton
+	{
+	cursor:default !important
+}
+
+/* MultiSelect */                
+.mulselect {
+	width: 270px;
+	float: left
+}
+	.mulselect select {
+	    width: 260px
+	}
+
+.muloptions {
+	width: 130px;
+	float: left
+}
+
+.muloptions p {
+	margin: 2px;
+	text-align: center;
+	font-size: larger;
+	cursor: pointer
+}
+	.muloptions p:hover {
+		color: White;
+		background-color: Silver
+	}
+
+/* Population */
+.popuCol1 {
+	display: block;
+	float: left;
+	padding-top: 10px;
+	width: 48%
+}
+	.popuCol1 ul li {
+		list-style-type: none;
+		overflow: hidden;
+		padding: 4px;
+		position: relative
+	}
+
+.popuCol2 {
+	display: block;
+	float: left;
+	padding-top: 10px;
+	padding-left: 10px;
+	width: 48%
+}
+	.popuCol2 ul li {
+		list-style-type:none;
+		padding:4px;
+		position:relative
+	}
+
+.popuAgeRange {
+    display: none;
+    right: 25px;
+    top: 0;
+    float:right
+}
+
+.popuCol1 ul li .textarea {
+	font-size: 11px;
+	height: 60px;
+	margin-left: 30px;
+	resize: none;
+	width: 250px;
+	margin-right: 10px
+}
+
+.iconQuestion a, .iconQuestion2 a{
+	background:url(../images/newIcons.png) no-repeat  0px -88px;
+	padding:4px 13px 8px 13px	
+}
+.iconContact a{
+	background:url(../images/newIcons.png) no-repeat  0px -512px;
+	padding:0 0 0 18px;
+	text-decoration:underline;
+	color:#5077AA
+}
+.linkReturnValut{	
+	position:relative;
+	float:right
+}
+.linkReturnValut a{
+	background:url(../images/newIcons.png) no-repeat 0.2em -128px;
+	padding:4px 4px 4px 28px;
+	margin-left:8px;	
+	text-decoration:underline;	
+	color:#5077AA
+}
+/* Population End */
+
+/* Task based - Question Comment Section */
+.taskComments{
+	width:45%;
+	float:left;
+	border-right:1px solid #ccc;
+	margin:1% 0;
+	padding:0 2% 2% 2%;
+	line-height:24px
+	}
+.commentNoborder{
+		border:none !important;
+	}
+.expandCollapseLink{
+		text-align:right;
+		float:right
+	}
+	.expandCollapseLink a{color:#009}
+
+/* Task panel */
+.taskButtons{
+	 float:left;
+	 position:relative;
+	 margin-bottom:2px
+	}
+	
+.taskButtons input{
+	padding:4px;
+	cursor:pointer;
+	/*font-family:Verdana, Geneva, sans-serif;
+	font-size:12px;*/
+	border:1px solid #bebebe;
+	margin:4px 0 0 0
+	}
+
+/*Class added to show mail icon as part of R6 : Returned Payment*/
+.taskButtons  input.mail,
+.taskButtons  input.filterDocument, 
+.taskButtons  input.upload, 
+.taskButtons  input.share, 
+.taskButtons  input.unShare, 
+.taskButtons input.add, 
+.taskButtons input.remove, 
+.taskButtons input.refresh{
+	background:url(../images/newIcons.png) no-repeat 109% 9px #f5f5f5;
+	padding:4px 20px 4px 4px;
+	cursor:pointer;
+	font-family:Verdana, Geneva, sans-serif;
+	font-size:1em;
+	border:1px solid #bebebe
+	}
+.taskButtons  input.upload{
+	padding:4px 4px 4px 16px;
+	background-position:0.2em -225px !important
+}
+.taskButtons  input.share{
+	padding:4px 4px 4px 22px;
+	background-position:0.2em -164px !important
+}
+.taskButtons  input.unShare{
+	background:url(../images/newIcons.png) no-repeat -1px -828px;
+	background-color:#f5f5f5;
+	padding-left:19px !important;
+	margin-right: 5px !important;
+	}
+	
+	.taskButtons input.add, .taskButtons input.remove, .taskButtons input.refresh, .taskButtons input#PriviewId1, .taskButtons input#PreviewId{
+	background-position:4px -331px;
+	padding:4px 4px 4px 22px;	
+	margin:4px 0 0 0;
+	color:#333;
+	font-weight:normal
+	}
+		#PriviewId1, #PreviewId{padding-left:4px !important}
+.taskButtons input.disable {
+    background-color:#d2d2d2 !important;
+    color: #999;
+    font-weight: normal   
+}
+.taskButtons input.refresh{
+	background:url(../images/newIcons.png) no-repeat 4px -563px #f5f5f5
+}
+  .taskButtons input.add, .taskButtons input.remove{
+	padding:4px 4px 4px 22px
+	}
+	.taskButtons  input.remove{
+		background-position:5px -19px
+		}
+
+/* Pagination Start */
+.paginationWrapper{
+	float:right;	
+	text-align:right;
+	margin-top:-23px
+	}
+
+.paginationWrapperBottom{
+	float:right;	
+	text-align:right
+}
+.paginationWrapper ul, .paginationWrapperBottom ul{
+	display:inline;
+	float:right	
+}
+.paginationWrapper ul li, .paginationWrapperBottom ul li{
+	float:left;
+	padding:0 3px;
+	font-size:0.917em
+}
+.paginationWrapper ul li a, .paginationWrapperBottom ul li a{
+		color:#5077AA;
+		text-decoration:underline
+	}
+/* Pagination Ends */
+
+.loadingTxt{
+	text-align:center;
+	font-size: 17px;
+    font-weight: bold
+	}
+.loadingTxt img {margin-top:4px}
+.loadingTxt .loadingNote {font-size:12px}
+.returnButton{
+ 	background:url(../images/newIcons.png) no-repeat scroll 0.2em -128px #f5f5f5; 	
+ 	padding:4px 4px 4px 24px;
+	cursor:pointer;
+	border:1px solid #bebebe;
+	margin-right:4px;
+	margin-top: -3px
+ }
+.linkReturnVault {
+	position: relative;
+	float: right;
+	white-space: nowrap;
+}
+H2 span.linkReturnVault, h2 span.linkReturnValut {
+	margin-top:-4px;
+	margin-right:6px
+}
+.linkReturnValut{	
+	position:relative;
+	float:right;
+	padding:1px 0 4px 0;
+}
+.linkReturnVault a, .linkReturnValut a {
+	background: url(../images/newIcons.png) no-repeat 0.2em -128px;
+	padding: 2px 4px 4px 26px;
+	margin-left: 8px;
+	text-decoration: underline;
+	color: #5077AA;
+	display: inline-block
+
+}
+.iconQuestion, .iconContact{	
+	display: block;
+    float: right;
+     margin-top: 17px;
+	/* margin-top:20px\9;for IE8 Margin top */	
+}
+.iconQuestion-align{
+	 margin-top: -10px;
+}
+.wizardUploadTabs ul li{
+	width:24%;
+}
+.iconQuestion a, .iconQuestion2 a{
+	background:url(../images/newIcons.png) no-repeat  0px -88px;
+	padding:4px 13px 8px 13px	
+}
+.iconContact a{
+	background:url(../images/newIcons.png) no-repeat  0px -512px;
+	padding:0 0 0 18px;
+	text-decoration:underline;
+	color:#5077AA
+}	
+.linkEdit, .linkPrint, .linkWithdraw, .linkRemove{
+		position:relative;
+		display:inline;
+		font-size:1em;
+		margin-left:2em
+	}
+	.linkPrint{
+		font-size:.9em
+	}
+.linkEdit a, .linkPrint a, .linkWithdraw a, .linkRemove a, .linkEdit label{
+		padding:2px 2px 0 20px;
+		background:url(../images/newIcons.png) no-repeat left -55px;
+		text-decoration:underline;
+		color:#5077AA
+	}
+	
+	.viewInvoice{
+	padding:2px 2px 0 20px;
+		background:url(../images/info-icon.png) no-repeat left -55px;
+		text-decoration:underline;
+		color:#5077AA
+	}
+	.linkPrint a{
+		padding:2px 0 2px 20px;
+		background-position:left -536px		
+	}
+	.linkWithdraw a{
+		padding:2px 0 2px 20px;
+		background-position:0 -250px
+		}
+	.linkRemove a{
+		padding:2px 0 2px 20px;
+		background:url(../images/newIcons.png) no-repeat left -55px
+		}
+	.linkEdit a{
+		padding-bottom:4px
+	}
+label.printer{
+	background:url(../images/newIcons.png) no-repeat 0 -540px transparent;
+	display: inline-block
+	}
+label.remove{
+	background:url(../images/newIcons.png) no-repeat 0 -24px transparent;
+	display: inline-block
+	}
+label.submit{
+	background:url(../images/newIcons.png) no-repeat 0 -462px transparent;	
+	display: inline-block
+	}
+label.iconComments {background:url(../images/newIcons.png) no-repeat scroll 0 -486px transparent}
+.iconComments {
+	background:url(../images/newIcons.png) no-repeat 0 -486px transparent;
+	display:inline-block;
+	padding-left:17px;
+	color:blue;
+	text-decoration:underline;
+	cursor: pointer
+	}
+	
+			
+/* Selected Container Start */	
+.selectedContainer{
+		border:1px solid #333;
+		height:159px;
+		position:relative;
+		margin: 16px 0 16px 4px
+	}
+	.selectedContainer h4{
+		background:#515151;
+		color:#fff;
+		font-weight:bold;
+		position:absolute;
+		margin:-10px 0 0 -7px
+		}
+	.selectedContainer ul{
+		clear:both;
+		margin-top:10px;
+		padding:4px 10px 4px 10px;
+		margin-top:28px;
+		overflow:auto;
+		height:122px
+		}
+		.selectedContainer ul li{
+			margin:2px 15px 2px 0;
+			background: url(../images/newIcons.png) no-repeat -0px -277px;
+			float:left;
+			padding-left:20px;
+			cursor:pointer;
+			color:#5077AA;			
+			white-space: nowrap;
+			text-decoration: underline
+			}
+			.selectedContainer  ul li.noneSelected, .selectedContainerAgency ul li.noneSelected{
+				text-decoration:none;
+				cursor:default;
+			    color: #666;
+			    background: none;	
+			    padding-left: 0px !important	
+			}
+/* Selected Container End */
+
+/* Seach Container Start */
+.searchContainer{
+	clear:both;	
+	margin:10px 0
+	}
+	.searchContainer h5{
+		color: #333;
+		font-size: 13px;
+		font-weight: bold;
+		line-height: 18px;
+		padding: 0 0 4px;
+		clear:both
+	}
+/* Search Container End */
+
+/* tabularCustomHead */
+.tabularCustomHead {
+	display:block;
+	background:	url(../images/trans_bg.png) repeat-x scroll 0 0 #1A6BB4;
+	color:#fff;
+	font-weight:bold;
+	clear:both;
+	padding:6px 32px 6px 6px;	
+	-moz-border-radius: 4px 4px 0 0; /* Firefox */
+	-webkit-border-radius: 4px 4px 0 0; /* Safari and Chrome */
+	border-radius: 4px 4px 0 0;
+	/* Opera 10.5+, future browsers, and now also Internet Explorer 6+ using IE-CSS3 */
+	/*behavior: url(css/ie-css3.htc); /* Do not uncomment this - It not displaying in IE8 */
+	/* This lets IE know to call the script on all elements which get the 'box' class */
+	position:relative
+}
+.tabularCustomHead span{
+		color:#fff;
+		font-weight:bold
+	}
+
+.tabularCustomHeadIcon {
+	display: block;
+	position: absolute;
+	right: 7px;
+	top: 7px
+}
+/* Accordioan Styles */
+
+.accrodinWrapper{
+	float:left;
+	cursor:pointer;
+	overflow: hidden !important;
+	clear:both
+	}
+	.accrodinWrapper h5{
+		float:left;
+		color:#fff;
+		font-weight:bold;
+		font-size:1.1em;
+		margin: 1.2% 0 1% 1% !important;
+		padding-right:20px
+		}
+	.accrodinWrapper ul{
+		float:right;
+		margin-right:3%;
+		border:none
+		}
+		.accrodinWrapper ul li label{
+			color: #FFF;
+			cursor: pointer;
+			padding-left: 22px;
+			font-size:11px
+			}
+.accContainer {
+	float: left;
+	width: 100%;
+	display: block;
+	padding: 0 1px 0 1px !important;
+	overflow: hidden !important
+}
+.accDataRowHead {
+	border: 1px solid #CCC;
+	background: #f2f2f2;
+	color: #666;
+	font-weight: bold;
+	line-height: 25px;
+	overflow: hidden;
+	display: block
+}
+
+.accDataRowHead span {font-weight: bold}
+
+.accDataRow {
+	border-bottom: 1px solid #CCC;
+	color: #666;
+	overflow: hidden;
+	display: block;
+	background: #fff
+}
+#accordianId .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active{
+	background: none !important;	
+    border: 1px solid #D9DADD
+}
+.alert-box .ui-state-active, 
+.alert-box .ui-widget-content .ui-state-active, 
+.alert-box .ui-widget-header .ui-state-active, 
+.alert-box-link-to-vault .ui-state-active, 
+.alert-box .ui-widget-content .ui-state-active, 
+.alert-box .ui-widget-header .ui-state-active{
+	background: #4297E2 !important
+}
+.complianceWrapper #accordianId .ui-state-active, 
+.complianceWrapper .ui-widget-content .ui-state-active, 
+.complianceWrapper .ui-widget-header .ui-state-active{
+	background:url(../images/background.png) repeat-x #f9f9f9 0 -291px !important
+	}
+	.ui-tabs .ui-tabs-nav li.ui-tabs-selected a, .ui-tabs .ui-tabs-nav li.ui-state-disabled a, .ui-tabs .ui-tabs-nav li.ui-state-processing a{
+		color: #333 !important
+	}
+/* Accordioan Styles Ends */
+
+/* Basics Language Screen Starts */
+.col1 {
+	color: #666;
+	float: left;
+	font-weight: bold;
+	padding: 4px 8px 4px 0;
+	text-align: right;
+	width: 10%;
+	word-wrap:break-word
+}
+.col2, .col3 {
+	color: #666;
+	float: left;
+	padding: 4px 4px 4px 8px;;
+	width: 77%
+}
+.col3 {
+	padding: 4px;
+	width: 9%
+}
+
+.langCol1, .langCol2{
+	display: block;
+	float: left;
+	padding-top: 10px;
+	width: 25%
+}
+.langCol2 {
+	padding-left: 10px;
+	width: 73%
+}
+.langCol1 ul li {
+	list-style-type: none;
+	padding: 4px;
+	word-break: break-all
+}
+
+.langHeader {
+	background: #EFEFEF;
+	color: #666;
+	font-weight: bold;
+	padding: 6px !important
+}
+/* Basics Language Screen Ends */
+
+	
+/* Busness Application Summary Starting here */
+	.accordianStatus, span.accordianStatus{
+		float: right;
+		margin-bottom: -10px;
+		margin-top:16px;
+		text-align: right;
+		width: 100%
+		}
+		span.accordianStatus{
+			margin:0 !important;
+			float:none !important
+			}
+	.accordianStatus .sub-started, .accordianStatus .sub-draft, .accordianStatus .sub-complete, .accordianStatus .sub-notstarted {
+		padding: 5px 2px 2px 26px
+		}
+			
+		/* Overwrite jquery classes to work Title element */
+	h5.ui-accordion-header {border:none!important}
+	.ui-accordion .ui-accordion-content {padding: 0.5em 2.2em}
+	/* Busness Application Summary Ends here */
+.greyBox{
+	background:#F0F0F0
+}
+
+/* Portlet columns used in Home page, can be reused where ever applicable */
+.portlet1Col {
+	clear:both;
+	display: block;
+	margin-bottom: 2%;
+	width: 100%
+}
+.portlet2Col {
+   	display: block;
+    float: left;
+    margin-bottom: 2%;
+    width: 49%
+}
+.portlet3Col {
+	display: block;
+	float: left;
+	margin-bottom: 2%;
+	margin-right: 1%;
+	width: 32.6%
+}
+.portletColRight {
+   float: right;
+   margin:0
+}
+.portletTextBold{
+	color: #5077AA;
+	font-size: 14px;
+	font-weight: bold;
+	line-height: 18px;
+	padding: 7px 0 8px 2px
+}
+.portletTextBold a {
+	text-decoration:underline;
+	font-weight: bold
+}
+
+.complianceWrapper .tasktopfilter{
+	margin: 3px 0 10px;
+    width: 99%;
+	background: #fcfcfc;
+	margin: 3px 0 10px 0;
+	padding: 4px 4px 0;
+	border:1px solid #D0D0D0;		
+	box-shadow: 4px 4px 4px #888;
+	
+	/* For IE 8 */
+	-ms-filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#888888');
+	/* For IE 5.5 - 7 */
+	filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#888888');
+}
+.complianceWrapper .tasktopfilter .taskfilter {width:30%}
+.complianceWrapper .tasktopfilter .taskfilter .graybtutton {
+	margin-left:3px
+}
+	
+/* Service Summary - Role Based Start */
+	.roleBasedWrapper {clear:both}
+	.roleBasedWrapper ul li div{
+		padding:0.5%;
+		background:#c6dff0;
+		border:1px solid #b4bbbf;
+		margin-top: -1px
+	}
+		.roleBasedWrapper ul li ul li div {background:#f4fafd !important}
+		.roleBasedWrapper ul li ul li ul li div {background:none !important}
+		.roleBasedWrapper ul li ul {margin-left:10px}
+		.roleBasedWrapper ul li ul li div, .roleBasedWrapper ul li ul li ul li div{
+			background:#fff;
+			border:1px solid #b4bbbf;
+			margin-top:-1px
+		}
+		.roleBasedWrapper ul li div, .roleBasedWrapper ul li ul li div, .roleBasedWrapper ul li ul li ul li div{
+			position:relative
+			}
+		.roleBasedWrapper .checkBox{
+			position:absolute;
+			right: 8px;
+   			top: 38%
+			}
+			.roleBasedWrapper p { margin-right: 24px}
+			.roleBasedWrapper h3 {padding:0}
+		
+/* Below classes is written for arrow icons(Collapse and expand). onClicking of pane on summary pages. It would be handled through Jquery */		
+	.openlanguage{background:url(../images/arrowCollapse.png) no-repeat 99% center #4297E2}
+   .closedlanguage{background:url(../images/arrowExpand.png) no-repeat 99% center #4297E2}
+/* Service Summary - Role Based End */
+
+.floatLft{
+	float:left;
+	text-align:left
+	}
+	.floatRht {float:right !important}
+	
+/* Maintainance Starts */
+.maintainanceWrapper{
+	float:left;
+	width:100%;
+	padding:5px 0 12px 0
+	}
+	.maintainanceWrapper .lftCell{
+		overflow:auto;
+		float:left;
+		width:21%;
+		margin-right:1%;
+		border:solid 1px #CDCDCD;
+		min-height:700px;
+		height:700px;
+		padding:10px
+		}
+	.maintainanceWrapper .rgtCell{
+		float:right;	
+		width:75%;
+		/*border:solid 1px #CCC;*/
+		min-height:628px;
+		height:auto !important;
+		height:628px
+			}
+			.tabularContainer{
+				border:1px solid #CDCDCD;
+				border-top:none;
+				clear:both;
+				padding:0.5% 1.5% 0.2% 1.5%
+				}
+		.rgtCell .descriptionTxtarea, .rgtCell .linkageTree, .rgtCell .otherBox{			
+			border:1px solid #E4E4E4;
+			height:100px;
+			width:98%;
+			resize:none;
+			padding:5px;
+			overflow-y:auto
+			}
+			
+		.rgtCell .linkageTree {height:150px}
+			
+		.maintainanceWrapper .rgtCell .buttonholder {padding-right:3%}
+			.link, .formcontainer .row span.formfield a{
+				text-decoration:underline;
+				color:#5077AA !important
+			}
+			.positionOuter {position:relative}
+			.positionInner {position:absolute}
+			.alignRht {text-align:right !important}
+			 .floatNone {float:none !important}
+			 .alignCenter{text-align:center}
+			
+/* Maintainance End */
+
+/* Tooltip starts */
+.withdrawal_info{
+	position:relative;
+	float:right
+}
+.withdrawal_info_tooltip, .withdrawal_info_tooltip_Completed{	
+	background: url(../images/tootltip_bg.png) no-repeat scroll center 97% transparent;
+    display:none ;
+    position: absolute;
+    top: -115px;
+	left: -108px  
+}
+.withdrawal_info_tooltip_Completed{
+	 top: -64px !important;
+	 background: url(../images/tootltip_bg.png) no-repeat scroll center 94% transparent !important;
+}
+.tooltip_content, .tooltip_content_Completed{
+	background: none repeat scroll 0 0 #F2F2F2;
+    border-color: #2F81AA;
+    border-style: solid solid none;
+    border-width: 2px 2px 0;
+    height: 101px;
+    margin-bottom: 18px;
+    padding: 0 5px;
+    width: 222px;
+	text-align:center;
+	font-family:verdana;
+	font-size:10px	
+}
+.tooltip_content_Completed{
+	 height: 50px !important
+}
+.exclamationIcon{
+	position: relative;
+    top: 4px
+}
+.tooltip_content span {clear:both}
+/* Tooltip ends */
+
+/* added for search*/
+.autocomplete-w1 {
+    position:absolute;
+    top:0; 
+    left:0;
+    margin:8px 0 0 6px;
+    font-size:12px 
+   }
+.autocomplete {
+    border:1px solid #999;
+     background:#FFF;
+     cursor:default;
+     text-align:left;
+     overflow-y:scroll;
+     overflow-x:hidden;
+     margin:-6px 6px 6px -6px;
+	 height: auto
+ }                         
+
+.autocomplete .selected { 
+	background:#CDEBFA;
+	overflow: hidden
+}
+.autocomplete div { padding:2px 5px; white-space:nowrap }
+.autocomplete strong { font-weight:normal; color:#004878 }
+
+
+.servicesRow{
+	margin-bottom:20px;
+	float:left;
+	width:100%
+	}
+.servicesRow span.servicesCol1{
+		width:78%;
+		 float: left;
+		 padding: 4px 5px 4px 0
+	}
+.servicesRow span.servicesCol2{
+	width:16%;
+	float: right;
+	padding: 4px 5px 4px 0;
+	text-align: left
+	}	
+
+/* Tabbed Flow- Wizards */
+
+
+/* New Calendar Classes added for new API for S.H.Jain */          
+.calendarTopTable{
+     border:4px solid #4297E3;
+     background:#4297E2
+     }
+.calendarMonthBg{
+    text-align:center;
+    font-size:13px
+}
+.calendarResetBtn{
+    background:url(../images/trans_bg.png) repeat-x #26B83F;
+    padding:2px;
+    border:1px solid;
+    border-color:#fff #000 #000 #fff;
+    cursor:pointer;
+    color:#fff;
+    font-size:9px;
+    font-weight:bold
+}
+.calendarMainBg{
+    border-collapse: inherit !important;
+    border-spacing: 1px !important;
+    padding-bottom:0 !important
+}
+/* New Calendar Classes Ends */
+
+                
+.accDataRowHead .col2 {width: 45%}
+.accDataRowHead .col3{
+	width: 41%;
+	text-align:right
+}
+
+/* Overlay Popup Start */
+.overlay, .deleteOverlay, .overlayYesNo{
+	background: #999;
+	opacity: 0.5;
+	filter: alpha(opacity = 70);
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 900;
+	display: none
+}
+a.exit-panel, a.exitYesNo-panel, a.close-panel{ 
+	position: absolute; 
+	right: -4px; 
+	top: -4px; 
+	height: 39px; 
+	width: 40px; 
+	z-index:1002; 
+	background:url(../images/otherIcons.png) no-repeat -69px -33px 
+}
+/* Overlay Popup End */
+
+/* Layout Overwriting */
+.taskCommentsTxtarea{
+	resize:none;
+	width:392px;
+	font-size: 12px
+}
+
+.taskCommentsTxtareaTabLevel{
+	resize:none;
+	width:375px;
+	font-size: 12px
+}
+.normalCustomTab li a {padding:0.5em 12px 0.4em !important}
+
+
+/* Grid Sorting Start */
+.sort-default, .sort-ascending, .sort-descending{
+ 	/*background: url(../images/sortDefault.png) no-repeat scroll 100% 0 transparent;*/
+    color: #000 !important;
+    font-weight: bold;
+    padding: 0 20px 0 0;
+    text-decoration: none !important
+}
+.sort-default{
+	padding:0
+}
+.sort-ascending{background: url(../images/sortArrow.png) no-repeat scroll 100% -2% transparent;
+}
+.sort-descending{background: url(../images/sortArrow.png) no-repeat scroll 100% 101% transparent;
+}
+
+/* Grid Sorting End */
+
+/* Help Start */
+ul.helpLinks{
+	margin-top:-8px;
+	margin-bottom:16px;
+	padding-left: 20px
+	}
+ul.helpLinks li {margin-bottom:4px}
+	ul.helpLinks li a{
+		text-decoration:underline;
+		color:#5077AA
+		}
+		.helpWrapper ol {list-style-type: decimal !important}
+		ol.helpWrapper ul, ol.helpWrapper ol{
+			float: right;
+			width: 98%;
+			
+		}
+		ol.helpWrapper ul li, ol.helpWrapper ol li, ol.helpWrapper p{
+			padding: 0 2px 6px 4px;	
+			/*word-break: break-all;*/
+			float: left			
+		}
+		 ol.helpWrapper p{
+		 	clear: none;
+		 	/*word-break: break-all */
+		 }
+		ol.helpWrapper ul li span, ol.helpWrapper ol li span, ol.helpWrapper p{width:96%;}
+	
+		.helpWrapper ul{list-style-type: disc !important}
+			ol.helpWrapper li{
+				/*list-style-type:decimal;*/
+				list-style-position:inside;
+				padding:6px 2px 0 6px;
+				/* border-bottom: 1px solid #CCC; 
+				margin-bottom: 14px*/
+				}
+				ol.helpWrapper h3 {display:inline}
+				/*ol.helpWrapper p {padding-left:20px}*/
+					ol.helpWrapper ul.innerList li{
+						list-style-type:disc;
+						border:none !important;
+						padding:0 0 0 30px;
+						margin-bottom:auto
+						}
+				ol.helpWrapper li.last {border-bottom:none}
+					ol.helpWrapper .topAnchor{
+							clear:both;
+							text-align:right
+						}
+						ol.helpWrapper .topAnchor a{
+							background:url(../images/arrowUp.jpg) no-repeat left center;
+							padding-left:16px
+						}
+/* Help End */
+
+/* message block Start*/
+.passed{
+	background:url(../images/newIcons.png) no-repeat 6px -627px #DBFFDB;
+	padding:7px 30px 7px 31px;
+	border: 1px solid #6ACA6A;
+	clear: both;
+	position:relative;
+	display:none;
+	margin-top:2px;	
+	color:#428129
+}
+
+.failed {
+     background:url(../images/errorNotifyIcon.png?v=1) no-repeat 3px 5px #FFCCBA;
+     border: 1px solid #E80000;
+     padding:7px 21px 7px 33px;
+     clear: both;         
+     position:relative;
+     display:none;
+     color:#d63301
+}
+
+.failedShow {
+     background:url(../images/otherIcons.png) no-repeat 3px -1718px #FFCCBA;
+     border: 1px solid #E80000;
+     padding:7px 20px 7px 33px;
+     clear: both;         
+     position:relative;
+     color:#d63301
+}
+.message-move{
+	width: 80%;
+    margin-top: 5px;
+}
+.message-close{
+	position:absolute;
+	right:7px;
+	top:8px;
+	cursor:pointer
+}
+
+/* message block End*/
+.overlay-subtitle{
+	font-weight:bold;
+	color:#fff;
+	padding-left:10px
+}
+.grid td{
+		vertical-align:top;
+		border-bottom:1px solid #E4E4E4
+	}
+.grid tr.nobdr td {border:none !important}
+
+.pad6 {padding:6px}
+.rdoBtn {width: auto !important}
+
+/* New Customised Accordian classes created on 23Jul2012 */
+.custToggleHead{
+     background: url(../images/arrowCollapse.png) no-repeat scroll 99% center #4297E2;
+     cursor:pointer;
+     margin-bottom:2px;
+     color:#fff;
+     padding:8px 6px;
+     font-weight:bold
+}
+.custContainer{
+  /* border: 1px solid #E4E4E4;
+     border-bottom:none; */
+     background:#fff;
+     float:left;
+     width:100%;
+     margin-bottom:4px
+}
+.custDataRowHead{
+     background: #F2F2F2;
+     border: 1px solid #CCC;
+     color: #666;
+     display: block;
+     font-weight: bold;
+     line-height: 25px;
+     overflow: hidden;
+     width:100%
+}
+#nextElement { position: relative}
+#nextElement a{
+    float: right;
+    padding-right: 4px;
+    position: absolute;
+    right: 0;
+    text-decoration: underline;
+    top: 6px
+}
+.custAccordianCol1 {
+    color: #666;
+    float: left;
+    font-weight: bold;
+    padding: 4px 8px 4px 0;
+    text-align: right;
+    width: 12%
+}
+.custAccordianCol2 {
+    color: #666;
+    float: left;
+    padding: 4px 4px 4px 8px;;
+    width: 75%;
+    font-weight: bold
+}
+.allBtns{
+	float: right !important;
+    position: absolute;
+    right: 0;
+    top: 40px
+}
+/* New Customised Accordian classes created on 23Jul2012 */
+
+.ui-dialog {background: #fff !important}
+.ui-dialog .ui-dialog-titlebar{
+	background:	url(../images/trans_bg.png) repeat-x scroll 0 0 #1A6BB4;
+	color:#fff;
+	font-weight:bold;
+	color:#fff;
+	font-weight:bold;
+	-moz-border-radius: 4px 4px 0 0; /* Firefox */
+	-webkit-border-radius: 4px 4px 0 0; /* Safari and Chrome */
+	border-radius: 4px 4px 0 0
+}
+.ui-dialog .ui-dialog-titlebar span{
+	color:#fff;
+	font-weight:bold
+}
+.ui-dialog .ui-dialog-titlebar-close{
+	background:url(../images/otherIcons.png) no-repeat -80px -41px;	
+}
+.ui-dialog .ui-dialog-titlebar-close{
+	padding:0
+}
+#dialogBox h6, #ConfirmMessagediv h6{
+	font-size: 11px !important;
+	font-family:verdana, sans-serif
+}
+.ui-dialog .ui-dialog-buttonpane button{
+	/*background:url(../images/trans_bg.png) repeat-x scroll 0 0 #26B83F;
+	border-bottom: 1px solid #666;
+	border-top: 1px solid #fff;
+	border-right: 1px solid #666;
+	border-left: 1px solid#fff;
+	font-size:11px;
+	font-family: verdana, sans-serif;
+	*/
+	color:#fff;
+	font-weight:bold;
+	border:none !important
+	
+}
+	.ui-dialog .ui-dialog-buttonpane button span{
+		color:#fff;
+		font-size:11px;
+		font-weight:bold;
+		/*font-family: verdana, sans-serif;
+		margin:4px*/
+	}
+	
+.tabDisabled, .tabDisabled a:hover{
+	color: #999;
+    cursor: default
+}
+.submitButtonDisable {
+   /* pointer-events: none; */
+    cursor: default;
+    border-width: 1px;
+    cursor: pointer;
+   /* font-size: 11px;*/
+    font-weight: bold;
+    margin-left: 1px;
+    padding: 5px;
+    padding: 9px 20px !important;
+    color:#d3d3dd !important
+}
+
+.overlaycontent {padding:13px}
+.helpDocPop{
+	background: none;
+	cursor: default;
+	margin: 15px;
+	clear:both
+}
+.helpDocPop li {margin-bottom: 20px}
+.helpDocPop li a{
+	/*background: url(../images/newIcons.png) no-repeat 0px -421px;*/
+	padding:4px 0 4px 0;
+	font-weight:bold;
+	text-decoration: underline;
+	color: #5077AA
+}
+.helpDocPop li div {padding-top: 6px}
+.leftPaddingContact {padding-left: 5px}
+.ui-button-text{
+	background:url(../images/trans_bg.png) repeat-x scroll 0 0 #26B83F;
+	/*border: 0 !important;*/
+	border:1px solid #1DA52D
+}
+.wlp-bighorn-layout-flow {overflow: visible}
+
+/* extracted from "helppage.css" */
+.alert-box-help, .alert-box-contact, .alert-box, .alert-box-link-to-vault, .alert-box-delete{
+	background: #FFF;
+    display: none;
+    z-index: 1001;
+    position: fixed
+}
+.alert-box-contact {width: 683px}
+
+
+/*CSS for Simple Tree Menu*/
+.treeview ul{ 
+	margin: 0;
+	padding: 0
+}
+.treeview li{ /*Style for LI elements in general (excludes an LI that contains sub lists)*/
+/* Below is not required in our case */
+/* background: white url(../images/iconCollapse.gif) no-repeat left center; */
+	list-style-type: none;
+	padding-left: 16px;
+	margin-bottom: 3px;
+	white-space: nowrap
+}
+.treeview li.submenu{ /* Style for LI that contains sub lists (other ULs). */
+	background: url(../images/iconExpand.gif) no-repeat scroll left 5px white;
+	cursor: pointer !important;
+	white-space: nowrap
+}
+	.treeview li.submenu ul{ /*Style for ULs that are children of LIs (submenu) */
+		display: none; /*Hide them by default. Don't delete. */
+	}
+		.treeview .submenu ul li{ /*Style for LIs of ULs that are children of LIs (submenu) */
+			cursor: default
+		}
+.date {width:73px !important}
+
+.recaptchatable {float: left}
+.taxonomyLeftCell{
+	min-height: 736px\9 !important;
+}
+.settingHeight{
+	height:180px;
+	height:173px\9;
+}
+.breakAll{
+	vertical-align: top;
+    word-break: break-all	
+}
+.wordWrap{
+	vertical-align: top;
+    word-wrap: break-word	
+}
+.taskDetailsPhone{
+	 background: url(../images/newIcons.png) no-repeat scroll 106px -300px transparent;
+     padding-left: 10px !important
+}
+.printerFriendlyPhone, .printerFriendlyPhoneTask{
+	 background: url(../images/newIcons.png) no-repeat scroll right -304px transparent;
+ 	display:inline-block;
+ 	padding-right:27px;
+}
+
+input.error, select.error, textarea.error {color:black}
+
+/*----- Below is Extracted from window.css -----*/
+/*  The "borderless" skin theme simply disables window borders and makes window content background transparent.
+    These style rules are more specific than other rules applicable to the window and window content. */
+
+.wlp-bighorn-theme-borderless .wlp-bighorn-window {border: 0}
+.wlp-bighorn-theme-borderless .wlp-bighorn-window-content {background-color: transparent}
+/*//----- Extracted from window.css Ends -----*/
+
+
+/*----- Below is Extracted from layout.css ---- */
+/*  Horizontal placeholders in flow layouts, as well as the west, center and east placeholders in border
+    layouts use float mechanisms for placement.  */
+.wlp-bighorn-layout-flow-horizontal,
+.wlp-bighorn-layout-border-west,
+.wlp-bighorn-layout-border-center,
+.wlp-bighorn-layout-border-east{
+    float: left
+}
+
+/*  Float clearing strategy based on http://www.quirksmode.org/css/clearing.html.  */
+.wlp-bighorn-layout-flow,
+.wlp-bighorn-layout-border-wce-container{
+    overflow: hidden;
+    width: 100%
+}
+
+/*  Default widths of the west, center and east placeholders in border layouts.  These widths can be
+    overridden by specifying explicit widths on the individual placeholders in the layout markup.   */
+.wlp-bighorn-layout-border-west,
+.wlp-bighorn-layout-border-east {
+    width: 33%
+}
+.wlp-bighorn-layout-border-center {width: 34%}
+
+/*  Grid layout uses fixed tables.  This style can be overridden in custom skeletons, skins or layouts.  */
+.wlp-bighorn-layout-grid {table-layout: fixed}
+
+/*  Preserves layout structure when placeholder is empty.  */
+.wlp-bighorn-layout-cell {min-height: 1px}
+/*----- Extracted from layout.css Ends ----*/
+
+
+.addTaxonomyButtons, .removeTaxonomyButtons{
+   	background: url(../images/trans_bg.png) repeat-x scroll 0 0 #26B83F;
+    border: 1px solid #1DA52D;
+    color: #FFF;
+    cursor: pointer;
+    font-family: verdana,sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    margin-left: 2px;
+    padding: 5px;
+    width:80px
+}
+.removeTaxonomyButtons{
+	background: url(../images/trans_bg.png) repeat-x scroll 0 0 #FF0000 !important;
+    border: 1px solid #B92801 !important
+}
+.capitalize {text-transform: capitalize}
+.wrapText {white-space: normal !important}
+#deletebutton{
+	background: url(../images/newIcons.png) no-repeat 5px -19px #dcdcdc !important;
+	padding-left: 22px;
+}
+
+.sessionTimeOutLogo{
+	background : url("../images/logos.png") no-repeat scroll 8px -48px transparent;
+	padding-left: 144px;
+}
+
+.noExpand{
+	background : #4297E2;
+}
+.row span img{
+	cursor: pointer !important;
+}
+.forHeightCheck{
+	height:2000px;
+}
+.copyright{
+		width: 23%;
+	}
+	.copyright label{
+			border:1px solid #ccc;
+			margin-left:8px;
+			color:#fff;
+			padding:4px;
+	}
+	.selectReturned{
+		width:105px!important;
+	}
+	
+.customtabs ul li a.sub-started, .customtabs ul li a.sub-draft, .customtabs ul li a.sub-complete, .customtabs ul li a.sub-notstarted{
+	padding:0.5em 2em 0.4em 2.5em !important
+}
+.accordion h5 span{
+	background: none !important
+}
+
+/* help popup scroll */
+.helppopupScroll{
+	height:187px; 
+	overflow-y:auto
+}
+
+/* Select Organization Screen Starts */
+.selectOrganizationBody
+	{
+	clear:both;
+	padding:5px 5px 5px
+	}
+.selectOrganizationContainer
+	{
+	clear:both;
+	padding:30px 5px 5px
+	}
+.selectOrgDiv 
+	{
+	clear:both;
+	padding:30px 5px 5px
+	}
+/* Select Organization Screen Ends*/
+
+
+
+
+.ddcombo_table{
+			width:auto !important;
+			border:0px !important;
+		}
+		.ddcombo_results {
+				padding: 0px;
+				border: 1px solid black;
+				background-color: white;
+				overflow: hidden;
+				z-index: 99999;
+			}
+
+			.ddcombo_results ul {
+				width: 100%;
+				list-style-position: outside;
+				list-style: none;
+				padding: 0;
+				margin: 0;
+			}
+
+			.ddcombo_results li {
+				margin: 0px;
+				padding: 2px 5px;
+				cursor: default;
+				display: block;
+				/* 
+				if width will be 100% horizontal scrollbar will apear 
+				when scroll mode will be used
+				*/
+				/*width: 100%;*/
+				font: menu;
+				font-size: 12px;
+				/* 
+				it is very important, if line-height not setted or setted 
+				in relative units scroll will be broken in firefox
+				*/
+				line-height: 16px;
+				overflow: hidden;
+			}
+			.selectLiCombo {
+				background-color: #1569B2
+			    border-color: #F2F2F2;
+			    border-style: solid;
+			    border-width: 1px;
+			    color: #1569B2;
+				font-weight:normal!important;
+			}
+
+			.ddcombo_loading {
+				background: white url('indicator.gif') right center no-repeat;
+			}
+
+			.ddcombo_odd {
+				background-color: #eee;
+			}
+
+			.ddcombo_over {
+				background-color: #0A246A;
+				color: white;
+			}
+
+			.ddcombo_td1 {
+			  background: url('bg.png') no-repeat;
+			  width: 271px;
+			}
+
+			.ddcombo_td1 input {
+			  margin-left: 4px;
+			  margin-right: 0px;
+			  margin-top: 0px;
+			  height: 21px;
+			  width: 271px;
+			  display: block;
+			}
+
+			.ddcombo_td1 div {
+			  background-color: white;
+			  margin-bottom: 2px;
+			}
+
+			.ddcombo_td2 {
+			  cursor: pointer;
+			  height: 25px;
+			  width: 22px;
+			  cursor: pointer;
+			}
+
+			.ddcombo_td2 img {
+			  display: block;
+			  margin: 0;
+			  padding: 0;
+			  border: 0;
+			  height: 25px;
+			}
+
+			.ddcombo_td2 a {
+			  background: url('../images/button1.png');
+			  display: block;
+			  height: 25px; 
+			  width: 22px;
+			}
+
+			.ddcombo_td2 a:hover {
+			  background: url('../images/button2.png');
+			}
+
+			.ddcombo_input1 {
+			}
+			 
+			.ddcombo_div {
+			  padding: 0;
+			  margin: 0;
+			  padding-left: 4px; 
+			  background: url(../images/transparent_pixel.gif); 
+			}
+			
+			/*R4: Tab Level Comments Highlighted Tab CSS Starts */
+			.highlightTlcTabs {
+				color: #838383;
+				background-color: #A2DF84;
+			}
+			
+			.ui-tabs-selected .highlightTlcTabs{
+				background-color: #82D359;
+			}
+			
+			/*R4: Tab Level Comments Highlighted Tab CSS Ends */
+			
+/*Switch Account Overlay*/
+.tabularWrapperOverlay {		
+	color: #5077AA;
+	font-size: 13px;
+	font-weight: bold;
+	line-height: 18px;
+	padding: 0 0 10px
+}
+.formcontainerOverlay .row span.label {
+		background: none repeat scroll 0 0 #F2F2F2;
+	    float: left;
+	    margin: 0 8px 3px 0;
+	    min-height: 20px;
+	    padding: 4px 5px 4px 0;
+	    text-align: right;
+	    width:35%;
+	    font-weight: bold
+	}
+/* ---- Release 5 start changes done for provider centric reports ---- */
+.reportToolBar{
+	width:27%;
+}
+
+.reportHeaderUl{
+margin-left: 0px !important; 	
+}
+
+.reporticon a {
+    background-position: -36px 3px !important;
+}
+
+.reportDataGrid{
+	margin-top: 40px;
+	width: 50% !important;
+}
+
+.reportDetailed{
+	color: #333;
+	margin-top: 10px;
+}
+.reportButtonExport
+{
+	border-radius: 6px;
+	background:  #7CAF38;
+	border:1px solid white;
+	font-weight: normal;
+	float: right;
+    padding: 10px 25px 10px 25px !important;
+	cursor:pointer;
+	color:#fff;
+	font-family: verdana, sans-serif
+}
+.dashboardDropDown{
+margin-top: 10px;
+width: 50% !important;
+
+}
+.linkageTableParentDiv table{
+	width: 100%;
+}
+.linkageTable{
+	overflow-y:auto;
+}
+.overlayWidth{
+	width:400px;
+}
+.linePadding{
+	padding:0px 10px;	
+}
+.alert-box.alert-box-defaultTask {
+	width: 500px;
+	display: block;
+	position: absolute;
+	left: 324.5px;
+	top: 165px;
+}
+
+.padLft.defaultTaskPadLeft {
+	padding-left: 14px !important;
+	color: #5077AA;
+	font-size: 1.42em;
+	font-weight: bold;
+	float: left;
+	width: 97%;
+	margin-top: 10px;
+}
+
+.alert-box-defaultTask .row span.label {
+	background: none repeat scroll 0 0 #F2F2F2;
+	float: left;
+	margin: 0 8px 3px 0;
+	min-height: 20px;
+	padding: 4px 5px 4px 0;
+	text-align: right;
+	font-weight: normal;
+	width: 45% !important;
+}
+
+.graybtutton {
+	background: url(trans_bg.png) repeat-x scroll 0 0 #E9E9E9 !important;
+	color: #333 !important;
+	width: auto !important;
+	border: 1px solid #999 !important;
+}
+.addpadding {
+	padding-left: 10px;
+}
+
+.aligntext {
+	position: relative;
+	top: 5px;
+}
+
+.row span.label {
+	background: none repeat scroll 0 0 #F2F2F2;
+	float: left;
+	margin: 0 8px 3px 0;
+	min-height: 20px;
+	padding: 4px 5px 4px 0;
+	text-align: right;
+	width: 35%;
+	font-weight: bold
+}
+#row span.label {
+	background: none repeat scroll 0 0 #F2F2F2;
+	float: left;
+	min-height: 20px;
+	text-align: right;
+	font-weight: bold;
+	width:35%;
+	margin-right:5px;
+}
+.formcontainer #newTabs .row {
+overflow:inherit;
+min-height:auto;
+}
+.headerTextAlign {
+      text-align: center;
+      font-weight: bold;
+}
+.dropBox
+ {
+ width:85%;   
+}
+tr.rowpos {
+      height: 30px;
+}
+
+select.userDetailAlign {
+      width: 250px;
+}
+input.button.redbtn {
+      background-color: #D40200;
+}
+table.defaultassign td, table.defaultassign th {
+	border: 1px solid black;
+	border-collapse: collapse;
+	text-align: center;
+}
+.addpaddingDefault {
+      padding: 10px;
+      clear:both;
+}
+
+.boldtextDefaultHeader {
+      font-weight: bold;
+}
+span.labelDefaultAssignee {
+		background: none repeat scroll 0 0 #F2F2F2;
+	    float: left;
+	    margin: 0 8px 3px 0;
+	    min-height: 20px;
+	    padding: 4px 5px 4px 0;
+	    text-align: right;
+	    width:35%;
+	    font-weight: bold
+}
+
+.procurementTitleBreak{
+	word-break:break-word;
+}
+.tabularWrapperDocumentVault .folderImage, .tabularWrapperDocumentVault .documentImage{
+    width: 23px;
+    height: 25px;
+    background-repeat:no-repeat;
+    margin: 0 3px 0 3px;
+    display: block;
+    float:left;
+}
+
+.tabularWrapperDocumentVault .folderImage{
+	background-image: url("../images/folder-icon_blue.png");
+
+}
+.tabularWrapperDocumentVault .documentImage{
+	background-image: url("../images/file.png");
+	margin-left: 6px;
+}
+
+.tabularWrapperDocumentVaultGreen .folderImage{
+	background-image: url("../images/select_org_icon.png");
+    width: 22px;
+    height: 24px;
+}
+.tabularWrapperDocumentVaultGreen .documentImage{
+	background-image: url("../images/greendoc.png");
+	background-size: 18px 23px;
+    width: 22px;
+    height: 24px;
+}
+.userListSelect{
+	width:142px;
+}
+/* ---- Release 5 end changes done for provider centric reports ---- */
+
+
+#evalTableWrapper table td{
+	word-wrap:break-word;
+	padding:10px 9px;
+	text-align: center;
+	min-width:100px;
+}
+#evalTableWrapper{
+	overflow:auto;
+	max-height:400px;
+}
+/* Added in R6 start */
+.bulkNotificationAction {
+	width:22%
+}
+.textDescription{
+	width:44%;
+	 height:57px;
+}
+.buttonMargin{
+	margin-top: 2%;
+}
+.buttonGap{
+margin-right: 1%;
+}
+.returnButton{
+float: left;
+}
+.horizonatalline{
+	margin-top: 0px;
+    margin-bottom: -10px;
+    border-top: dotted 1px;
+    width: 53%;
+}
+/*Class added to show mail icon as part of R6 : Returned Payment Starts*/
+.taskButtons  input.mail{
+	padding:4px 4px 4px 22px;
+	background-position:0.2em -509px !important
+}
+/*Class added to show mail icon as part of R6 : Returned Payment Ends*/
+/* added in R6 for Notification Table */
+.alertNoitificationTable {
+	background-image: url(../images/FiscalYearBudgetInfoTable.png) ;
+	width: 890px;
+    height: 100px;
+    background-size: 100%;
+    float: left;
+}
+/*class added for bulk Notification Tab on agency setting screen  */
+.bulkNotificationButton{
+	border-radius: 5px 5px 0px 0px;
+}
+
+/* added in R7 */
+.messageContract{
+	border: 1px solid black;
+	background:url(../images/info-icon1.png) no-repeat;
+	height: auto;
+    text-align: left;
+    padding-left: 30px;
+    padding-top: 3px;
+    background-repeat: no-repeat;
+    background-color: lightblue;
+	
+}
+
+.unflag{
+	display:  block; 
+	width:  100%;
+	padding-top:5px;
+}
+/* added in R7*/
+.budgetAutoModification{
+	background:url(../images/auto_icon.png) no-repeat -7px -7px;
+	display: inline-block;
+    padding-left: 22px !important;
+    margin-left: 4px;
+}
+.viewInvoice{
+		cursor: pointer;
+		padding-top: 1px;
+		margin-top: 3px;
+		background:url(../images/information_icon.png) no-repeat;
+		background-size:18px 18px;
+		text-decoration:underline;
+		color:#5077AA;
+		width:80px;
+		Height:20px;
+	}

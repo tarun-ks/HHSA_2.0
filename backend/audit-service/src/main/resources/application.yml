@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: audit-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/eprocurement
+    username: postgres
+    password: admin
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  flyway:
+    enabled: false
+    # Audit service doesn't have its own migrations (uses common-core audit_logs table only)
+
+server:
+  port: 8094
+
+# OpenTelemetry Configuration
+opentelemetry:
+  service-name: audit-service
+  exporter:
+    type: logging  # logging, otlp
+    otlp:
+      endpoint: ${OTLP_ENDPOINT:http://localhost:4317}
+  resource:
+    attributes:
+      service.name: audit-service
+      service.version: 1.0.0
+
+logging:
+  level:
+    root: INFO
+    com.hhsa: DEBUG
+    io.opentelemetry: DEBUG
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+

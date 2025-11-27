@@ -1,0 +1,236 @@
+<form-rules>
+	<form-rule formname="Filings" version="0" formid="">
+		<!-- Start of changes for Release 3.10.0 . Enhancement 6573 - Remove CHAR500 extension logic -->
+		<trigger ids="19,13,15,8,1"></trigger>
+		<rule ruleid="1">
+			<question quesid="19" value="Yes" />
+		</rule>
+
+		<rule ruleid="2">
+			<question quesid="1" value="No" />
+		</rule>
+		<!-- End of changes for Release 3.10.0 . Enhancement 6573 - Remove CHAR500 extension logic -->
+		<rule ruleid="4">
+			<question quesid="1" value="Yes" />
+			<question quesid="13" value="No" />
+		</rule>
+
+		<rule ruleid="5">
+			<question quesid="13" value="Yes" />
+			<question quesid="14" value="CPA_Review_Report" />
+			<question quesid="15" value="Yes" />
+		</rule>
+
+		<rule ruleid="6">
+			<question quesid="19" value="Yes" />
+			<question quesid="20" value="Yes" />
+		</rule>
+
+		<rule ruleid="7">
+			<question quesid="13" value="Yes" />
+			<question quesid="14" value="Independent_Audit" />
+			<question quesid="15" value="Yes" />
+		</rule>
+		
+		<rule ruleid="8">
+			<question quesid="1" value="Yes" />
+			<question quesid="13" value="Yes" />
+			<question quesid="14" value="CPA_Review_Report" />
+		</rule>
+		
+		<rule ruleid="9">
+			<question quesid="1" value="Yes" />
+			<question quesid="13" value="Yes" />
+			<question quesid="14" value="Independent_Audit" />
+		</rule>
+		
+		<rule ruleid="4">
+			<question quesid="corpStr" value="For Profit" />
+			<question quesid="13" value="No" />
+		</rule>
+		
+		<rule ruleid="8">
+			<question quesid="corpStr" value="For Profit" />
+			<question quesid="13" value="Yes" />
+			<question quesid="14" value="CPA_Review_Report" />
+		</rule>
+				
+		<rule ruleid="9">
+			<question quesid="corpStr" value="For Profit" />
+			<question quesid="13" value="Yes" />
+			<question quesid="14" value="Independent_Audit" />
+		</rule>
+		
+		<rule ruleid="13">
+			<question quesid="7" value="char_ext_sec" />
+		</rule>
+		
+		<rule ruleid="10">
+			<question quesid="corpStr" value="Non Profit" />
+			<question quesid="8" value="Yes" />
+		</rule>
+		
+		<doc-mapping>
+			<rules>
+				<rule ruleid="1" />
+				<doctypes>
+					<doctype category="Audit">A-133</doctype>
+				</doctypes>
+			</rules>
+			<rules>
+				<rule ruleid="2" />
+				<doctypes>
+					<!-- Changed business rule for 3.1.0 -->
+					<doctype category="Filings">CHAR 500 + 990 + Audit</doctype>
+				</doctypes>
+			</rules>
+			<rules>
+				<rule ruleid="3" />
+				<doctypes>
+				<!-- Changed business rule for 3.1.0 -->
+					<doctype category="Filings">CHAR 500 - Extension</doctype>
+				</doctypes>
+			</rules>
+			<rules>
+				<rule ruleid="4" />
+				<doctypes>
+					<doctype category="Audit">Annual Financial Statement</doctype>
+				</doctypes>
+			</rules>
+			<rules>
+				<rule ruleid="5" />
+				<doctypes>
+					<doctype category="Audit">Corrective Action Plan (for CPA Review Report)</doctype>
+				</doctypes>
+			</rules>
+			<rules>
+				<rule ruleid="6" />
+				<doctypes>
+					<doctype category="Audit">Corrective Action Plan (For A133)</doctype>
+				</doctypes>
+			</rules>
+			<rules>
+				<rule ruleid="7" />
+				<doctypes>
+					<doctype category="Audit">Corrective Action Plan (for Independent Audit)</doctype>
+				</doctypes>
+			</rules>
+			<rules>
+				<rule ruleid="8" />
+				<doctypes>
+					<doctype category="Audit">CPA Review Report</doctype>
+				</doctypes>
+			</rules>
+			<rules>
+				<rule ruleid="9" />
+				<doctypes>
+					<doctype category="Audit">Independent Audit</doctype>
+				</doctypes>
+			</rules>
+			<rules>
+				<rule ruleid="10" />
+				<doctypes>
+					<doctype category="Organization Basics">IRS Determination Letter [501(c)3]</doctype>
+				</doctypes>
+			</rules>
+			<rules>
+				<rule ruleid="13" />
+				<doctypes>
+					<doctype category="Filings">CHAR500 - 2nd Extension Document</doctype>
+				</doctypes>
+			</rules>
+		</doc-mapping>
+	</form-rule>
+
+	<form-rule formname="Basic" version="0" formid="">
+		<trigger ids="7,all,cfo"></trigger>
+		<rule ruleid="1">
+			<question quesid="7" value="" />
+		</rule>
+
+		<rule ruleid="2">
+			<question quesid="all" value="" />
+		</rule>
+
+		<rule ruleid="11">
+			<question quesid="cfo" value="" />
+		</rule>
+		<doc-mapping>
+			<rules>
+				<rule ruleid="1" />
+				<doctypes>
+					<doctype category="Organization Basics">Certificate of Assumed Name</doctype>
+				</doctypes>
+			</rules>
+			<rules>
+				<rule ruleid="2" />
+				<doctypes>
+					<doctype category="Organization Basics">Certificate of Incorporation or equivalent</doctype>
+					<doctype category="Organization Basics">Chief Executive Officer (CEO) Resume or Equivalent</doctype>
+					<doctype category="Organization Basics">Organizational Chart</doctype>
+				</doctypes>
+			</rules>
+			<rules>
+				<rule ruleid="11" />
+				<doctypes>
+					<doctype category="Organization Basics">Chief Financial Officer (CFO) Resume or Equivalent</doctype>
+				</doctypes>
+			</rules>
+		</doc-mapping>
+	</form-rule>
+
+	<form-rule formname="OrgProfile" version="0" formid="">
+		<trigger ids="7,all,cfo"></trigger>
+		<rule ruleid="1">
+			<question quesid="7" value="" />
+		</rule>
+
+		<rule ruleid="2">
+			<question quesid="all" value="" />
+		</rule>
+
+		<rule ruleid="11">
+			<question quesid="cfo" value="" />
+		</rule>
+		<doc-mapping>
+			<rules>
+				<rule ruleid="1" />
+				<doctypes>
+					<doctype category="Organization Basics">Certificate of Assumed Name</doctype>
+				</doctypes>
+			</rules>
+			<rules>
+				<rule ruleid="2" />
+				<doctypes>
+					<doctype category="Organization Basics">Certificate of Incorporation or equivalent</doctype>
+					<doctype category="Organization Basics">Chief Executive Officer (CEO) Resume or Equivalent</doctype>
+					<doctype category="Organization Basics">Organizational Chart</doctype>
+				</doctypes>
+			</rules>
+			<rules>
+				<rule ruleid="11" />
+				<doctypes>
+					<doctype category="Organization Basics">Chief Financial Officer (CFO) Resume or Equivalent</doctype>
+				</doctypes>
+			</rules>
+		</doc-mapping>
+	</form-rule>
+
+	<form-rule formname="Board" version="0" formid="">
+		<trigger ids="all"></trigger>
+		<rule ruleid="1">
+			<question quesid="all" value="" />
+		</rule>
+		<doc-mapping>
+			<rules>
+				<rule ruleid="1" />
+				<doctypes>
+					<doctype category="Organization Basics">Board of Directors List or Equivalent</doctype>
+					<!-- Doctype name changed from from “Corporate By-Laws” to “Corporate By-Laws or Equivalent” for Release 3.10.0 enhancement 6572 -->
+					<doctype category="Organization Basics">Corporate By-Laws or Equivalent</doctype>
+				</doctypes>
+			</rules>
+		</doc-mapping>
+
+	</form-rule>
+</form-rules>

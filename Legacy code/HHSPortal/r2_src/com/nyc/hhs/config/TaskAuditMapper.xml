@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.TaskAuditMapper">
+
+	<insert id="insertTaskAuditForLaunch" parameterType="com.nyc.hhs.model.TaskAuditBean">
+		insert into USER_LEVEL_AUDIT
+		(USER_LEVEL_AUDIT_ID,WORKFLOW_ID,TASK_SEQUENCE,EVENT_TYPE,
+		 TASK_TYPE,ENTITY_ID,ENTITY_NAME,TASK_LEVEL,USER_TYPE,
+		 CONTRACT_ID,CREATED_BY_USER_ID,CREATED_DATE,MODIFIED_BY_USER_ID,MODIFIED_DATE, 
+		 CREATED_BY_STAFF_ID, MODIFIED_BY_STAFF_ID, ASSIGNED_TO)
+		 values(SEQ_USER_LEVEL_AUDIT_ID.NEXTVAL,#{workflowId,jdbcType=VARCHAR},
+		 #{taskSequence,jdbcType=VARCHAR},
+		 #{eventType, jdbcType=VARCHAR},#{taskType,jdbcType=VARCHAR},
+		 #{entityId,jdbcType=VARCHAR},#{entityName,jdbcType=VARCHAR},
+		 #{taskLevel, jdbcType=VARCHAR}, #{userType, jdbcType=VARCHAR},
+		 #{contractId, jdbcType=VARCHAR}, #{createdBy, jdbcType=VARCHAR}, systimestamp,
+		 #{modifiedBy, jdbcType=VARCHAR}, systimestamp, 
+		 #{createdByStaffId, jdbcType=VARCHAR}, #{modifiedByStaffId, jdbcType=VARCHAR},
+		 #{assignedTo})
+	</insert>
+	
+	<insert id="insertTaskAudit" parameterType="com.nyc.hhs.model.TaskAuditBean">
+        insert into USER_LEVEL_AUDIT
+		(USER_LEVEL_AUDIT_ID,WORKFLOW_ID,TASK_SEQUENCE,EVENT_TYPE,
+		 TASK_TYPE,ENTITY_ID,ENTITY_NAME,TASK_LEVEL,USER_TYPE,
+		 CONTRACT_ID,CREATED_BY_USER_ID,CREATED_DATE,MODIFIED_BY_USER_ID,
+		 MODIFIED_DATE, ASSIGNED_TO)
+		 (select SEQ_USER_LEVEL_AUDIT_ID.NEXTVAL, #{workflowId,jdbcType=VARCHAR}, taskSequence+1,
+		 		#{eventType, jdbcType=VARCHAR}, task_type, entity_id, entity_name, 
+		 		<choose>
+		 			<when test="null != taskLevel and '' != taskLevel">
+		 				#{taskLevel, jdbcType=VARCHAR},
+		 			</when>
+		 			<otherwise>(select task_level from 
+						(select task_level from USER_LEVEL_AUDIT where workflow_id = 
+						#{workflowId} order by created_date desc) 
+						where rownum = 1),
+					</otherwise>
+		 		</choose>
+		 		#{userType, jdbcType=VARCHAR}, contract_id, #{createdBy, jdbcType=VARCHAR}, systimestamp,
+				#{modifiedBy, jdbcType=VARCHAR}, systimestamp, 
+				#{assignedTo, jdbcType=VARCHAR}
+				from
+			 	(select max(task_Sequence) as taskSequence, task_type, entity_id, 
+			 		entity_name, contract_id from USER_LEVEL_AUDIT
+					where workflow_id = #{workflowId,jdbcType=VARCHAR}
+          			group by workflow_id , task_type, entity_id, 
+			 		entity_name, contract_id)
+      	  )
+	</insert>
+	
+	<update id="updateEndDateForPreviousStep" parameterType="com.nyc.hhs.model.TaskAuditBean">
+		update USER_LEVEL_AUDIT set END_DATE = systimestamp,
+		FINISH_EVENT = #{eventType}, NEXT_LEVEL = #{nextLevel, jdbcType=VARCHAR},
+		<choose>
+			<when test="null != modifiedBy and modifiedBy != ''">MODIFIED_BY_USER_ID = #{modifiedBy},</when>
+			<otherwise>MODIFIED_BY_STAFF_ID = #{modifiedByStaffId},</otherwise>
+		</choose>
+		MODIFIED_DATE = systimestamp
+		where USER_LEVEL_AUDIT_ID = 
+		(select USER_LEVEL_AUDIT_ID from 
+			(select USER_LEVEL_AUDIT_ID from USER_LEVEL_AUDIT where workflow_id = 
+			#{workflowId} order by created_date desc) 
+		where rownum = 1) 
+	</update>
+	
+	<!-- [Start] R7.4.0:QC 9008 Added for deleting contract budget update -->
+	<resultMap id="AuditDeleteBudgetUpdate" type="com.nyc.hhs.model.TaskAuditBean">
+		<result property="workflowId" column="WORKFLOW_ID" />
+		<result property="taskSequence" column="TASK_SEQUENCE" />
+		<result property="eventType" column="EVENT_TYPE" />
+		<result property="taskType" column="TASK_TYPE"/>
+		<result property="entityId" column="ENTITY_ID" />
+		<result property="entityName" column="ENTITY_NAME" />
+		<result property="taskLevel" column="TASK_LEVEL" />
+		<result property="contractId" column="CONTRACT_ID" />
+	</resultMap>
+	
+	<select id="fetchMaxBudgetUpdateAuditDataByContractId" resultMap="AuditDeleteBudgetUpdate" parameterType="java.lang.String">
+		select WORKFLOW_ID, TASK_SEQUENCE+1 as TASK_SEQUENCE, EVENT_TYPE,
+               TASK_TYPE, ENTITY_ID, ENTITY_NAME, TASK_LEVEL, CONTRACT_ID
+         from ( select   USER_LEVEL_AUDIT_ID, WORKFLOW_ID, TASK_SEQUENCE, EVENT_TYPE, TASK_TYPE,
+                         ENTITY_ID, ENTITY_NAME, TASK_LEVEL, USER_TYPE, CONTRACT_ID,
+                         RANK() OVER (PARTITION BY CONTRACT_ID, TASK_TYPE ORDER BY TASK_SEQUENCE desc) rank
+                  from   USER_LEVEL_AUDIT 
+                 where   CONTRACT_ID = #{asContractId}
+                   and   TASK_TYPE = 'Contract Budget Update Review' 
+               )
+         where rank in(1)
+	</select>
+   <!-- Start R8.4.0 QC 9468 Delete Update Budget not working for multiple years  -->
+	<insert id="insertAuditForDeletingBudgetUpdate" parameterType="com.nyc.hhs.model.TaskAuditBean">
+		insert into USER_LEVEL_AUDIT
+		(USER_LEVEL_AUDIT_ID,WORKFLOW_ID,TASK_SEQUENCE,EVENT_TYPE,
+		 TASK_TYPE,ENTITY_ID,ENTITY_NAME,TASK_LEVEL,USER_TYPE, CONTRACT_ID,
+         CREATED_BY_USER_ID,CREATED_DATE,MODIFIED_BY_USER_ID,MODIFIED_DATE,   ASSIGNED_TO)
+		select  SEQ_USER_LEVEL_AUDIT_ID.NEXTVAL, 
+				<choose>
+                       <when test="null == workflowId or workflowId == ''">'NA' as WORKFLOW_ID </when>
+                       <otherwise>#{workflowId} as WORKFLOW_ID </otherwise>
+                </choose>
+		        , TASK_SEQUENCE+1 as TASK_SEQUENCE, #{eventType} AS EVENT_TYPE, TASK_TYPE
+                , ENTITY_ID, ENTITY_NAME,  TASK_LEVEL, #{userType} as USER_TYPE  , CONTRACT_ID 
+                , #{createdBy} ,systimestamp, #{createdBy} , systimestamp, 'Unassigned' as ASSIGNED_TO
+         from ( select   USER_LEVEL_AUDIT_ID, WORKFLOW_ID, TASK_SEQUENCE, '' as EVENT_TYPE, TASK_TYPE,
+                         ENTITY_ID, ENTITY_NAME, TASK_LEVEL, USER_TYPE, CONTRACT_ID,
+                         RANK() OVER (PARTITION BY CONTRACT_ID, TASK_TYPE ORDER BY TASK_SEQUENCE desc) rank
+                  from   USER_LEVEL_AUDIT 
+                 where   CONTRACT_ID = #{contractId}
+                   and   TASK_TYPE = 'Contract Budget Update Review' 
+               )
+            where rownum = 1      
+	</insert>
+	<!-- End R8.4.0 QC 9468 Delete Update Budget not working for multiple years  -->
+	<!-- [End] R7.4.0:QC 9008 Added for deleting contract budget update -->
+
+</mapper>

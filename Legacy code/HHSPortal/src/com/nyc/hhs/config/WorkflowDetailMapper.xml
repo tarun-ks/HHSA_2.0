@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.nyc.hhs.service.db.services.application.WorkflowDetailMapper">
+
+	<resultMap id="result" type="com.nyc.hhs.model.WorkflowDetails">
+		<result property="msApplicationId" column="APPLICATIONID" />
+		<result property="msDocumentId" column="DOCUMENTID" />
+		<result property="msDocumentType" column="DOCTYPE" />
+		<result property="msCurrentStatus" column="STATUS" />
+		<result property="msEffectiveDate" column="EFFECTIVEDATE" />
+		<result property="msProvidername" column="PROVIDER_NAME" />
+		<result property="msSubmittedBy" column="SUBMITTED_BY" />
+		<result property="msEmailAddress" column="EMAIL_ADDRESS" />
+		<result property="msPhone" column="PHONE" />
+		<result property="moDateSumitted" column="DATE_SUBMITTED" />
+		<result property="msProviderSatus" column="PROVIDER_STATUS" />
+		<result property="miNoOfServices" column="NO_OF_SERVICES" />
+		<result property="msDocumentName" column="SECTION_ID" />
+		<result property="msModifiedDate" column="MODIFIED_DATE" />
+		<result property="msModifiedBy" column="MODIFIED_BY" />
+		<result property="msBusinessAppStatus" column="BUSINESS_APP_STATUS" />
+	</resultMap>
+	
+	
+	  <resultMap id="subSectionResult" type="com.nyc.hhs.model.SubSectionBean">
+		<result property="msOrganizationId" column="ORGANIZATION_ID" />
+		<result property="msUserId" column="USER_ID" />
+		<result property="msSectionId" column="SECTION_ID" />
+		<result property="msApplicationId" column="BUSINESS_APPLICATION_ID" />
+		<result property="msDocumentCategory" column="DOCUMENT_CATEGORY" />
+		<result property="msDocumentId" column="DOCUMENT_ID" />
+		<result property="msDocumentType" column="DOCUMENT_TYPE" />
+		<result property="msSubSectionStatus" column="SUB_SECTION_STATUS" />
+		<result property="moModifiedDate" column="MODIFIED_DATE" />
+		<result property="msModifiedBy" column="MODIFIED_BY" />
+		<result property="moSubmissionDate" column="SUBMISSION_DATE" />
+		<result property="msSubmittedBy" column="SUBMITTED_BY" />
+		<result property="msQuestionId" column="QUESTION_ID" />
+		<result property="msFormId" column="FORM_ID" />
+		<result property="msFormName" column="FORM_NAME" />
+		<result property="msFormVersion" column="FORM_VERSION" />
+		<result property="msProcSubSectionType" column="PROC_SUB_SECTION_TYPE" />
+		<result property="msProcSubSectionStatus" column="PROC_SUB_SECTION_STATUS" />
+		<result property="msSubSectionID" column="SUB_SECTION_ID" />
+		<result property="msServiceAppId" column="SERVICE_APPLICATION_ID" />
+	</resultMap>
+	
+		<resultMap id="documentResult" type="com.nyc.hhs.model.DocumentBean">
+		<result property="msOrgID" column="ORGANIZATION_ID" />
+		<result property="msUserID" column="USER_ID" />
+		<result property="msSectionID" column="SECTION_ID" />
+		<result property="msAppID" column="BUSINESS_APPLICATION_ID" />
+		<result property="msDocCategory" column="DOCUMENT_CATEGORY" />
+		<result property="msDocID" column="DOCUMENT_ID" />
+		<result property="msDocType" column="DOCUMENT_TYPE" />
+		<result property="msDocStatus" column="DOCUMENT_STATUS" />
+		<result property="msModifiedDate" column="MODIFIED_DATE" />
+		<result property="msModifiedBy" column="MODIFIED_BY" />
+		<result property="msCreatedDate" column="SUBMISSION_DATE" />
+		<result property="msCreatedBy" column="SUBMITTED_BY" />
+		<result property="msQuestionID" column="QUESTION_ID" />
+		<result property="msFormID" column="FORM_ID" />
+		<result property="msFormName" column="FORM_NAME" />
+		<result property="msFormVersion" column="FORM_VERSION" />
+		<result property="msProcDocStatus" column="PROC_DOC_STATUS" />
+		<result property="msDocTitle" column="DOCUMENT_TITLE" />
+	</resultMap>
+
+	<select id="documentDetails" parameterType="hashmap" resultMap="documentResult">
+	SELECT d.ORGANIZATION_ID, d.USER_ID, d.SECTION_ID, d.BUSINESS_APPLICATION_ID, d.DOCUMENT_CATEGORY, 
+		d.DOCUMENT_ID, d.DOCUMENT_TYPE, d.DOCUMENT_STATUS, d.MODIFIED_DATE, (sd.FIRST_NAME||' '||sd.MIDDLE_INITIAL||' '||sd.LAST_NAME) as MODIFIED_BY , 
+		d.CREATED_DATE AS SUBMISSION_DATE, d.CREATED_BY AS SUBMITTED_BY, d.QUESTION_ID, d.FORM_ID, d.FORM_NAME, d.FORM_VERSION, 
+		d.PROC_DOC_STATUS, d.DOCUMENT_TITLE 
+		FROM DOCUMENT d INNER JOIN STAFF_DETAILS sd on sd.STAFF_ID = d.MODIFIED_BY where d.BUSINESS_APPLICATION_ID= #{AppID} AND d.SECTION_ID= #{SectionID} ORDER BY DOCUMENT_TYPE ASC
+	 </select>
+	  
+	  <select id="documentServiceDetails" parameterType="hashmap" resultMap="documentResult">
+		SELECT d.ORGANIZATION_ID, d.USER_ID, d.SECTION_ID, d.BUSINESS_APPLICATION_ID, d.DOCUMENT_CATEGORY, 
+		d.DOCUMENT_ID, d.DOCUMENT_TYPE, d.DOCUMENT_STATUS, d.MODIFIED_DATE, (sd.FIRST_NAME||' '||sd.MIDDLE_INITIAL||' '||sd.LAST_NAME) as MODIFIED_BY , 
+		d.CREATED_DATE AS SUBMISSION_DATE,d.CREATED_BY AS SUBMITTED_BY, d.QUESTION_ID, d.FORM_ID, d.FORM_NAME, d.FORM_VERSION, 
+		d.PROC_DOC_STATUS, d.DOCUMENT_TITLE 
+		FROM DOCUMENT d INNER JOIN STAFF_DETAILS sd on sd.STAFF_ID = d.MODIFIED_BY where d.BUSINESS_APPLICATION_ID= #{AppID} AND d.SERVICE_APPLICATION_ID = #{SectionID} ORDER BY DOCUMENT_TYPE ASC
+	  </select>
+	  
+	  <select id="getDocList" parameterType="hashmap" resultMap="documentResult">
+		SELECT ORGANIZATION_ID, USER_ID, SECTION_ID, APPLICATION_ID, DOCUMENT_CATEGORY, 
+		DOCUMENT_ID, DOCUMENT_TYPE, DOCUMENT_STATUS, MODIFIED_DATE, MODIFIED_BY , 
+		CREATED_DATE AS SUBMISSION_DATE,CREATED_BY AS SUBMITTED_BY, QUESTION_ID, FORM_ID, FORM_NAME, FORM_VERSION, 
+		PROC_DOC_STATUS, DOCUMENT_TITLE 
+		FROM DOCUMENT where DOCUMENT_ID= #{documentID} 
+	  </select>
+	  
+	  <select id="providerDetails" parameterType="hashmap" resultMap="result">
+		SELECT 
+		ORGANIZATION.ORGANIZATION_LEGAL_NAME as PROVIDER_NAME , 
+		STAFF_DETAILS.EMAIL as EMAIL_ADDRESS , 
+		STAFF_DETAILS.PHONE as PHONE , ORGANIZATION.ORGANIZATION_STATUS as PROVIDER_STATUS , 
+		STAFF_DETAILS.FIRST_NAME||' '||STAFF_DETAILS.MIDDLE_INITIAL||' '||STAFF_DETAILS.LAST_NAME as SUBMITTED_BY 
+		FROM ORGANIZATION, STAFF_DETAILS, STAFF_ORGANIZATION
+		WHERE ORGANIZATION.ORGANIZATION_ID = #{orgId}
+		AND ORGANIZATION.ORGANIZATION_ID = STAFF_ORGANIZATION.ORGANIZATION_ID 
+		AND (lower(STAFF_ORGANIZATION.STAFF_ID)=lower(#{userId}) or lower(STAFF_DETAILS.EMAIL)=lower(#{userId}))
+		AND STAFF_DETAILS.STAFF_ID = STAFF_ORGANIZATION.STAFF_ID	
+	  </select>
+	  
+	   <select id="subSectionDetails" parameterType="hashmap" resultMap="subSectionResult">
+		SELECT ssb.ORGANIZATION_ID,ssb.USER_ID, ssb.SECTION_ID, ssb.BUSINESS_APPLICATION_ID,
+		 ssb.SUB_SECTION_STATUS, ssb.MODIFIED_DATE, (sd.FIRST_NAME||' '||sd.MIDDLE_INITIAL||' '||sd.LAST_NAME) as MODIFIED_BY,
+		ssb.CREATED_DATE as SUBMISSION_DATE, ssb.CREATED_BY as SUBMITTED_BY,ssb.FORM_ID, ssb.FORM_NAME, ssb.FORM_VERSION,
+		ssb.PROC_SUB_SECTION_TYPE, ssb.PROC_SUB_SECTION_STATUS, ssb.SUB_SECTION_ID,ssb.SERVICE_APPLICATION_ID
+		FROM SUB_SECTION_SUMMARY ssb INNER JOIN STAFF_DETAILS sd on sd.STAFF_ID = ssb.MODIFIED_BY where ssb.BUSINESS_APPLICATION_ID=#{AppID} AND ssb.SECTION_ID=#{SectionID} ORDER BY SUB_SECTION_ID ASC	
+	  </select>
+	  
+	  <select id="subSectionServiceDetails" parameterType="hashmap" resultMap="subSectionResult">
+		SELECT ssb.ORGANIZATION_ID,ssb.USER_ID, ssb.SECTION_ID, ssb.BUSINESS_APPLICATION_ID,
+		ssb.SUB_SECTION_STATUS, ssb.MODIFIED_DATE, (sd.FIRST_NAME||' '||sd.MIDDLE_INITIAL||' '||sd.LAST_NAME) as MODIFIED_BY,
+		ssb.CREATED_DATE as SUBMISSION_DATE, ssb.CREATED_BY as SUBMITTED_BY,ssb.FORM_ID, ssb.FORM_NAME, ssb.FORM_VERSION,
+		ssb.PROC_SUB_SECTION_TYPE, ssb.PROC_SUB_SECTION_STATUS, ssb.SUB_SECTION_ID,ssb.SERVICE_APPLICATION_ID
+		FROM SUB_SECTION_SUMMARY ssb INNER JOIN STAFF_DETAILS sd on sd.STAFF_ID = ssb.MODIFIED_BY where ssb.BUSINESS_APPLICATION_ID=#{AppID} AND ssb.SERVICE_APPLICATION_ID=#{SectionID} ORDER BY SUB_SECTION_ID ASC
+	  </select>
+	  
+	  
+	  <select id="noOfServices" parameterType="hashmap" resultMap="result">
+		select count (*) as NO_OF_SERVICES from SERVICE_APPLICATION WHERE BUSINESS_APPLICATION_ID=#{AppId}
+		
+	  </select>
+</mapper>

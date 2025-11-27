@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<formconfigs>
+	<form formid='basics' name="Basic" liveversion='0' tablename='ORGANIZATION'>
+		<version formid='Basic_0' no='0' deployedlocation='/forms' />
+	</form>
+	<form formid='filings' name="Filings" liveversion='0' tablename='filing_form'>
+		<version formid='Filings_0' no='0' deployedlocation='/forms' />
+	</form>
+	<form formid='board' name="Board" liveversion='0' tablename='board_form'>
+		<version formid='Board_0' no='0' deployedlocation='/forms' />
+	</form>
+	<form formid='policies' name="Policies" liveversion='0' tablename='policies_form'>
+		<version formid='Policies_0' no='0' deployedlocation='/forms' />
+	</form>
+	<form formid='orgprofile' name="OrgProfile" liveversion='0' tablename='ORGANIZATION'>
+		<version formid='OrgProfile_0' no='0' deployedlocation='/forms' />
+	</form>
+</formconfigs>
+

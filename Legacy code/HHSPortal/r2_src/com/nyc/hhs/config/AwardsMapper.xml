@@ -1,0 +1,915 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.AwardsMapper">
+
+	<resultMap id="awardDetailsForFinance" type="com.nyc.hhs.model.AwardBean">
+		<result property="awardAmount" column="CONTRACT_AMOUNT" />
+		<result property="epin" column="EXT_EPIN" />
+		<result property="contractNumber" column="EXT_CT_NUMBER" />
+		<result property="contractStatus" column="CONTRACT_STATUS" />
+		<result property="contractId" column="CONTRACT_ID" />
+		<result property="contractStartDate" column="CONTRACT_START_DATE" />
+		<result property="contractEndDate" column="CONTRACT_END_DATE" />
+		<result property="contractModifiedDate" column="MODIFIED_DATE" />
+		<result property="contractModifiedBy" column="MODIFIED_BY_USERID" />
+		<result property="contractTitle" column="CONTRACT_TITLE" />
+		<result property="budgetId" column="BUDGET_ID" />
+		<result property="budgetModifiedDate" column="BUDGET_MODIFIED_DATE" />
+		<result property="budgetModifiedByStaffId" column="MODIFIED_BY_STAFFID" />
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="isOpenEndedRFP" column="IS_OPEN_ENDED_RFP" />
+		<result property="procurementStatus" column="PROC_STATUS_ID" />
+	</resultMap>
+
+	<!-- Query modified as a part of release 3.3.0 defect 6463 -->
+	<!-- fetchAwardDetailsForFinance query is modified as part of build 2.6.0, defect id 5607 -->
+	<!-- Proc Status fetched || Changes done for Enhancement #6429 for Release 3.4.0 -->
+	<select id="fetchAwardDetailsForFinance" parameterType="com.nyc.hhs.model.AwardBean"
+		resultMap="awardDetailsForFinance">
+		SELECT CT.CONTRACT_ID ,
+		  CT.EXT_CT_NUMBER ,
+		  PROC.PROCUREMENT_TITLE ,
+		  PROC.STATUS_ID as PROC_STATUS_ID,
+		  PROC.IS_OPEN_ENDED_RFP,
+		  TO_CHAR(CT.CONTRACT_START_DATE,'MM/DD/yyyy') AS CONTRACT_START_DATE,
+		  TO_CHAR(CT.CONTRACT_END_DATE,'MM/DD/yyyy')   AS CONTRACT_END_DATE ,
+		  CT.CONTRACT_TITLE ,
+		  CT.EXT_EPIN ,
+		  decode(CT.CONTRACT_AMOUNT, '0', '0.00', to_char(CT.CONTRACT_AMOUNT, '9,999,999,999,999,999.99')) CONTRACT_AMOUNT,
+		  CT.EXT_CT_NUMBER ,
+		  TO_CHAR(CT.MODIFIED_DATE,'MM/DD/yyyy') AS MODIFIED_DATE ,
+		  (CUD.FIRST_NAME
+		  ||' '
+		  ||CUD.LAST_NAME)                                                              AS MODIFIED_BY_USERID,
+		  DECODE(ST.STATUS,'Pending Workflow Launch','Pending Configuration',ST.STATUS) AS CONTRACT_STATUS ,
+		  BUD1.MODIFIED_BY_STAFFID ,
+		  BUD1.BUDGET_MODIFIED_DATE ,
+		  BUD1.BUDGET_ID
+		FROM CONTRACT CT ,
+		  PROCUREMENT PROC ,
+		  CITY_USER_DETAILS CUD ,
+		  STATUS_MASTER_R2_R3 ST,
+		  (SELECT BUD.BUDGET_ID,
+		    CONTRACT_ID ,
+		    (
+		    CASE
+		      WHEN BUD.MODIFIED_BY_STAFFID IS NOT NULL
+		      THEN (SD.FIRST_NAME
+		        || ' '
+		        ||SD.MIDDLE_INITIAL
+		        ||' '
+		        ||SD.LAST_NAME)
+		      ELSE (CUD.FIRST_NAME
+		        || ' '
+		        || CUD.LAST_NAME)
+		    END )                                    AS MODIFIED_BY_STAFFID,
+		    TO_CHAR(BUD.MODIFIED_DATE, 'MM/DD/yyyy') AS BUDGET_MODIFIED_DATE
+		  FROM BUDGET BUD,
+		    STAFF_DETAILS SD,
+		    CITY_USER_DETAILS CUD,
+		    STAFF_ORGANIZATION SO
+		  WHERE (BUD.MODIFIED_BY_STAFFID = SD.STAFF_ID
+		  OR BUD.MODIFIED_BY_USERID      = CUD.USER_ID)
+		  AND SO.organization_id         = #{userOrgId}
+		  AND SO.STAFF_ID = SD.STAFF_ID
+		  AND CONTRACT_ID                =
+		    (SELECT CONTRACT_ID
+		    FROM CONTRACT PP
+		    WHERE ORGANIZATION_ID  = #{userOrgId}
+		    AND PROCUREMENT_ID     = #{procurementId}
+		    AND CONTRACT_SOURCE_ID = 1
+		    AND CONTRACT_TYPE_ID   = 1
+		    AND STATUS_ID NOT     IN(58,69,165)
+		    <if test="null != evaluationPoolMappingId">
+				AND EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId} </if>
+		    )
+		  AND ROWNUM = '1'
+		  ORDER BY FISCAL_YEAR_ID
+		  ) BUD1
+		WHERE CT.ORGANIZATION_ID  = #{userOrgId}
+		AND CT.PROCUREMENT_ID     = #{procurementId}
+	   <if test="null != evaluationPoolMappingId">
+   		AND CT.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId} </if>
+		AND CT.CONTRACT_SOURCE_ID = 1
+		AND CT.CONTRACT_TYPE_ID  != 6
+		AND CT.MODIFIED_BY_USERID = CUD.USER_ID
+		AND CT.STATUS_ID          = ST.STATUS_ID
+		AND CT.CONTRACT_ID        = BUD1.CONTRACT_ID(+)
+		AND PROC.PROCUREMENT_ID   = CT.PROCUREMENT_ID
+		AND CT.STATUS_ID NOT     IN(58,69,165)
+	</select>
+	
+
+	<resultMap id="awardDetails" type="com.nyc.hhs.model.AwardBean">
+		<result property="awardAmount" column="CONTRACT_AMOUNT" />
+		<result property="epin" column="EXT_EPIN" />
+		<result property="contractNumber" column="EXT_CT_NUMBER" />
+		<result property="contractStatus" column="CONTRACT_STATUS" />
+		<result property="contractId" column="CONTRACT_ID" />
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="isOpenEndedRFP" column="IS_OPEN_ENDED_RFP" />
+		<result property="procurementStatus" column="PROC_STATUS_ID" />
+		<result property="status" column="STATUS_ID" />
+	</resultMap>
+
+	<!-- Query modified as a part of release 3.3.0 defect 6463 -->
+	<!-- Proc Status fetched || Changes done for Enhancement #6429 for Release 3.4.0 -->
+	<!-- Updated in R5 -->
+	<select id="fetchAwardDetails" parameterType="com.nyc.hhs.model.AwardBean"
+		resultMap="awardDetails">
+		SELECT CT.STATUS_ID, CT.CONTRACT_ID, PROC.PROCUREMENT_TITLE, PROC.STATUS_ID as PROC_STATUS_ID, PROC.IS_OPEN_ENDED_RFP, 
+		CT.EXT_EPIN,
+		decode(CT.CONTRACT_AMOUNT, '0', '0.00', to_char(CT.CONTRACT_AMOUNT, '9,999,999,999,999,999.99')) CONTRACT_AMOUNT,
+		CT.EXT_CT_NUMBER, DECODE(ST.STATUS,'Pending Workflow Launch','Pending Configuration',ST.STATUS) AS
+		CONTRACT_STATUS FROM CONTRACT CT,STATUS_MASTER_R2_R3 ST, PROCUREMENT
+		PROC WHERE
+		CT.ORGANIZATION_ID= #{userOrgId} AND CT.PROCUREMENT_ID= #{procurementId} 
+		<if test="null != evaluationPoolMappingId">
+			AND CT.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		</if>
+		AND CT.STATUS_ID
+		NOT IN(58,69) AND CT.CONTRACT_SOURCE_ID=1 AND CT.CONTRACT_TYPE_ID!=6 AND
+		CT.STATUS_ID=ST.STATUS_ID
+		AND PROC.PROCUREMENT_ID = CT.PROCUREMENT_ID
+    </select>
+	<!-- Updated in R5 -->
+	<resultMap id="awardDocuments" type="com.nyc.hhs.model.ExtendedDocument">
+		<result property="documentType" column="DOCUMENT_TYPE" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+		<result property="documentId" column="DOCUMENT_IDENTIFIER_ID" />
+		<!-- Start || Changes done for Enhancement #6429 for Release 3.4.0 -->
+		<result property="statusId" column="STATUS_ID" />
+		<result property="procurementStatusId" column="PROC_STATUS_ID" />
+		<result property="agencyAward" column="AGENCY_AWARD" />
+		<!-- End || Changes done for Enhancement #6429 for Release 3.4.0 -->
+	</resultMap>
+
+	<select id="fetchAwardDocuments" parameterType="com.nyc.hhs.model.ExtendedDocument"
+		resultMap="awardDocuments">
+		SELECT RFPDOC.DOCUMENT_TYPE,RFPDOC.DOCUMENT_IDENTIFIER_ID,
+		TO_CHAR(RFPDOC.MODIFIED_DATE,'MM/DD/YYYY') as
+		MODIFIED_DATE FROM
+		RFP_DOCUMENT RFPDOC WHERE PROCUREMENT_ID=#{procurementId} 
+		AND EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		AND RFP_DOC_FLAG='0'
+	</select>
+
+    <select id="awardDocumentList" parameterType="hashmap"
+		resultType="String">
+		SELECT DOCUMENT_IDENTIFIER_ID FROM AWARD_DOCUMENT WHERE AWARD_ID =#{awardId} AND ORGANIZATION_ID =#{providerOrgID} 
+		UNION
+		SELECT DOCUMENT_IDENTIFIER_ID
+		FROM RFP_DOCUMENT 
+		WHERE PROCUREMENT_ID=#{procurementId} 
+		AND EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		AND RFP_DOC_FLAG='0'
+	</select>
+
+
+
+
+	<resultMap type="com.nyc.hhs.model.EvaluationBean" id="evaluationResultsAndSelection">
+		<result property="awardReviewStatus" column="STATUS" />
+		<result property="awardReviewStatusId" column="AWARD_REVIEW_STATUS_ID" />
+		<result property="awardApprovalDate" column="AWARD_APPROVAL_DATE" />
+		<result property="awardId" column="AWARD_ID" />
+	</resultMap>
+
+	<select id="fetchAwardReviewStatus" parameterType="map"
+		resultMap="evaluationResultsAndSelection">
+		SELECT
+		ST.STATUS,AWD.AWARD_REVIEW_STATUS_ID,AWD.AWARD_APPROVAL_DATE,AWD.AWARD_ID
+		FROM AWARD AWD, STATUS_MASTER_R2_R3 ST
+		WHERE
+		AWD.AWARD_REVIEW_STATUS_ID
+		= ST.STATUS_ID AND PROCUREMENT_ID =
+		#{procurementId,jdbcType=VARCHAR}
+		<if test="null != evaluationPoolMappingId">
+			and AWD.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		</if>
+	</select>
+
+	<insert id="insertAwardDocumentDetails" parameterType="java.util.Map">
+		INSERT INTO AWARD_DOCUMENT
+		(AWARD_DOCUMENT_ID,AWARD_ID,CREATED_DATE,
+		CREATED_BY_USERID,MODIFIED_DATE,MODIFIED_BY_USERID,AWARD_DOC_STATUS_ID,DOCUMENT_IDENTIFIER_ID,
+		AWARD_DOCUMENT_CONFIG_ID,ORGANIZATION_ID)
+		VALUES(SEQ_AWARD_DOC_ID.NEXTVAL,#{awardId},SYSDATE,
+		#{userId},SYSDATE,#{userId},#{statusId},#{documentId},#{docReferenceNo},#{organizationId})
+	</insert>
+	<delete id="removeAwardDocuments" parameterType="java.util.Map">
+		DELETE FROM AWARD_DOCUMENT WHERE DOCUMENT_IDENTIFIER_ID=#{documentId} AND
+		AWARD_ID=#{awardId} AND AWARD_DOCUMENT_CONFIG_ID=#{docReferenceNo}
+	</delete>
+
+	<!-- <update id="updateAwardDocumentProperties" parameterType="java.util.Map"> 
+		UPDATE AWARD_DOCUMENT SET DOCUMENT_TITLE=#{DocumentTitle},MODIFIED_BY_USERID=#{userId},MODIFIED_DATE=#{DateLastModified} 
+		WHERE DOCUMENT_IDENTIFIER_ID=#{documentId} </update> -->
+
+	<resultMap type="com.nyc.hhs.model.AwardBean" id="awardBean">
+		<result property="awardAmount" column="CONTRACT_AMOUNT" />
+		<result property="providerName" column="ORGANIZATION_LEGAL_NAME" />
+		<result property="epin" column="EXT_EPIN" />
+		<result property="status" column="STATUS" />
+		<result property="ctNumber" column="EXT_CT_NUMBER" />
+	</resultMap>
+	<select id="fetchAwardsDetails" parameterType="java.lang.String"
+		resultMap="awardBean">
+		SELECT
+		org.organization_legal_name,ct.EXT_EPIN,
+		decode(CT.CONTRACT_AMOUNT, '0', '0.00', to_char(CT.CONTRACT_AMOUNT, '9,999,999,999,999,999.99')) CONTRACT_AMOUNT,
+		DECODE(st.STATUS,'Pending Workflow Launch','Pending Configuration',st.STATUS) AS STATUS,ct.EXT_CT_NUMBER
+		FROM CONTRACT ct,status_master_r2_r3 st,ORGANIZATION org
+		WHERE
+		CONTRACT_ID = #{contractID} and st.status_id =ct.status_id and
+		org.ORGANIZATION_ID = ct.ORGANIZATION_ID
+	</select>
+	
+	<!-- Made changes for release 3.10.0 enhancement 5686 -->
+	<update id="updateAwardStatus" parameterType="java.util.Map">
+		UPDATE CONTRACT SET
+		STATUS_ID = #{statusId}, 
+		REUSE_EPIN = #{reuseEpin,jdbcType=VARCHAR},
+		ADD_DELETE_FLAG = #{addDeleteStatus} WHERE
+		CONTRACT_ID = #{contractID}
+	</update>
+
+	<select id="fetchAwardId" parameterType="java.util.Map"
+		resultType="String">
+		SELECT AWARD_ID FROM AWARD WHERE PROCUREMENT_ID=#{procurementId} 
+		<if test="null != evaluationPoolMappingId">
+			and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		</if>
+	</select>
+
+	<resultMap id="awardAndContractDetails" type="com.nyc.hhs.model.AwardBean">
+		<result property="providerName" column="ORGANIZATION_LEGAL_NAME" />
+		<result property="organizationId" column="ORGANIZATION_ID" />
+		<result property="awardAmount" column="CONTRACT_AMOUNT" />
+		<result property="epin" column="EXT_EPIN" />
+		<result property="contractNumber" column="EXT_CT_NUMBER" />
+		<result property="contractStatus" column="STATUS" />
+		<result property="contractTypeId" column="CONTRACT_TYPE_ID" />
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<result property="contractId" column="CONTRACT_ID" />
+		<result property="evaluationPoolMappingId" column="EVALUATION_POOL_MAPPING_ID" />
+		<result property="isOpenEndedRFP" column="IS_OPEN_ENDED_RFP" />
+		<result property="evaluationGroupId" column="evaluation_group_id" />
+		<result property="procurementTitle" column="procurement_title" />
+		<result property="status" column="status_id" />
+		<result property="awardNegotiationFlag" column="award_negotiation_flag" />
+		<result property="awardId" column="award_review_status_id" />
+	</resultMap>
+	
+	<!-- Query modified as a part of release 3.3.0 defect 6463 --> 
+	<!-- Updated in R5 -->   
+	<select id="awardAndContracts" parameterType="java.util.Map"
+		resultMap="awardAndContractDetails">
+		SELECT award_review_status_id, procurement_title, status_id,award_negotiation_flag ,PROCUREMENT_ID, CONTRACT_AMOUNT, EXT_CT_NUMBER, EXT_EPIN, 
+		DECODE(STATUS,'Pending Workflow Launch','Pending Configuration','ETL Registered','Pending Registration',STATUS) AS STATUS, 
+		ORGANIZATION_LEGAL_NAME, ORGANIZATION_ID, CONTRACT_TYPE_ID, CONTRACT_ID, rn, EVALUATION_POOL_MAPPING_ID, IS_OPEN_ENDED_RFP, evaluation_group_id 
+		from 
+			(SELECT aw.award_review_status_id, proc.procurement_title,con.status_id, nvl(aw.award_negotiation_flag, '--') as award_negotiation_flag ,
+			con.PROCUREMENT_ID,con.CONTRACT_AMOUNT,nvl(con.EXT_CT_NUMBER, '--') as EXT_CT_NUMBER,
+			nvl(con.EXT_EPIN,'Not Assigned') AS EXT_EPIN, sta.STATUS,
+			org.ORGANIZATION_LEGAL_NAME,org.ORGANIZATION_ID,con.CONTRACT_TYPE_ID, 
+			con.CONTRACT_ID,rownum as rn,con.EVALUATION_POOL_MAPPING_ID, proc.IS_OPEN_ENDED_RFP, epm.evaluation_group_id
+			FROM CONTRACT con,organization org, status_master_r2_r3 sta, PROCUREMENT proc, EVALUATION_POOL_MAPPING epm, award aw
+			WHERE con.ORGANIZATION_ID = org.ORGANIZATION_ID(+)
+				AND con.status_id = sta.status_id(+) 
+				AND con.PROCUREMENT_ID = proc.PROCUREMENT_ID 
+				AND con.procurement_id =#{procurementId}  AND CONTRACT_TYPE_ID !=6 
+				AND con.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+				AND epm.EVALUATION_POOL_MAPPING_ID = con.EVALUATION_POOL_MAPPING_ID
+				AND con.STATUS_ID!='165'
+				AND aw.EVALUATION_POOL_MAPPING_ID=con.EVALUATION_POOL_MAPPING_ID
+			order by EXT_EPIN)
+		WHERE rn BETWEEN #{startNode} AND #{endNode}
+	</select>
+<!-- Updated in R5 --> 
+	<resultMap id="viewAptProgressDetails" type="com.nyc.hhs.model.AwardBean">
+		<result property="awardEpinId" column="PROCUREMENT_AWARD_EPIN" />
+		<result property="aptMilestone" column="APT_MILESTONE" />
+		<result property="awardAmount" column="CONTRACT_AMOUNT" />
+		<result property="awardAgencyId" column="AWARD_AGENCY_ID" />
+		<result property="providerName" column="ORGANIZATION_LEGAL_NAME" />
+		<result property="ctNumber" column="EXT_CT_NUMBER" />
+		<result property="mocsApprovalDate" column="MOCS_APPROVAL_DATE" />
+		<result property="dateSentToComptroller" column="date_sent_to_comptroller" />
+		<result property="registrationDate" column="registration_date" />
+		<result property="status" column="STATUS" />
+	</resultMap>
+
+	<!-- Below Query modified as part of release 2.6.1 -->
+	<!-- Query modified as a part of release 3.3.0 defect 6463 --> 
+	<!-- R6: Query modified as part of Release 6 APT to allow non APT epins -->
+	<select id="viewAptProgress" parameterType="java.util.Map"
+		resultMap="viewAptProgressDetails">
+		SELECT vwae.PROCUREMENT_AWARD_EPIN, vwae.APT_MILESTONE, con.CONTRACT_AMOUNT, vwae.AWARD_AGENCY_ID, org.organization_legal_name, 
+		con.EXT_CT_NUMBER, vwae.MOCS_APPROVAL_DATE, vwae.date_sent_to_comptroller, vwae.registration_date,  
+		DECODE(status.STATUS,'Pending Workflow Launch','Pending Configuration','ETL Registered','Pending Registration',status.STATUS) AS STATUS 
+		FROM REF_APT_EPIN_MASTER vwae, organization org , contract con , status_master_r2_r3 status
+		WHERE con.organization_id = org.organization_id
+		AND con.STATUS_ID = status.status_id
+		AND vwae.REF_APT_EPIN_ID  = con.REF_APT_EPIN_ID
+		and vwae.EPIN_TYPE IN ('C', 'A', 'R', 'N')
+		AND con.ext_epin  =  #{AwardEPin}
+		AND con.contract_type_id in (1,5)
+		and con.status_id != 165
+	</select>
+	
+	<!-- Below Query modified for enhancement 3.1.0 :6204 -->
+	<update id="updateRelatedProposal" parameterType="java.util.Map">
+		update proposal_config set PROC_REVIEW_STATUS_ID = #{statusId},
+		LAST_UPDATE_DATE = systimestamp
+		<if test="competitionPoolStatus == 139">
+			,PROPOSAL_STATUS_ID = #{statusId}
+		</if>
+		where PROPOSAL_ID in
+		(select PROPOSAL_ID from proposal_config pc, evaluation_pool_mapping epm 
+			where pc.ORGANIZATION_ID = #{organizationId}
+			and pc.procurement_Id=#{procurementId} and pc.PROPOSAL_STATUS_ID not in
+			(#{proposalInDraftStatus}, #{updateproposalstatusnonresponsive})
+			and epm.evaluation_group_id = pc.evaluation_group_id
+			and epm.competition_pool_id = pc.competition_pool_id
+			and epm.evaluation_pool_mapping_id = #{evaluationPoolMappingId}
+		)
+	</update>
+
+	<update id="updateModifiedFlagEvalResults" parameterType="java.util.Map">
+		update EVALUATION_RESULTS set MODIFIED_FLAG= #{modifiedFlag},AWARD_AMOUNT = '0', 
+		MODIFIED_DATE = sysdate, MODIFIED_BY_USERID = #{userId} where PROPOSAL_ID in
+		(select PROPOSAL_ID from proposal_config where ORGANIZATION_ID = #{organizationId}
+		and procurement_Id=#{procurementId} and PROC_REVIEW_STATUS_ID = 23)
+		and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</update>
+
+	<update id="updateAwardReviewStatus" parameterType="java.util.Map">
+		update Award set AWARD_REVIEW_STATUS_ID =#{statusId},
+		MODIFIED_DATE =
+		sysdate,
+		MODIFIED_BY_USERID = #{userId} where
+		PROCUREMENT_ID=#{procurementId}
+		and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId} 
+		<if test="null != updateAfterAwardApproval">
+		  and award_review_status_id = 34
+		</if>
+	</update>
+
+	<resultMap id="awardTaskDocument" type="com.nyc.hhs.model.ExtendedDocument">
+		<result property="documentId" column="DOCUMENT_IDENTIFIER_ID" />
+		<result property="requiredFlag" column="REQUIRED_FLAG" />
+		<result property="documentSeqNumber" column="RFP_DOCUMENT_ID" />
+	</resultMap>
+
+	<select id="fetchDocumentsForAwardDocTask" parameterType="hashmap"
+		resultMap="awardTaskDocument">
+		SELECT RFP_DOCUMENT_ID, RFPDOC.DOCUMENT_IDENTIFIER_ID, 'NO' as REQUIRED_FLAG FROM RFP_DOCUMENT
+		RFPDOC WHERE EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		AND RFP_DOC_FLAG='0'
+    	UNION ALL
+		SELECT RFP_DOCUMENT_ID, RFPDOC.DOCUMENT_IDENTIFIER_ID, 'YES' as REQUIRED_FLAG FROM RFP_DOCUMENT
+		RFPDOC, evaluation_group eg, evaluation_pool_mapping epm
+    	WHERE RFPDOC.EVALUATION_POOL_MAPPING_ID = eg.DEFAULT_CONFIGURATION_ID 
+    	AND eg.evaluation_group_id = epm.evaluation_group_id
+    	and epm.evaluation_pool_mapping_id = #{evaluationPoolMappingId}
+		AND RFP_DOC_FLAG='0'
+	</select>
+
+	<resultMap type="com.nyc.hhs.model.ExtendedDocument" id="awardDocumentTypes">
+		<result property="documentSeqNumber" column="AWARD_DOCUMENT_CONFIG_ID" />
+		<result property="documentType" column="AWARD_DOCUMENT_TYPE" />
+		<result property="requiredFlag" column="REQUIRED_FLAG" />
+	</resultMap>
+
+	<select id="fetchAwardDocumentTypeForTask" parameterType="string"
+		resultMap="awardDocumentTypes">
+		SELECT AWDCONF.AWARD_DOCUMENT_CONFIG_ID,
+		AWDCONF.AWARD_DOCUMENT_TYPE, AWDCONF.REQUIRED_FLAG FROM
+		AWARD_DOCUMENT_CONFIG AWDCONF, AWARD AWD, evaluation_group eg, EVALUATION_POOL_MAPPING epm
+		WHERE AWDCONF.AWARD_ID = AWD.AWARD_ID
+    	AND AWD.EVALUATION_POOL_MAPPING_ID = eg.default_configuration_id
+    	and eg.evaluation_group_id = epm.evaluation_group_id
+    	and epm.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		ORDER BY REQUIRED_FLAG DESC,
+		AWARD_DOCUMENT_TYPE ASC,
+		AWARD_DOC_SEQ_NUM ASC
+	</select>
+
+	<delete id="removeAwardTaskDocs" parameterType="hashmap">
+		DELETE FROM
+		RFP_DOCUMENT WHERE DOCUMENT_IDENTIFIER_ID =
+		#{documentId,jdbcType=VARCHAR} AND RFP_DOCUMENT_ID = #{docSeqID,jdbcType=VARCHAR}
+	</delete>
+
+	<!-- start release 3.14.0 -->
+	<insert id="saveAwardDocumentTypes" parameterType="com.nyc.hhs.model.ExtendedDocument">
+		INSERT
+		INTO
+		AWARD_DOCUMENT_CONFIG
+		(AWARD_DOCUMENT_CONFIG_ID,AWARD_ID,AWARD_DOC_SEQ_NUM,AWARD_DOCUMENT_TYPE,REQUIRED_FLAG,
+		 CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,MODIFIED_BY_USERID)
+		VALUES(SEQ_AWD_DOC_CONFIG_ID.NEXTVAL,
+		(SELECT
+		AWARD_ID FROM AWARD WHERE EVALUATION_POOL_MAPPING_ID =
+		#{evaluationPoolMappingId,jdbcType=VARCHAR}),
+		#{documentSeqNumber,jdbcType=VARCHAR},
+		#{documentType,jdbcType=VARCHAR}, #{requiredFlag,jdbcType=VARCHAR},
+		SYSDATE, #{createdBy,jdbcType=VARCHAR},
+		SYSDATE,
+		#{lastModifiedById,jdbcType=VARCHAR})
+	</insert>
+	<!-- end release 3.14.0 -->
+
+	<!-- changed in build 2.6.0, defect id 5667 -->
+	<insert id="insertAwardTaskDocDetails" parameterType="hashmap">
+		INSERT INTO
+		RFP_DOCUMENT(RFP_DOCUMENT_ID,DOCUMENT_IDENTIFIER_ID,PROCUREMENT_ID,DOCUMENT_CATEGORY,
+		DOCUMENT_TYPE,STATUS_ID,CREATED_DATE,CREATED_BY_USERID,
+		MODIFIED_DATE,MODIFIED_BY_USERID,RFP_DOC_FLAG, EVALUATION_POOL_MAPPING_ID, DOC_DELETE_FLAG)
+		VALUES(SEQ_RFP_DOC_ID.NEXTVAL,#{documentId},#{procurementId},#{docCategory},
+		#{docType},#{status},SYSDATE,#{userId},SYSDATE,#{userId},'0', #{evaluationPoolMappingId},'0')
+	</insert>
+
+	<select id="awardAndContractsCount" parameterType="java.util.Map"
+		resultType="int">
+		select count(*)
+		from contract con,organization org, status_master_r2_r3 sta
+		where con.ORGANIZATION_ID = org.ORGANIZATION_ID(+)
+		AND con.status_id = sta.status_id(+) and
+		con.procurement_id =#{procurementId} 
+		<if test="null != evaluationPoolMappingId">
+			and con.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		</if>
+	</select>
+
+	<!-- Assign award epin -->
+	<!-- R6: refAptEpinId and procurementAgencyId included in result bean -->
+	<resultMap id="awardBeanDetails" type="com.nyc.hhs.model.AwardBean">
+		<result property="epin" column="AWARD_EPIN" />
+		<result property="awardAgencyId" column="AWARD_AGENCY_ID" />
+		<result property="awardedVendorName" column="AWARDED_VENDOR_NAME" />
+		<result property="vendorFmsId" column="VENDOR_FMS_ID" />
+		<result property="awardAmount" column="AWARD_AMOUNT" />
+		<result property="refAptEpinId" column="REF_APT_EPIN_ID" />
+		<result property="procurementAgencyId" column="AGENCY_ID" />
+	</resultMap>
+
+	<!-- Query modified as a part of release 3.3.0 defect 6463 -->
+	<!-- changed query as part of build 3.1.0, enhancement id 5642-->
+	<!-- Query modified as a part of release 3.10.0 enhancement 5686 -->
+	<!-- R6: Query modified to include REF APT EPIN ID and procurement Agency Id -->
+	<select id="fetchAwardEPinDetails" parameterType="java.lang.String"
+		resultMap="awardBeanDetails">
+		SELECT vae.AWARD_EPIN,
+		  vae.AWARD_AGENCY_ID,
+		  vae.AWARDED_VENDOR_NAME,
+		  vae.VENDOR_FMS_ID,
+		  vae.AWARD_AMOUNT,
+		  vae.REF_APT_EPIN_ID,
+		  pro.AGENCY_ID
+		FROM VW_AWARD_EPIN vae,
+		  PROCUREMENT pro,
+		  ref_apt_epin_master epin
+		WHERE vae.PROCUREMENT_EPIN_ID    = epin.PROCUREMENT_EPIN_ID
+			AND pro.REF_APT_EPIN_ID          = epin.REF_APT_EPIN_ID
+			AND pro.PROCUREMENT_ID           = #{lsProcurementId}
+			AND vae.REF_APT_EPIN_ID NOT IN
+  		(select DECODE(REF_APT_EPIN_ID, null, 0, REF_APT_EPIN_ID) from CONTRACT where STATUS_id != 69 and STATUS_id != '165' and 
+			contract_type_id in (1,2,3,5) and (REUSE_EPIN IN ('Y') or  REUSE_EPIN is null))
+	</select>
+
+	<resultMap id="amountProviderDetails" type="com.nyc.hhs.model.AwardBean">
+		<result property="providerName" column="ORGANIZATION_LEGAL_NAME" />
+		<result property="awardAmount" column="CONTRACT_AMOUNT" />
+	</resultMap>
+
+	<select id="fetchAmountProviderDetails" parameterType="java.lang.String"
+		resultMap="amountProviderDetails">
+		select con.CONTRACT_AMOUNT,org.ORGANIZATION_LEGAL_NAME from
+		contract con,organization org
+		where con.ORGANIZATION_ID =
+		org.ORGANIZATION_ID and CONTRACT_ID=#{asContractId}	
+	</select>
+<!-- R6: Added extra field REF_APT_EPIN_ID for new epin validation -->
+	<update id="assignAwardEpin" parameterType="Map">
+		UPDATE CONTRACT SET
+		<if test="contractTypeId == 5">
+		STATUS_ID=#{contractStatus},
+		</if>
+		EXT_EPIN=#{lsAwardEpin}, REF_APT_EPIN_ID=#{refAptEpinId} where CONTRACT_ID=#{asContractId}
+	</update>
+	<!-- Assign award epin -->
+
+	<update id="updateAwardDetailsFromTask" parameterType="hashmap">
+		UPDATE AWARD SET
+		<if test="includeDate eq 'true'">
+			AWARD_APPROVAL_DATE = systimestamp,
+		</if>
+		AWARD_REVIEW_STATUS_ID = #{awardStatusId}
+		WHERE PROCUREMENT_ID = #{procurementId}
+		<if test="evaluationPoolMappingId != null">
+			and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		</if>
+	</update>
+	<update id="updateAwardDocDetails" parameterType="java.util.Map">
+		UPDATE AWARD_DOCUMENT SET
+		DOCUMENT_IDENTIFIER_ID=#{documentId},MODIFIED_DATE=SYSDATE,MODIFIED_BY_USERID=#{userId}
+		WHERE DOCUMENT_IDENTIFIER_ID=#{replacingDocumentId}
+		AND AWARD_DOCUMENT_CONFIG_ID=#{docReferenceNo}
+	</update>
+
+	<delete id="removeAwardDocumentFromVault" parameterType="String">
+		DELETE
+		FROM AWARD_DOCUMENT WHERE DOCUMENT_IDENTIFIER_ID=#{asDocumentId}
+	</delete>
+	
+	<!-- Commented for enhancement 6448 for Release 3.8.0  -->
+	<!--<select id="ctNotCancelledClosedRegistered" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) FROM CONTRACT WHERE STATUS_ID NOT IN
+		(#{registered},#{closed},#{canceled},#{awardRegistered},#{awardCanceled})
+		AND PROCUREMENT_ID=#{procurementId}  and contract_type_id != 6
+	</select>
+	
+	--><!-- Multiple NT219 fix  -->
+	<select id="checkIfAllReqAwardDocsUploaded" parameterType="string"
+		resultType="int">
+		select count(1) from AWARD_DOCUMENT_CONFIG conf,
+		(Select
+		AWARD_DOCUMENT_CONFIG_ID from AWARD_DOCUMENT where
+		AWARD_ID =
+		#{awardId} and organization_id = #{organizationId}) doc where
+		doc.AWARD_DOCUMENT_CONFIG_ID(+) =
+		conf.AWARD_DOCUMENT_CONFIG_ID and
+		conf.required_flag = '1' and
+		conf.AWARD_ID = #{awardId} and
+		doc.AWARD_DOCUMENT_CONFIG_ID is
+		null
+	</select>
+	<select id="getAgencyIdForAwardId" parameterType="string"
+		resultType="string">
+		select agency_id from procurement pro, award awd
+		where awd.procurement_id = pro.procurement_id
+		and awd.award_id=#{awardId}
+	</select>
+	<select id="getContractRegistered" parameterType="string"
+		resultType="int">
+		select count(1) from contract where procurement_id=#{asProcurementId} and
+		status_id in(57,62)
+      </select>
+
+	<resultMap id="AwardWFProcurementDetails" type="com.nyc.hhs.model.AcceptProposalTaskBean" >
+		<result property="awardAmount" column="AWARD_AMOUNT" />
+	</resultMap>
+	<select id="fetchAwardAmountForSelectedProposals" parameterType="map"
+		resultMap="AwardWFProcurementDetails">
+    	SELECT SUM(EVALRES.AWARD_AMOUNT) AWARD_AMOUNT,EVALRES.EVALUATION_POOL_MAPPING_ID 
+		FROM PROPOSAL_CONFIG PROCONF, EVALUATION_RESULTS EVALRES, EVALUATION_POOL_MAPPING EPM
+		WHERE PROCONF.PROPOSAL_ID =	EVALRES.PROPOSAL_ID	AND 
+		PROCONF.PROC_REVIEW_STATUS_ID = #{PROPOSAL_SELECTED}
+		AND EPM.EVALUATION_POOL_MAPPING_ID = EVALRES.EVALUATION_POOL_MAPPING_ID
+		AND	EVALRES.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId} GROUP BY EVALRES.EVALUATION_POOL_MAPPING_ID
+     </select>
+      
+      <select id="fetchOrgNameFromContractId" parameterType="string" resultType="string">
+      	SELECT ORG.ORGANIZATION_LEGAL_NAME FROM CONTRACT PC, ORGANIZATION ORG 
+		WHERE PC.contract_id = #{asContractId,jdbcType=VARCHAR} AND
+		PC.ORGANIZATION_ID = ORG.ORGANIZATION_ID
+      </select>
+      
+      <select id="fetchOrgDetailsFromContractId" parameterType="string" resultType="map">
+      	SELECT ORG.ORGANIZATION_LEGAL_NAME organizationName, ORG.ORGANIZATION_ID organizationId FROM CONTRACT PC, ORGANIZATION ORG 
+		WHERE PC.contract_id = #{asContractId,jdbcType=VARCHAR} AND
+		PC.ORGANIZATION_ID = ORG.ORGANIZATION_ID
+      </select>
+      
+      <select id="contractCofApproved" parameterType="hashmap" resultType="int">
+      	SELECT count(1) FROM contract WHERE status_id IN 
+      	<foreach item="items" index="index" collection="statusList"
+				open="(" separator="," close=")">
+				#{items}
+    	</foreach>
+      	AND contract_id = #{contractID,jdbcType=VARCHAR}
+      </select>
+      
+      
+      <select id="contractBudgetApproved" parameterType="hashmap" resultType="int">
+		SELECT COUNT(budget_id)
+		FROM
+		  (SELECT budget_id
+		  FROM budget
+		  WHERE contract_id = #{contractID,jdbcType=VARCHAR}
+		  AND status_id    IN 	
+		  <foreach item="items" index="index" collection="statusList"
+						open="(" separator="," close=")">
+						#{items}
+		    	</foreach>    
+		  ORDER BY budget_id ASC
+		  )
+		WHERE rownum = 1 
+      </select>
+      
+      
+      <resultMap type="com.nyc.hhs.model.EvaluationGroupAwardBean" id="evaluationAwardsDetails">
+      	<result property="evaluationGroupTitle" column="EVALUATION_GROUP_TITLE"/>
+      	<result property="evaluationGroupId" column="EVALUATION_GROUP_ID"/>
+      	<result property="submissionCloseDate" column="SUBMISSION_CLOSE_DATE"/>
+      	<result property="awardAmount" column="AWARD_AMOUNT"/>
+      	<result property="noOfAwards" column="AWARD_COUNT"/>
+      </resultMap>
+      
+	<!-- Query modified as a part of release 3.3.0 defect 6463 -->      
+      <select id="fetchEvaluationGroupAwardsList" parameterType="com.nyc.hhs.model.EvaluationGroupAwardBean" 
+      	resultMap="evaluationAwardsDetails">
+        select evaluation_group_title, evaluation_group_id, award_amount,SUBMISSION_CLOSE_DATE, award_count
+      	from (select a.evaluation_group_title, a.evaluation_group_id, 
+      	decode(a.award_amount, '0', '0.00', to_char(a.award_amount, '999,999,999,999,999,999,999.99')) award_amount,
+      	a.SUBMISSION_CLOSE_DATE, a.award_count, rownum rn
+      	from(SELECT eg.evaluation_group_title ,eg.evaluation_group_id, 
+        (select NVL(SUM(c.contract_amount),0) award_amount
+	      from contract c, evaluation_pool_mapping epm
+          where c.evaluation_pool_mapping_id = epm.evaluation_pool_mapping_id
+	      and epm.evaluation_group_id = eg.evaluation_group_id
+	      and c.STATUS_ID != 69 and c.STATUS_ID != 165) award_amount,
+      	TO_CHAR(eg.SUBMISSION_CLOSE_DATE,'MM/DD/yyyy') AS SUBMISSION_CLOSE_DATE,
+        (select COUNT(awd.award_id) award_count from award awd, contract c, evaluation_pool_mapping epm
+					  where epm.evaluation_pool_mapping_id = awd.evaluation_pool_mapping_id
+					  and  c.evaluation_pool_mapping_id = epm.evaluation_pool_mapping_id
+             			and epm.evaluation_group_id = eg.evaluation_group_id
+					   and c.STATUS_ID != 69 and c.STATUS_ID != 165) award_count
+        from evaluation_group eg
+        LEFT JOIN evaluation_pool_mapping evp on evp.evaluation_group_id  = eg.evaluation_group_id
+        LEFT JOIN award a on a.evaluation_pool_mapping_id = evp.evaluation_pool_mapping_id
+        WHERE eg.procurement_id = #{procurementId,jdbcType=VARCHAR}
+        and a.award_approval_date is not null
+        GROUP BY eg.evaluation_group_title,eg.evaluation_group_id,eg.submission_close_date
+        having count(a.award_id) > 0
+		order by
+				<choose>
+					<when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+					<otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+				</choose>
+				<choose>
+					<when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+					<otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+				</choose>
+				)a ) b WHERE rn BETWEEN #{startNode} AND
+				#{endNode}			
+      </select>
+     
+      <select id="fetchEvaluationGroupAwardsListCount" parameterType="java.lang.String" resultType="int">
+			select count(*)
+			from (select count(epm.evaluation_group_id) group_count
+	        FROM EVALUATION_GROUP EG, EVALUATION_POOL_MAPPING EPM, award a
+	        WHERE
+            eg.evaluation_group_id = epm.evaluation_group_id
+            and epm.evaluation_pool_mapping_id = a.evaluation_pool_mapping_id
+            and eg.procurement_id = #{asProcurementId,jdbcType=VARCHAR}
+            and a.award_approval_date is not null        
+            group by  epm.evaluation_group_id
+            having count(a.award_id) > 0)
+            where group_count > 0
+      </select>
+      
+      <resultMap type="com.nyc.hhs.model.SelectionDetailsSummaryBean" id="selectionDetailsSummary">
+      	<result property="procurementId" column="procurement_id"/>
+      	<result property="competitionPoolTitle" column="competition_pool_title"/>
+      	<result property="contractNumber" column="EXT_CT_NUMBER"/>
+      	<result property="contractStatus" column="CONTRACT_STATUS"/>
+      	<result property="contractId" column="CONTRACT_ID"/>
+      	<result property="amount" column="CONTRACT_AMOUNT"/>
+      	<result property="evaluationPoolMapingId" column="EVALUATION_POOL_MAPPING_ID"/>
+      	<result property="awardEpin" column="EXT_EPIN"/>
+      	<result property="status" column="status_id"/>
+      </resultMap>
+      
+	<!-- Query modified as a part of release 3.3.0 defect 6463 -->
+	<!-- Updated in R5 -->      
+      <select id="fetchSelectionDetailsSummaryList" parameterType="com.nyc.hhs.model.SelectionDetailsSummaryBean" resultMap="selectionDetailsSummary">
+          	select status_id, CONTRACT_ID, PROCUREMENT_TITLE, EXT_EPIN, CONTRACT_AMOUNT, EXT_CT_NUMBER, CONTRACT_STATUS,
+      		competition_pool_title , EVALUATION_POOL_MAPPING_ID, procurement_id
+      		from (select a.status_id, a.CONTRACT_ID, a.PROCUREMENT_TITLE, a.EXT_EPIN,a.CONTRACT_AMOUNT, a.EXT_CT_NUMBER,a.CONTRACT_STATUS,
+      		a.competition_pool_title ,a.EVALUATION_POOL_MAPPING_ID,a.procurement_id, rownum rn
+      		from(SELECT CT.status_id, CT.CONTRACT_ID, PROC.PROCUREMENT_TITLE, NVL(CT.EXT_EPIN, 'Pending') as EXT_EPIN,
+      		CT.CONTRACT_AMOUNT, NVL(CT.EXT_CT_NUMBER, 'Pending') as EXT_CT_NUMBER, 
+          	DECODE(ST.STATUS,'Pending Workflow Launch','Pending Configuration',ST.STATUS) AS
+			CONTRACT_STATUS,cp.competition_pool_title ,evp.EVALUATION_POOL_MAPPING_ID,ct.procurement_id FROM CONTRACT CT
+		    LEFT JOIN STATUS_MASTER_R2_R3 ST on CT.STATUS_ID=ST.STATUS_ID
+		    LEFT JOIN PROCUREMENT PROC on PROC.PROCUREMENT_ID = CT.PROCUREMENT_ID
+		    LEFT JOIN EVALUATION_POOL_MAPPING evp on evp.EVALUATION_POOL_MAPPING_ID = CT.EVALUATION_POOL_MAPPING_ID
+		    LEFT JOIN COMPETITION_POOL cp ON cp.COMPETITION_POOL_ID = evp.COMPETITION_POOL_ID
+		    WHERE CT.ORGANIZATION_ID= #{organizationId} AND CT.PROCUREMENT_ID = #{procurementId,jdbcType=VARCHAR} AND CT.STATUS_ID
+			NOT IN(58,69,165) AND CT.CONTRACT_SOURCE_ID = #{contractSourceId} AND CT.CONTRACT_TYPE_ID != #{contractTypeId}
+			order by
+				<choose>
+					<when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+					<otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+				</choose>
+				<choose>
+					<when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+					<otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+				</choose>
+				)a ) b WHERE rn BETWEEN #{startNode} AND
+				#{endNode}			
+      </select>
+      <!-- Updated in R5 -->  
+      
+	<!-- Query modified as a part of release 3.3.0 defect 6463 -->      
+      <select id="fetchSelectionDetailsSummaryListCount" parameterType="java.lang.String" resultType="int">
+       	select count(1) from CONTRACT CT
+		WHERE CT.procurement_id = #{asProcurementId,jdbcType=VARCHAR} AND CT.STATUS_ID
+		NOT IN(58,69,165) AND CT.CONTRACT_SOURCE_ID=1 AND CT.CONTRACT_TYPE_ID!=6
+      </select>
+      
+      <select id="fetchEvalPoolMappingId" parameterType="string" resultType="string">
+      	SELECT EVALUATION_POOL_MAPPING_ID FROM EVALUATION_POOL_MAPPING WHERE PROCUREMENT_ID = #{procurementId}
+      </select>
+      
+      <select id="fetchDefaultConfigId" parameterType="string" resultType="string">
+      	SELECT DEFAULT_CONFIGURATION_ID 
+		FROM EVALUATION_GROUP EG, evaluation_pool_mapping EPM
+		WHERE eg.evaluation_group_id = epm.evaluation_group_id
+		AND epm.evaluation_pool_mapping_id = #{evaluationPoolMappingId}
+      </select>
+
+    <!-- Commented for enhancement 6448 for Release 3.8.0 -->
+	<!--<select id="checkAwardReviewStatus" parameterType="map"
+		resultType="int">
+		SELECT count(*)
+		FROM AWARD AWD
+		WHERE
+		awd.PROCUREMENT_ID = #{procurementId,jdbcType=VARCHAR}
+		and awd.AWARD_REVIEW_STATUS_ID != #{AWARD_REVIEW_APPROVED}
+	</select>-->
+	
+	<update id="updateContractStartEndDate" parameterType="map">
+		update Contract
+		Set CONTRACT_START_DATE = #{contractStartDate}, CONTRACT_END_DATE = #{contractEndDate}
+		where
+		CONTRACT_ID = #{contractID}
+		and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}	
+	</update>
+	
+	<insert id="insertDefaultAwardDocDetails" parameterType="map">
+		INSERT INTO
+		RFP_DOCUMENT(RFP_DOCUMENT_ID,DOCUMENT_IDENTIFIER_ID,PROCUREMENT_ID,DOCUMENT_CATEGORY,
+		DOCUMENT_TYPE,STATUS_ID,CREATED_DATE,CREATED_BY_USERID,
+		MODIFIED_DATE,MODIFIED_BY_USERID,RFP_DOC_FLAG, EVALUATION_POOL_MAPPING_ID)
+   		(select SEQ_RFP_DOC_ID.NEXTVAL, DOCUMENT_IDENTIFIER_ID, PROCUREMENT_ID, DOCUMENT_CATEGORY,
+    	DOCUMENT_TYPE, STATUS_ID, CREATED_DATE, CREATED_BY_USERID, MODIFIED_DATE,MODIFIED_BY_USERID,
+    	RFP_DOC_FLAG, #{evaluationPoolMappingId} from rfp_document 
+    	where evaluation_pool_mapping_id = 
+      		(select default_configuration_id from evaluation_group eg, evaluation_pool_mapping epm
+      		 where eg.evaluation_group_id = epm.evaluation_group_id
+          	 and epm.evaluation_pool_mapping_id = #{evaluationPoolMappingId}))
+	</insert>
+	
+	<!-- Start of queries added for enhancement 3.1.0 :6025 -->
+	
+	<insert id="insertDocumentDownloadRequest" parameterType="java.util.Map">
+		INSERT INTO DOCUMENT_DOWNLOAD_REQUEST
+		(DOCUMENT_DOWNLOAD_REQUEST_ID,FILE_NAME,PROCUREMENT_ID,
+		PROCUREMENT_STATUS_ID,ORGANIZATION_ID,DOCUMENT_STATUS_ID,CREATED_DATE,CREATED_BY_USER_ID,MODIFIED_DATE,MODIFIED_BY_USER_ID, EVALUATION_POOL_MAPPING_ID)
+		VALUES(SEQ_DOCUMENT_DOWNLOAD_REQUEST.NEXTVAL,#{asFileName},#{asProcurementId},#{asProcStatus},#{asProviderOrgID},
+		'162',SYSDATE,#{asUserId},SYSDATE,#{asUserId},#{asEvaluationPoolMappingId})
+	</insert>
+	
+	<update id="updateDocumentDownloadRequest" parameterType="map">
+		update DOCUMENT_DOWNLOAD_REQUEST
+		Set DOCUMENT_STATUS_ID = #{asStatusId},MODIFIED_BY_USER_ID = #{asUserId},MODIFIED_DATE = SYSDATE
+		where
+		PROCUREMENT_ID = #{asProcurementId}
+		and EVALUATION_POOL_MAPPING_ID = #{asEvaluationPoolMappingId}
+		and ORGANIZATION_ID = #{asProviderOrgID}
+	</update>
+	
+	
+	<resultMap id="DocumentDetailsBatchProcessList" type="com.nyc.hhs.model.ExtendedDocument">
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<result property="evaluationPoolMappingId" column="EVALUATION_POOL_MAPPING_ID" />
+		<result property="organizationId" column="ORGANIZATION_ID" />
+		<result property="documentTitle" column="FILE_NAME" />
+		<result property="organizationName" column="ORGANIZATION_LEGAL_NAME" />
+	</resultMap>
+	
+	<select id="fetchDocumentDetailsforZipBatchProcess" parameterType="HashMap" resultMap="DocumentDetailsBatchProcessList">
+      	SELECT ddr.PROCUREMENT_ID, ddr.FILE_NAME, ddr.ORGANIZATION_ID, org.ORGANIZATION_LEGAL_NAME, ddr.EVALUATION_POOL_MAPPING_ID 
+		FROM DOCUMENT_DOWNLOAD_REQUEST ddr,
+		ORGANIZATION org
+		WHERE DOCUMENT_STATUS_ID = #{statusId}
+		AND ddr.PROCUREMENT_STATUS_ID NOT IN (7,8)
+		AND ddr.ORGANIZATION_ID = org.ORGANIZATION_ID
+     </select>
+     
+	<!-- Query modified as a part of release 3.3.0 defect 6463 -->     
+     <select id="isFinancialCheck" parameterType="HashMap" resultType="int">
+		select count(1) from CONTRACT where 
+		PROCUREMENT_ID = #{procurementId} 
+		and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId} 
+		and CONTRACT_TYPE_ID = '1'
+		and STATUS_ID != '69' and STATUS_ID != '165'
+     </select>
+     
+     <update id="updateProcStatusForDocs" parameterType="map">
+		update DOCUMENT_DOWNLOAD_REQUEST
+		Set PROCUREMENT_STATUS_ID = #{asStatusId}, MODIFIED_BY_USER_ID = #{asUserId}
+		where
+		PROCUREMENT_ID = #{asProcurementId}
+	</update>
+	
+	<select id="fetchDocumentDetailsforZipDeleteBatchProcess" parameterType="HashMap" resultMap="DocumentDetailsBatchProcessList">
+      	SELECT ddr.PROCUREMENT_ID, ddr.FILE_NAME, ddr.ORGANIZATION_ID, org.ORGANIZATION_LEGAL_NAME, ddr.EVALUATION_POOL_MAPPING_ID 
+		FROM DOCUMENT_DOWNLOAD_REQUEST ddr,
+		ORGANIZATION org
+		WHERE
+		ddr.PROCUREMENT_STATUS_ID IN (7,8)
+		AND ddr.ORGANIZATION_ID = org.ORGANIZATION_ID
+     </select>
+     
+     <update id="updateDocumentDownloadRequestForBatch" parameterType="map">
+		update DOCUMENT_DOWNLOAD_REQUEST
+		Set DOCUMENT_STATUS_ID = #{asStatusId}, MODIFIED_DATE = SYSDATE, MODIFIED_BY_USER_ID='system', DOC_ZIP_CREATED_DATE = SYSDATE
+		where PROCUREMENT_ID = #{asProcurementId}
+		and EVALUATION_POOL_MAPPING_ID = #{asEvaluationPoolMappingId}
+		and ORGANIZATION_ID = #{asProviderOrgID}
+	 </update>
+	
+	 <update id="updateDocumentDownloadDeleteRequestForBatch" parameterType="map">
+		update DOCUMENT_DOWNLOAD_REQUEST
+		Set DOCUMENT_STATUS_ID = #{asStatusId}, MODIFIED_DATE = SYSDATE, MODIFIED_BY_USER_ID='system'
+		where PROCUREMENT_ID = #{asProcurementId}
+		and EVALUATION_POOL_MAPPING_ID = #{asEvaluationPoolMappingId}
+		and ORGANIZATION_ID = #{asProviderOrgID}
+	 </update>
+	 
+	 <select id="fetchDocumentStatus" parameterType="string" resultType="string">
+  		select STATUS from STATUS_MASTER_R2_R3 where STATUS_ID = #{statusId}
+     </select>
+	 
+	 <!-- End of queries added for enhancement 3.1.0 :6025 -->
+	 
+	 <!-- Start || Changes done for Enhancement #6429 for Release 3.4.0 -->
+	 <select id="fetchAgencyAwardDocuments" parameterType="com.nyc.hhs.model.ExtendedDocument"
+		resultMap="awardDocuments">
+		SELECT AGENCYAWRDDOC.DOCUMENT_TYPE,AGENCYAWRDDOC.DOCUMENT_IDENTIFIER_ID,
+		TO_CHAR(AGENCYAWRDDOC.MODIFIED_DATE,'MM/DD/YYYY') as
+		MODIFIED_DATE,AGENCYAWRDDOC.STATUS_ID,'1' as AGENCY_AWARD,PROC.STATUS_ID as PROC_STATUS_ID FROM
+		AGENCY_AWARD_DOCUMENT AGENCYAWRDDOC, PROCUREMENT PROC WHERE 
+		PROC.PROCUREMENT_ID = AGENCYAWRDDOC.PROCUREMENT_ID
+		AND AGENCYAWRDDOC.PROCUREMENT_ID=#{procurementId} 
+		AND AGENCYAWRDDOC.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		AND AGENCYAWRDDOC.AWARD_ID = #{awardId}
+		AND AGENCYAWRDDOC.ORGANIZATION_ID = #{userOrgId}
+	</select>
+	
+	<select id="fetchAgencyAwardDocumentIds" parameterType="com.nyc.hhs.model.ExtendedDocument"
+		resultType="string">
+		SELECT AGENCYAWRDDOC.DOCUMENT_IDENTIFIER_ID	FROM
+		AGENCY_AWARD_DOCUMENT AGENCYAWRDDOC WHERE PROCUREMENT_ID=#{procurementId} 
+		AND EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		AND AWARD_ID = #{awardId}
+		AND ORGANIZATION_ID = #{asProviderOrgID}
+	</select>
+	
+	<delete id="removeAgencyAwardDocs" parameterType="map">
+		DELETE FROM
+		AGENCY_AWARD_DOCUMENT WHERE DOCUMENT_IDENTIFIER_ID =
+		#{documentId,jdbcType=VARCHAR} 
+	</delete>
+	
+	<insert id="insertAgencyAwardDocsDetails" parameterType="hashmap">
+		INSERT INTO
+		AGENCY_AWARD_DOCUMENT(AWARD_DOCUMENT_ID,ORGANIZATION_ID,DOCUMENT_IDENTIFIER_ID,PROCUREMENT_ID,AWARD_ID,DOCUMENT_CATEGORY,
+		DOCUMENT_TYPE,STATUS_ID,CREATED_DATE,CREATED_BY_USERID,
+		MODIFIED_DATE,MODIFIED_BY_USERID, EVALUATION_POOL_MAPPING_ID)
+		VALUES(SEQ_AGENCY_AWARD_DOC_ID.NEXTVAL,#{organizationId},#{documentId},#{procurementId},#{awardId},#{docCategory},
+		#{docType},#{status},SYSDATE,#{userId},SYSDATE,#{userId}, #{evaluationPoolMappingId})
+	</insert>
+	<!-- End || Changes done for Enhancement #6429 for Release 3.4.0 -->
+	
+	<!-- Added in R5 -->
+	<update id="updateFinalizedAmount" parameterType="hashmap">
+		update EVALUATION_RESULTS set NEGOTIATED_AWARD_AMOUNT =#{AMOUNT}  where PROPOSAL_ID= #{proposalId} 
+	</update>
+	
+	<update id="updateAwardNegotiationDetails" parameterType="hashmap">
+		UPDATE AWARD
+		<if test="IsNegotiationRequired eq 'true'">
+			SET AWARD_NEGOTIATION_FLAG=1
+		</if>
+		<if test="IsNegotiationRequired eq 'false'">
+			SET AWARD_NEGOTIATION_FLAG=0
+		</if>
+		WHERE PROCUREMENT_ID = #{procurementId}
+		<if test="evaluationPoolMappingId != null">
+			and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		</if>
+	</update>
+	
+	<!-- Added in R5 -->
+	
+</mapper>

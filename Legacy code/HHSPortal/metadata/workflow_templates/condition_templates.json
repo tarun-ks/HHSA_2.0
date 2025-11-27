@@ -1,0 +1,715 @@
+{
+  "version": "2.0.0",
+  "description": "Enterprise Workflow Condition Templates",
+  "condition_engine": {
+    "condition_types": [
+      "field_validation",
+      "numeric_comparison",
+      "string_comparison",
+      "date_comparison",
+      "array_operations",
+      "calculated_fields",
+      "external_api_conditions",
+      "user_permissions",
+      "workflow_state",
+      "time_based",
+      "complex_logical"
+    ],
+    "operators": [
+      "equals",
+      "not_equals",
+      "greater_than",
+      "less_than",
+      "greater_than_or_equal",
+      "less_than_or_equal",
+      "contains",
+      "not_contains",
+      "starts_with",
+      "ends_with",
+      "in",
+      "not_in",
+      "is_null",
+      "is_not_null",
+      "regex_match",
+      "date_before",
+      "date_after",
+      "date_between",
+      "time_before",
+      "time_after",
+      "time_between"
+    ],
+    "logical_operators": ["AND", "OR", "NOT", "XOR"],
+    "nested_conditions": true,
+    "condition_caching": true,
+    "performance_optimization": true
+  },
+  "condition_templates": {
+    "field_validation_conditions": {
+      "required_field_validation": {
+        "id": "required_field_validation",
+        "name": "Required Field Validation",
+        "description": "Validate that required fields are present and not null",
+        "condition_type": "field_validation",
+        "enabled": true,
+        "priority": 1,
+        "template": {
+          "field": "{{field_name}}",
+          "operator": "is_not_null",
+          "value": null,
+          "error_message": "{{field_name}} is required"
+        },
+        "usage_examples": [
+          {
+            "description": "Validate contract value is present",
+            "field": "contract_value",
+            "operator": "is_not_null",
+            "value": null
+          },
+          {
+            "description": "Validate contract type is present",
+            "field": "contract_type",
+            "operator": "is_not_null",
+            "value": null
+          }
+        ]
+      },
+      "field_type_validation": {
+        "id": "field_type_validation",
+        "name": "Field Type Validation",
+        "description": "Validate field data types",
+        "condition_type": "field_validation",
+        "enabled": true,
+        "priority": 2,
+        "template": {
+          "field": "{{field_name}}",
+          "operator": "{{operator}}",
+          "value": "{{expected_type}}",
+          "error_message": "{{field_name}} must be of type {{expected_type}}"
+        },
+        "usage_examples": [
+          {
+            "description": "Validate contract value is numeric",
+            "field": "contract_value",
+            "operator": "is_numeric",
+            "value": "number"
+          },
+          {
+            "description": "Validate contract ID is string",
+            "field": "contract_id",
+            "operator": "is_string",
+            "value": "string"
+          }
+        ]
+      },
+      "field_format_validation": {
+        "id": "field_format_validation",
+        "name": "Field Format Validation",
+        "description": "Validate field format using regex",
+        "condition_type": "field_validation",
+        "enabled": true,
+        "priority": 3,
+        "template": {
+          "field": "{{field_name}}",
+          "operator": "regex_match",
+          "value": "{{regex_pattern}}",
+          "error_message": "{{field_name}} format is invalid"
+        },
+        "usage_examples": [
+          {
+            "description": "Validate email format",
+            "field": "email",
+            "operator": "regex_match",
+            "value": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+          },
+          {
+            "description": "Validate phone number format",
+            "field": "phone",
+            "operator": "regex_match",
+            "value": "^\\+?[1-9]\\d{1,14}$"
+          }
+        ]
+      }
+    },
+    "numeric_comparison_conditions": {
+      "value_range_validation": {
+        "id": "value_range_validation",
+        "name": "Value Range Validation",
+        "description": "Validate numeric values are within specified range",
+        "condition_type": "numeric_comparison",
+        "enabled": true,
+        "priority": 1,
+        "template": {
+          "field": "{{field_name}}",
+          "operator": "{{operator}}",
+          "value": "{{threshold_value}}",
+          "error_message": "{{field_name}} must be {{operator}} {{threshold_value}}"
+        },
+        "usage_examples": [
+          {
+            "description": "Validate contract value is positive",
+            "field": "contract_value",
+            "operator": "greater_than",
+            "value": 0
+          },
+          {
+            "description": "Validate contract value is within budget limit",
+            "field": "contract_value",
+            "operator": "less_than_or_equal",
+            "value": "{{budget_limit}}"
+          }
+        ]
+      },
+      "percentage_validation": {
+        "id": "percentage_validation",
+        "name": "Percentage Validation",
+        "description": "Validate percentage values are within 0-100 range",
+        "condition_type": "numeric_comparison",
+        "enabled": true,
+        "priority": 2,
+        "template": {
+          "field": "{{field_name}}",
+          "operator": "between",
+          "value": [0, 100],
+          "error_message": "{{field_name}} must be between 0 and 100"
+        },
+        "usage_examples": [
+          {
+            "description": "Validate completion percentage",
+            "field": "completion_percentage",
+            "operator": "between",
+            "value": [0, 100]
+          }
+        ]
+      }
+    },
+    "string_comparison_conditions": {
+      "string_length_validation": {
+        "id": "string_length_validation",
+        "name": "String Length Validation",
+        "description": "Validate string length is within specified range",
+        "condition_type": "string_comparison",
+        "enabled": true,
+        "priority": 1,
+        "template": {
+          "field": "{{field_name}}",
+          "operator": "{{operator}}",
+          "value": "{{length_threshold}}",
+          "error_message": "{{field_name}} length must be {{operator}} {{length_threshold}}"
+        },
+        "usage_examples": [
+          {
+            "description": "Validate contract name length",
+            "field": "contract_name",
+            "operator": "greater_than",
+            "value": 5
+          },
+          {
+            "description": "Validate description length",
+            "field": "description",
+            "operator": "less_than_or_equal",
+            "value": 1000
+          }
+        ]
+      },
+      "string_content_validation": {
+        "id": "string_content_validation",
+        "name": "String Content Validation",
+        "description": "Validate string content matches expected patterns",
+        "condition_type": "string_comparison",
+        "enabled": true,
+        "priority": 2,
+        "template": {
+          "field": "{{field_name}}",
+          "operator": "{{operator}}",
+          "value": "{{expected_content}}",
+          "error_message": "{{field_name}} content is invalid"
+        },
+        "usage_examples": [
+          {
+            "description": "Validate contract ID format",
+            "field": "contract_id",
+            "operator": "starts_with",
+            "value": "CT"
+          },
+          {
+            "description": "Validate status value",
+            "field": "status",
+            "operator": "in",
+            "value": ["DRAFT", "PENDING", "APPROVED", "REJECTED"]
+          }
+        ]
+      }
+    },
+    "date_comparison_conditions": {
+      "date_range_validation": {
+        "id": "date_range_validation",
+        "name": "Date Range Validation",
+        "description": "Validate dates are within specified range",
+        "condition_type": "date_comparison",
+        "enabled": true,
+        "priority": 1,
+        "template": {
+          "field": "{{field_name}}",
+          "operator": "{{operator}}",
+          "value": "{{date_threshold}}",
+          "error_message": "{{field_name}} must be {{operator}} {{date_threshold}}"
+        },
+        "usage_examples": [
+          {
+            "description": "Validate start date is not in the past",
+            "field": "start_date",
+            "operator": "greater_than_or_equal",
+            "value": "{{current_date}}"
+          },
+          {
+            "description": "Validate end date is after start date",
+            "field": "end_date",
+            "operator": "greater_than",
+            "value": "{{start_date}}"
+          }
+        ]
+      },
+      "business_day_validation": {
+        "id": "business_day_validation",
+        "name": "Business Day Validation",
+        "description": "Validate dates are business days",
+        "condition_type": "date_comparison",
+        "enabled": true,
+        "priority": 2,
+        "template": {
+          "field": "{{field_name}}",
+          "operator": "is_business_day",
+          "value": null,
+          "error_message": "{{field_name}} must be a business day"
+        },
+        "usage_examples": [
+          {
+            "description": "Validate contract start date is business day",
+            "field": "start_date",
+            "operator": "is_business_day",
+            "value": null
+          }
+        ]
+      }
+    },
+    "array_operation_conditions": {
+      "array_contains_validation": {
+        "id": "array_contains_validation",
+        "name": "Array Contains Validation",
+        "description": "Validate array contains specific values",
+        "condition_type": "array_operations",
+        "enabled": true,
+        "priority": 1,
+        "template": {
+          "field": "{{field_name}}",
+          "operator": "contains",
+          "value": "{{expected_value}}",
+          "error_message": "{{field_name}} must contain {{expected_value}}"
+        },
+        "usage_examples": [
+          {
+            "description": "Validate required documents are present",
+            "field": "attached_documents",
+            "operator": "contains",
+            "value": "contract_agreement"
+          }
+        ]
+      },
+      "array_length_validation": {
+        "id": "array_length_validation",
+        "name": "Array Length Validation",
+        "description": "Validate array length is within specified range",
+        "condition_type": "array_operations",
+        "enabled": true,
+        "priority": 2,
+        "template": {
+          "field": "{{field_name}}",
+          "operator": "{{operator}}",
+          "value": "{{length_threshold}}",
+          "error_message": "{{field_name}} length must be {{operator}} {{length_threshold}}"
+        },
+        "usage_examples": [
+          {
+            "description": "Validate at least one approver is assigned",
+            "field": "approvers",
+            "operator": "greater_than",
+            "value": 0
+          }
+        ]
+      }
+    },
+    "calculated_field_conditions": {
+      "risk_score_validation": {
+        "id": "risk_score_validation",
+        "name": "Risk Score Validation",
+        "description": "Validate calculated risk score",
+        "condition_type": "calculated_fields",
+        "enabled": true,
+        "priority": 1,
+        "template": {
+          "field": "risk_score",
+          "operator": "{{operator}}",
+          "value": "{{risk_threshold}}",
+          "calculation": "{{risk_calculation_formula}}",
+          "error_message": "Risk score is {{operator}} {{risk_threshold}}"
+        },
+        "usage_examples": [
+          {
+            "description": "Validate low risk score",
+            "field": "risk_score",
+            "operator": "less_than",
+            "value": 0.3,
+            "calculation": "calculate_risk_score(contract_value, contract_type, provider_rating)"
+          }
+        ]
+      },
+      "budget_utilization_validation": {
+        "id": "budget_utilization_validation",
+        "name": "Budget Utilization Validation",
+        "description": "Validate budget utilization percentage",
+        "condition_type": "calculated_fields",
+        "enabled": true,
+        "priority": 2,
+        "template": {
+          "field": "budget_utilization",
+          "operator": "{{operator}}",
+          "value": "{{utilization_threshold}}",
+          "calculation": "{{budget_utilization_formula}}",
+          "error_message": "Budget utilization is {{operator}} {{utilization_threshold}}"
+        },
+        "usage_examples": [
+          {
+            "description": "Validate budget utilization is within limit",
+            "field": "budget_utilization",
+            "operator": "less_than_or_equal",
+            "value": 80,
+            "calculation": "(contract_value / total_budget) * 100"
+          }
+        ]
+      }
+    },
+    "external_api_conditions": {
+      "budget_availability_check": {
+        "id": "budget_availability_check",
+        "name": "Budget Availability Check",
+        "description": "Check budget availability via external API",
+        "condition_type": "external_api_conditions",
+        "enabled": true,
+        "priority": 1,
+        "template": {
+          "api_endpoint": "{{budget_api_endpoint}}",
+          "method": "POST",
+          "payload": {
+            "agency_id": "{{agency_id}}",
+            "program_id": "{{program_id}}",
+            "amount": "{{contract_value}}"
+          },
+          "response_field": "available",
+          "operator": "equals",
+          "value": true,
+          "timeout_seconds": 30,
+          "retry_attempts": 3
+        },
+        "usage_examples": [
+          {
+            "description": "Check if budget is available for contract",
+            "api_endpoint": "/api/budget/check",
+            "method": "POST",
+            "payload": {
+              "agency_id": "{{agency_id}}",
+              "program_id": "{{program_id}}",
+              "amount": "{{contract_value}}"
+            },
+            "response_field": "available",
+            "operator": "equals",
+            "value": true
+          }
+        ]
+      },
+      "compliance_check": {
+        "id": "compliance_check",
+        "name": "Compliance Check",
+        "description": "Check compliance via external API",
+        "condition_type": "external_api_conditions",
+        "enabled": true,
+        "priority": 2,
+        "template": {
+          "api_endpoint": "{{compliance_api_endpoint}}",
+          "method": "POST",
+          "payload": {
+            "contract_data": "{{contract_data}}",
+            "compliance_rules": "{{compliance_rules}}"
+          },
+          "response_field": "compliant",
+          "operator": "equals",
+          "value": true,
+          "timeout_seconds": 60,
+          "retry_attempts": 2
+        },
+        "usage_examples": [
+          {
+            "description": "Check contract compliance",
+            "api_endpoint": "/api/compliance/check",
+            "method": "POST",
+            "payload": {
+              "contract_data": "{{contract_data}}",
+              "compliance_rules": "{{compliance_rules}}"
+            },
+            "response_field": "compliant",
+            "operator": "equals",
+            "value": true
+          }
+        ]
+      }
+    },
+    "user_permission_conditions": {
+      "role_based_access": {
+        "id": "role_based_access",
+        "name": "Role-Based Access",
+        "description": "Check user has required role",
+        "condition_type": "user_permissions",
+        "enabled": true,
+        "priority": 1,
+        "template": {
+          "field": "user.roles",
+          "operator": "contains",
+          "value": "{{required_role}}",
+          "error_message": "User does not have required role: {{required_role}}"
+        },
+        "usage_examples": [
+          {
+            "description": "Check user has ACCO_MANAGER role",
+            "field": "user.roles",
+            "operator": "contains",
+            "value": "{{references.user_roles.ACCO_MANAGER.code}}"
+          }
+        ]
+      },
+      "permission_check": {
+        "id": "permission_check",
+        "name": "Permission Check",
+        "description": "Check user has specific permission",
+        "condition_type": "user_permissions",
+        "enabled": true,
+        "priority": 2,
+        "template": {
+          "field": "user.permissions",
+          "operator": "contains",
+          "value": "{{required_permission}}",
+          "error_message": "User does not have required permission: {{required_permission}}"
+        },
+        "usage_examples": [
+          {
+            "description": "Check user has contract_approve permission",
+            "field": "user.permissions",
+            "operator": "contains",
+            "value": "contract_approve"
+          }
+        ]
+      }
+    },
+    "workflow_state_conditions": {
+      "state_transition_validation": {
+        "id": "state_transition_validation",
+        "name": "State Transition Validation",
+        "description": "Validate state transition is allowed",
+        "condition_type": "workflow_state",
+        "enabled": true,
+        "priority": 1,
+        "template": {
+          "field": "current_state",
+          "operator": "in",
+          "value": "{{allowed_states}}",
+          "error_message": "State transition from {{current_state}} is not allowed"
+        },
+        "usage_examples": [
+          {
+            "description": "Validate transition from draft state",
+            "field": "current_state",
+            "operator": "in",
+            "value": ["draft", "pending_review"]
+          }
+        ]
+      },
+      "workflow_completion_check": {
+        "id": "workflow_completion_check",
+        "name": "Workflow Completion Check",
+        "description": "Check if workflow is completed",
+        "condition_type": "workflow_state",
+        "enabled": true,
+        "priority": 2,
+        "template": {
+          "field": "workflow_status",
+          "operator": "equals",
+          "value": "completed",
+          "error_message": "Workflow is not completed"
+        },
+        "usage_examples": [
+          {
+            "description": "Check if contract workflow is completed",
+            "field": "workflow_status",
+            "operator": "equals",
+            "value": "completed"
+          }
+        ]
+      }
+    },
+    "time_based_conditions": {
+      "sla_breach_check": {
+        "id": "sla_breach_check",
+        "name": "SLA Breach Check",
+        "description": "Check if SLA has been breached",
+        "condition_type": "time_based",
+        "enabled": true,
+        "priority": 1,
+        "template": {
+          "field": "state_duration_hours",
+          "operator": "greater_than",
+          "value": "{{sla_hours}}",
+          "error_message": "SLA has been breached"
+        },
+        "usage_examples": [
+          {
+            "description": "Check if review SLA is breached",
+            "field": "state_duration_hours",
+            "operator": "greater_than",
+            "value": 72
+          }
+        ]
+      },
+      "deadline_check": {
+        "id": "deadline_check",
+        "name": "Deadline Check",
+        "description": "Check if deadline is approaching",
+        "condition_type": "time_based",
+        "enabled": true,
+        "priority": 2,
+        "template": {
+          "field": "days_until_deadline",
+          "operator": "less_than",
+          "value": "{{warning_days}}",
+          "error_message": "Deadline is approaching"
+        },
+        "usage_examples": [
+          {
+            "description": "Check if contract deadline is approaching",
+            "field": "days_until_deadline",
+            "operator": "less_than",
+            "value": 7
+          }
+        ]
+      }
+    },
+    "complex_logical_conditions": {
+      "multi_field_validation": {
+        "id": "multi_field_validation",
+        "name": "Multi-Field Validation",
+        "description": "Validate multiple fields with logical operators",
+        "condition_type": "complex_logical",
+        "enabled": true,
+        "priority": 1,
+        "template": {
+          "logical_operator": "{{logical_operator}}",
+          "conditions": [
+            {
+              "field": "{{field1}}",
+              "operator": "{{operator1}}",
+              "value": "{{value1}}"
+            },
+            {
+              "field": "{{field2}}",
+              "operator": "{{operator2}}",
+              "value": "{{value2}}"
+            }
+          ],
+          "error_message": "Multi-field validation failed"
+        },
+        "usage_examples": [
+          {
+            "description": "Validate contract value and type",
+            "logical_operator": "AND",
+            "conditions": [
+              {
+                "field": "contract_value",
+                "operator": "greater_than",
+                "value": 0
+              },
+              {
+                "field": "contract_type",
+                "operator": "is_not_null",
+                "value": null
+              }
+            ]
+          }
+        ]
+      },
+      "conditional_validation": {
+        "id": "conditional_validation",
+        "name": "Conditional Validation",
+        "description": "Apply validation based on other conditions",
+        "condition_type": "complex_logical",
+        "enabled": true,
+        "priority": 2,
+        "template": {
+          "if_condition": {
+            "field": "{{condition_field}}",
+            "operator": "{{condition_operator}}",
+            "value": "{{condition_value}}"
+          },
+          "then_validation": {
+            "field": "{{validation_field}}",
+            "operator": "{{validation_operator}}",
+            "value": "{{validation_value}}"
+          },
+          "error_message": "Conditional validation failed"
+        },
+        "usage_examples": [
+          {
+            "description": "Validate high-value contracts require additional approval",
+            "if_condition": {
+              "field": "contract_value",
+              "operator": "greater_than",
+              "value": 100000
+            },
+            "then_validation": {
+              "field": "additional_approval_required",
+              "operator": "equals",
+              "value": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  "condition_management": {
+    "condition_validation": {
+      "enabled": true,
+      "validate_syntax": true,
+      "validate_field_references": true,
+      "validate_operator_compatibility": true
+    },
+    "condition_testing": {
+      "enabled": true,
+      "test_mode": true,
+      "mock_data": true,
+      "dry_run": true
+    },
+    "condition_optimization": {
+      "enabled": true,
+      "cache_results": true,
+      "optimize_queries": true,
+      "parallel_evaluation": true
+    }
+  },
+  "metadata": {
+    "created_at": "2024-01-01T00:00:00Z",
+    "created_by": "system",
+    "version": "2.0.0",
+    "description": "Enterprise workflow condition templates with advanced features",
+    "tags": ["conditions", "templates", "validation", "workflow", "logic"],
+    "dependencies": [
+      "schema/references.json",
+      "workflow_definitions.json"
+    ]
+  }
+}

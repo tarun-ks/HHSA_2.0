@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+     http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context-3.0.xsd
+     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+     http://www.springframework.org/schema/mvc
+	 http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+
+	<bean id="portletParameterHandlerMapping"
+		class="org.springframework.web.portlet.handler.ParameterHandlerMapping">
+		<property name="parameterMap">
+			<map>
+				<entry key="providerAgencyHome" value-ref="providerAgencyHomeController" />
+				<entry key="documentVault" value-ref="manageDocumentsController" />
+				<entry key="OrgInformation" value-ref="orgbasicInformationHandler" />
+				<entry key="businessSummary" value-ref="businessSummaryController" />
+				<entry key="manageMembers" value-ref="manageMembersHandler" />
+				<!-- Start: R5 Added -->
+				<entry key="proposalDetails" value-ref="propEvalHandler" />
+				<!-- End: R5 Added -->
+			</map>
+		</property>
+	</bean>
+	
+	<bean id="portletModeHandlerMapping"
+		class="org.springframework.web.portlet.handler.PortletModeHandlerMapping">
+		<property name="portletModeMap">
+			<map>
+				<entry key="view" value-ref="providerAgencyHomeController" />
+			</map>
+		</property>
+	</bean>
+
+	<bean id="providerAgencyHomeController" class="com.nyc.hhs.controllers.ProviderAgencyHomeController" />
+	<!--Start Updated in R5 -->
+	<bean id="manageDocumentsController" class="com.nyc.hhs.controllers.DocumentVaultController" />
+	<!--End Updated in R5 -->
+	<bean id="orgbasicInformationHandler" class="com.nyc.hhs.controllers.BusinessApplicationController" />
+	<bean id="businessSummaryController" class="com.nyc.hhs.controllers.BusinessSummaryController" />
+	<bean id="manageMembersHandler" class="com.nyc.hhs.controllers.ManageMembersController" />
+	<!-- Start: R5 Added -->
+	<bean id="propEvalHandler" class="com.nyc.hhs.controllers.ProposalEvaluationController" />
+	<!-- End: R5 Added -->
+	<!-- <bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="/portlet/homeprovider/documentshared/" />
+		<property name="suffix" value=".jsp" />
+	</bean> -->
+	<!--Start Added in R5 -->
+	<bean class="com.nyc.hhs.spring.view.resolver.HHSSpringViewResolver"
+		id="viewResolver">
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="/portlet/homeprovider/documentshared/" />
+		<property name="alternatePrefix" value="/portlet/application/enhanceddocumentvault/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+	<!--End Added in R5 -->
+</beans>

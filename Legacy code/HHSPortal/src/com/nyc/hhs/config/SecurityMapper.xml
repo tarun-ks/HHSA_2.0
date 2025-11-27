@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+   <mapper namespace="com.nyc.hhs.service.db.services.application.SecurityMapper">
+   
+        <resultMap id="RoleComponentList" type="com.nyc.hhs.model.ComponentRoleMappingBean">
+            <result property="msComponentId" column="COMPONENT_ID" />
+            <result property="msRole"        column="ROLE" />
+            <result property="msOrgType"     column="ORGANIZATION_TYPE" />
+            <result property="msDisplay"     column="DISPLAY_FLAG" />
+            <result property="msPermissionType"     column="PERMISSION_TYPE" />
+     </resultMap>
+     
+      
+      <select id="getroleComponentMapping"   resultMap="RoleComponentList">
+            SELECT * FROM COMPONENT_ROLE_MAPPING where lower(ORGANIZATION_TYPE) = lower(#{msOrgType}) and DISPLAY_FLAG='1'
+    </select>
+
+</mapper>

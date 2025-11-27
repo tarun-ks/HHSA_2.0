@@ -1,0 +1,2877 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ROOT>
+	<organizationId name="provider_org">
+		<!-- Start Updated in R5 -->
+		<DocumentCategory name="Audit">
+			<DocType name="A-133" sampleflag="Yes">
+				<foldername>/A_133</foldername>
+				<DoccumentClass>A_133</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='PERIOD_COVER_FROM_DATE' id="periodcoveredfrom"
+						type="date" display_name="Period Covered From Date" isdisable="false"
+						isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_TO_DATE' id="periodcoveredto"
+						type="date" display_name="Period Covered To Date" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Annual Financial Statement" sampleflag="Yes">
+				<foldername>/ANNUAL_FINANCIAL_STATM</foldername>
+				<DoccumentClass>ANNUAL_FINANCIAL_STATM</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='PERIOD_COVER_FROM_DATE' id="periodcoveredfrom"
+						type="date" display_name="Period Covered From Date" isdisable="false"
+						isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_TO_DATE' id="periodcoveredto"
+						type="date" display_name="Period Covered To Date" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Corrective Action Plan (for CPA Review Report)" sampleflag="Yes">
+				<foldername>/CORRECT_ACT_PLAN_CPA_REV_REPO</foldername>
+				<DoccumentClass>CORRECT_ACT_PLAN_CPA_REV_REPO</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='IMPLE_STATUS' id="implementationstatus"
+						type="String" display_name="Implementation Status" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Corrective Action Plan (For A133)" sampleflag="Yes">
+				<foldername>/CORRECT_ACT_PLAN_A133</foldername>
+				<DoccumentClass>CORRECT_ACT_PLAN_A133</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='IMPLE_STATUS' id="implementationstatus"
+						type="String" display_name="Implementation Status" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Corrective Action Plan (for Independent Audit)" sampleflag="Yes">
+				<foldername>/CORRECT_ACT_PLAN_INDP_AUDIT</foldername>
+				<DoccumentClass>CORRECT_ACT_PLAN_INDP_AUDIT</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='IMPLE_STATUS' id="implementationstatus"
+						type="String" display_name="Implementation Status" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="CPA Review Report" sampleflag="Yes">
+				<foldername>/CPA_REVIEW_REPORT</foldername>
+				<DoccumentClass>CPA_REVIEW_REPORT</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='PERIOD_COVER_FROM_DATE' id="periodcoveredfrom"
+						type="date" display_name="Period Covered From Date" isdisable="false"
+						isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_TO_DATE' id="periodcoveredto"
+						type="date" display_name="Period Covered To Date" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Independent Audit" sampleflag="Yes">
+				<foldername>/INDEPEN_AUDIT</foldername>
+				<DoccumentClass>INDEPEN_AUDIT</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='PERIOD_COVER_FROM_DATE' id="periodcoveredfrom"
+						type="date" display_name="Period Covered From Date" isdisable="false"
+						isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_TO_DATE' id="periodcoveredto"
+						type="date" display_name="Period Covered To Date" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Audit Communication Templates" sampleflag="Yes">
+				<foldername>/AUDIT_COMMUNI_TEMPLATS</foldername>
+				<DoccumentClass>AUDIT_COMMUNI_TEMPLATS</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Corrective Action Plan - Related Documents" sampleflag="Yes">
+				<foldername>/CORRECT_ACT_PLAN_RELAT_DOC</foldername>
+				<DoccumentClass>CORRECT_ACT_PLAN_RELAT_DOC</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Audit - Other" sampleflag="Yes" ismasked="true">
+				<originalDocType>Other</originalDocType>
+				<foldername>/AUDIT_OTHERS</foldername>
+				<DoccumentClass>AUDIT_OTHERS</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+		<!--End Updated in R5 -->
+		<DocumentCategory name="Filings" type="rfp_award">
+			<!-- Modified CHAR500 doc type for release 3.1.0, Enhancement 6021 -->
+			<!--Start Updated in R5 -->
+			<!--Start R 9.1.0 QC 9609 Disable CHAR 500 Document type in Document Vault -->
+			<!-- 
+			<DocType name="CHAR 500 + 990 + Audit" sampleflag="Yes">
+				
+				<foldername>/CHAR_500</foldername>
+				<DoccumentClass>CHAR_500</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='PERIOD_COVER_FROM_MONTH' id="periodcoveredfrommonth"
+						type="string" display_name="Period Covered From" isdisable="true"
+						isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_FROM_YEAR' id="periodcoveredfromyear"
+						type="string" display_name="" isdisable="false" isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_TO_MONTH' id="periodcoveredtomonth"
+						type="string" display_name="Period Covered To" isdisable="true"
+						isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_TO_YEAR' id="periodcoveredtoyear"
+						type="string" display_name="" isdisable="false" isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			-->
+			<!--End R 9.1.0 QC 9609 Disable CHAR 500 Document type in Document Vault -->
+			
+			<!-- Added new doc type for release 3.1.0, Enhancement 6021 -->
+			<!-- Removed doc type for release 3.10.0, Enhancement 6573 -->
+			<!-- Un-commenting Extensions type of char-500 and adding uploadFlag -->
+			 <DocType name="CHAR 500 - Extension" displayInApp="false" sampleflag="Yes" uploadFlag="false">
+				<foldername>/CHAR500_EXT</foldername>
+				<DoccumentClass>CHAR500_EXT</DoccumentClass>
+				<SampleDocType>Sample Document -  CHAR 500 - Extension</SampleDocType>
+				<Properties>
+					<Property symbolic_name='PERIOD_COVER_FROM_MONTH' id="periodcoveredfrommonth"
+						type="string" display_name="Period Covered From" isdisable="true"
+						isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_FROM_YEAR' id="periodcoveredfromyear"
+						type="string" display_name="" isdisable="false" isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_TO_MONTH' id="periodcoveredtomonth"
+						type="string" display_name="Period Covered To" isdisable="true"
+						isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_TO_YEAR' id="periodcoveredtoyear"
+						type="string" display_name="" isdisable="false" isdropdown="false"></Property>
+				</Properties>
+			</DocType> 
+			<!-- Un-commenting Extensions type of char-500 and adding uploadFlag -->
+			<!-- Modified CHAR500 - 1st Extension Document Document doc type for release 
+				3.1.0, Enhancement 6021 -->
+			 <DocType name="CHAR500 - 1st Extension Document" displayInApp="false" uploadFlag="false"> 
+				<foldername>/CHAR500_EXTENSION_DOC</foldername> <DoccumentClass>CHAR500_EXTENSION_DOC</DoccumentClass> 
+				<Properties> <Property symbolic_name='PERIOD_COVER_FROM_MONTH' id="periodcoveredfrommonth" 
+				type="string" display_name="Period Covered From" isdisable="true" isdropdown="false"></Property> 
+				<Property symbolic_name='PERIOD_COVER_FROM_YEAR' id="periodcoveredfromyear" 
+				type="string" display_name="" isdisable="false" isdropdown="false"></Property> 
+				<Property symbolic_name='PERIOD_COVER_TO_MONTH' id="periodcoveredtomonth" 
+				type="string" display_name="Period Covered To" isdisable="true" isdropdown="false"></Property> 
+				<Property symbolic_name='PERIOD_COVER_TO_YEAR' id="periodcoveredtoyear" type="string" 
+				display_name="" isdisable="false" isdropdown="false"></Property> </Properties> 
+				</DocType> 
+			<!--Start Updated in R5 -->
+			<DocType name="IRS Form 990" sampleflag="Yes">
+				<foldername>/IRS_FORM_990</foldername>
+				<DoccumentClass>IRS_FORM_990</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='PERIOD_COVER_FROM_DATE' id="periodcoveredfrom"
+						type="date" display_name="Period Covered From Date" isdisable="false"
+						isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_TO_DATE' id="periodcoveredto"
+						type="date" display_name="Period Covered To Date" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="IRS Form 990 - Extension Document" sampleflag="Yes">
+				<foldername>/IRS_FORM_990_EXTEN_DOC</foldername>
+				<DoccumentClass>IRS_FORM_990_EXTEN_DOC</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='PERIOD_COVER_FROM_DATE' id="periodcoveredfrom"
+						type="date" display_name="Period Covered From Date" isdisable="false"
+						isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_TO_DATE' id="periodcoveredto"
+						type="date" display_name="Period Covered To Date" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="IRS Form 990 EZ" sampleflag="Yes">
+				<foldername>/IRS_FORM_990_EZ</foldername>
+				<DoccumentClass>IRS_FORM_990_EZ</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="IRS Form 990 N" sampleflag="Yes">
+				<foldername>/IRS_FORM_990_N</foldername>
+				<DoccumentClass>IRS_FORM_990_N</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			
+			<!--Start R 9.1.0 QC 9609 Disable CHAR 500 Document type in Document Vault -->
+			<!--  
+			<DocType name="CHAR410" sampleflag="Yes">
+				<foldername>/CHAR410</foldername>
+				<DoccumentClass>CHAR410</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="CHAR500 - Notice of Exemption" sampleflag="Yes">
+				<foldername>/CHAR500_NOTICE_EXEMPTION</foldername>
+				<DoccumentClass>CHAR500_NOTICE_EXEMPTION</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			-->
+			<!--End R 9.1.0 QC 9609 Disable CHAR 500 Document type in Document Vault -->
+			<!--Start Updated in R5 -->
+			<DocType name="W-9 Form" sampleflag="Yes">
+				<foldername>/W9</foldername>
+				<DoccumentClass>W9</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<!--End Updated in R5 -->
+			<!-- Un-commenting Extensions type of char-500 and adding uploadFlag -->
+			<!-- Modified CHAR500 - 2nd Extension Document doc type for release 3.1.0, 
+				Enhancement 6021 -->
+			  <DocType name="CHAR500 - 2nd Extension Document" displayInApp="false" sampleflag="Yes" uploadFlag="false">
+				<foldername>/CHAR500_2ND_EXT_DOC</foldername>
+				<DoccumentClass>CHAR500_2ND_EXT_DOC</DoccumentClass>
+				<SampleDocType>Sample Document -  CHAR500 - 2nd Extension Document</SampleDocType>
+				<Properties>
+					<Property symbolic_name='PERIOD_COVER_FROM_MONTH' id="periodcoveredfrommonth"
+						type="string" display_name="Period Covered From" isdisable="true"
+						isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_FROM_YEAR' id="periodcoveredfromyear"
+						type="string" display_name="" isdisable="false" isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_TO_MONTH' id="periodcoveredtomonth"
+						type="string" display_name="Period Covered To" isdisable="true"
+						isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_TO_YEAR' id="periodcoveredtoyear"
+						type="string" display_name="" isdisable="false" isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Filings - Other" sampleflag="Yes" ismasked="true">
+				<foldername>/FILINGS_OTHERS</foldername>
+				<originalDocType>Other</originalDocType>
+				<DoccumentClass>FILINGS_OTHERS</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Substitute W9" type="rfp_award" sampleflag="Yes">
+				<foldername>/SUB_W9</foldername>
+				<DoccumentClass>SUB_W9</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+		<DocumentCategory name="Financials" type="rfp_award"
+			onlyFinancial="true">
+			<DocType
+				name="Direct Deposit/Electronic Funds Transfer (EFT) Vendor Payment Enrollment Form" sampleflag="Yes">
+				<foldername>/DD_EFT_VENDOR_PAY_ENROL_FORM</foldername>
+				<DoccumentClass>DD_EFT_VENDOR_PAY_ENROL_FORM</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Lease or Rental Agreement" sampleflag="Yes">
+				<foldername>/LEASE_RENTAL_AGREE</foldername>
+				<DoccumentClass>LEASE_RENTAL_AGREE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='PERIOD_COVER_FROM_DATE' id="periodcoveredfrom"
+						type="date" display_name="Period Covered From Date" isdisable="false"
+						isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_TO_DATE' id="periodcoveredto"
+						type="date" display_name="Period Covered To Date" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Financials - Other" sampleflag="Yes" ismasked="true">
+			<originalDocType>Other</originalDocType>
+				<foldername>/FINANCIALS_OTHERS</foldername>
+				<DoccumentClass>FINANCIALS_OTHERS</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Provider's Board Approved Budget" sampleflag="Yes">
+				<foldername>/PROVID_BOARD_APP_BUDG</foldername>
+				<DoccumentClass>PROVID_BOARD_APP_BUDG</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Subcontractor Agreement" type="rfp_award" sampleflag="Yes">
+				<foldername>/SUBCONTRACTOR_AGREE</foldername>
+				<DoccumentClass>SUBCONTRACTOR_AGREE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='PERIOD_COVER_FROM_DATE' id="periodcoveredfrom"
+						type="date" display_name="Period Covered From Date" isdisable="false"
+						isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_TO_DATE' id="periodcoveredto"
+						type="date" display_name="Period Covered To Date" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Consultant Agreement" type="rfp_award" sampleflag="Yes">
+				<foldername>/CONSULTANT_AGREE</foldername>
+				<DoccumentClass>CONSULTANT_AGREE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='PERIOD_COVER_FROM_DATE' id="periodcoveredfrom"
+						type="date" display_name="Period Covered From Date" isdisable="false"
+						isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_TO_DATE' id="periodcoveredto"
+						type="date" display_name="Period Covered To Date" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Cost Allocation Plan" type="rfp_award" sampleflag="Yes">
+				<foldername>/COST_ALLOC_PLAN</foldername>
+				<DoccumentClass>COST_ALLOC_PLAN</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='PERIOD_COVER_FROM_DATE' id="periodcoveredfrom"
+						type="date" display_name="Period Covered From Date" isdisable="false"
+						isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_TO_DATE' id="periodcoveredto"
+						type="date" display_name="Period Covered To Date" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Receipts/Proof of Payment" type="rfp_award" sampleflag="Yes">
+				<foldername>/RECEIPTS_PROOF_OF_PAYMENT</foldername>
+				<DoccumentClass>RECEIPTS_PROOF_OF_PAYMENT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Paystubs" type="rfp_award" sampleflag="Yes">
+				<foldername>/PAYSTUBS</foldername>
+				<DoccumentClass>PAYSTUBS</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Indirect Rate Justification" type="rfp_award" sampleflag="Yes">
+				<foldername>/INDIRECT_RATE_JUST</foldername>
+				<DoccumentClass>INDIRECT_RATE_JUST</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Debt Service Documentation" type="rfp_award" sampleflag="Yes">
+				<foldername>/DEBT_SERVICE_DOCUMENT</foldername>
+				<DoccumentClass>DEBT_SERVICE_DOCUMENT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Real Estate Tax Documentation" type="rfp_award" sampleflag="Yes">
+				<foldername>/REAL_ESTATE_TAX_DOCUMENT</foldername>
+				<DoccumentClass>REAL_ESTATE_TAX_DOCUMENT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Administrative Overhead Documentation" type="rfp_award" sampleflag="Yes">
+				<foldername>/ADMIN_OVERHEAD_DOCUMENT</foldername>
+				<DoccumentClass>ADMIN_OVERHEAD_DOCUMENT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Documentation of Funding Sources" type="rfp_award" sampleflag="Yes">
+				<foldername>/DOCUMENT_FUNDING_SOURCES</foldername>
+				<DoccumentClass>DOCUMENT_FUNDING_SOURCES</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Banking Documentation" type="rfp_award" sampleflag="Yes">
+				<foldername>/BANKING_DOCUMENT</foldername>
+				<DoccumentClass>BANKING_DOCUMENT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Recoupment Justification Documentation" type="rfp_award" sampleflag="Yes">
+				<foldername>/RECOUP_JUST_DOCUMENT</foldername>
+				<DoccumentClass>RECOUP_JUST_DOCUMENT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Fringe Benefits Justification" type="rfp_award" sampleflag="Yes">
+				<foldername>/FRINGE_BENEFITS_JUST</foldername>
+				<DoccumentClass>FRINGE_BENEFITS_JUST</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Program Income Documentation" type="rfp_award" sampleflag="Yes">
+				<foldername>/PROG_INCOME_DOCUMENT</foldername>
+				<DoccumentClass>PROG_INCOME_DOCUMENT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Financial Disclosure Forms" type="rfp_award" sampleflag="Yes">
+				<foldername>/FIN_DISC_FORMS</foldername>
+				<DoccumentClass>FIN_DISC_FORMS</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Invoice Review Documentation"  type="rfp_award" sampleflag="Yes">
+				<foldername>/INVOICE_REVIEW_DOC</foldername>
+				<DoccumentClass>INVOICE_REVIEW_DOC</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+		<DocumentCategory name="Organization Basics" type="rfp_award">
+			<DocType name="Certificate of Assumed Name" sampleflag="Yes">
+				<foldername>/CERTI_OF_ASSUMED_NAME</foldername>
+				<DoccumentClass>CERTI_OF_ASSUMED_NAME</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Certificate of Incorporation or equivalent" sampleflag="Yes">
+				<foldername>/CERTI_OF_INCORP_OR_EQUI</foldername>
+				<DoccumentClass>CERTI_OF_INCORP_OR_EQUI</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false">
+					</Property>
+				</Properties>
+			</DocType>
+			<DocType name="Chief Executive Officer (CEO) Resume or Equivalent" sampleflag="Yes">
+				<foldername>/CEO_RESUME</foldername>
+				<DoccumentClass>CEO_RESUME</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='DATE_LAST_UPDATED' id="datelastupdated"
+						type="date" display_name="Date Of Last Update" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Chief Financial Officer (CFO) Resume or Equivalent" sampleflag="Yes">
+				<foldername>/CFO_RESUME</foldername>
+				<DoccumentClass>CFO_RESUME</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='DATE_LAST_UPDATED' id="datelastupdated"
+						type="date" display_name="Date Of Last Update" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Organizational Chart" sampleflag="Yes">
+				<foldername>/ORGANIZATIONAL_CHART</foldername>
+				<DoccumentClass>ORGANIZATIONAL_CHART</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="IRS Determination Letter [501(c)3]" sampleflag="Yes">
+				<foldername>/IRS_DETERMINATION_LETTER</foldername>
+				<DoccumentClass>IRS_DETERMINATION_LETTER</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Board of Directors List or Equivalent" sampleflag="Yes">
+				<foldername>/BORD_DIREC_LIST_EQUI</foldername>
+				<DoccumentClass>BORD_DIREC_LIST_EQUI</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<!-- Doctype name changed from from “Corporate By-Laws” to “Corporate 
+				By-Laws or Equivalent” for Release 3.10.0 enhancement 6572 -->
+			<DocType name="Corporate By-Laws or Equivalent" sampleflag="Yes">
+				<foldername>/CORPORATE_BY_LAW</foldername>
+				<DoccumentClass>CORPORATE_BY_LAW</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Key Staff - Resume" sampleflag="Yes">
+				<foldername>/KeyStaffResume</foldername>
+				<DoccumentClass>KeyStaffResume</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Annual Report" sampleflag="Yes">
+				<foldername>/ANNUAL_REPORT</foldername>
+				<DoccumentClass>ANNUAL_REPORT</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='PERIOD_COVER_FROM_DATE' id="periodcoveredfrom"
+						type="date" display_name="Period Covered From Date" isdisable="false"
+						isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_TO_DATE' id="periodcoveredto"
+						type="date" display_name="Period Covered To Date" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Board Minutes" sampleflag="Yes">
+				<foldername>/BOARD_MINUTES</foldername>
+				<DoccumentClass>BOARD_MINUTES</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='MEETING_DATE' id="meetingdate"
+						type="date" display_name="Meeting Date" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Certificate of Occupancy" sampleflag="Yes">
+				<foldername>/CERTIFI_OCCUPANCY</foldername>
+				<DoccumentClass>CERTIFI_OCCUPANCY</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType
+				name="Community Based Development Organization (CBDO) certification" sampleflag="Yes">
+				<foldername>/CBDO_CERTIFICATION</foldername>
+				<DoccumentClass>CBDO_CERTIFICATION</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType
+				name="Community Housing Development Organization (CHDO) certification" sampleflag="Yes">
+				<foldername>/CHDO_CERTIFICATION</foldername>
+				<DoccumentClass>CHDO_CERTIFICATION</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Licenses/Certifications/Permits" sampleflag="Yes">
+				<foldername>/LICENSES</foldername>
+				<DoccumentClass>LICENSES</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='PERIOD_COVER_FROM_DATE' id="periodcoveredfrom"
+						type="date" display_name="Period Covered From Date" isdisable="false"
+						isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_TO_DATE' id="periodcoveredto"
+						type="date" display_name="Period Covered To Date" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Organization Basics - Other" sampleflag="Yes" ismasked="true">
+			<originalDocType>Other</originalDocType>
+				<foldername>/ORG_BASIC_OTHERS</foldername>
+				<DoccumentClass>ORG_BASIC_OTHERS</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Place of Assembly Permit" sampleflag="Yes">
+				<foldername>/PLAC_ASSEM_PERMIT</foldername>
+				<DoccumentClass>PLAC_ASSEM_PERMIT</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Work Sample" type="rfp_award" sampleflag="Yes">
+				<foldername>/WORK_SAMPLE</foldername>
+				<DoccumentClass>WORK_SAMPLE</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Brochure/Flyer" type="rfp_award" sampleflag="Yes">
+				<foldername>/BROCHURE_FLYER</foldername>
+				<DoccumentClass>BROCHURE_FLYER</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+
+		</DocumentCategory>
+		<!--End Updated in R5 -->
+		<DocumentCategory name="Other">
+		<!--Start Updated in R5 -->
+		<DocType name="Other - Other" sampleflag="Yes" ismasked="true">
+		<originalDocType>Other</originalDocType>
+		<!--End Updated in R5 -->
+				<foldername>/OTHERS</foldername>
+				<DoccumentClass>OTHERS</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+		<DocumentCategory name="Policy">
+		<!--Start Updated in R5 -->
+			<DocType name="Anti-Nepotism Policy" sampleflag="Yes">
+				<foldername>/ANTI_NEPOTISM_POLICY</foldername>
+				<DoccumentClass>ANTI_NEPOTISM_POLICY</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="CEO Compensation Policy" sampleflag="Yes">
+				<foldername>/CEO_COMPEN_POLICY</foldername>
+				<DoccumentClass>CEO_COMPEN_POLICY</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Conflict of Interest Policy" sampleflag="Yes">
+				<foldername>/CONFLICT_OF_INTEREST_POLICY</foldername>
+				<DoccumentClass>CONFLICT_OF_INTEREST_POLICY</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Continuity of Operations Plan (COOP)" sampleflag="Yes">
+
+				<foldername>/CONTI_OPERAT_PLAN_COOP</foldername>
+				<DoccumentClass>CONTI_OPERAT_PLAN_COOP</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Diversity Policy" sampleflag="Yes">
+
+				<foldername>/DIVERSITY_POLICY</foldername>
+				<DoccumentClass>DIVERSITY_POLICY</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Emergency Preparedness" sampleflag="Yes">
+				<foldername>/EMERGENCY_PREPAREDNESS</foldername>
+				<DoccumentClass>EMERGENCY_PREPAREDNESS</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Employee Loan Policy" sampleflag="Yes">
+
+				<foldername>/EMP_LOAN_POLICY</foldername>
+				<DoccumentClass>EMP_LOAN_POLICY</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Financial/Internal Controls Policy" sampleflag="Yes">
+				<foldername>/FINANC_INT_CONTROL_POLICY</foldername>
+				<DoccumentClass>FINANC_INT_CONTROL_POLICY</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType
+				name="Non-Discrimination/Equal Employment Opportunity (EEO) Policy" sampleflag="Yes">
+				<foldername>/NON_DISCRI_EEO_POLICY</foldername>
+				<DoccumentClass>NON_DISCRI_EEO_POLICY</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Policy - Other" sampleflag="Yes" ismasked="true">
+				<originalDocType>Other</originalDocType>
+				<foldername>/POLICY_OTHERS</foldername>
+				<DoccumentClass>POLICY_OTHERS</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Personnel Manual/Employee Handbook" sampleflag="Yes">
+				<foldername>/PERSO_MANU_EMP_HANDBOK</foldername>
+				<DoccumentClass>PERSO_MANU_EMP_HANDBOK</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Personnel recruitment, screening and hiring" sampleflag="Yes">
+				<foldername>/PERSO_RECRU_SCR_HIRING</foldername>
+				<DoccumentClass>PERSO_RECRU_SCR_HIRING</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Personnel retention and training" sampleflag="Yes">
+				<foldername>/PERSO_RETE_TRAIN</foldername>
+				<DoccumentClass>PERSO_RETE_TRAIN</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Personnel supervision and performance evaluation" sampleflag="Yes">
+				<foldername>/PERSO_SUPER_PERFO_EVALU</foldername>
+				<DoccumentClass>PERSO_SUPER_PERFO_EVALU</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Policies and Procedures Manual" sampleflag="Yes">
+				<foldername>/POLICIES_PROCE_PERMIT</foldername>
+				<DoccumentClass>POLICIES_PROCE_PERMIT</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Record Retention Policy" sampleflag="Yes">
+				<foldername>/RECD_RETEN_POLICY</foldername>
+				<DoccumentClass>RECD_RETEN_POLICY</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Security Plan" sampleflag="Yes">
+				<foldername>/SECURITY_PLAN</foldername>
+				<DoccumentClass>SECURITY_PLAN</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Transition Policy/Succession Policy" sampleflag="Yes">
+				<foldername>/TRANS_POLICY_SUCESS_POLICY</foldername>
+				<DoccumentClass>TRANS_POLICY_SUCESS_POLICY</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Whistleblower Policy" sampleflag="Yes">
+				<foldername>/WHISTLEBLOWER_POLICY</foldername>
+				<DoccumentClass>WHISTLEBLOWER_POLICY</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+		<DocumentCategory name="Services">
+			<DocType name="Contract/Grant Documentation" sampleflag="Yes">
+				<foldername>/Contract</foldername>
+				<DoccumentClass>Contract</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Capability Statement" sampleflag="Yes">
+				<foldername>/CapabilityStatement</foldername>
+				<DoccumentClass>CapabilityStatement</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Services - Other" sampleflag="Yes" ismasked="true">
+			<originalDocType>Other</originalDocType>
+				<foldername>/OTHERS</foldername>
+				<DoccumentClass>OTHERS</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+		<DocumentCategory name="Solicitation" type="rfp_award">
+			<DocType name="Board Resolution" sampleflag="Yes">
+				<foldername>/BOARD_RESOLUTION</foldername>
+				<DoccumentClass>BOARD_RESOLUTION</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Broker Certification" sampleflag="Yes">
+				<foldername>/BROKER_CERTIFICATION</foldername>
+				<DoccumentClass>BROKER_CERTIFICATION</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Budget" sampleflag="Yes">
+				<foldername>/BUDGET_TEMPLATE</foldername>
+				<DoccumentClass>BUDGET_TEMPLATE</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Certificate of Insurance" sampleflag="Yes">
+				<foldername>/CERTIFI_INSURANCE</foldername>
+				<DoccumentClass>CERTIFI_INSURANCE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='PERIOD_COVER_FROM_DATE' id="periodcoveredfrom"
+						type="date" display_name="Period Covered From Date" isdisable="false"
+						isdropdown="false"></Property>
+					<Property symbolic_name='PERIOD_COVER_TO_DATE' id="periodcoveredto"
+						type="date" display_name="Period Covered To Date" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Certification of Client Abuse and Neglect" sampleflag="Yes">
+				<foldername>/CERTIFI_CLIENT_ABUSE_NEGLECT</foldername>
+				<DoccumentClass>CERTIFI_CLIENT_ABUSE_NEGLECT</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Doing Business Data Form" sampleflag="Yes">
+				<foldername>/DOING_BUSINESS_DATA_FORM</foldername>
+				<DoccumentClass>DOING_BUSINESS_DATA_FORM</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Financial Signature Authorization" sampleflag="Yes">
+				<foldername>/FINANC_SIG_AUTHORITY</foldername>
+				<DoccumentClass>FINANC_SIG_AUTHORITY</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Contract Agreement" sampleflag="Yes">
+				<foldername>/HSC_SIG_PAGE_WIT_NOTRY_CORP_SAL</foldername>
+				<DoccumentClass>HSC_SIG_PAGE_WIT_NOTRY_CORP_SAL</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Project Labor Agreement" sampleflag="Yes">
+				<foldername>/PROJ_LABOR_AGREEMENT</foldername>
+				<DoccumentClass>PROJ_LABOR_AGREEMENT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Reference" sampleflag="Yes">
+				<foldername>/REF_LETTERS</foldername>
+				<DoccumentClass>REF_LETTERS</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Signature Authorization (authority to sign contracts)" sampleflag="Yes">
+				<foldername>/SIG_AUTH_TO_SIG_CONTR</foldername>
+				<DoccumentClass>SIG_AUTH_TO_SIG_CONTR</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="State Education Department Waiver" sampleflag="Yes">
+				<foldername>/STAT_EDU_DEP_WAVER</foldername>
+				<DoccumentClass>STAT_EDU_DEP_WAVER</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Tax Affirmation" sampleflag="Yes">
+				<foldername>/TAX_AFFIRMATION</foldername>
+				<DoccumentClass>TAX_AFFIRMATION</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='EFFECTIVE_DATE' id="effectivedate"
+						type="date" display_name="Effective Date(mm/dd/yyyy)" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Workscope" sampleflag="Yes">
+				<foldername>/WORKSCOPE</foldername>
+				<DoccumentClass>WORKSCOPE</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Site Control" type="rfp_award" sampleflag="Yes">
+				<foldername>/SITE_CONTROL</foldername>
+				<DoccumentClass>SITE_CONTROL</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Community Linkages and Partnerships" type="rfp_award" sampleflag="Yes">
+				<foldername>/COM_LINK_AND_PARTNERSHIPS</foldername>
+				<DoccumentClass>COM_LINK_AND_PARTNERSHIPS</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Evaluation" type="rfp_award" sampleflag="Yes">
+				<foldername>/EVALUATION</foldername>
+				<DoccumentClass>EVALUATION</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Proposal" type="rfp_award" sampleflag="Yes">
+				<foldername>/PROPOSAL</foldername>
+				<DoccumentClass>PROPOSAL</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<!-- [Start] R7.7.0 QC9181 -->
+			<DocType name="Structured Proposal Form" type="rfp_award" sampleflag="Yes">
+				<foldername>/STRUCTURED_PROPOSAL_FORM</foldername>
+				<DoccumentClass>STRUCTURED_PROPOSAL_FORM</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<!-- [End] R7.7.0 QC9181 -->
+			<DocType name="Solicitation - Other" type="rfp_award" sampleflag="Yes" ismasked="true">
+			<originalDocType>Other</originalDocType>
+				<foldername>/SOLICITATION_OTHERS</foldername>
+				<DoccumentClass>SOLICITATION_OTHERS</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Submitted VENDEX Memo" type="rfp_award" sampleflag="Yes">
+				<foldername>/SUB_VENDEX_MEMO</foldername>
+				<DoccumentClass>SUB_VENDEX_MEMO</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="VENDEX Certification of No Change" type="rfp_award" sampleflag="Yes">
+				<foldername>/VEN_CERT_OF_NO_CHNG</foldername>
+				<DoccumentClass>VEN_CERT_OF_NO_CHNG</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Community Board Correspondence" type="rfp_award" sampleflag="Yes">
+				<foldername>/COM_BOARD_CORR</foldername>
+				<DoccumentClass>COM_BOARD_CORR</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Proof of Group Purchasing Membership" type="rfp_award" sampleflag="Yes">
+				<foldername>/PROOF_GRP_PURCH_MEMSHIP</foldername>
+				<DoccumentClass>PROOF_GRP_PURCH_MEMSHIP</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Iran Divestment Act Compliance" type="rfp_award" sampleflag="Yes">
+				<foldername>/IRAN_DIVESTMENT_COMPLIANCE</foldername>
+				<DoccumentClass>IRAN_DIVESTMENT_COMPLIANCE</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Best and Final Offer (BAFO)" sampleflag="Yes" uploadFlag ="false">
+				<foldername>/BEST_AND_FINAL_OFFER</foldername>
+				<DoccumentClass>BEST_AND_FINAL_OFFER</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+		<!--End Updated in R5 -->
+	</organizationId>
+	<organizationId name="city_org">
+	<!--Start Updated in R5 -->
+		<DocumentCategory name="Help" display="true">
+			<!--End Updated in R5 -->
+			<DocType name="Help">
+				<foldername>/HELP</foldername>
+				<DoccumentClass>HELP</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='HELP_CATEGORY' id="helpcategory"
+						type="string" display_name="Help Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='DISPLAY_HELP_ON_APP' id="helpradio"
+						type="boolean" display_name="Display this document on the page specific help page?"
+						isdisable="false" isdropdown="false"></Property>
+					<Property symbolic_name='DESCRIPTION' id="helpdesc" type="string"
+						display_name="Document Description" isdisable="false" isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+		<!--Start Added in R5 -->
+		<DocumentCategory name="Sample Document" display="true">
+			<DocType name="Sample Document - Other - Other" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Other</sampledoccategory>
+				<sampledoctype>Other</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="false"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="false"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - A-133" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Audit</sampledoccategory>
+				<sampledoctype>A-133</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Annual Financial Statement" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Audit</sampledoccategory>
+				<sampledoctype>Annual Financial Statement</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Corrective Action Plan (for CPA Review Report)" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Audit</sampledoccategory>
+				<sampledoctype>Corrective Action Plan (for CPA Review Report)</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Corrective Action Plan (For A133)" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Audit</sampledoccategory>
+				<sampledoctype>Corrective Action Plan (For A133)</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Corrective Action Plan (for Independent Audit)" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Audit</sampledoccategory>
+				<sampledoctype>Sample Document - Corrective Action Plan (for Independent Audit)</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - CPA Review Report" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Audit</sampledoccategory>
+				<sampledoctype>CPA Review Report</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Independent Audit" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Audit</sampledoccategory>
+				<sampledoctype>Independent Audit</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Audit Communication Templates" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Audit</sampledoccategory>
+				<sampledoctype>Audit Communication Templates</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Corrective Action Plan - Related Documents" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Audit</sampledoccategory>
+				<sampledoctype>Corrective Action Plan - Related Documents</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Audit - Other" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Audit</sampledoccategory>
+				<sampledoctype>Other</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - CHAR 500 + 990 + Audit" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Filings</sampledoccategory>
+				<sampledoctype>CHAR 500 + 990 + Audit</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - IRS Form 990" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Filings</sampledoccategory>
+				<sampledoctype>IRS Form 990</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - IRS Form 990 - Extension Document" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Filings</sampledoccategory>
+				<sampledoctype>IRS Form 990 - Extension Document</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - IRS Form 990 EZ" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Filings</sampledoccategory>
+				<sampledoctype>IRS Form 990 EZ</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - IRS Form 990 N" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Filings</sampledoccategory>
+				<sampledoctype>IRS Form 990 N</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - CHAR410" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Filings</sampledoccategory>
+				<sampledoctype>CHAR410</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+						</Properties>
+			</DocType>
+			<DocType name="Sample Document - CHAR500 - Notice of Exemption" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Filings</sampledoccategory>
+				<sampledoctype>CHAR500 - Notice of Exemption</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<!--Start Updated in R5 -->
+			<DocType name="Sample Document - W-9 Form" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Filings</sampledoccategory>
+				<sampledoctype>W-9 Form</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<!--End Updated in R5 -->
+			<DocType name="Sample Document - Filings - Other" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Filings</sampledoccategory>
+				<sampledoctype>Other</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Substitute W9" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Filings</sampledoccategory>
+				<sampledoctype>Substitute W9</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType
+				name="Sample Document - Direct Deposit/Electronic Funds Transfer (EFT) Vendor Payment Enrollment Form" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Direct Deposit/Electronic Funds Transfer (EFT) Vendor Payment Enrollment Form</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Lease or Rental Agreement" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Lease or Rental Agreement</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Financials - Other" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Other</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Provider's Board Approved Budget" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Provider's Board Approved Budget</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Subcontractor Agreement" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Subcontractor Agreement</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Consultant Agreement" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Consultant Agreement</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Cost Allocation Plan" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Cost Allocation Plan</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Receipts/Proof of Payment" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Receipts/Proof of Payment</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+						<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+					<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Paystubs" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Paystubs</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Indirect Rate Justification" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Indirect Rate Justification</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Debt Service Documentation" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Debt Service Documentation</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Real Estate Tax Documentation" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Real Estate Tax Documentation</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Administrative Overhead Documentation" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Administrative Overhead Documentation</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Documentation of Funding Sources" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Documentation of Funding Sources</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Banking Documentation" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Banking Documentation</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Recoupment Justification Documentation" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Recoupment Justification Documentation</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Fringe Benefits Justification" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Fringe Benefits Justification</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Program Income Documentation" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Program Income Documentation</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Financial Disclosure Forms" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Financial Disclosure Forms</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Financials - Agency Document" type="rfp_award"
+				isSampleType="true" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Agency Document</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Certificate of Assumed Name" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Financials</sampledoccategory>
+				<sampledoctype>Certificate of Assumed Name</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Certificate of Incorporation or equivalent" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Organization Basics</sampledoccategory>
+				<sampledoctype>Certificate of Incorporation or equivalent</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Chief Executive Officer (CEO) Resume or Equivalent" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Organization Basics</sampledoccategory>
+				<sampledoctype>Chief Executive Officer (CEO) Resume or Equivalent</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Chief Financial Officer (CFO) Resume or Equivalent" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Organization Basics</sampledoccategory>
+				<sampledoctype>Chief Financial Officer (CFO) Resume or Equivalent</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Organizational Chart" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Organization Basics</sampledoccategory>
+				<sampledoctype>Organizational Chart</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - IRS Determination Letter [501(c)3]" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Organization Basics</sampledoccategory>
+				<sampledoctype>IRS Determination Letter [501(c)3]</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Board of Directors List or Equivalent" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Organization Basics</sampledoccategory>
+				<sampledoctype>Board of Directors List or Equivalent</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Corporate By-Laws or Equivalent" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Organization Basics</sampledoccategory>
+				<sampledoctype>Corporate By-Laws or Equivalent</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Key Staff - Resume" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Organization Basics</sampledoccategory>
+				<sampledoctype>Key Staff - Resume</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Annual Report" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Organization Basics</sampledoccategory>
+				<sampledoctype>Annual Report</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Board Minutes" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Organization Basics</sampledoccategory>
+				<sampledoctype>Board Minutes</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Certificate of Occupancy" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Organization Basics</sampledoccategory>
+				<sampledoctype>Certificate of Occupancy</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType
+				name="Sample Document - Community Based Development Organization (CBDO) certification" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Organization Basics</sampledoccategory>
+				<sampledoctype>Community Based Development Organization (CBDO) certification</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType
+				name="Sample Document - Community Housing Development Organization (CHDO) certification" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Organization Basics</sampledoccategory>
+				<sampledoctype>Community Housing Development Organization (CHDO) certification</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Licenses/Certifications/Permits" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Organization Basics</sampledoccategory>
+				<sampledoctype>Licenses/Certifications/Permits</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Organization Basics - Others" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Organization Basics</sampledoccategory>
+				<sampledoctype>Others</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Place of Assembly Permit" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Organization Basics</sampledoccategory>
+				<sampledoctype>Place of Assembly Permit</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Work Sample" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Organization Basics</sampledoccategory>
+				<sampledoctype>Work Sample</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Brochure/Flyer" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Organization Basics</sampledoccategory>
+				<sampledoctype>Brochure/Flyer</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Anti-Nepotism Policy" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Policy</sampledoccategory>
+				<sampledoctype>Anti-Nepotism Policy</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - CEO Compensation Policy" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Policy</sampledoccategory>
+				<sampledoctype>CEO Compensation Policy</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Continuity of Operations Plan (COOP)" sampleflag="Yes" ismasked="true"> 
+				<sampledoccategory>Policy</sampledoccategory>
+				<sampledoctype>Continuity of Operations Plan (COOP)</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Diversity Policy" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Policy</sampledoccategory>
+				<sampledoctype>Diversity Policy</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Emergency Preparedness" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Policy</sampledoccategory>
+				<sampledoctype>Emergency Preparedness</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Employee Loan Policy" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Policy</sampledoccategory>
+				<sampledoctype>Employee Loan Policy</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Financial/Internal Controls Policy" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Policy</sampledoccategory>
+				<sampledoctype>Financial/Internal Controls Policy</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType
+				name="Sample Document - Non-Discrimination/Equal Employment Opportunity (EEO) Policy" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Policy</sampledoccategory>
+				<sampledoctype>Non-Discrimination/Equal Employment Opportunity (EEO) Policy</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Policy - Other" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Policy</sampledoccategory>
+				<sampledoctype>Other</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Personnel Manual/Employee Handbook" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Policy</sampledoccategory>
+				<sampledoctype>Personnel Manual/Employee Handbook</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Personnel recruitment, screening and hiring" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Policy</sampledoccategory>
+				<sampledoctype>Personnel recruitment, screening and hiring</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Personnel retention and training" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Policy</sampledoccategory>
+				<sampledoctype>Personnel retention and training</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Personnel supervision and performance evaluation" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Policy</sampledoccategory>
+				<sampledoctype>Personnel supervision and performance evaluation</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Policies and Procedures Manual" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Policy</sampledoccategory>
+				<sampledoctype>Policies and Procedures Manual</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Record Retention Policy" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Policy</sampledoccategory>
+				<sampledoctype>Record Retention Policy</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Security Plan" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Policy</sampledoccategory>
+				<sampledoctype>Security Plan</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Transition Policy/Succession Policy" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Policy</sampledoccategory>
+				<sampledoctype>Transition Policy/Succession Policy</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Whistleblower Policy" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Policy</sampledoccategory>
+				<sampledoctype>Whistleblower Policy</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Contract/Grant Documentation" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Services</sampledoccategory>
+				<sampledoctype>Contract/Grant Documentation</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Capability Statement" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Services</sampledoccategory>
+				<sampledoctype>Capability Statement</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Services - Other" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Services</sampledoccategory>
+				<sampledoctype>Other</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Board Resolution" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Board Resolution</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Broker Certification" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Broker Certification</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Budget" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Budget</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Certificate of Insurance" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Certificate of Insurance</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Certification of Client Abuse and Neglect" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Certification of Client Abuse and Neglect</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Doing Business Data Form" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Doing Business Data Form</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Financial Signature Authorization" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Financial Signature Authorization</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Contract Agreement" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Contract Agreement</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Project Labor Agreement" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Project Labor Agreement</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Reference" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Reference</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Signature Authorization (authority to sign contracts)" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Signature Authorization (authority to sign contracts)</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - State Education Department Waiver" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>State Education Department Waiver</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Tax Affirmation" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Tax Affirmation</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+					<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Workscope" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Workscope</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Site Control" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Site Control</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Community Linkages and Partnerships" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Community Linkages and Partnerships</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Evaluation" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Evaluation</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Proposal" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Proposal</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Solicitation - Other" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Other</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Submitted VENDEX Memo" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Submitted VENDEX Memo</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - VENDEX Certification of No Change" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>VENDEX Certification of No Change</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Community Board Correspondence" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Community Board Correspondence</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Proof of Group Purchasing Membership" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Proof of Group Purchasing Membership</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Iran Divestment Act Compliance" type="rfp_award" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Iran Divestment Act Compliance</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+			<DocType name="Sample Document - Best and Final Offer (BAFO)" sampleflag="Yes" ismasked="true">
+				<sampledoccategory>Solicitation</sampledoccategory>
+				<sampledoctype>Best and Final Offer (BAFO)</sampledoctype>
+				<foldername>/HELP_SAMPLE</foldername>
+				<DoccumentClass>HELP_SAMPLE</DoccumentClass>
+				<Properties>
+				<Property symbolic_name='SAMPLE_CATEGORY' id="samplecategory"
+						type="string" display_name="Sample Document Category" isdisable="false"
+						isdropdown="true"></Property>
+				<Property symbolic_name='SAMPLE_TYPE' id="sampletype"
+						type="string" display_name="Sample Document Type" isdisable="false"
+						isdropdown="true"></Property>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+		<!--End Added in R5 -->
+		<!--Start Updated in R5 -->
+		<DocumentCategory name="System Terms &amp; Conditions" display="true">
+			<DocType name="System Terms &amp; Conditions">
+				<foldername>/SYSTEM_TERMS_CONDITIONS</foldername>
+				<DoccumentClass>SYSTEM_TERMS_CONDITIONS</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+		<DocumentCategory name="Application Terms &amp; Conditions" display="true">
+			<DocType name="Application Terms &amp; Conditions">
+				<foldername>/APPLICATION_TERMS_CONDITIONS</foldername>
+				<DoccumentClass>APPLICATION_TERMS_CONDITIONS</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+		<DocumentCategory name="Standard Contract" display="true">
+			<DocType name="Standard Contract">
+				<foldername>/STANDARD_CONTRACT</foldername>
+				<DoccumentClass>STANDARD_CONTRACT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+		<DocumentCategory name="Appendix A" display="true">
+			<DocType name="Appendix A">
+				<foldername>/APPENDIX_A</foldername>
+				<DoccumentClass>APPENDIX_A</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+		<!--End Updated in R5 -->
+		<!--Start Added in R5 -->
+		<DocumentCategory name="Dictionary">
+			<DocType name="Dictionary">
+				<foldername>/Dictionary</foldername>
+				<DoccumentClass>HHS_ACCELERATOR</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+		<!--End Added in R5 -->
+		<DocumentCategory name="Solicitation" type="rfp_award" display="true">
+			<DocType name="Addenda" type="rfp_award">
+				<foldername>/ADDENDA</foldername>
+				<DoccumentClass>ADDENDA</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Award Notification" type="rfp_award">
+				<foldername>/AWARD_NOTIFICATION</foldername>
+				<DoccumentClass>AWARD_NOTIFICATION</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Concept Report" type="rfp_award">
+				<foldername>/CONCEPT_REPORT</foldername>
+				<DoccumentClass>CONCEPT_REPORT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Request for Proposals (RFP)" type="rfp_award">
+				<foldername>/RFP</foldername>
+				<DoccumentClass>RFP</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Site Control Template" type="rfp_award">
+				<foldername>/SITE_CONTROL_TEMP</foldername>
+				<DoccumentClass>SITE_CONTROL_TEMP</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Community Linkages and Partnerships Template"
+				type="rfp_award">
+				<foldername>/COM_LINK_AND_PARTNERSHIPS_TEMP</foldername>
+				<DoccumentClass>COM_LINK_AND_PARTNERSHIPS_TEMP</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Workscope Template" type="rfp_award">
+				<foldername>/WORKSCOPE_TEMP</foldername>
+				<DoccumentClass>WORKSCOPE_TEMP</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Budget Template" type="rfp_award">
+				<foldername>/BUDGET_TEMPLATE_RFP</foldername>
+				<DoccumentClass>BUDGET_TEMPLATE_RFP</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Contract Agreement Template" type="rfp_award">
+				<foldername>/CONTRACT_AGREE_TEMP</foldername>
+				<DoccumentClass>CONTRACT_AGREE_TEMP</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Other Appendix" type="rfp_award">
+				<foldername>/OTHER_APPDX</foldername>
+				<DoccumentClass>OTHER_APPDX</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Board Resolution Template" type="rfp_award">
+				<foldername>/BOARD_RES_TEMP</foldername>
+				<DoccumentClass>BOARD_RES_TEMP</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Certification of Client Abuse and Neglect Template"
+				type="rfp_award">
+				<foldername>/CERT_CLIENT_ABUSE_NEG_TEMP</foldername>
+				<DoccumentClass>CERT_CLIENT_ABUSE_NEG_TEMP</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType
+				name="Direct Deposit/Electronic Funds Transfer (EFT) Vendor Payment Enrollment Form Template"
+				type="rfp_award">
+				<foldername>/DD_EFT_VENDOR_PAY_ENROL_FORM_TEMP</foldername>
+				<DoccumentClass>DD_EFT_VENDOR_PAY_ENROL_FORM_TEMP</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Doing Business Data Form Template" type="rfp_award">
+				<foldername>/DBD_FORM_TEMP</foldername>
+				<DoccumentClass>DBD_FORM_TEMP</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Financial Signature Authorization Template"
+				type="rfp_award">
+				<foldername>/FIN_SIG_AUTH_TEMP</foldername>
+				<DoccumentClass>FIN_SIG_AUTH_TEMP</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Financial Signature Authorization Template"
+				type="rfp_award">
+				<foldername>/FIN_SIG_AUTH_TEMP</foldername>
+				<DoccumentClass>FIN_SIG_AUTH_TEMP</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Indirect Rate Justification MOCS" type="rfp_award">
+				<foldername>/INDIRECT_RATE_JUST_MOCS</foldername>
+				<DoccumentClass>INDIRECT_RATE_JUST_MOCS</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+	</organizationId>
+	<organizationId name="agency_org">
+		<DocumentCategory name="BudgetAmedmentTemplate" displayInApp="false">
+		<!--Start Updated in R5 -->
+		<!-- Fix for Defect# 7809 -->
+			<DocType name="BudgetAmedmentTemplate" uploadFlag ="false" searchFlag="false">
+			<!--Defect# 7809 end -->
+				<foldername>/BUDGET_AMENDMENT_TEMPLATE</foldername>
+				<DoccumentClass>BUDGET_AMENDMENT_TEMPLATE</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+		<!--Start Updated in R7 -->
+		<DocumentCategory name="BudgetModificationTemplate" displayInApp="false">
+			<DocType name="BudgetModificationTemplate" uploadFlag ="false" searchFlag="false">
+				<foldername>/BUDGET_MODIFICATION_TEMPLATE</foldername>
+				<DoccumentClass>BUDGET_MODIFICATION_TEMPLATE</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+		<!--End Updated in R7 -->
+		<DocumentCategory name="Solicitation" type="rfp_award" displayInAward="true">
+			<DocType name="Solicitation - Agency Document" type="rfp_award"
+				displayInAward="true" ismasked="true">
+				<originalDocType>Agency Document</originalDocType>
+				<foldername>/AGENCY_DOC_SOLICITATION</foldername>
+				<DoccumentClass>AGENCY_DOC_SOLICITATION</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+		<DocumentCategory name="Financials" type="rfp_award"
+			onlyFinancial="true" displayInAward="true">
+			<DocType name="Financials - Agency Document" type="rfp_award"
+				displayInAward="true" ismasked="true">
+				<originalDocType>Agency Document</originalDocType>
+				<foldername>/AGENCY_DOC_FINANCIAL</foldername>
+				<DoccumentClass>AGENCY_DOC_FINANCIAL</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+		<!--End Updated in R5 -->
+		<DocumentCategory name="Agency Document"
+			displayInAward="true">
+			<!-- Added for Release 6 Returned payment review-->
+			<DocType name="Check" displayInAward="false">
+				<foldername>/CHECK</foldername>
+				<DoccumentClass>CHECK</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<!-- Added for Release 6 end-->
+			<DocType name="A-133" displayInAward="true">
+				<foldername>/AGENCY_DOC_A133</foldername>
+				<DoccumentClass>AGENCY_DOC_A133</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Annual Financial Statement" displayInAward="true">
+				<foldername>/AGENCY_DOC_ANNUAL_FINANCIAL_STATEMENT</foldername>
+				<DoccumentClass>AGENCY_DOC_ANNUAL_FINANCIAL_STATEMENT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Corrective Action Plan  (for CPA Review Report)"
+				displayInAward="true">
+				<foldername>/AGENCY_DOC_CORRECTIVE_ACTION_PLAN_REV_REPORT</foldername>
+				<DoccumentClass>AGENCY_DOC_CORRECTIVE_ACTION_PLAN_REV_REPORT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Corrective Action Plan (For A133)"
+				displayInAward="true">
+				<foldername>/AGENCY_DOC_CORRECTIVE_ACTION_PLAN_A133</foldername>
+				<DoccumentClass>AGENCY_DOC_CORRECTIVE_ACTION_PLAN_A133</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Corrective Action Plan (for Independent Audit)"
+				displayInAward="true">
+				<foldername>/AGENCY_DOC_CORRECTIVE_ACTION_PLAN_INDEPENDANT_AUDIT</foldername>
+				<DoccumentClass>AGENCY_DOC_CORRECTIVE_ACTION_PLAN_INDEPENDANT_AUDIT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="CPA Review Report" displayInAward="true">
+				<foldername>/AGENCY_DOC_CPA_REV_REPORT</foldername>
+				<DoccumentClass>AGENCY_DOC_CPA_REV_REPORT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Independent Audit" displayInAward="true">
+				<foldername>/AGENCY_DOC_INDEPENDANT_AUDIT</foldername>
+				<DoccumentClass>AGENCY_DOC_INDEPENDANT_AUDIT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Contract/Grant Documentation" displayInAward="true">
+				<foldername>/AGENCY_DOC_CONTRACT_GRANT_DOCMENTN</foldername>
+				<DoccumentClass>AGENCY_DOC_CONTRACT_GRANT_DOCMENTN</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Corrective Action Plan - Related Documents"
+				displayInAward="true">
+				<foldername>/AGENCY_DOC_CORRCTV_ACTN_PLAN_RELTD_DOCMENTN</foldername>
+				<DoccumentClass>AGENCY_DOC_CORRCTV_ACTN_PLAN_RELTD_DOCMENTN</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Contract Agreement" displayInAward="true">
+				<foldername>/AGENCY_DOC_CONTRACT_AGREEMENT</foldername>
+				<DoccumentClass>AGENCY_DOC_CONTRACT_AGREEMENT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Licenses/Certifications/Permits"
+				displayInAward="true">
+				<foldername>/AGENCY_DOC_LIC_CERT_PERMITS</foldername>
+				<DoccumentClass>AGENCY_DOC_LIC_CERT_PERMITS</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Award Notification" displayInAward="true">
+				<foldername>/AGENCY_DOC_AWARD_NOTFCTN</foldername>
+				<DoccumentClass>AGENCY_DOC_AWARD_NOTFCTN</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Evaluation" displayInAward="true">
+				<foldername>/AGENCY_DOC_EVALUATION</foldername>
+				<DoccumentClass>AGENCY_DOC_EVALUATION</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<!--Start Updated in R5 -->
+			<DocType name="Agency Document - Other" displayInAward="true" ismasked="true">
+				<originalDocType>Other</originalDocType>
+				<!--End Updated in R5 -->
+				<foldername>/AGENCY_DOC_OTHER</foldername>
+				<DoccumentClass>AGENCY_DOC_OTHER</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Site Control Template" displayInAward="true">
+				<foldername>/AGENCY_DOC_SITE_CONTROL_TEMPLT</foldername>
+				<DoccumentClass>AGENCY_DOC_SITE_CONTROL_TEMPLT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Community Linkages and Partnerships Template"
+				displayInAward="true">
+				<foldername>/AGENCY_DOC_COMNTY_LINKGS_PRTNRSHP_TEMPLT</foldername>
+				<DoccumentClass>AGENCY_DOC_COMNTY_LINKGS_PRTNRSHP_TEMPLT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Workscope Template" displayInAward="true">
+				<foldername>/AGENCY_DOC_WORKSCOPE_TEMPLT</foldername>
+				<DoccumentClass>AGENCY_DOC_WORKSCOPE_TEMPLT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Budget Template" displayInAward="true">
+				<foldername>/AGENCY_DOC_BUDGET_TEMPLT</foldername>
+				<DoccumentClass>AGENCY_DOC_BUDGET_TEMPLT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Contract Agreement Template" displayInAward="true">
+				<foldername>/AGENCY_DOC_CONTRACT_AGREEMENT_TEMPLT</foldername>
+				<DoccumentClass>AGENCY_DOC_CONTRACT_AGREEMENT_TEMPLT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Board Resolution Template" displayInAward="true">
+				<foldername>/AGENCY_DOC_BOARD_RESOLUTN_TEMPLT</foldername>
+				<DoccumentClass>AGENCY_DOC_BOARD_RESOLUTN_TEMPLT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Certification of Client Abuse and Neglect Template"
+				displayInAward="true">
+				<foldername>/AGENCY_DOC_CERT_CLIENT_ABUSE_NGLT_TEMPLT</foldername>
+				<DoccumentClass>AGENCY_DOC_CERT_CLIENT_ABUSE_NGLT_TEMPLT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType
+				name="Direct Deposit/Electronic Funds Transfer (EFT) Vendor Payment Enrollment Form Template"
+				displayInAward="true">
+				<foldername>/AGENCY_DOC_DD_EFT_VNDR_PRF_FORM</foldername>
+				<DoccumentClass>AGENCY_DOC_DD_EFT_VNDR_PRF_FORM</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Doing Business Data Form Template"
+				displayInAward="true">
+				<foldername>/AGENCY_DOC_DOING_BUSINS_DATA_FRM_TEMPLT</foldername>
+				<DoccumentClass>AGENCY_DOC_DOING_BUSINS_DATA_FRM_TEMPLT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<DocType name="Financial Signature Authorization Template"
+				displayInAward="true">
+				<foldername>/AGENCY_DOC_FINANCL_SIGN_AUTH_TEMPLT</foldername>
+				<DoccumentClass>AGENCY_DOC_FINANCL_SIGN_AUTH_TEMPLT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+			<!--Start Updated in R5 -->
+			<DocType name="Agency Document - Agency Document" displayInAward="true" ismasked="true">
+				<originalDocType>Agency Document</originalDocType>
+				<!--End Updated in R5 -->
+				<foldername>/AGENCY_DOC_AGENCY_DOCUMENT</foldername>
+				<DoccumentClass>AGENCY_DOC_AGENCY_DOCUMENT</DoccumentClass>
+				<Properties>
+				</Properties>
+			</DocType>
+		</DocumentCategory>
+	</organizationId>
+</ROOT>

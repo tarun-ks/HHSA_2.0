@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.HhsAuditMapper">
+
+	<resultMap id="userCommentsMap" type="com.nyc.hhs.model.HhsAuditBean">
+		<result property="userId" column="CREATED_BY_USERID" />
+		<result property="entityType" column="ENTITY_TYPE" /> 
+		<result property="entityId" column="ENTITY_ID"></result>
+		<result property="providerComments" column="PROVIDER_COMMENT"></result>
+		<result property="taskId" column="TASK_ID"></result>
+		<result property="workflowId" column="WORKFLOW_ID"></result>
+		<result property="internalComments" column="INTERNAL_COMMENT"></result>
+		<result property="agencyId" column="AGENCY_ID"></result>
+	</resultMap>
+	
+	<insert id="hhsauditProviderInsert" parameterType="com.nyc.hhs.model.HhsAuditBean">
+		insert into
+		provider_audit
+		values(SEQ_PROVIDER_AUDIT_ID.NEXTVAL,#{eventName,jdbcType=VARCHAR},#{eventType,
+		jdbcType=VARCHAR},
+		systimestamp,#{data, jdbcType=VARCHAR},#{entityType,
+		jdbcType=VARCHAR},#{entityId,jdbcType=VARCHAR},sysdate,#{userId,
+		jdbcType=VARCHAR},sysdate,#{userId, jdbcType=VARCHAR})
+		</insert>
+
+	<insert id="hhsauditAgencyInsert" parameterType="com.nyc.hhs.model.HhsAuditBean">
+		insert into
+		agency_audit
+		values(SEQ_AGENCY_AUDIT_ID.NEXTVAL,#{eventName,jdbcType=VARCHAR},#{eventType,
+		jdbcType=VARCHAR},
+		systimestamp,#{data, jdbcType=VARCHAR},#{entityType,
+		jdbcType=VARCHAR},#{entityId,jdbcType=VARCHAR},sysdate,#{userId,
+		jdbcType=VARCHAR},sysdate,#{userId, jdbcType=VARCHAR})
+		</insert>
+
+	<insert id="hhsauditAcceleratorInsert" parameterType="com.nyc.hhs.model.HhsAuditBean">
+		insert into
+		ACCELERATOR_AUDIT
+		values(SEQ_ACCELERATOR_AUDIT_ID.NEXTVAL,#{eventName,jdbcType=VARCHAR},#{eventType,
+		jdbcType=VARCHAR},
+		sysdate,#{data, jdbcType=VARCHAR},#{entityType,
+		jdbcType=VARCHAR},#{entityId,jdbcType=VARCHAR},sysdate,#{userId,
+		jdbcType=VARCHAR},sysdate,#{userId, jdbcType=VARCHAR})
+		</insert>
+
+	<insert id="saveCommentNonAudit" parameterType="com.nyc.hhs.model.HhsAuditBean">
+		insert into
+		USER_COMMENT (USER_COMMENT_ID, WORKFLOW_ID, TASK_ID, AUDIT_DATE,
+		INTERNAL_COMMENT, PROVIDER_COMMENT, ENTITY_TYPE,
+		ENTITY_ID,
+		CREATED_DATE, CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID,
+		AGENCY_ID)
+		values(SEQ_USER_COMMENT_ID.NEXTVAL,#{workflowId,jdbcType=VARCHAR},#{taskId,jdbcType=VARCHAR},sysdate,
+		#{internalComments,jdbcType=VARCHAR},#{providerComments,jdbcType=VARCHAR},
+		#{entityType,jdbcType=VARCHAR},#{entityId,jdbcType=VARCHAR},sysdate,#{userId,
+		jdbcType=VARCHAR},sysdate,#{userId, jdbcType=VARCHAR},#{agencyId,
+		jdbcType=VARCHAR})
+		</insert>
+
+	<update id="updateCommentNonAudit" parameterType="com.nyc.hhs.model.HhsAuditBean">
+		UPDATE
+		USER_COMMENT SET INTERNAL_COMMENT
+		=#{internalComments,jdbcType=VARCHAR},PROVIDER_COMMENT=#{providerComments,jdbcType=VARCHAR},
+		MODIFIED_DATE = sysdate, MODIFIED_BY_USERID = #{userId,
+		jdbcType=VARCHAR}, AGENCY_ID = #{agencyId, jdbcType=VARCHAR} WHERE
+		WORKFLOW_ID=#{workflowId} AND TASK_ID=#{taskId}
+		<if test="entityType != null">
+		 AND ENTITY_TYPE = #{entityType}
+		</if>
+	</update>
+
+	<update id="updateCommentNonAuditForProvider" parameterType="com.nyc.hhs.model.HhsAuditBean">
+		UPDATE
+		USER_COMMENT SET INTERNAL_COMMENT
+		=#{internalComments,jdbcType=VARCHAR},PROVIDER_COMMENT=#{providerComments,jdbcType=VARCHAR},
+		MODIFIED_DATE = sysdate, MODIFIED_BY_USERID = #{userId,
+		jdbcType=VARCHAR}, AGENCY_ID = #{agencyId, jdbcType=VARCHAR} WHERE
+		ENTITY_TYPE=#{entityType,jdbcType=VARCHAR} AND
+		ENTITY_ID=#{entityId,jdbcType=VARCHAR}
+	</update>
+
+
+	<delete id="deleteFromUserComment" parameterType="com.nyc.hhs.model.HhsAuditBean">
+		DELETE FROM USER_COMMENT WHERE
+		ENTITY_TYPE=#{entityType,jdbcType=VARCHAR} AND
+		ENTITY_ID=#{entityId,jdbcType=VARCHAR}
+	</delete>
+
+	<insert id="copyAgencyTaskCommentHistory" parameterType="hashmap">
+		INSERT INTO
+		AGENCY_AUDIT(AGENCY_AUDIT_ID,
+		EVENT_NAME,EVENT_TYPE,AUDIT_DATE,
+		DATA,ENTITY_TYPE,ENTITY_ID,
+		CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,
+		MODIFIED_BY_USERID)
+		(select SEQ_AGENCY_AUDIT_ID.nextval,
+		EVENT_NAME,EVENT_TYPE,AUDIT_DATE,
+		DATA,#{newEntityType},#{newEntityId},
+		systimestamp,CREATED_BY_USERID,systimestamp,
+		MODIFIED_BY_USERID
+		from Agency_audit
+		where
+		ENTITY_TYPE=#{entityType,jdbcType=VARCHAR} AND ENTITY_ID=#{entityId,jdbcType=VARCHAR}
+		 and EVENT_NAME in ('Internal Comments','Public Comments'))
+	</insert>
+	
+		<select id="fetchUserCommentsForTabLevelAuditProvider" resultType="map">
+		SELECT ENTITY_TYPE, PROVIDER_COMMENT
+		FROM USER_COMMENT
+		WHERE
+		ENTITY_ID=#{entityId,jdbcType=VARCHAR} AND
+		WORKFLOW_ID IS NULL AND
+		ENTITY_TYPE LIKE 'TLC_%'
+	</select>
+	
+	<select id="fetchUserCommentsForTabLevelAuditAgency" resultType="map">
+		SELECT ENTITY_TYPE, PROVIDER_COMMENT, INTERNAL_COMMENT
+		FROM USER_COMMENT
+		WHERE
+		ENTITY_ID=#{entityId,jdbcType=VARCHAR} AND
+		WORKFLOW_ID IS NOT NULL AND
+		ENTITY_TYPE LIKE 'TLC_%'
+	</select>
+	
+	<delete id="deleteFromUserCommentForTabLevelProvider" parameterType="com.nyc.hhs.model.HhsAuditBean">
+		DELETE FROM USER_COMMENT WHERE
+		ENTITY_ID=#{entityId,jdbcType=VARCHAR} AND
+		WORKFLOW_ID IS NULL AND
+		ENTITY_TYPE LIKE 'TLC_%'
+	</delete>
+	
+	<delete id="deleteFromUserCommentForTabLevelAgency" parameterType="com.nyc.hhs.model.HhsAuditBean">
+		DELETE FROM USER_COMMENT WHERE
+		ENTITY_ID=#{entityId,jdbcType=VARCHAR} AND
+		WORKFLOW_ID IS NOT NULL AND
+		ENTITY_TYPE LIKE 'TLC_%'
+	</delete>
+	
+	<delete id="deleteTabHighlightTabLevelFromAgencyAuditOnSubmit" parameterType="hashmap">
+		DELETE FROM TAB_LEVEL_COMMENTS_HIGHLIGHT
+    	WHERE CONTRACT_ID = #{contractId} AND BUDGET_ID = #{budgetId}
+    	<if test="entityId != null">
+		 AND INVOICE_ID = #{entityId}
+		</if> 
+	</delete>
+
+	<!-- START | Inserts for audit entry for Procurement, Eval gp and Comp pool status update-->
+	<insert id="hhsauditInsertForProcurement" parameterType="com.nyc.hhs.model.HhsAuditBean">
+	insert into
+	ACCELERATOR_AUDIT
+	values(SEQ_ACCELERATOR_AUDIT_ID.NEXTVAL,#{eventName,jdbcType=VARCHAR},#{eventType,
+	jdbcType=VARCHAR},
+	sysdate,(select 'Procurement Status has been changed to ' || SM.STATUS FROM procurement proc,status_master_r2_r3 SM 
+    where proc.STATUS_ID = SM.STATUS_ID and proc.PROCUREMENT_ID = #{entityId}),'Procurement',#{entityId,jdbcType=VARCHAR},sysdate,#{userId,
+	jdbcType=VARCHAR},sysdate,#{userId, jdbcType=VARCHAR})
+	</insert>
+
+	<insert id="hhsauditInsertForEvalGroup" parameterType="com.nyc.hhs.model.HhsAuditBean">
+ 	insert into
+	ACCELERATOR_AUDIT
+	values(SEQ_ACCELERATOR_AUDIT_ID.NEXTVAL,#{eventName,jdbcType=VARCHAR},#{eventType,
+	jdbcType=VARCHAR},
+	sysdate,(select 'Evaluation Group Status has been changed to ' || SM.STATUS FROM EVALUATION_GROUP eg,
+	status_master_r2_r3 SM 
+	where eg.STATUS_ID = SM.STATUS_ID 	  
+		<choose>
+	     <when test="evalGrp != null"> and eg.EVALUATION_GROUP_ID = #{entityId} 
+	     </when>
+	     <otherwise>
+	      and eg.EVALUATION_GROUP_ID = (select evaluation_group_id from evaluation_pool_mapping where evaluation_pool_mapping_id = #{entityId})    
+	     </otherwise>
+	  </choose>
+    ),'Evaluation Group',#{entityId,jdbcType=VARCHAR},sysdate,#{userId,
+	jdbcType=VARCHAR},sysdate,#{userId, jdbcType=VARCHAR})
+	</insert>
+
+	<insert id="hhsauditInsertForCompPool" parameterType="com.nyc.hhs.model.HhsAuditBean">
+	insert into
+	ACCELERATOR_AUDIT
+	values(SEQ_ACCELERATOR_AUDIT_ID.NEXTVAL,#{eventName,jdbcType=VARCHAR},#{eventType,
+	jdbcType=VARCHAR},
+	sysdate,(select 'Competition Pool Status has been changed to ' || SM.STATUS FROM EVALUATION_POOL_MAPPING evalMapping,status_master_r2_r3 SM 
+    where evalMapping.STATUS_ID = SM.STATUS_ID 
+	  <choose>
+	    <when test="evalGrp != null"> and evalMapping.EVALUATION_GROUP_ID = #{entityId} 
+	    and evalMapping.COMPETITION_POOL_ID = #{compConfId}
+	    </when>
+	    <otherwise>
+	      and evalMapping.EVALUATION_POOL_MAPPING_ID = #{entityId}    
+	    </otherwise>
+	  </choose>
+    ),'Competition Pool',#{entityId,jdbcType=VARCHAR},sysdate,#{userId,
+	jdbcType=VARCHAR},sysdate,#{userId, jdbcType=VARCHAR})
+	</insert>
+	<!-- END | Inserts for audit entry for Procurement, Eval gp and Comp pool status update-->
+
+	<!-- Release Addendum Query for Release 3.1.0 for Addendum Enhancement 6024-->
+	<!-- Further modified to solve Release Addendum Issue in Emergency Build 3.1.1-->
+   	<insert id="releaseAddendumAuditInsert" parameterType="com.nyc.hhs.model.HhsAuditBean">
+	insert into addendum_audit(ADDENDUM_AUDIT_ID,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,
+	MODIFIED_BY_USERID,PROCUREMENT_ID,SEQUENCE_NUMBER,VERSION_NUMBER_EC,VERSION_NUMBER_PDC,
+	VERSION_NUMBER_PQC,VERSION_NUMBER_RFP_DOC) values
+	(SEQ_ADDENDUM_AUDIT_ID.NEXTVAL,sysdate,#{userId, jdbcType=VARCHAR},sysdate,
+	#{userId, jdbcType=VARCHAR},#{entityId,jdbcType=VARCHAR},(select nvl(max(SEQUENCE_NUMBER),0)+1 
+	from addendum_audit where PROCUREMENT_ID=#{entityId}),
+	(select max(version_number) from EVALUATION_CRITERIA where procurement_id = #{entityId}),
+	(select max(version_number) from PRCRMNT_DOCUMENT_MAPPING where procurement_id = #{entityId}),
+	(select nvl(max(version_number),0) from PRCRMNT_QUESTION_MAPPING where procurement_id = #{entityId}),
+	(select max(version_number) from RFP_DOCUMENT where procurement_id = #{entityId}) 
+	)
+	</insert>
+    
+<!-- /* [Start] R8.9.0 QC9531  cleaning Dup user_dn     */ -->
+	<insert id="hhsauditInsertForDupUserDN" parameterType="com.nyc.hhs.model.HhsAuditBean">
+    insert into ACCELERATOR_AUDIT  
+       ( ACCELERATOR_AUDIT_ID , EVENT_NAME , EVENT_TYPE , AUDIT_DATE , DATA  ,  ENTITY_TYPE  , ENTITY_ID ,CREATED_DATE , CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID )
+    values
+       (SEQ_ACCELERATOR_AUDIT_ID.NEXTVAL,#{eventName},#{eventType}, SYSTIMESTAMP,#{data},#{entityType},#{entityId},SYSTIMESTAMP,'system',SYSTIMESTAMP,'system')
+     </insert>
+<!-- 	/* [End] R8.9.0 QC9531  cleaning Dup user_dn     */ -->	
+	
+    
+    
+    
+</mapper>	

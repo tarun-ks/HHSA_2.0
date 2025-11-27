@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transactions>
+	<transaction id="fetchNotificationSettings"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.BatchNotificationService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="fetchNotificationSettings">
+				<param name="aoElementIdMap" type="java.util.Map" />
+			</method>
+			<output name="notificationSettingDetails" type="java.util.List" />
+		</service>
+	</transaction>
+	
+	<transaction id="fetchProposalDueDateAlertDetails"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.BatchNotificationService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="fetchProposalDueDateAlertDetails">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="smAlertNotificationDetails" type="java.util.List" />
+		</service>
+	</transaction>
+	
+	<transaction id="fetchApprovedProvidersList"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.BatchNotificationService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="fetchApprovedProvidersList">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="loApprovedProvidersList" type="java.util.List" />
+		</service>
+	</transaction>
+	
+	<transaction id="insertSMNotificationDetail"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service
+			classname="com.nyc.hhs.service.db.services.notification.NotificationService"
+			servicetype="system">
+			<method name="processSMNotification">
+				<param name="loHmNotifyParam" type="java.util.HashMap"></param>
+			</method>
+			<output name="insertStatus" type="java.lang.Boolean" />
+		</service>
+	</transaction>
+	
+	<transaction id="fetchRfpReleaseDueDateAlertDetails"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.BatchNotificationService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="fetchRfpReleaseDueDateAlertDetails">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="smAlertNotificationDetails" type="java.util.List" />
+		</service>
+	</transaction>
+	
+		<transaction id="fetchFirstRoundEvaluationDueDateAlertDetails"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.BatchNotificationService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="fetchFirstRoundEvaluationDueDateAlertDetails">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="smAlertNotificationDetails" type="java.util.List" />
+		</service>
+	</transaction>
+	
+	<transaction id="fetchExtAndIntEvaluatorBatch"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.BatchNotificationService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="fetchExtAndIntEvaluator">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="ExtIntEvaluatorList" type="java.util.HashMap" />
+		</service>
+	</transaction>
+	
+	<transaction id="fetchFinalEvaluationDueDateAlertDetails"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.BatchNotificationService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="fetchFinalEvaluationDueDateAlertDetails">
+				<param name="loHMap" type="java.util.Map" />
+			</method>
+			<output name="smAlertNotificationDetails" type="java.util.List" />
+		</service>
+	</transaction>
+	
+	<transaction id="filterNotificationList"
+		useslocaldbconnection="true" usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.BatchNotificationService"
+			servicetype="system" paramName="aoHMServiceData">
+			<method name="filterNotificationList">
+				<param name="loHMap" type="java.util.HashMap" />
+			</method>
+			<output name="aoFilteredNotification" type="java.util.List" />
+		</service>
+	</transaction>
+	<transaction id="applicationSettingDB_batch" useslocaldbconnection="true"
+		usesfilenetconnection="false">
+		<service classname="com.nyc.hhs.daomanager.service.ApplicationService"
+			servicetype="">
+			<method name="getApplicationSettingFromDB">
+				<param name="aoMyBatisSession" type="org.apache.ibatis.session.SqlSession" />
+			</method>
+			<output name="loAppliocationSettingMap" type="java.util.List" />
+		</service>
+	</transaction>
+</transactions>

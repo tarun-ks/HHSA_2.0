@@ -1,0 +1,447 @@
+{
+  "version": "2.0.0",
+  "description": "Enterprise Document Workflow Management",
+  "workflow_engine": {
+    "async_processing": true,
+    "parallel_execution": true,
+    "version_control": true,
+    "collaborative_editing": true,
+    "real_time_sync": true,
+    "external_integration": true
+  },
+  "document_workflows": {
+    "contract_document_creation": {
+      "id": "contract_document_creation",
+      "name": "Contract Document Creation Workflow",
+      "description": "Workflow for creating contract documents",
+      "document_type": "contract_agreement",
+      "enabled": true,
+      "priority": 1,
+      "states": [
+        {
+          "id": "draft",
+          "name": "Draft",
+          "description": "Document is in draft state",
+          "is_initial": true,
+          "is_final": false,
+          "permissions": {
+            "view": ["{{references.user_roles.CONTRACT_OWNER.code}}"],
+            "edit": ["{{references.user_roles.CONTRACT_OWNER.code}}"],
+            "delete": ["{{references.user_roles.CONTRACT_OWNER.code}}"]
+          },
+          "actions": [
+            {
+              "id": "save_draft",
+              "name": "Save Draft",
+              "type": "save",
+              "async": false
+            },
+            {
+              "id": "submit_for_review",
+              "name": "Submit for Review",
+              "type": "transition",
+              "target_state": "pending_review",
+              "async": false
+            }
+          ]
+        },
+        {
+          "id": "pending_review",
+          "name": "Pending Review",
+          "description": "Document is under review",
+          "is_initial": false,
+          "is_final": false,
+          "permissions": {
+            "view": ["{{references.user_roles.ACCO_MANAGER.code}}", "{{references.user_roles.CONTRACT_OWNER.code}}"],
+            "review": ["{{references.user_roles.ACCO_MANAGER.code}}"],
+            "comment": ["{{references.user_roles.ACCO_MANAGER.code}}"]
+          },
+          "actions": [
+            {
+              "id": "approve_document",
+              "name": "Approve Document",
+              "type": "transition",
+              "target_state": "approved",
+              "async": false
+            },
+            {
+              "id": "request_changes",
+              "name": "Request Changes",
+              "type": "transition",
+              "target_state": "draft",
+              "async": false
+            },
+            {
+              "id": "reject_document",
+              "name": "Reject Document",
+              "type": "transition",
+              "target_state": "rejected",
+              "async": false
+            }
+          ],
+          "sla": {
+            "duration_hours": 48,
+            "escalation_rules": "document_escalation_rules"
+          }
+        },
+        {
+          "id": "approved",
+          "name": "Approved",
+          "description": "Document is approved and ready for signing",
+          "is_initial": false,
+          "is_final": false,
+          "permissions": {
+            "view": ["{{references.user_roles.CONTRACT_OWNER.code}}", "{{references.user_roles.ACCO_MANAGER.code}}"],
+            "sign": ["{{references.user_roles.CONTRACT_OWNER.code}}"]
+          },
+          "actions": [
+            {
+              "id": "initiate_signing",
+              "name": "Initiate Signing",
+              "type": "transition",
+              "target_state": "pending_signing",
+              "async": true
+            }
+          ]
+        },
+        {
+          "id": "pending_signing",
+          "name": "Pending Signing",
+          "description": "Document is awaiting signatures",
+          "is_initial": false,
+          "is_final": false,
+          "permissions": {
+            "view": ["{{references.user_roles.CONTRACT_OWNER.code}}", "{{references.user_roles.ACCO_MANAGER.code}}"],
+            "sign": ["{{references.user_roles.CONTRACT_OWNER.code}}"]
+          },
+          "actions": [
+            {
+              "id": "complete_signing",
+              "name": "Complete Signing",
+              "type": "transition",
+              "target_state": "signed",
+              "async": true
+            }
+          ],
+          "sla": {
+            "duration_hours": 72,
+            "escalation_rules": "signing_escalation_rules"
+          }
+        },
+        {
+          "id": "signed",
+          "name": "Signed",
+          "description": "Document is fully signed",
+          "is_initial": false,
+          "is_final": true,
+          "permissions": {
+            "view": ["{{references.user_roles.CONTRACT_OWNER.code}}", "{{references.user_roles.ACCO_MANAGER.code}}", "{{references.user_roles.FINANCE_MANAGER.code}}"]
+          },
+          "actions": []
+        },
+        {
+          "id": "rejected",
+          "name": "Rejected",
+          "description": "Document is rejected",
+          "is_initial": false,
+          "is_final": true,
+          "permissions": {
+            "view": ["{{references.user_roles.CONTRACT_OWNER.code}}", "{{references.user_roles.ACCO_MANAGER.code}}"],
+            "resubmit": ["{{references.user_roles.CONTRACT_OWNER.code}}"]
+          },
+          "actions": [
+            {
+              "id": "resubmit_document",
+              "name": "Resubmit Document",
+              "type": "transition",
+              "target_state": "draft",
+              "async": false
+            }
+          ]
+        }
+      ],
+      "transitions": [
+        {
+          "id": "draft_to_pending_review",
+          "name": "Submit for Review",
+          "from_state": "draft",
+          "to_state": "pending_review",
+          "conditions": [
+            {
+              "field": "document_completeness",
+              "operator": "equals",
+              "value": true
+            },
+            {
+              "field": "required_fields_present",
+              "operator": "equals",
+              "value": true
+            }
+          ],
+          "actions": [
+            {
+              "type": "send_notification",
+              "template": "document_submitted_for_review",
+              "recipients": ["{{references.user_roles.ACCO_MANAGER.code}}"],
+              "async": true
+            },
+            {
+              "type": "create_audit_log",
+              "message": "Document submitted for review",
+              "async": false
+            }
+          ]
+        },
+        {
+          "id": "pending_review_to_approved",
+          "name": "Approve Document",
+          "from_state": "pending_review",
+          "to_state": "approved",
+          "conditions": [
+            {
+              "field": "review_approval",
+              "operator": "equals",
+              "value": true
+            }
+          ],
+          "actions": [
+            {
+              "type": "send_notification",
+              "template": "document_approved",
+              "recipients": ["{{references.user_roles.CONTRACT_OWNER.code}}"],
+              "async": true
+            },
+            {
+              "type": "create_audit_log",
+              "message": "Document approved",
+              "async": false
+            }
+          ]
+        }
+      ]
+    },
+    "amendment_document_workflow": {
+      "id": "amendment_document_workflow",
+      "name": "Amendment Document Workflow",
+      "description": "Workflow for processing amendment documents",
+      "document_type": "amendment_document",
+      "enabled": true,
+      "priority": 2,
+      "states": [
+        {
+          "id": "draft",
+          "name": "Draft",
+          "description": "Amendment is in draft state",
+          "is_initial": true,
+          "is_final": false,
+          "permissions": {
+            "view": ["{{references.user_roles.CONTRACT_OWNER.code}}"],
+            "edit": ["{{references.user_roles.CONTRACT_OWNER.code}}"]
+          },
+          "actions": [
+            {
+              "id": "submit_amendment",
+              "name": "Submit Amendment",
+              "type": "transition",
+              "target_state": "pending_approval",
+              "async": false
+            }
+          ]
+        },
+        {
+          "id": "pending_approval",
+          "name": "Pending Approval",
+          "description": "Amendment is pending approval",
+          "is_initial": false,
+          "is_final": false,
+          "permissions": {
+            "view": ["{{references.user_roles.ACCO_MANAGER.code}}", "{{references.user_roles.CONTRACT_OWNER.code}}"],
+            "approve": ["{{references.user_roles.ACCO_MANAGER.code}}"]
+          },
+          "actions": [
+            {
+              "id": "approve_amendment",
+              "name": "Approve Amendment",
+              "type": "transition",
+              "target_state": "approved",
+              "async": false
+            },
+            {
+              "id": "reject_amendment",
+              "name": "Reject Amendment",
+              "type": "transition",
+              "target_state": "rejected",
+              "async": false
+            }
+          ],
+          "sla": {
+            "duration_hours": 24,
+            "escalation_rules": "amendment_escalation_rules"
+          }
+        },
+        {
+          "id": "approved",
+          "name": "Approved",
+          "description": "Amendment is approved",
+          "is_initial": false,
+          "is_final": true,
+          "permissions": {
+            "view": ["{{references.user_roles.CONTRACT_OWNER.code}}", "{{references.user_roles.ACCO_MANAGER.code}}"]
+          },
+          "actions": []
+        },
+        {
+          "id": "rejected",
+          "name": "Rejected",
+          "description": "Amendment is rejected",
+          "is_initial": false,
+          "is_final": true,
+          "permissions": {
+            "view": ["{{references.user_roles.CONTRACT_OWNER.code}}", "{{references.user_roles.ACCO_MANAGER.code}}"],
+            "resubmit": ["{{references.user_roles.CONTRACT_OWNER.code}}"]
+          },
+          "actions": [
+            {
+              "id": "resubmit_amendment",
+              "name": "Resubmit Amendment",
+              "type": "transition",
+              "target_state": "draft",
+              "async": false
+            }
+          ]
+        }
+      ]
+    },
+    "document_archival_workflow": {
+      "id": "document_archival_workflow",
+      "name": "Document Archival Workflow",
+      "description": "Workflow for archiving documents",
+      "document_type": "all",
+      "enabled": true,
+      "priority": 3,
+      "states": [
+        {
+          "id": "active",
+          "name": "Active",
+          "description": "Document is active and accessible",
+          "is_initial": true,
+          "is_final": false,
+          "permissions": {
+            "view": ["{{references.user_roles.CONTRACT_OWNER.code}}", "{{references.user_roles.ACCO_MANAGER.code}}"],
+            "edit": ["{{references.user_roles.CONTRACT_OWNER.code}}"],
+            "download": ["{{references.user_roles.CONTRACT_OWNER.code}}", "{{references.user_roles.ACCO_MANAGER.code}}"]
+          },
+          "actions": [
+            {
+              "id": "archive_document",
+              "name": "Archive Document",
+              "type": "transition",
+              "target_state": "archived",
+              "async": true
+            }
+          ]
+        },
+        {
+          "id": "archived",
+          "name": "Archived",
+          "description": "Document is archived",
+          "is_initial": false,
+          "is_final": false,
+          "permissions": {
+            "view": ["{{references.user_roles.ACCO_MANAGER.code}}"],
+            "restore": ["{{references.user_roles.ACCO_MANAGER.code}}"]
+          },
+          "actions": [
+            {
+              "id": "restore_document",
+              "name": "Restore Document",
+              "type": "transition",
+              "target_state": "active",
+              "async": false
+            },
+            {
+              "id": "dispose_document",
+              "name": "Dispose Document",
+              "type": "transition",
+              "target_state": "disposed",
+              "async": true
+            }
+          ]
+        },
+        {
+          "id": "disposed",
+          "name": "Disposed",
+          "description": "Document is disposed",
+          "is_initial": false,
+          "is_final": true,
+          "permissions": {
+            "view": ["{{references.user_roles.ACCO_MANAGER.code}}"]
+          },
+          "actions": []
+        }
+      ]
+    }
+  },
+  "workflow_integrations": {
+    "contract_workflow_integration": {
+      "trigger_event": "contract_created",
+      "action": "create_contract_document",
+      "workflow": "contract_document_creation",
+      "async": true
+    },
+    "amendment_workflow_integration": {
+      "trigger_event": "amendment_created",
+      "action": "create_amendment_document",
+      "workflow": "amendment_document_workflow",
+      "async": true
+    },
+    "retention_workflow_integration": {
+      "trigger_event": "retention_period_expired",
+      "action": "archive_document",
+      "workflow": "document_archival_workflow",
+      "async": true
+    }
+  },
+  "escalation_rules": {
+    "document_escalation_rules": {
+      "level_1": {
+        "duration_hours": 24,
+        "action": "send_reminder",
+        "recipients": ["assignee"]
+      },
+      "level_2": {
+        "duration_hours": 48,
+        "action": "escalate_to_manager",
+        "recipients": ["assignee.manager"]
+      },
+      "level_3": {
+        "duration_hours": 72,
+        "action": "escalate_to_department_head",
+        "recipients": ["{{references.user_roles.ACCO_MANAGER.code}}"]
+      }
+    },
+    "signing_escalation_rules": {
+      "level_1": {
+        "duration_hours": 24,
+        "action": "send_reminder",
+        "recipients": ["signer"]
+      },
+      "level_2": {
+        "duration_hours": 48,
+        "action": "escalate_to_manager",
+        "recipients": ["signer.manager"]
+      }
+    }
+  },
+  "metadata": {
+    "created_at": "2024-01-01T00:00:00Z",
+    "created_by": "system",
+    "version": "2.0.0",
+    "description": "Enterprise document workflows with advanced features",
+    "tags": ["documents", "workflows", "approval", "signing", "archival"],
+    "dependencies": [
+      "schema/references.json",
+      "documents/document_types.json"
+    ]
+  }
+}

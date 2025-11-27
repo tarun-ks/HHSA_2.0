@@ -1,0 +1,2920 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.nyc.hhs.service.db.services.application.ContractBudgetAmendmentMapper">
+	
+	<!-- Program Income Amendment Queries Starts -->
+
+	<resultMap id="programIncomeAmendmentList" type="com.nyc.hhs.model.CBProgramIncomeBean">
+		<result property="id" column="LINE_ITEM_ID" />
+		<result property="programTitle" column="PROGRAM_INCOME_TITLE" />
+		<result property="approvedFYBudget" column="FY_BUDGET" />
+		<result property="remainingAmount" column="REMAINING_AMOUNT"/>
+		<result property="amendmentAmount" column="AMEND_AMOUNT"/>
+		<!--   Added in R7  -->
+		<result property="entryTypeId" column="ENTRY_TYPE_ID" />
+		<result property="description" column="DESCRIPTION" />
+		<result property="empPosition" column="PROGRAM_INCOME_TITLE" />
+		<result property="parentId" column="PARENT_ID" />
+		<result property="budgetCategory" column="Entry_type" />  
+		<!-- R7 changes end -->
+	</resultMap>
+
+	<select id="fetchProgramIncomeAmendment" parameterType="com.nyc.hhs.model.CBProgramIncomeBean"
+		resultMap="programIncomeAmendmentList">
+		SELECT parent_id AS LINE_ITEM_ID,
+		PROGRAM_INCOME_TYPE AS PROGRAM_INCOME_TITLE,
+		SUM(APPROVED_FY_BUDGET) AS FY_BUDGET ,
+		<!-- Added in R7 -->
+		PARENT_ID,
+		Description,
+		Entry_type_id,
+		decode(Entry_type,'Personnel Service Salary','Personnel Services',Entry_type) as Entry_type,
+		<!-- R7 changes end -->
+		SUM(remaining_amount) AS REMAINING_AMOUNT,
+		SUM(mod_amount) AS AMEND_AMOUNT
+		FROM
+		(SELECT
+		CASE
+		WHEN (SELECT entity_name FROM other_details WHERE entity_id = parent_id and entry_type_id = 11)
+		IS
+		NOT NULL
+		THEN
+		(SELECT entity_name FROM other_details WHERE entity_id = parent_id	and entry_type_id = 11)
+		ELSE prgm_master.PROGRAM_INCOME_TYPE
+		END AS PROGRAM_INCOME_TYPE,
+		a.AMOUNT AS APPROVED_FY_BUDGET ,
+		(a.AMOUNT - SUM(
+		CASE
+		WHEN inv.STATUS_ID IS NOT NULL
+		THEN NVL(inv_det.INVOICE_AMOUNT,0)
+		ELSE 0
+		END )) AS remaining_amount,
+		0 AS mod_amount,
+		A.parent_id,
+		<!-- Changed in R7 -->
+		A.Description,
+		a.Entry_type_id,
+		Entry_type
+		FROM PROGRAM_INCOME a
+		LEFT JOIN ENTRY_TYPE_MASTER etm
+        ON A.ENTRY_TYPE_ID= etm.ENTRY_TYPE_ID
+		<!-- R7 changes end-->
+		LEFT JOIN INVOICE_DETAILS inv_det
+		ON inv_det.ENTRY_TYPE_ID = 11
+		AND inv_det.LINE_ITEM_ID = a.parent_id
+		INNER JOIN PROGRAM_INCOME_TYPE prgm_master
+		ON prgm_master.PROGRAM_INCOME_TYPE_ID = a.PROGRAM_INCOME_TYPE_ID
+		LEFT JOIN INVOICE inv
+		ON inv.INVOICE_ID = inv_det.INVOICE_ID
+		AND inv.STATUS_ID IN (72,73)
+		WHERE a.BUDGET_ID = #{parentBudgetId}
+		AND a.SUB_BUDGET_ID = #{parentSubBudgetId}
+		<!-- Added in R7 -->
+		<if test="null!= entryTypeId">
+		AND a.Entry_type_id=#{entryTypeId}
+		</if>
+		<!-- R7 changes end -->
+		GROUP BY a.AMOUNT,
+		A.parent_id,
+		prgm_master.PROGRAM_INCOME_TYPE,a.Entry_type_id,a.description,Entry_type
+		UNION ALL
+		SELECT
+		CASE
+		WHEN (SELECT entity_name FROM other_details WHERE entity_id = parent_id and entry_type_id = 11)
+		IS
+		NOT NULL
+		THEN
+		(SELECT entity_name FROM other_details WHERE entity_id = parent_id and entry_type_id = 11
+		)
+		ELSE prgm_master.PROGRAM_INCOME_TYPE
+		END AS PROGRAM_INCOME_TYPE,
+		0 AS APPROVED_FY_BUDGET ,
+		0 AS remaining_amount,
+		a.AMOUNT AS mod_amount,
+		A.parent_id,
+		<!-- Added in R7 -->
+		A.Description,
+		a.Entry_type_id,
+		Entry_type
+		FROM PROGRAM_INCOME a
+		LEFT JOIN ENTRY_TYPE_MASTER etm
+        ON A.ENTRY_TYPE_ID= etm.ENTRY_TYPE_ID
+        <!-- R7 changes end -->
+		INNER JOIN PROGRAM_INCOME_TYPE prgm_master
+		ON prgm_master.PROGRAM_INCOME_TYPE_ID = a.PROGRAM_INCOME_TYPE_ID
+		WHERE a.BUDGET_ID = #{contractBudgetID}
+		AND a.SUB_BUDGET_ID = #{subBudgetID}
+		<!-- Added in R7 -->
+		<if test="null!= entryTypeId">
+		AND a.Entry_type_id=#{entryTypeId}
+		</if>
+		<!-- R7 changes end -->
+		GROUP BY a.AMOUNT,
+		A.parent_id,
+		prgm_master.PROGRAM_INCOME_TYPE,a.Entry_type_id,description,Entry_type
+		)
+		GROUP BY parent_id,
+		PROGRAM_INCOME_TYPE,Entry_type_id,description,Entry_type
+		ORDER BY Entry_type_id,parent_id DESC 
+
+	</select>
+
+	<insert id="insertProgramIncomeAmendment" parameterType="com.nyc.hhs.model.CBProgramIncomeBean">
+		Insert into
+		PROGRAM_INCOME
+		(
+		PROGRAM_INCOME_ID,
+		BUDGET_ID,
+		SUB_BUDGET_ID,
+		PROGRAM_INCOME_TYPE_ID,
+		PARENT_ID,AMOUNT,
+		CREATED_DATE,
+		CREATED_BY_USERID,
+		CREATED_BY_STAFFID,
+		MODIFIED_DATE,
+		MODIFIED_BY_USERID,
+		MODIFIED_BY_STAFFID,
+		ACTIVE_FLAG,
+		PREV_APPROVED_BUDGET,
+		<!-- Added in R7 for new program income screen -->
+		ENTRY_TYPE_ID,
+		DESCRIPTION
+		)
+		values
+		(
+		SEQ_PROGRAM_INCOME_ID.nextval,
+		#{contractBudgetID},
+		#{subBudgetID},
+		(select PROGRAM_INCOME_TYPE_ID from PROGRAM_INCOME where PROGRAM_INCOME_ID = #{id}),
+		#{id},
+		#{amendmentAmount},
+		SYSTIMESTAMP,
+		#{modifyByAgency,jdbcType=VARCHAR},
+		#{modifyByProvider,jdbcType=VARCHAR},
+		SYSTIMESTAMP,
+		#{modifyByAgency,jdbcType=VARCHAR},
+		#{modifyByProvider,jdbcType=VARCHAR},
+		#{activeFlag},
+		#{prevApprovedBudget},
+		#{entryTypeId},
+		#{description}
+		)
+	</insert>
+
+	<update id="updateProgramIncomeAmendment" parameterType="com.nyc.hhs.model.CBProgramIncomeBean">
+		UPDATE PROGRAM_INCOME set AMOUNT = #{amendmentAmount}, MODIFIED_DATE =
+		SYSTIMESTAMP, MODIFIED_BY_USERID = #{modifyByAgency,jdbcType=VARCHAR}, MODIFIED_BY_STAFFID = #{modifyByProvider,jdbcType=VARCHAR}
+		<!-- Updated in R7 -->
+		<if test="empPosition != 0 and entryTypeId != null and entryTypeId != '' ">
+		,ENTRY_TYPE_ID= #{entryTypeId},
+		PROGRAM_INCOME_TYPE_ID= #{empPosition},
+		description= #{description}
+		</if>
+		WHERE PARENT_ID       = #{id}
+		AND SUB_BUDGET_ID     = #{subBudgetID}
+		AND ACTIVE_FLAG       = '1'
+	 </update>
+	<!-- Program Income Amendment Queries Ends -->
+	
+	
+	<resultMap id="CoCBMProfServicesList" type="com.nyc.hhs.model.CBProfessionalServicesBean">
+		<result property="id" column="PROFESSIONAL_SERVICE_ID" />
+		<result property="cbmId" column="MODIFY_PROFESSIONAL_SERVICE_ID" />
+		<result property="profServiceTypeId" column="PROFESSIONAL_SERVICE_TYPE_ID" />
+		<result property="professionalServiceName" column="PROFESSIONAL_SERVICE_TYPE" />
+		<result property="fyBudget" column="AMOUNT" />
+		<result property="remainingAmt" column="REMAINING_AMOUNT" />
+		<result property="modifyAmount" column="MODIFY_AMOUNT" />
+	</resultMap>
+
+	<select id="fetchProfServicesDetailsAmendment" parameterType="com.nyc.hhs.model.CBGridBean"
+		resultMap="CoCBMProfServicesList">
+		SELECT 
+			PROFESSIONAL_SERVICE_ID,
+			MODIFY_PROFESSIONAL_SERVICE_ID,
+			PROFESSIONAL_SERVICE_TYPE_ID,
+			PROFESSIONAL_SERVICE_TYPE,
+			AMOUNT,
+			REMAINING_AMOUNT,
+			MODIFY_AMOUNT
+		FROM
+		(select
+		profess.PROFESSIONAL_SERVICE_ID as PROFESSIONAL_SERVICE_ID,
+		modifyBudget.PROFESSIONAL_SERVICE_ID as
+		MODIFY_PROFESSIONAL_SERVICE_ID,
+		profess.PROFESSIONAL_SERVICE_TYPE_ID as PROFESSIONAL_SERVICE_TYPE_ID,
+		CASE
+		WHEN other.ENTITY_NAME IS NOT NULL THEN other.ENTITY_NAME
+		ELSE
+		profess_master.PROFESSIONAL_SERVICE_TYPE
+		END
+		as
+		PROFESSIONAL_SERVICE_TYPE,
+		<!-- Rel 3.16.0 QC6821 BEGIN Amount to be zero, when Parent_id equals id. Otherwise the grid displays the amount newly added -->
+		CASE
+		WHEN profess.PROFESSIONAL_SERVICE_ID=modifyBudget.PROFESSIONAL_SERVICE_ID THEN 0
+		ELSE
+		nvl(profess.AMOUNT,0)
+		END
+		as
+		AMOUNT,
+		CASE
+		WHEN profess.PROFESSIONAL_SERVICE_ID=modifyBudget.PROFESSIONAL_SERVICE_ID THEN 0
+		ELSE
+		nvl(profess.AMOUNT,'0') - nvl(invoicedetail.INVOICE_AMOUNT,'0')
+		END
+		as
+		REMAINING_AMOUNT,
+		<!-- Rel 3.16.0 QC6821 BEGIN Amount to be zero, when Parent_id equals id. Otherwise the grid displays the amount newly added -->
+		nvl(modifyBudget.AMOUNT,'0') as MODIFY_AMOUNT
+		from
+		PROFESSIONAL_SERVICE_TYPE_MSTR profess_master
+		inner join
+		PROFESSIONAL_SERVICE profess on profess.PROFESSIONAL_SERVICE_TYPE_ID =
+		profess_master.PROFESSIONAL_SERVICE_TYPE_ID and
+		profess.PROFESSIONAL_SERVICE_ID = profess.PARENT_ID and
+		profess.active_flag = '1'
+		left outer join OTHER_DETAILS other on
+		other.ENTITY_ID = profess.PROFESSIONAL_SERVICE_ID and
+		other.ENTRY_TYPE_ID = 4 and other.active_flag = '1'
+		left outer join
+		(select * from PROFESSIONAL_SERVICE where BUDGET_ID =
+		#{contractBudgetID} and SUB_BUDGET_ID = #{subBudgetID}
+		<!-- Rel 3.16.0 QC6821 BEGIN. Remove following filter --> 
+<!--  		and PROFESSIONAL_SERVICE_ID != PARENT_ID  -->
+		<!-- Rel 3.16.0 QC6821 END. Remove following filter -->
+		) modifyBudget on
+		modifyBudget.PARENT_ID =
+		profess.PROFESSIONAL_SERVICE_ID
+		left outer join
+		(select entry_type_id, line_item_id, sum(invoice_amount)
+		as
+		INVOICE_AMOUNT
+		from INVOICE_DETAILS where INVOICE_ID IN
+		(select
+		invoice_id from INVOICE where BUDGET_ID = #{parentBudgetId} 
+		and STATUS_ID in (72, 73)) and ENTRY_TYPE_ID = 4
+		group by entry_type_id, line_item_id) invoicedetail
+		on
+		invoicedetail.entry_type_id = 4 and invoicedetail.line_item_id =
+		profess.PROFESSIONAL_SERVICE_ID
+		where profess.SUB_BUDGET_ID =
+		#{parentSubBudgetId} and profess.BUDGET_ID = #{parentBudgetId}
+
+		UNION ALL
+		
+		select
+		profess.PROFESSIONAL_SERVICE_ID as PROFESSIONAL_SERVICE_ID,
+		modifyBudget.PROFESSIONAL_SERVICE_ID as
+		MODIFY_PROFESSIONAL_SERVICE_ID,
+		profess.PROFESSIONAL_SERVICE_TYPE_ID as PROFESSIONAL_SERVICE_TYPE_ID,
+		CASE
+		WHEN other.ENTITY_NAME IS NOT NULL THEN other.ENTITY_NAME
+		ELSE
+		profess_master.PROFESSIONAL_SERVICE_TYPE
+		END
+		as
+		PROFESSIONAL_SERVICE_TYPE,
+		<!-- Rel 3.16.0 QC6821 BEGIN Amount to be zero, when Parent_id equals id. Otherwise the grid displays the amount newly added -->
+		CASE
+		WHEN profess.PROFESSIONAL_SERVICE_ID=modifyBudget.PROFESSIONAL_SERVICE_ID THEN 0
+		ELSE
+		nvl(profess.AMOUNT,0)
+		END
+		as
+		AMOUNT,
+		CASE
+		WHEN profess.PROFESSIONAL_SERVICE_ID=modifyBudget.PROFESSIONAL_SERVICE_ID THEN 0
+		ELSE
+		nvl(profess.AMOUNT,'0') - nvl(invoicedetail.INVOICE_AMOUNT,'0')
+		END
+		as
+		REMAINING_AMOUNT,
+		<!-- Rel 3.16.0 QC6821 END Amount to be zero, when Parent_id equals id. Otherwise the grid displays the amount newly added -->
+		nvl(modifyBudget.AMOUNT,'0') as MODIFY_AMOUNT
+		from
+		PROFESSIONAL_SERVICE_TYPE_MSTR profess_master
+		inner join
+		PROFESSIONAL_SERVICE profess on profess.PROFESSIONAL_SERVICE_TYPE_ID =
+		profess_master.PROFESSIONAL_SERVICE_TYPE_ID and
+		profess.PROFESSIONAL_SERVICE_ID = profess.PARENT_ID and
+		profess.active_flag = '1'
+		left outer join OTHER_DETAILS other on
+		other.ENTITY_ID = profess.PROFESSIONAL_SERVICE_ID and
+		other.ENTRY_TYPE_ID = 4 and other.active_flag = '1'
+		left outer join
+		(select * from PROFESSIONAL_SERVICE where BUDGET_ID =
+		#{contractBudgetID} and SUB_BUDGET_ID = #{subBudgetID} 
+		<!-- Rel 3.16.0 QC6821 BEGIN. Remove following filter -->
+<!--  		and PROFESSIONAL_SERVICE_ID != PARENT_ID  -->
+		<!-- Rel 3.16.0 QC6821 END. Remove following filter -->
+		) modifyBudget on
+		modifyBudget.PARENT_ID =
+		profess.PROFESSIONAL_SERVICE_ID
+		left outer join
+		(select entry_type_id, line_item_id, sum(invoice_amount)
+		as
+		INVOICE_AMOUNT
+		from INVOICE_DETAILS where INVOICE_ID IN
+		(select
+		invoice_id from INVOICE where BUDGET_ID = #{parentBudgetId} 
+		and STATUS_ID in (72, 73)) and ENTRY_TYPE_ID = 4
+		group by entry_type_id, line_item_id) invoicedetail
+		on
+		invoicedetail.entry_type_id = 4 and invoicedetail.line_item_id =
+		profess.PROFESSIONAL_SERVICE_ID
+		where profess.SUB_BUDGET_ID =
+		#{subBudgetID} and profess.BUDGET_ID = #{contractBudgetID}
+    	)
+		order by
+		professional_service_type_id
+    </select>
+    
+    <select id="fetchRemainingAmnt" parameterType="com.nyc.hhs.model.CBProfessionalServicesBean"
+		resultType="BigDecimal">
+		select
+		nvl(profess.AMOUNT,'0') -
+		nvl(invoicedetail.INVOICE_AMOUNT,'0') as REMAINING_AMOUNT
+		from
+		PROFESSIONAL_SERVICE profess
+		left outer join (select entry_type_id,
+		line_item_id, sum(invoice_amount)
+		as INVOICE_AMOUNT
+		from INVOICE_DETAILS
+		where INVOICE_ID IN
+		(select invoice_id from INVOICE where CONTRACT_ID =
+		#{contractID} and
+		BUDGET_ID = #{parentBudgetId} and STATUS_ID in
+		(72,73)) and
+		ENTRY_TYPE_ID = 4
+		group by entry_type_id,
+		line_item_id) invoicedetail on
+		invoicedetail.entry_type_id = 4 and
+		invoicedetail.line_item_id =
+		profess.PROFESSIONAL_SERVICE_ID
+		where
+		profess.PROFESSIONAL_SERVICE_ID = #{id}
+    </select>
+
+<!--   [Start] R7.5.0 QC9146 Professional Service Grid issue for Amendment -->
+	<insert id="mergeProfServicesAmendmentAmount" parameterType="com.nyc.hhs.model.CBProfessionalServicesBean">
+		MERGE INTO PROFESSIONAL_SERVICE  ProfS 
+        using (select  PROFESSIONAL_SERVICE_ID, PROFESSIONAL_SERVICE_TYPE_ID, #{contractBudgetID} as BUDGET_ID, 
+                       #{subBudgetID} as SUB_BUDGET_ID,PARENT_ID,AMOUNT,ACTIVE_FLAG,CREATED_DATE,CREATED_BY_USERID,
+                       MODIFIED_DATE, MODIFIED_BY_USERID, MODIFIED_BY_STAFFID, CREATED_BY_STAFFID
+                from   PROFESSIONAL_SERVICE
+               where   PROFESSIONAL_SERVICE_ID = #{id}
+                and    ACTIVE_FLAG = 1
+              ) Tmp
+      on (   Tmp.PARENT_ID = ProfS.PARENT_ID 
+             and  Tmp.PROFESSIONAL_SERVICE_TYPE_ID = ProfS.PROFESSIONAL_SERVICE_TYPE_ID   
+             and  Tmp.SUB_BUDGET_ID =  ProfS.SUB_BUDGET_ID
+             and  Tmp.BUDGET_ID =  ProfS.BUDGET_ID 
+         )
+ 		WHEN NOT MATCHED THEN
+          Insert 
+          (   ProfS.PROFESSIONAL_SERVICE_ID, ProfS.PROFESSIONAL_SERVICE_TYPE_ID, ProfS.BUDGET_ID, ProfS.SUB_BUDGET_ID,
+              ProfS.PARENT_ID, ProfS.AMOUNT, ProfS.CREATED_DATE, ProfS.CREATED_BY_USERID, ProfS.CREATED_BY_STAFFID, ProfS.MODIFIED_DATE,
+              ProfS.MODIFIED_BY_USERID, ProfS.MODIFIED_BY_STAFFID, ProfS.ACTIVE_FLAG, ProfS.PREV_APPROVED_BUDGET
+          )
+          values 
+          ( SEQ_PROFESSIONAL_SERVICE_ID.nextval
+            , Tmp.PROFESSIONAL_SERVICE_TYPE_ID,  Tmp.BUDGET_ID, Tmp.SUB_BUDGET_ID
+            , Tmp.PARENT_ID , #{modifyAmount}  , SYSTIMESTAMP ,   #{modifyByAgency} , #{modifyByProvider} ,  SYSTIMESTAMP ,   
+           #{modifyByAgency}  , #{modifyByProvider} , Tmp.ACTIVE_FLAG , Tmp.AMOUNT
+          ) 
+    WHEN MATCHED THEN
+    		update  
+          set ProfS.AMOUNT = #{modifyAmount}
+            , ProfS.MODIFIED_DATE = SYSTIMESTAMP
+            , ProfS.MODIFIED_BY_USERID = #{modifyByAgency}
+            , ProfS.MODIFIED_BY_STAFFID = #{modifyByProvider} 
+          where Tmp.PARENT_ID = ProfS.PARENT_ID 
+          and  Tmp.PROFESSIONAL_SERVICE_TYPE_ID = ProfS.PROFESSIONAL_SERVICE_TYPE_ID   
+	</insert>
+	
+	<insert id="addProfServicesAmendmentAmount" parameterType="com.nyc.hhs.model.CBProfessionalServicesBean">
+		Insert into PROFESSIONAL_SERVICE
+		(   PROFESSIONAL_SERVICE_ID,PROFESSIONAL_SERVICE_TYPE_ID,BUDGET_ID,SUB_BUDGET_ID,
+            PARENT_ID,AMOUNT,CREATED_DATE,CREATED_BY_USERID,CREATED_BY_STAFFID,MODIFIED_DATE,
+            MODIFIED_BY_USERID,MODIFIED_BY_STAFFID,ACTIVE_FLAG,PREV_APPROVED_BUDGET
+		)
+		select   SEQ_PROFESSIONAL_SERVICE_ID.nextval, PROFESSIONAL_SERVICE_TYPE_ID, #{contractBudgetID} as BUDGET_ID, #{subBudgetID} as SUB_BUDGET_ID, 		
+                 PARENT_ID, #{modifyAmount} as AMOUNT, SYSTIMESTAMP, #{modifyByAgency} as CREATED_BY_USERID, #{modifyByProvider} as MODIFIED_BY_STAFFID, 
+                 SYSTIMESTAMP, #{modifyByAgency} as MODIFIED_BY_USERID, #{modifyByProvider} as MODIFIED_BY_STAFFID,  '1' as ACTIVE_FLAG, AMOUNT as PREV_APPROVED_BUDGET 
+        from     PROFESSIONAL_SERVICE
+        where    PROFESSIONAL_SERVICE_ID = #{id}
+
+<!-- 		values
+
+		(SEQ_PROFESSIONAL_SERVICE_ID.nextval,
+		#{profServiceTypeId},
+		#{contractBudgetID},
+		#{subBudgetID},
+		#{id},
+		#{modifyAmount},
+		SYSTIMESTAMP,
+		#{modifyByAgency},
+		#{modifyByProvider},
+		SYSTIMESTAMP,
+        #{modifyByAgency},
+		#{modifyByProvider},
+		'1',
+		#{fyBudget}) 
+-->
+	</insert>
+
+	<update id="updateProfServicesAmendmentAmount" parameterType="com.nyc.hhs.model.CBProfessionalServicesBean">
+		update PROFESSIONAL_SERVICE 
+		   set   AMOUNT = #{modifyAmount}
+		   ,  MODIFIED_DATE = SYSTIMESTAMP
+		   ,  MODIFIED_BY_USERID = #{modifyByAgency}
+		   ,  MODIFIED_BY_STAFFID = #{modifyByProvider}
+		where professional_service_id = #{cbmId} 
+		and budget_id = #{contractBudgetID}
+		and sub_budget_id = #{subBudgetID}
+	</update>
+<!--   [End] R7.5.0 QC9146 Professional Service Grid issue for Amendment -->
+	
+	
+	
+	<resultMap id="ContractedServices" type="com.nyc.hhs.model.ContractedServicesBean">
+		<result property="subHeader" column="CONTRACTED_SERVICE_TYPE" />
+		<result property="descOfService" column="SERVICE_DESCRIPTION" />
+		<result property="fyBudget" column="AMOUNT" />
+		<result property="ytdInvoiceAmt" column="INVOICE_AMOUNT" />
+		<result property="csName" column="NAME" />
+		<result property="id" column="PARENT_ID" />
+		<result property="ytdInvoiceAmt" column="YTD_INVOICE_AMOUNT" />
+		<result property="invoiceAmt" column="INVOICE_AMOUNT" />
+		<result property="remaingAmt" column="REMAINING_AMOUNT" />
+		<result property="amendmentAmt" column="AMENDMENT_AMOUNT" />
+		<result property="parentId" column="PARENT_ID" />
+		<result property="proposedAmt" column="PROPOSED_AMOUNT" />
+		<result property="subBudgetID" column="SUB_BUDGET_ID" />
+		<result property="ytdTotalInvoiceAmt" column="TOTAL_YTD_INVOICE_AMOUNT" />
+		<result property="totalContractedServices" column="TOTAL_PROPOSED_AMOUNT" />
+		
+		
+
+
+	</resultMap>
+	<select id="fetchContractedServicesAmendmentConsultants"
+		parameterType="com.nyc.hhs.model.CBGridBean" resultMap="ContractedServices">
+
+		SELECT Name,
+		PARENT_ID,
+		SERVICE_DESCRIPTION,
+		sum(FY_BUDGET) as
+		AMOUNT,
+		sum(mod_Amount)
+		as
+		AMENDMENT_AMOUNT,
+		sum(INVOICE_AMOUNT),
+		sum(REMAINING_AMT) as
+		REMAINING_AMOUNT
+		FROM
+		(SELECT cs.Name,
+		cs.CONTRACTED_SERVICE_ID,
+		cs.parent_id AS PARENT_ID,
+		cs.SERVICE_DESCRIPTION,
+		cs.SUB_BUDGET_ID,
+		(
+		CASE
+		WHEN cs.SUB_BUDGET_ID =
+		#{parentSubBudgetId}
+		THEN cs.AMOUNT
+		END) AS
+		FY_BUDGET,
+		0 AS
+		mod_Amount,
+		SUM(
+		CASE
+		WHEN INVVV.STATUS_ID IS NOT NULL
+		THEN
+		NVL(INV.INVOICE_AMOUNT,0)
+		ELSE 0
+		END) AS INVOICE_AMOUNT,
+		(
+		CASE
+		WHEN
+		cs.SUB_BUDGET_ID =
+		#{parentSubBudgetId}
+		THEN cs.AMOUNT
+		END) - SUM(
+		CASE
+		WHEN
+		INVVV.STATUS_ID
+		IS NOT NULL
+		THEN NVL(INV.INVOICE_AMOUNT,0)
+		ELSE 0
+		END) AS
+		REMAINING_AMT
+		FROM CONTRACTED_SERVICE cs
+		LEFT JOIN
+		INVOICE_DETAILS inv
+		ON
+		cs.CONTRACTED_SERVICE_ID = inv.LINE_ITEM_ID
+		AND
+		inv.ENTRY_TYPE_ID =
+		6
+		INNER JOIN CONTRACTED_SERVICE_TYPE_MASTER b
+		ON
+		b.CONTRACTED_SERVICE_TYPE_ID
+		= cs.CONTRACTED_SERVICE_TYPE_ID
+		LEFT JOIN
+		INVOICE INVVV
+		ON INVVV.INVOICE_ID = inv.INVOICE_ID
+		AND INVVV.STATUS_ID
+		IN (72,73)
+		WHERE cs.BUDGET_ID = #{parentBudgetId}
+		AND cs.SUB_BUDGET_ID =
+		#{parentSubBudgetId}
+		And
+		cs.CONTRACTED_SERVICE_TYPE_ID='1'
+		AND
+		cs.active_flag = 1
+		AND
+		cs.CONTRACTED_SERVICE_ID = cs.Parent_id
+
+		GROUP BY
+		cs.Name,
+		cs.parent_id,
+		cs.SERVICE_DESCRIPTION,
+		cs.AMOUNT,
+		cs.CONTRACTED_SERVICE_ID,
+		cs.SUB_BUDGET_ID
+		UNION ALL
+		SELECT
+		cs.Name,
+		cs.CONTRACTED_SERVICE_ID,
+		cs.parent_id AS PARENT_ID,
+		cs.SERVICE_DESCRIPTION,
+		cs.SUB_BUDGET_ID,
+		0 AS FY_BUDGET,
+		cs.AMOUNT AS
+		mod_amount,
+		0 AS
+		INVOICE_AMOUNT,
+		0 AS REMAINING_AMT
+		FROM
+		CONTRACTED_SERVICE cs
+		INNER JOIN
+		CONTRACTED_SERVICE_TYPE_MASTER b
+		ON
+		b.CONTRACTED_SERVICE_TYPE_ID
+		=
+		cs.CONTRACTED_SERVICE_TYPE_ID
+		WHERE
+		cs.SUB_BUDGET_ID = #{subBudgetID}
+		and
+		cs.parent_id!=cs.contracted_service_id
+		And
+		cs.CONTRACTED_SERVICE_TYPE_ID='1'
+		AND
+		cs.active_flag = 1
+		)
+		group
+		by
+		Name,
+		PARENT_ID,
+		SERVICE_DESCRIPTION
+		ORDER BY
+		parent_id DESC
+		
+	</select>
+
+	<select id="fetchContractedServicesAmendmentSubContractors"
+		parameterType="com.nyc.hhs.model.CBGridBean" resultMap="ContractedServices">
+		SELECT Name,
+		PARENT_ID,
+		SERVICE_DESCRIPTION,
+		sum(FY_BUDGET) as
+		AMOUNT,
+		sum(mod_Amount)
+		as AMENDMENT_AMOUNT,
+		sum(INVOICE_AMOUNT),
+		sum(REMAINING_AMT) as
+		REMAINING_AMOUNT
+		FROM
+		(SELECT cs.Name,
+		cs.CONTRACTED_SERVICE_ID,
+		cs.parent_id AS PARENT_ID,
+		cs.SERVICE_DESCRIPTION,
+		cs.SUB_BUDGET_ID,
+		(
+		CASE
+		WHEN cs.SUB_BUDGET_ID =
+		#{parentSubBudgetId}
+		THEN cs.AMOUNT
+		END) AS
+		FY_BUDGET,
+		0 AS
+		mod_Amount,
+		SUM(
+		CASE
+		WHEN INVVV.STATUS_ID IS NOT NULL
+		THEN
+		NVL(INV.INVOICE_AMOUNT,0)
+		ELSE 0
+		END) AS INVOICE_AMOUNT,
+		(
+		CASE
+		WHEN
+		cs.SUB_BUDGET_ID =
+		#{parentSubBudgetId}
+		THEN cs.AMOUNT
+		END) - SUM(
+		CASE
+		WHEN
+		INVVV.STATUS_ID
+		IS NOT NULL
+		THEN NVL(INV.INVOICE_AMOUNT,0)
+		ELSE 0
+		END) AS
+		REMAINING_AMT
+		FROM CONTRACTED_SERVICE cs
+		LEFT JOIN
+		INVOICE_DETAILS inv
+		ON
+		cs.CONTRACTED_SERVICE_ID = inv.LINE_ITEM_ID
+		AND
+		inv.ENTRY_TYPE_ID =
+		6
+		INNER JOIN CONTRACTED_SERVICE_TYPE_MASTER b
+		ON
+		b.CONTRACTED_SERVICE_TYPE_ID
+		= cs.CONTRACTED_SERVICE_TYPE_ID
+		LEFT JOIN
+		INVOICE INVVV
+		ON INVVV.INVOICE_ID = inv.INVOICE_ID
+		AND INVVV.STATUS_ID
+		IN (72,73)
+		WHERE cs.BUDGET_ID = #{parentBudgetId}
+		AND cs.SUB_BUDGET_ID =
+		#{parentSubBudgetId}
+		And
+		cs.CONTRACTED_SERVICE_TYPE_ID='2'
+		AND
+		cs.active_flag = 1
+		AND
+		cs.CONTRACTED_SERVICE_ID = cs.Parent_id
+
+		GROUP BY
+		cs.Name,
+		cs.parent_id,
+		cs.SERVICE_DESCRIPTION,
+		cs.AMOUNT,
+		cs.CONTRACTED_SERVICE_ID,
+		cs.SUB_BUDGET_ID
+		UNION ALL
+		SELECT
+		cs.Name,
+		cs.CONTRACTED_SERVICE_ID,
+		cs.parent_id AS PARENT_ID,
+		cs.SERVICE_DESCRIPTION,
+		cs.SUB_BUDGET_ID,
+		0 AS FY_BUDGET,
+		cs.AMOUNT AS
+		mod_amount,
+		0 AS
+		INVOICE_AMOUNT,
+		0 AS REMAINING_AMT
+		FROM
+		CONTRACTED_SERVICE cs
+		INNER JOIN
+		CONTRACTED_SERVICE_TYPE_MASTER b
+		ON
+		b.CONTRACTED_SERVICE_TYPE_ID
+		=
+		cs.CONTRACTED_SERVICE_TYPE_ID
+		WHERE
+		cs.SUB_BUDGET_ID = #{subBudgetID}
+		and
+		cs.parent_id!=cs.contracted_service_id
+		And
+		cs.CONTRACTED_SERVICE_TYPE_ID='2'
+		AND
+		cs.active_flag = 1
+		)
+		group
+		by
+		Name,
+		PARENT_ID,
+		SERVICE_DESCRIPTION
+		ORDER BY
+		parent_id DESC
+		</select>
+
+	<select id="fetchContractedServicesAmendmentVendors"
+		parameterType="com.nyc.hhs.model.CBGridBean" resultMap="ContractedServices">
+		SELECT Name,
+		PARENT_ID,
+		SERVICE_DESCRIPTION,
+		sum(FY_BUDGET) as
+		AMOUNT,
+		sum(mod_Amount)
+		as AMENDMENT_AMOUNT,
+		sum(INVOICE_AMOUNT),
+		sum(REMAINING_AMT) as
+		REMAINING_AMOUNT
+		FROM
+		(SELECT cs.Name,
+		cs.CONTRACTED_SERVICE_ID,
+		cs.parent_id AS PARENT_ID,
+		cs.SERVICE_DESCRIPTION,
+		cs.SUB_BUDGET_ID,
+		(
+		CASE
+		WHEN cs.SUB_BUDGET_ID =
+		#{parentSubBudgetId}
+		THEN cs.AMOUNT
+		END) AS
+		FY_BUDGET,
+		0 AS
+		mod_Amount,
+		SUM(
+		CASE
+		WHEN INVVV.STATUS_ID IS NOT NULL
+		THEN
+		NVL(INV.INVOICE_AMOUNT,0)
+		ELSE 0
+		END) AS INVOICE_AMOUNT,
+		(
+		CASE
+		WHEN
+		cs.SUB_BUDGET_ID =
+		#{parentSubBudgetId}
+		THEN cs.AMOUNT
+		END) - SUM(
+		CASE
+		WHEN
+		INVVV.STATUS_ID
+		IS NOT NULL
+		THEN NVL(INV.INVOICE_AMOUNT,0)
+		ELSE 0
+		END) AS
+		REMAINING_AMT
+		FROM CONTRACTED_SERVICE cs
+		LEFT JOIN
+		INVOICE_DETAILS inv
+		ON
+		cs.CONTRACTED_SERVICE_ID = inv.LINE_ITEM_ID
+		AND
+		inv.ENTRY_TYPE_ID =
+		6
+		INNER JOIN CONTRACTED_SERVICE_TYPE_MASTER b
+		ON
+		b.CONTRACTED_SERVICE_TYPE_ID
+		= cs.CONTRACTED_SERVICE_TYPE_ID
+		LEFT JOIN
+		INVOICE INVVV
+		ON INVVV.INVOICE_ID = inv.INVOICE_ID
+		AND INVVV.STATUS_ID
+		IN (72,73)
+		WHERE cs.BUDGET_ID = #{parentBudgetId}
+		AND cs.SUB_BUDGET_ID =
+		#{parentSubBudgetId}
+		And
+		cs.CONTRACTED_SERVICE_TYPE_ID='3'
+		AND
+		cs.active_flag = 1
+		AND
+		cs.CONTRACTED_SERVICE_ID = cs.Parent_id
+
+		GROUP BY
+		cs.Name,
+		cs.parent_id,
+		cs.SERVICE_DESCRIPTION,
+		cs.AMOUNT,
+		cs.CONTRACTED_SERVICE_ID,
+		cs.SUB_BUDGET_ID
+		UNION ALL
+		SELECT
+		cs.Name,
+		cs.CONTRACTED_SERVICE_ID,
+		cs.parent_id AS PARENT_ID,
+		cs.SERVICE_DESCRIPTION,
+		cs.SUB_BUDGET_ID,
+		0 AS FY_BUDGET,
+		cs.AMOUNT AS
+		mod_amount,
+		0 AS
+		INVOICE_AMOUNT,
+		0 AS REMAINING_AMT
+		FROM
+		CONTRACTED_SERVICE cs
+		INNER JOIN
+		CONTRACTED_SERVICE_TYPE_MASTER b
+		ON
+		b.CONTRACTED_SERVICE_TYPE_ID
+		=
+		cs.CONTRACTED_SERVICE_TYPE_ID
+		WHERE
+		cs.SUB_BUDGET_ID = #{subBudgetID}
+		and
+		cs.parent_id!=cs.contracted_service_id
+		And
+		cs.CONTRACTED_SERVICE_TYPE_ID='3'
+		AND
+		cs.active_flag = 1
+		)
+		group
+		by
+		Name,
+		PARENT_ID,
+		SERVICE_DESCRIPTION
+		ORDER BY
+		parent_id DESC
+	</select>
+
+	<select id="fetchNonGridContractedServices" parameterType="com.nyc.hhs.model.CBGridBean"
+		resultMap="ContractedServices">
+		SELECT SUM(amount)as TOTAL_PROPOSED_AMOUNT,
+		SUM(INVOICE_AMOUNT)as
+		TOTAL_YTD_INVOICE_AMOUNT
+		FROM
+		(
+		SELECT SUM(
+		CASE
+		WHEN inv.STATUS_ID IS NOT
+		NULL
+		THEN NVL(inv_det.INVOICE_AMOUNT,0)
+		ELSE 0
+		END ) AS INVOICE_AMOUNT,
+		0
+		AS CURRENT_INVOICE_AMOUNT,
+		CONTRACTED_SERVICE_ID,
+		a.AMOUNT
+		FROM
+		CONTRACTED_SERVICE a
+		LEFT JOIN INVOICE_DETAILS inv_det
+		ON
+		inv_det.LINE_ITEM_ID = a.CONTRACTED_SERVICE_ID
+		AND
+		inv_det.ENTRY_TYPE_ID = '6'
+		INNER JOIN CONTRACTED_SERVICE_TYPE_MASTER b
+		ON b.CONTRACTED_SERVICE_TYPE_ID = a.CONTRACTED_SERVICE_TYPE_ID
+		LEFT
+		JOIN INVOICE inv
+		ON inv.INVOICE_ID = inv_det.INVOICE_ID
+		AND
+		inv.STATUS_ID in( 72,73)
+		WHERE
+		a.SUB_BUDGET_ID in (#{subBudgetID},#{parentSubBudgetId})
+		GROUP BY
+		CONTRACTED_SERVICE_ID,
+		a.AMOUNT
+		)
+
+	</select>
+
+	<select id="fetchContractedServicesNewAmendmentConsultants"
+		parameterType="com.nyc.hhs.model.CBGridBean" resultMap="ContractedServices">
+		select
+		NAME,SERVICE_DESCRIPTION,PARENT_ID,SUB_BUDGET_ID,AMOUNT as AMENDMENT_AMOUNT,0 as
+		AMOUNT,
+		0 as PROPOSED_AMOUNT,0 as REMAINING_AMOUNT from
+		contracted_service where parent_id =
+		contracted_service_id and
+		sub_budget_id =#{subBudgetID}
+		and
+		contracted_service_type_id =
+		#{subHeader}
+		ORDER BY
+		parent_id DESC
+
+	</select>
+
+	<insert id="addContractedServicesAmendment" parameterType="com.nyc.hhs.model.ContractedServicesBean">
+		Insert into
+		CONTRACTED_SERVICE
+		(CONTRACTED_SERVICE_ID,
+		CONTRACTED_SERVICE_TYPE_ID,
+		BUDGET_ID,
+		SUB_BUDGET_ID,
+		PARENT_ID,
+		NAME,
+		SERVICE_DESCRIPTION,
+		BUDGETED_UNITS,
+		AMOUNT,
+		CREATED_DATE,
+		CREATED_BY_STAFFID,
+		MODIFIED_DATE,
+		MODIFIED_BY_STAFFID,
+		CREATED_BY_USERID,
+		MODIFIED_BY_USERID,
+		ACTIVE_FLAG
+		)
+		VALUES
+		(SEQ_CONTRACTED_SERVICE_ID.nextval,
+		#{subHeader},
+		#{contractBudgetID},
+		#{subBudgetID},
+		SEQ_CONTRACTED_SERVICE_ID.currval,
+		#{csName},
+		#{descOfService},
+		'0',
+		#{amendmentAmt},
+		current_timestamp,
+		#{modifyByProvider},
+		current_timestamp,
+		#{modifyByProvider},
+		#{modifyByAgency},
+		#{modifyByAgency},
+		'1')
+
+	</insert>
+
+	<insert id="editContractedServicesAmendment" parameterType="com.nyc.hhs.model.ContractedServicesBean">
+		Insert into
+		CONTRACTED_SERVICE
+		(CONTRACTED_SERVICE_ID,
+		CONTRACTED_SERVICE_TYPE_ID,
+		BUDGET_ID,
+		SUB_BUDGET_ID,
+		PARENT_ID,
+		NAME,
+		SERVICE_DESCRIPTION,
+		BUDGETED_UNITS,
+		AMOUNT,
+		CREATED_DATE,
+		CREATED_BY_STAFFID,
+		MODIFIED_DATE,
+		MODIFIED_BY_STAFFID,
+		CREATED_BY_USERID,
+		MODIFIED_BY_USERID,
+		ACTIVE_FLAG,
+		PREV_APPROVED_BUDGET
+		)
+		VALUES
+		(SEQ_CONTRACTED_SERVICE_ID.nextval,
+		#{subHeader},
+		#{contractBudgetID},
+		#{subBudgetID},
+		#{id},
+		#{csName},
+		#{descOfService},
+		'0',
+		#{amendmentAmt},
+		current_timestamp,
+		#{modifyByProvider},
+		current_timestamp,
+		#{modifyByProvider},
+		#{modifyByAgency},
+		#{modifyByAgency},
+		'1',
+		#{fyBudget})
+
+	</insert>
+
+	<delete id="delContractedServicesAmendment" parameterType="com.nyc.hhs.model.ContractedServicesBean">
+		Delete from CONTRACTED_SERVICE
+		where CONTRACTED_SERVICE_ID=#{id}
+	</delete>
+
+	<update id="updateContractedServicesAmendment" parameterType="com.nyc.hhs.model.ContractedServicesBean">
+		UPDATE CONTRACTED_SERVICE set
+		AMOUNT=#{amendmentAmt},
+		NAME=#{csName},
+		SERVICE_DESCRIPTION=#{descOfService},
+		MODIFIED_BY_USERID = #{modifyByAgency},
+		MODIFIED_BY_STAFFID=#{modifyByProvider}
+		WHERE
+		PARENT_ID = #{id}
+		AND
+		SUB_BUDGET_ID =#{subBudgetID}
+		AND ACTIVE_FLAG ='1'
+	</update>
+	<select id="getRemainingAmountAmendmentContractedServices" resultType="BigDecimal"
+		parameterType="com.nyc.hhs.model.ContractedServicesBean">
+		SELECT 
+		(
+		CASE
+		WHEN cs.SUB_BUDGET_ID =
+		#{subBudgetID}
+		THEN 0
+		WHEN cs.SUB_BUDGET_ID = #{parentSubBudgetId}
+		THEN
+		cs.AMOUNT
+		END) - SUM(
+		CASE
+		WHEN INVVV.STATUS_ID IS NOT NULL
+		THEN
+		NVL(INV.INVOICE_AMOUNT,0)
+		ELSE 0
+		END) AS REMAINING_AMT
+		FROM CONTRACTED_SERVICE cs
+		LEFT
+		JOIN INVOICE_DETAILS inv
+		ON cs.CONTRACTED_SERVICE_ID = inv.LINE_ITEM_ID
+		AND
+		inv.ENTRY_TYPE_ID = 6
+		LEFT JOIN INVOICE INVVV
+		ON INVVV.INVOICE_ID =
+		inv.INVOICE_ID
+		AND INVVV.STATUS_ID IN (72,73)
+		WHERE cs.parent_id = #{id}
+		AND cs.active_flag = '1'
+		AND cs.CONTRACTED_SERVICE_ID = cs.Parent_id
+		GROUP BY
+		cs.SUB_BUDGET_ID,
+		cs.parent_id,
+		cs.AMOUNT
+	</select>
+
+	<select id="fetchInsertContractedServicesAmendment"
+		parameterType="com.nyc.hhs.model.ContractedServicesBean" resultMap="ContractedServices">
+		select SERVICE_DESCRIPTION,NAME,AMOUNT from CONTRACTED_SERVICE
+		where CONTRACTED_SERVICE_ID=#{id}
+	</select>	
+	
+		<resultMap id="sessionInfo" type="com.nyc.hhs.model.CBGridBean">
+		<result property="contractID" column="CONTRACT_ID" />
+		<result property="parentBudgetId" column="PARENT_ID" />
+		<result property="fiscalYearID" column="FISCAL_YEAR_ID" />
+		<result property="contractBudgetID" column="BUDGET_ID" />
+		<result property="budgetTypeId" column="BUDGET_TYPE_ID" />
+		<result property="budgetStatusId" column="BUDGET_STATUS_ID" />
+		<result property="contractStatusId" column="CONTRACT_STATUS_ID" />
+		<result property="amendmentType" column="amendmentType" />
+	</resultMap>
+
+	<select id="getCbGridDataForSession" parameterType="hashmap"
+		resultMap="sessionInfo">
+		SELECT
+		CONTRACT.CONTRACT_ID,
+	    BUDGET.PARENT_ID,
+	    BUDGET.BUDGET_ID,
+	    BUDGET.fiscal_year_id,
+	    BUDGET.BUDGET_TYPE_ID,
+		BUDGET.STATUS_ID as BUDGET_STATUS_ID,
+		CONTRACT.STATUS_ID as CONTRACT_STATUS_ID,
+        CASE
+		WHEN CONTRACT.CONTRACT_AMOUNT >0 THEN 'positive'
+		ELSE
+		'negative'
+		END as amendmentType
+		FROM CONTRACT
+		INNER JOIN BUDGET ON BUDGET.CONTRACT_ID = CONTRACT.CONTRACT_ID
+		WHERE
+		BUDGET.BUDGET_ID = #{budgetId}
+		And
+		BUDGET_TYPE_ID = 1
+		AND
+		BUDGET.ACTIVE_FLAG = '1'
+	    AND 
+	    CONTRACT.CONTRACT_ID = #{contractId}
+	</select>
+	
+	<select id="getAmendAmount" resultType="BigDecimal" parameterType="java.lang.String">
+		SELECT 
+		BUDGET.FISCAL_YEAR_AMOUNT
+		FROM BUDGET
+		WHERE BUDGET.BUDGET_ID = #{budgetId}
+	</select>
+	
+	<resultMap id="SalariedEmployeeModificationList" type="com.nyc.hhs.model.PersonnelServiceBudget">
+		<result property="id" column="PERSONNEL_SERVICE_ID" />
+		<result property="empPosition" column="Position" />
+		<result property="contractBudgetID" column="BUDGET_ID" />
+		<result property="subBudgetID" column="SUB_BUDGET_ID" />
+		<result property="parentId" column="Parent_Id" />
+		<result property="amendmentUnit" column="UNITS" />
+		<result property="amendmentAmount" column="TOTAL_SALARY" />
+	</resultMap>
+	<select id="fetchSalriedEmployeeForAmendment" parameterType="com.nyc.hhs.model.CBGridBean"
+		resultMap="SalariedEmployeeModificationList">
+		Select ps.Personnel_Service_Id, po.Position,ps.Budget_Id,
+		ps.Sub_Budget_Id, ps.Parent_Id, ps.Units, ps.Total_Salary
+		From
+		personnel_service ps ,position po
+		WHERE
+		Ps.Position_Id = Po.Position_Id
+		And Ps.Budget_Id = #{contractBudgetID,jdbcType=VARCHAR}
+		And
+		Ps.Sub_Budget_Id = #{subBudgetID,jdbcType=VARCHAR}
+		And
+		Ps.Personnel_Service_Type_Id = 1
+		and ps.ACTIVE_FLAG = 1
+		ORDER BY ps.CREATED_DATE asc				
+	</select>
+
+	<select id="fetchHourlyEmployeeForAmendment" parameterType="com.nyc.hhs.model.CBGridBean"
+		resultMap="SalariedEmployeeModificationList">
+		Select ps.Personnel_Service_Id, po.Position,ps.Budget_Id,
+		ps.Sub_Budget_Id, ps.Parent_Id, ps.Units, ps.Total_Salary
+		From
+		personnel_service ps ,position po
+		WHERE
+		Ps.Position_Id = Po.Position_Id
+		And Ps.Budget_Id = #{contractBudgetID,jdbcType=VARCHAR}
+		And
+		Ps.Sub_Budget_Id = #{subBudgetID,jdbcType=VARCHAR}
+		And
+		Ps.Personnel_Service_Type_Id = 2
+		and ps.ACTIVE_FLAG = 1
+		ORDER BY ps.CREATED_DATE asc
+	</select>
+
+	<select id="fetchSeasonalEmployeeForAmendment" parameterType="com.nyc.hhs.model.CBGridBean"
+		resultMap="SalariedEmployeeModificationList">
+		Select ps.Personnel_Service_Id, po.Position,ps.Budget_Id,
+		ps.Sub_Budget_Id, ps.Parent_Id, ps.Units, ps.Total_Salary
+		From
+		personnel_service ps ,position po
+		WHERE
+		Ps.Position_Id = Po.Position_Id
+		And Ps.Budget_Id = #{contractBudgetID,jdbcType=VARCHAR}
+		And
+		Ps.Sub_Budget_Id = #{subBudgetID,jdbcType=VARCHAR}
+		And
+		Ps.Personnel_Service_Type_Id = 3
+		and ps.ACTIVE_FLAG = 1
+		ORDER BY
+		ps.CREATED_DATE asc
+	</select>
+
+	<resultMap id="FringeBenefitsModificationList" type="com.nyc.hhs.model.PersonnelServiceBudget">
+		<result property="id" column="FRINGE_BENEFIT_ID" />
+		<result property="contractBudgetID" column="BUDGET_ID" />
+		<result property="subBudgetID" column="SUB_BUDGET_ID" />
+		<result property="parentId" column="Parent_Id" />
+		<result property="amendmentAmount" column="AMOUNT" />
+	</resultMap>
+
+	<select id="fetchFringeBenefitsForAmendment" parameterType="com.nyc.hhs.model.CBGridBean"
+		resultMap="FringeBenefitsModificationList">
+		Select ps.FRINGE_BENEFIT_ID, ps.Budget_Id, ps.Sub_Budget_Id,
+		ps.Parent_Id, ps.AMOUNT
+		From
+		FRINGE_BENEFIT ps
+		WHERE
+		Ps.Budget_Id = #{contractBudgetID,jdbcType=VARCHAR}
+		And
+		Ps.Sub_Budget_Id = #{subBudgetID,jdbcType=VARCHAR}
+		and ps.ACTIVE_FLAG =
+		1
+	</select>
+
+	<insert id="insertFirstPersonnelServicesForAmendment"
+		parameterType="com.nyc.hhs.model.PersonnelServiceBudget">
+		INSERT INTO
+		PERSONNEL_SERVICE
+		(PERSONNEL_SERVICE_ID,
+		PERSONNEL_SERVICE_TYPE_ID,
+		POSITION_ID,
+		BUDGET_ID,
+		SUB_BUDGET_ID,
+		PARENT_ID,
+		UNITS,
+		TOTAL_SALARY,
+		CREATED_DATE,
+		CREATED_BY_USERID,
+		MODIFIED_DATE,
+		MODIFIED_BY_USERID,
+		ACTIVE_FLAG,
+		MODIFIED_BY_STAFFID,
+		CREATED_BY_STAFFID,
+		PREV_APPROVED_BUDGET)
+		VALUES
+		(SEQ_PERSONNEL_SERVICES_ID.NEXTVAL,
+		(SELECT PERSONNEL_SERVICE_TYPE_ID
+		from PERSONNEL_SERVICE WHERE PERSONNEL_SERVICE_ID =
+		#{id,jdbcType=VARCHAR}),
+		(SELECT POSITION_ID from PERSONNEL_SERVICE
+		WHERE PERSONNEL_SERVICE_ID = #{id,jdbcType=VARCHAR}),
+		#{contractBudgetID,jdbcType=VARCHAR},
+		#{subBudgetID,jdbcType=VARCHAR},
+		#{id,jdbcType=VARCHAR},
+		#{amendmentUnit,jdbcType=VARCHAR},
+		#{amendmentAmount,jdbcType=VARCHAR},
+		SYSDATE,
+		#{modifyByAgency,jdbcType=VARCHAR},
+		SYSDATE,
+		#{modifyByAgency,jdbcType=VARCHAR},'1',
+		#{modifyByProvider,jdbcType=VARCHAR},
+		#{modifyByProvider,jdbcType=VARCHAR},
+		#{budgetAmount})
+	</insert>
+
+	<update id="updatePersonnelServicesForAmendment"
+		parameterType="com.nyc.hhs.model.PersonnelServiceBudget">
+		update
+		personnel_service set POSITION_ID = #{empPosition}, units =
+		#{amendmentUnit},total_salary = #{amendmentAmount},
+		modified_date =
+		current_timestamp, modified_by_userid = #{modifyByAgency,jdbcType=VARCHAR},MODIFIED_BY_STAFFID = #{modifyByProvider,jdbcType=VARCHAR}
+		where BUDGET_ID =
+		#{contractBudgetID,jdbcType=VARCHAR}
+		and SUB_BUDGET_ID =
+		#{subBudgetID,jdbcType=VARCHAR}
+		and PARENT_ID = #{id}
+	</update>
+
+	<insert id="insertPersonnelServicesAmendment" parameterType="com.nyc.hhs.model.PersonnelServiceBudget">
+		INSERT INTO
+		PERSONNEL_SERVICE
+		(PERSONNEL_SERVICE_ID,
+		PERSONNEL_SERVICE_TYPE_ID,
+		POSITION_ID,
+		BUDGET_ID,
+		SUB_BUDGET_ID,
+		PARENT_ID,
+		UNITS,
+		TOTAL_SALARY,
+		CREATED_DATE,
+		CREATED_BY_USERID,
+		MODIFIED_DATE,
+		MODIFIED_BY_USERID,
+		ACTIVE_FLAG,
+		MODIFIED_BY_STAFFID,
+		CREATED_BY_STAFFID,
+		PREV_APPROVED_BUDGET)
+		VALUES
+		(SEQ_PERSONNEL_SERVICES_ID.NEXTVAL,
+		#{empType,jdbcType=VARCHAR},
+		#{empPosition,jdbcType=VARCHAR},
+		#{contractBudgetID,jdbcType=VARCHAR},
+		#{subBudgetID,jdbcType=VARCHAR},
+		SEQ_PERSONNEL_SERVICES_ID.currval,
+		#{amendmentUnit,jdbcType=VARCHAR},
+		#{amendmentAmount,jdbcType=VARCHAR},
+		SYSDATE,
+		#{modifyByAgency,jdbcType=VARCHAR},
+		SYSDATE,
+		#{modifyByAgency,jdbcType=VARCHAR},'1',
+		#{modifyByProvider,jdbcType=VARCHAR},		
+		#{modifyByProvider,jdbcType=VARCHAR},
+		#{budgetAmount})
+	</insert>
+
+	<update id="updateFringeBenifitsForAmendment" parameterType="com.nyc.hhs.model.PersonnelServiceBudget">
+		update
+		fringe_benefit set amount = #{amendmentAmount}, modified_date
+		=
+		current_timestamp, modified_by_userid = #{modifyByAgency,jdbcType=VARCHAR},MODIFIED_BY_STAFFID = #{modifyByProvider,jdbcType=VARCHAR}
+		where
+		BUDGET_ID = #{contractBudgetID,jdbcType=VARCHAR}
+		and SUB_BUDGET_ID =
+		#{subBudgetID,jdbcType=VARCHAR}
+		and PARENT_ID = #{id}
+	</update>
+
+	<insert id="insertFirstFringeBenefitsForAmendment"
+		parameterType="com.nyc.hhs.model.PersonnelServiceBudget">
+		INSERT INTO
+		FRINGE_BENEFIT
+		(FRINGE_BENEFIT_ID,
+		BUDGET_ID,
+		SUB_BUDGET_ID,
+		AMOUNT,
+		FRINGE_PERCENT,
+		CREATED_DATE,
+		CREATED_BY_USERID,
+		MODIFIED_DATE,
+		MODIFIED_BY_USERID,PARENT_ID,ACTIVE_FLAG,MODIFIED_BY_STAFFID,CREATED_BY_STAFFID,PREV_APPROVED_BUDGET)
+		VALUES
+		(SEQ_FRINGE_BENEFIT_ID.NEXTVAL,
+		#{contractBudgetID,jdbcType=VARCHAR},
+		#{subBudgetID,jdbcType=VARCHAR},
+		#{amendmentAmount,jdbcType=VARCHAR},
+		'0',
+		SYSDATE,
+		#{modifyByAgency,jdbcType=VARCHAR},
+		SYSDATE,
+		#{modifyByAgency,jdbcType=VARCHAR},
+		#{id,jdbcType=VARCHAR},'1',#{modifyByProvider,jdbcType=VARCHAR},#{modifyByProvider,jdbcType=VARCHAR},#{budgetAmount})
+	</insert>
+	
+	<resultMap id="MilestoneAmendmentList" type="com.nyc.hhs.model.CBMileStoneBean">
+		<result property="id" column="MILESTONE_ID" />
+		<result property="mileStone" column="MILESTONE" />
+		<result property="contractBudgetID" column="BUDGET_ID" />
+		<result property="subBudgetID" column="SUB_BUDGET_ID" />
+		<result property="parentId" column="PARENT_ID" />
+		<result property="modificationAmount" column="AMOUNT" />
+	</resultMap>
+
+
+	<select id="fetchMilestoneForAmendment" parameterType="com.nyc.hhs.model.CBGridBean"
+		resultMap="MilestoneAmendmentList">
+
+		Select MS.MILESTONE_ID, MS.MILESTONE, MS.AMOUNT,
+		MS.Budget_Id,
+		MS.Sub_Budget_Id, MS.Parent_Id
+		From
+		MILESTONE MS
+		WHERE
+		MS.Budget_Id = #{contractBudgetID}
+		And MS.Sub_Budget_Id =
+		#{subBudgetID}
+		and MS.ACTIVE_FLAG = 1
+		ORDER BY MS.CREATED_DATE asc
+	</select>
+
+	<resultMap id="MilestoneList" type="com.nyc.hhs.model.CBMileStoneBean">
+		<result property="id" column="MILESTONE_ID" />
+		<result property="mileStone" column="MILESTONE" />
+		<result property="subBudgetID" column="SUB_BUDGET_ID" />
+		<result property="amount" column="AMOUNT" />
+		<result property="invoiceAmount" column="INVOICE_AMOUNT" />
+		<result property="invoiceId" column="INVOICE_ID" />
+		<result property="createdDate" column="CREATED_DATE" />
+		<result property="createdByUserId" column="CREATED_BY_USERID" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+		<result property="modifiedByUserId" column="MODIFIED_BY_USERID" />
+		<result property="remainAmt" column="REMAINING_AMOUNT" />
+		<result property="entryTypeId" column="ENTRY_TYPE_ID" />
+	</resultMap>
+
+	<select id="fetchMilestoneBaseDetails" parameterType="com.nyc.hhs.model.CBMileStoneBean"
+		resultMap="MilestoneList">
+			SELECT MILESTONE_ID,
+			  MILESTONE,
+			  AMOUNT,
+			  SUM(REMAINING_AMOUNT) AS REMAINING_AMOUNT,
+			  SUM(INVOICE_AMOUNT)   AS INVOICE_AMOUNT,
+			  created_date
+			FROM
+			  (SELECT MS.MILESTONE_ID,
+			    MS.MILESTONE,
+			    MS.AMOUNT,
+			    (MS.AMOUNT - (SUM(
+			    CASE
+			      WHEN inv.STATUS_ID IN ('72','73')
+			      THEN idt.INVOICE_AMOUNT
+			      ELSE 0
+			    END ))) AS REMAINING_AMOUNT,
+			    0       AS INVOICE_AMOUNT,
+			    MS.created_date
+			  FROM MILESTONE MS
+			  LEFT JOIN INVOICE_DETAILS idt
+			  ON idt.LINE_ITEM_ID   = MS.MILESTONE_ID
+			  AND idt.ENTRY_TYPE_ID =  #{entryTypeId}
+			  LEFT JOIN INVOICE inv
+			  ON inv.INVOICE_ID    = idt.INVOICE_ID
+			  WHERE MS.BUDGET_ID   =  #{parentBudgetId}
+			  AND MS.SUB_BUDGET_ID = #{parentSubBudgetId}
+			  AND MS.ACTIVE_FLAG   = 1
+			  GROUP BY MS.MILESTONE_ID,
+			    MS.MILESTONE,
+			    MS.AMOUNT,
+			    MS.created_date
+			  UNION ALL
+			  SELECT MS.MILESTONE_ID,
+			    MS.MILESTONE,
+			    MS.AMOUNT,
+			    0                           AS REMAINING_AMOUNT,
+			    NVL(idt.INVOICE_AMOUNT,'0') AS INVOICE_AMOUNT,
+			    MS.created_date
+			  FROM MILESTONE MS
+			  LEFT JOIN INVOICE_DETAILS idt
+			  ON idt.LINE_ITEM_ID   = MS.MILESTONE_ID
+			  AND idt.ENTRY_TYPE_ID =  #{entryTypeId}
+			  LEFT JOIN INVOICE inv
+			  ON inv.INVOICE_ID    = idt.INVOICE_ID
+			  WHERE MS.BUDGET_ID   =  #{parentBudgetId}
+			  AND MS.SUB_BUDGET_ID = #{parentSubBudgetId}
+			  AND MS.ACTIVE_FLAG   = 1
+			  )
+			GROUP BY MILESTONE_ID,
+			  MILESTONE,
+			  AMOUNT,
+			  created_date
+			ORDER BY created_date DESC
+	</select>
+	
+	<select id="getSeqForMilestone" resultType="Integer">
+		SELECT
+		SEQ_MILESTONE_ID.NEXTVAL FROM DUAL
+	</select>
+
+	<insert id="insertMilestoneDetails" parameterType="com.nyc.hhs.model.CBMileStoneBean">
+		INSERT INTO
+		MILESTONE
+		(MILESTONE_ID,BUDGET_ID,SUB_BUDGET_ID,PARENT_ID,MILESTONE,AMOUNT,CREATED_BY_USERID,
+		CREATED_DATE,
+		MODIFIED_BY_USERID,
+		MODIFIED_DATE,ACTIVE_FLAG,
+		MODIFIED_BY_STAFFID,
+		CREATED_BY_STAFFID,
+		PREV_APPROVED_BUDGET)
+		VALUES
+		(#{id},#{contractBudgetID},#{subBudgetID},#{id},#{mileStone},#{modificationAmount},
+		#{modifyByAgency,jdbcType=VARCHAR},
+		current_timestamp,
+		#{modifyByAgency,jdbcType=VARCHAR},
+		current_timestamp,'1',
+		#{modifyByProvider,jdbcType=VARCHAR},
+		#{modifyByProvider,jdbcType=VARCHAR},
+		'0')
+	</insert>
+	
+	<insert id="insertNewMilestoneForAmd" parameterType="com.nyc.hhs.model.CBMileStoneBean">
+		INSERT INTO
+		MILESTONE
+		(MILESTONE_ID,BUDGET_ID,SUB_BUDGET_ID,PARENT_ID,MILESTONE,AMOUNT,
+		CREATED_BY_USERID,
+		CREATED_DATE,
+		MODIFIED_BY_USERID,
+		MODIFIED_DATE,ACTIVE_FLAG,
+		MODIFIED_BY_STAFFID,
+		CREATED_BY_STAFFID,
+		PREV_APPROVED_BUDGET)
+		VALUES
+		(SEQ_MILESTONE_ID.NEXTVAL,#{contractBudgetID},#{subBudgetID},#{id},#{mileStone},#{modificationAmount},
+		#{modifyByAgency,jdbcType=VARCHAR},
+		current_timestamp,
+		#{modifyByAgency,jdbcType=VARCHAR},
+		current_timestamp,'1',
+		#{modifyByProvider,jdbcType=VARCHAR},
+		#{modifyByProvider,jdbcType=VARCHAR},
+		#{amount})
+	</insert>
+
+	<update id="updateMilestoneDetails" parameterType="com.nyc.hhs.model.CBMileStoneBean">
+		UPDATE
+		MILESTONE
+		SET MILESTONE = #{mileStone},
+		AMOUNT = #{modificationAmount},
+		PREV_APPROVED_BUDGET = #{amount},
+		modified_date = CURRENT_TIMESTAMP, 
+		MODIFIED_BY_USERID = #{modifyByAgency, jdbcType=VARCHAR},
+		MODIFIED_BY_STAFFID = #{modifyByProvider, jdbcType=VARCHAR}
+		WHERE PARENT_ID = #{id} AND SUB_BUDGET_ID = #{subBudgetID}
+	</update>
+
+	<delete id="deleteMilestoneDetails" parameterType="com.nyc.hhs.model.CBMileStoneBean">
+		DELETE FROM
+		MILESTONE 
+		WHERE MILESTONE_ID = #{id} AND PARENT_ID = #{id} AND SUB_BUDGET_ID = #{subBudgetID}
+	</delete>
+	
+	<select id="fetchMilestoneDetailsForValidation" parameterType="String"
+		resultMap="MilestoneList">
+		SELECT MS.MILESTONE, MS.SUB_BUDGET_ID, MS.AMOUNT, (MS.AMOUNT - (SUM(CASE WHEN inv.STATUS_ID IN
+		('72','73')
+		THEN idt.INVOICE_AMOUNT
+		ELSE 0
+		END ))) as
+		REMAINING_AMOUNT
+		FROM MILESTONE MS
+
+		LEFT JOIN INVOICE_DETAILS idt
+		ON
+		idt.LINE_ITEM_ID = MS.MILESTONE_ID
+		AND
+		idt.ENTRY_TYPE_ID = #{entryTypeId}
+
+		LEFT JOIN INVOICE inv
+		ON
+		inv.INVOICE_ID = idt.INVOICE_ID
+
+		WHERE
+		MS.MILESTONE_ID = #{asId} AND MS.PARENT_ID = #{asId}
+    	GROUP BY MS.MILESTONE, MS.SUB_BUDGET_ID, MS.AMOUNT
+	</select>
+	
+	<resultMap id="CBOperationSupportAmendList" type="com.nyc.hhs.model.CBOperationSupportBean">
+		<result property="id" column="LINE_ITEM_ID" />
+		<result property="id" column="OPERATIONS_SUPPORT_TYPE_ID" />
+		<result property="opAndSupportName" column="OP_SUPPRT_NAME" />
+		<result property="fyBudget" column="FY_BUDGET" />
+		<result property="remainingAmt" column="REMAINING_AMOUNT"/>
+		<result property="amendAmt" column="AMEND_AMOUNT"/>
+		<result property="ytdInvoicedAmt" column="INVOICE_AMOUNT" />
+	</resultMap>
+	
+	<select id="fetchOperationAndSupportAmendDetails" resultMap="CBOperationSupportAmendList"
+		parameterType="com.nyc.hhs.model.CBGridBean">
+		SELECT 
+			parent_id AS LINE_ITEM_ID,
+			OPERATIONS_SUPPORT_TYPE as OP_SUPPRT_NAME,
+			SUM(APPROVED_FY_BUDGET) AS FY_BUDGET ,
+			SUM(remaining_amount) AS REMAINING_AMOUNT,
+			SUM(mod_amount) AS AMEND_AMOUNT
+		FROM
+			(SELECT
+				case 
+    				when
+     					(select entity_name from other_details where entity_id = parent_id) is not null
+    				then
+     					(select entity_name from other_details where entity_id = parent_id)
+    				else
+      					otps_master.OPERATIONS_SUPPORT_TYPE 
+  				end as OPERATIONS_SUPPORT_TYPE,
+				
+				a.AMOUNT AS APPROVED_FY_BUDGET ,
+				(a.AMOUNT - SUM(CASE
+								WHEN
+									inv.STATUS_ID IS NOT NULL
+								THEN
+									NVL(inv_det.INVOICE_AMOUNT,0)
+								ELSE 0
+								END )) AS remaining_amount,
+				0 AS mod_amount,
+				a.parent_id
+			FROM 
+				OPERATIONS_AND_SUPPORT a
+			LEFT JOIN 
+				INVOICE_DETAILS inv_det
+			ON 
+				inv_det.ENTRY_TYPE_ID =  #{entryTypeId}
+			AND
+				inv_det.LINE_ITEM_ID = a.parent_id
+			INNER JOIN
+				OPERATIONS_SUPPORT_TYPE_MASTER otps_master
+			ON
+				otps_master.OPERATIONS_SUPPORT_TYPE_ID = a.OPERATIONS_SUPPORT_TYPE_ID
+			LEFT JOIN
+				INVOICE inv
+			ON 
+				inv.INVOICE_ID = inv_det.INVOICE_ID
+			AND
+				inv.STATUS_ID IN (72,73)
+			WHERE 
+				a.BUDGET_ID = #{parentBudgetId}
+			AND 
+				a.SUB_BUDGET_ID = #{parentSubBudgetId}
+			GROUP BY 
+				a.AMOUNT,
+				a.parent_id,
+				otps_master.OPERATIONS_SUPPORT_TYPE
+
+			UNION ALL
+	
+			SELECT 
+				case 
+    				when
+     					(select entity_name from other_details where entity_id = parent_id) is not null
+    				then
+     					(select entity_name from other_details where entity_id = parent_id)
+    				else
+      					otps_master.OPERATIONS_SUPPORT_TYPE 
+  				end as OPERATIONS_SUPPORT_TYPE,
+  
+				
+				0 AS APPROVED_FY_BUDGET ,
+				0 AS remaining_amount,
+				a.AMOUNT AS mod_amount,
+				a.parent_id
+			FROM 
+				OPERATIONS_AND_SUPPORT a
+			inner join 
+				OPERATIONS_SUPPORT_TYPE_MASTER otps_master
+			ON
+				otps_master.OPERATIONS_SUPPORT_TYPE_ID = a.OPERATIONS_SUPPORT_TYPE_ID
+			WHERE 
+				a.BUDGET_ID = #{contractBudgetID}
+			AND 
+				a.SUB_BUDGET_ID = #{subBudgetID}
+			GROUP BY 
+				a.AMOUNT,
+				a.parent_id,
+				otps_master.OPERATIONS_SUPPORT_TYPE
+			)
+		GROUP BY 
+			parent_id,
+			OPERATIONS_SUPPORT_TYPE
+		ORDER BY
+			parent_id
+		</select>
+		
+		
+	<resultMap id="CBEquipmentBeanList" type="com.nyc.hhs.model.CBEquipmentBean">
+		<result property="id" column="EQUIPMENT_ID" />
+		<result property="equipment" column="EQUIPMENT_NAME" />
+		<result property="units" column="UNITS" />
+		<result property="fyBudget" column="FY_BUDGET" />
+		<result property="ytdInvoicedAmt" column="INVOICE_AMOUNT" />
+		<result property="remainingAmt" column="REMAINING_AMOUNT"/>
+		<result property="amendAmt" column="AMEND_AMOUNT"/>
+		<result property="subBudgetID" column="SUB_BUDGET_ID" />
+	</resultMap>
+		
+	<select id="fetchEquipmentAmendDetails" resultMap="CBEquipmentBeanList"
+		parameterType="com.nyc.hhs.model.CBGridBean">
+		select
+			eqp.EQUIPMENT_ID,
+			eqp.EQUIPMENT_NAME,
+			0 as UNITS,
+			eqp.AMOUNT AS FY_BUDGET,		
+	    	(eqp.AMOUNT - SUM(CASE
+					   	      	WHEN INVVV.STATUS_ID IS NOT NULL
+	      					  	THEN NVL(inv.INVOICE_AMOUNT,0)
+	     					  	ELSE 0
+	    					  END ) ) AS REMAINING_AMOUNT
+		from
+			EQUIPMENT eqp
+			LEFT JOIN INVOICE_DETAILS inv
+			ON eqp.EQUIPMENT_ID = inv.LINE_ITEM_ID
+			AND inv.ENTRY_TYPE_ID = 12
+			LEFT JOIN INVOICE INVVV
+			ON invvv.invoice_id = inv.invoice_id
+			AND invvv.status_id IN ('72','73')
+		WHERE
+			eqp.BUDGET_ID = #{parentBudgetId}
+			AND eqp.SUB_BUDGET_ID = #{parentSubBudgetId}
+			AND eqp.active_flag = 1
+		GROUP BY
+			eqp.EQUIPMENT_ID,
+			eqp.EQUIPMENT_NAME,
+			eqp.UNITS,
+			eqp.AMOUNT,
+			eqp.CREATED_DATE
+		order by eqp.CREATED_DATE desc
+      </select>
+      
+      	<select id="fetchEquipmentAmendAmtDetails" resultMap="CBEquipmentBeanList"
+		parameterType="com.nyc.hhs.model.CBGridBean">
+		select  
+	    	(CASE
+	      		WHEN eqp.PARENT_ID = eqp.EQUIPMENT_ID 
+	      	THEN 
+	      		(eqp.EQUIPMENT_ID || '_newrecord')
+	     	ELSE
+	     		(eqp.PARENT_ID || '')
+	    	END) as EQUIPMENT_ID,
+		    eqp.EQUIPMENT_NAME,
+	    	eqp.UNITS,
+			eqp.AMOUNT AS AMEND_AMOUNT
+		from
+			EQUIPMENT eqp
+		LEFT JOIN
+			INVOICE_DETAILS inv
+		ON	eqp.EQUIPMENT_ID = inv.LINE_ITEM_ID
+		AND	inv.ENTRY_TYPE_ID = 12
+		LEFT JOIN
+			INVOICE INVVV
+		ON	invvv.invoice_id = inv.invoice_id
+		AND invvv.status_id IN ('72','73')
+		WHERE
+			eqp.BUDGET_ID = #{contractBudgetID}
+		AND eqp.SUB_BUDGET_ID = #{subBudgetID}
+		AND eqp.active_flag = 1
+		GROUP BY
+			eqp.EQUIPMENT_ID,
+			eqp.EQUIPMENT_NAME,
+			eqp.UNITS,
+			eqp.AMOUNT, eqp.PARENT_ID
+		order by eqp.PARENT_ID
+	</select>
+      
+      	<update id="editOperationAndSupportAmendDetails" parameterType="com.nyc.hhs.model.CBOperationSupportBean">
+		update OPERATIONS_AND_SUPPORT
+		set
+			AMOUNT = #{amendAmt}, 
+			MODIFIED_DATE =	SYSTIMESTAMP,
+			MODIFIED_BY_USERID =  #{modifyByAgency},
+			MODIFIED_BY_STAFFID = #{modifyByProvider}
+		WHERE
+			PARENT_ID = #{id}
+		AND SUB_BUDGET_ID = #{subBudgetID}
+		AND ACTIVE_FLAG = '1'
+	</update>
+      
+    <insert id="insertOperationAndSupportAmendDetails" parameterType="com.nyc.hhs.model.CBOperationSupportBean">
+		INSERT INTO OPERATIONS_AND_SUPPORT( 
+	    	OPERATIONS_SUPPORT_ID,
+	  		OPERATIONS_SUPPORT_TYPE_ID,
+	  		BUDGET_ID,
+	  		SUB_BUDGET_ID,
+	  		PARENT_ID,
+	     	AMOUNT,
+	     	PREV_APPROVED_BUDGET,
+		    ACTIVE_FLAG,
+		    CREATED_DATE,
+		    CREATED_BY_USERID,
+		    MODIFIED_DATE,
+		    MODIFIED_BY_USERID,
+		    MODIFIED_BY_STAFFID,
+		    CREATED_BY_STAFFID 
+	  		)
+	  	values
+	  		(
+	  		SEQ_OPERATIONS_SUPPORT_ID.nextval,
+	  		(select OPERATIONS_SUPPORT_TYPE_ID from OPERATIONS_AND_SUPPORT where OPERATIONS_SUPPORT_ID = #{id}),
+	  		#{contractBudgetID},
+	  		#{subBudgetID},
+	  		#{id},
+	  		#{amendAmt},
+	  		#{fyBudget},
+	  		1,
+	  		SYSDATE,
+	  		#{modifyByAgency},
+	  		SYSDATE,
+	  		#{modifyByAgency},
+	  		#{modifyByProvider},
+	  		#{modifyByProvider}
+	  		)	
+	</insert>
+      
+    <insert id="addEquipmentAmendDetails" parameterType="com.nyc.hhs.model.CBEquipmentBean">
+		INSERT INTO EQUIPMENT(
+			EQUIPMENT_ID,
+			BUDGET_ID,
+			SUB_BUDGET_ID,
+			EQUIPMENT_NAME,
+			UNITS,
+			AMOUNT,
+			PREV_APPROVED_BUDGET,
+			CREATED_DATE,
+			CREATED_BY_USERID,
+			MODIFIED_DATE,
+			MODIFIED_BY_USERID,
+			ACTIVE_FLAG,
+			PARENT_ID,
+			CREATED_BY_STAFFID,
+			MODIFIED_BY_STAFFID )
+		VALUES(
+			SEQ_EQUIPMENT_ID.nextval,
+			#{contractBudgetID},
+			#{subBudgetID},
+			#{equipment},
+			#{units},
+			#{amendAmt},
+	  		#{fyBudget},
+			SYSTIMESTAMP,
+			#{modifyByAgency},
+			SYSTIMESTAMP,
+			#{modifyByAgency},
+			'1',
+			SEQ_EQUIPMENT_ID.currval,
+			#{modifyByProvider},
+			#{modifyByProvider}
+			)
+	</insert>
+      
+      	<delete id="delEquipmentAmendDetails" parameterType="com.nyc.hhs.model.CBEquipmentBean">
+		DELETE FROM EQUIPMENT
+		WHERE
+			PARENT_ID = #{id}
+		AND SUB_BUDGET_ID = #{subBudgetID}
+		AND ACTIVE_FLAG = '1'
+	</delete>
+    
+    <update id="editEquipmentAmendDetails" parameterType="com.nyc.hhs.model.CBEquipmentBean">
+		update EQUIPMENT
+		set
+			EQUIPMENT_NAME = #{equipment},
+			UNITS = #{units},
+			AMOUNT = #{amendAmt},
+			MODIFIED_DATE = SYSTIMESTAMP,
+			MODIFIED_BY_USERID = #{modifyByAgency},
+			MODIFIED_BY_STAFFID = #{modifyByProvider}
+		where
+			BUDGET_ID = #{contractBudgetID} 
+		AND SUB_BUDGET_ID = #{subBudgetID}
+		AND PARENT_ID = #{id}
+	</update>
+      
+    <insert id="editInsertEquipmentAmendDetails" parameterType="com.nyc.hhs.model.CBEquipmentBean">
+		INSERT INTO EQUIPMENT(
+			EQUIPMENT_ID,
+			BUDGET_ID,
+			SUB_BUDGET_ID,
+			EQUIPMENT_NAME,
+			UNITS,
+			AMOUNT,
+			CREATED_DATE,
+			CREATED_BY_USERID,
+			MODIFIED_DATE,
+			MODIFIED_BY_USERID,
+			ACTIVE_FLAG,
+			PARENT_ID,
+			CREATED_BY_STAFFID,
+			MODIFIED_BY_STAFFID )
+		VALUES(
+			SEQ_EQUIPMENT_ID.nextval,
+			#{contractBudgetID},
+			#{subBudgetID},
+			(select EQUIPMENT_NAME from EQUIPMENT where equipment_id = #{id}) ,
+			#{units},
+			#{amendAmt},
+			SYSTIMESTAMP,
+			#{modifyByAgency},
+			SYSTIMESTAMP,
+			#{modifyByAgency},
+			'1',
+			#{id},
+			#{modifyByProvider},
+			#{modifyByProvider}
+			)
+	</insert>
+		
+  	 <select id="fetchSubBudgetDetails" parameterType="java.util.Map"
+		resultType="hashmap">
+		select sub_budget_id, parent_id from sub_budget where budget_id = #{budgetId}
+	</select>	
+      
+    <update id="updateBudgetWithDocId" parameterType="java.util.Map">
+		UPDATE BUDGET SET XML_DOC_ID = #{documentId} WHERE BUDGET_ID = #{budgetId}  
+	</update>
+	
+	 <select id="fetchDocIdForBudget" parameterType="java.lang.String"
+		resultType="String">
+		select XML_DOC_ID from BUDGET where budget_id = #{asBudgetId}   
+	</select>
+	
+    <select id="fetchAmendmentBudgetStatus" parameterType="java.util.Map"
+		resultType="String">
+		select STATUS_ID from BUDGET where budget_id = #{budgetId}
+	</select>
+
+	<resultMap id="fyBudgetInfo" type="com.nyc.hhs.model.BudgetDetails">
+		<result property="startDate" column="BUDGET_START_DATE" />
+		<result property="endDate" column="BUDGET_END_DATE" />
+		<result property="approvedBudget" column="FISCAL_YEAR_AMOUNT" />
+	</resultMap>
+
+	<select id="fetchFyBudgetSummary" parameterType="hashmap"
+		resultMap="fyBudgetInfo">
+		SELECT BUDGET.BUDGET_START_DATE,
+		BUDGET.BUDGET_END_DATE,
+		BUDGET.FISCAL_YEAR_AMOUNT
+		FROM BUDGET
+		WHERE BUDGET.BUDGET_ID = (SELECT
+		PARENT_ID FROM BUDGET WHERE BUDGET_ID = #{budgetId} )
+		AND ACTIVE_FLAG = '1'
+	</select>
+	
+	<resultMap id="UtilitiesDetailsList" type="com.nyc.hhs.model.CBUtilities">
+		<result property="id" column="UTILITIES_ID" />
+		<result property="utilitiesDesc" column="UTILITIES_TYPE" />
+		<result property="fyAmount" column="FY_AMOUNT" />
+		<result property="invoiceAmount" column="INVOICED_AMOUNT" />
+		<result property="remainingAmt" column="REMAINING_AMOUNT" />
+		<result property="lineItemModifiedAmt" column="MODIFIED_AMOUNT" />
+		<result property="utilitiesTypeID" column="UTILITIES_TYPE_ID" />
+	</resultMap>
+
+	<select id="fetchUtilitiesAmendmentDetails" parameterType="com.nyc.hhs.model.CBGridBean"
+		resultMap="UtilitiesDetailsList">
+
+		SELECT 
+			parent_id AS UTILITIES_ID,
+			UTILITIES_TYPE AS UTILITIES_TYPE,
+			SUM(APPROVED_FY_BUDGET) AS FY_AMOUNT,
+			SUM(remaining_amount) AS REMAINING_AMOUNT,
+			SUM(mod_amount) AS MODIFIED_AMOUNT
+		FROM
+			(SELECT
+				UTM.UTILITIES_TYPE ,
+				UT.AMOUNT AS APPROVED_FY_BUDGET ,
+				(UT.AMOUNT - SUM(CASE
+								WHEN
+									inv.STATUS_ID IS NOT NULL
+								THEN
+									NVL(inv_det.INVOICE_AMOUNT,0)
+								ELSE 0
+								END )) AS remaining_amount,
+				0 AS mod_amount,
+				UT.parent_id
+			FROM 
+				UTILITIES UT
+			LEFT JOIN 
+				INVOICE_DETAILS inv_det
+			ON 
+				inv_det.ENTRY_TYPE_ID =  #{entryTypeId}
+			AND
+				inv_det.LINE_ITEM_ID = UT.parent_id
+			INNER JOIN
+				UTILITIES_TYPE_MASTER UTM
+			ON
+				UTM.UTILITIES_TYPE_ID = UT.UTILITIES_TYPE_ID
+			LEFT JOIN
+				INVOICE inv
+			ON 
+				inv.INVOICE_ID = inv_det.INVOICE_ID
+			AND
+				inv.STATUS_ID IN (72,73)
+			WHERE 
+				UT.BUDGET_ID = #{parentBudgetId}
+			AND 
+				UT.SUB_BUDGET_ID = #{parentSubBudgetId}
+			GROUP BY 
+				UT.AMOUNT,
+				UT.parent_id,
+				UTM.UTILITIES_TYPE
+
+			UNION ALL
+	
+			SELECT 
+				UTM.UTILITIES_TYPE ,
+				0 AS APPROVED_FY_BUDGET ,
+				0 AS remaining_amount,
+				UT.AMOUNT AS mod_amount,
+				UT.parent_id
+			FROM 
+				UTILITIES UT
+			inner join 
+				UTILITIES_TYPE_MASTER UTM
+			ON
+				UTM.UTILITIES_TYPE_ID = UT.UTILITIES_TYPE_ID
+			WHERE 
+				UT.BUDGET_ID = #{contractBudgetID}
+			AND 
+				UT.SUB_BUDGET_ID = #{subBudgetID}
+			GROUP BY 
+				UT.AMOUNT,
+				UT.parent_id,
+				UTM.UTILITIES_TYPE
+			)
+		GROUP BY 
+			parent_id,
+			UTILITIES_TYPE
+		ORDER BY
+			parent_id
+	</select>
+	   <insert id="insertAmendRecInOtherDetailsProgInc" parameterType="com.nyc.hhs.model.CBProgramIncomeBean">
+			Insert into
+		OTHER_DETAILS(
+		OTHER_DETAILS_ID,
+		ENTITY_ID,
+		ENTRY_TYPE_ID,
+		ENTITY_NAME,
+		ACTIVE_FLAG,
+		CREATED_DATE,
+		CREATED_BY_USERID,
+		MODIFIED_DATE,
+		MODIFIED_BY_USERID)
+
+		SELECT SEQ_OTHER_DETAILS_ID.nextval, 
+		  (select PROGRAM_INCOME_ID from PROGRAM_INCOME where parent_id = #{id} 
+		and parent_id != PROGRAM_INCOME_ID
+		and active_flag = 1
+		),
+		    ENTRY_TYPE_ID,
+		    ENTITY_NAME,
+		    ACTIVE_FLAG,
+		    CREATED_DATE,
+		    CREATED_BY_USERID,
+		    MODIFIED_DATE,
+		    MODIFIED_BY_USERID
+		  FROM OTHER_DETAILS
+		  WHERE ENTITY_ID = #{id}
+		  and active_flag = '1'
+	</insert>		
+	
+	<select id="fetchOtherEntryIfExists" resultType="Integer" parameterType="com.nyc.hhs.model.CBOperationSupportBean">
+		SELECT count(1) from OTHER_DETAILS 
+		WHERE ENTITY_ID = #{id}
+	</select>
+	
+	<select id="fetchOtherEntryIfExistsProgInc" resultType="Integer" parameterType="com.nyc.hhs.model.CBProgramIncomeBean">
+		SELECT count(1) from OTHER_DETAILS 
+		WHERE ENTITY_ID = #{id} and entry_type_id=11
+	</select>
+		
+    <insert id="insertAmendRecInOtherDetails" parameterType="com.nyc.hhs.model.CBOperationSupportBean">
+			Insert into
+		OTHER_DETAILS(
+		OTHER_DETAILS_ID,
+		ENTITY_ID,
+		ENTRY_TYPE_ID,
+		ENTITY_NAME,
+		ACTIVE_FLAG,
+		CREATED_DATE,
+		CREATED_BY_USERID,
+		MODIFIED_DATE,
+		MODIFIED_BY_USERID)
+
+		SELECT SEQ_OTHER_DETAILS_ID.nextval, 
+		  (select operations_support_id from operations_and_support where parent_id = #{id} 
+		and parent_id != operations_support_id
+		and active_flag = 1
+		),
+		    ENTRY_TYPE_ID,
+		    ENTITY_NAME,
+		    ACTIVE_FLAG,
+		    CREATED_DATE,
+		    CREATED_BY_USERID,
+		    MODIFIED_DATE,
+		    MODIFIED_BY_USERID
+		  FROM OTHER_DETAILS
+		  WHERE ENTITY_ID = #{id}
+		  and active_flag = '1'
+
+	</insert>		
+	
+	<update id="updateAmendContractStatusToPendReg" parameterType="com.nyc.hhs.model.TaskDetailsBean">
+		UPDATE contract
+		SET status_id                                                    = '61'
+		WHERE contract_id                                                = #{contractId}
+		AND (SELECT COUNT(budget_id) FROM budget WHERE contract_id = #{contractId} 
+		<!-- release 3.14.0 --> 
+		and status_id ! = 106 
+		<!-- release 3.14.0 -->
+		) =
+		  (SELECT COUNT(budget_id)
+		  FROM budget
+		  WHERE contract_id = #{contractId}
+		  AND status_id     = '86'
+		  )
+	 </update>
+	 
+	 <sql id="fetchAmendedContractSubBudgetId">
+		SELECT sub_budget_id
+		FROM sub_budget
+		WHERE parent_id = #{parentSubBudgetId}
+		AND budget_id  IN
+		  (SELECT budget_id
+		  FROM budget
+		  WHERE contract_id IN
+		    (SELECT contract_id
+		    FROM contract a
+		    WHERE contract_type_id =2
+		    AND parent_contract_id =
+		      (SELECT parent_contract_id FROM contract WHERE contract_id= #{contractID}
+		      )
+		    AND contract_id != #{contractID}  and status_id != 69
+		    )
+		  )
+	 </sql>
+	 
+	 <!-- Start R8.3.1 qc_9480 Negative Amendment values making Budget FY Amount Negative after Multiple Invoices  -->
+	 
+	 <select id="fetchPSDetailsForValidationInMultipleAmendments" parameterType="com.nyc.hhs.model.PersonnelServiceBudget"
+		resultType="hashmap">
+			SELECT  Sub_Budget_Id,  Position_id, SUM( NVL(RemainingAmount,0) ) as RemainingAmount
+			FROM
+			  (SELECT  A.sub_budget_id,   A.position_id,           
+			(Total_Salary - SUM(  NVL(A.RemainingAmount,0) ) over(partition BY Personnel_Service_Id)) AS RemainingAmount
+				FROM   (  SELECT    ps.personnel_service_id,  ps.sub_budget_id,  ps.position_id,  Ps.Total_Salary,  NVL(Inv.INVOICED_AMOUNT,0)  AS RemainingAmount
+			FROM PERSONNEL_SERVICE Ps
+			LEFT OUTER JOIN (SELECT inv.LINE_ITEM_ID AS LINE_ITEM_ID ,Inv.Entry_Type_Id, SUM( NVL(inv.INVOICE_AMOUNT,0) ) AS INVOICED_AMOUNT
+			FROM  INVOICE_DETAILS inv
+			inner JOIN Invoice Invvv on inv.Invoice_Id = Invvv.Invoice_Id AND Invvv.status_id IN (72, 73)
+			WHERE   inv.LINE_ITEM_ID = #{id}
+			AND Inv.Entry_Type_Id      = 1
+			GROUP BY LINE_ITEM_ID , Entry_Type_Id
+			)  inv
+					ON    Ps.PERSONNEL_SERVICE_ID    = inv.LINE_ITEM_ID
+					AND  Inv.Entry_Type_Id = 1
+					WHERE Ps.Personnel_Service_Id = #{id}
+			) A
+			  UNION ALL
+			  SELECT sb.parent_id AS Sub_Budget_Id, ps.position_id,	ps.total_Salary AS RemainingAmount
+			  FROM personnel_service ps
+			  INNER JOIN sub_budget sb
+			  ON sb.sub_budget_id     = Ps.sub_budget_id
+			  WHERE ps.SUB_BUDGET_ID IN (<include refid="fetchAmendedContractSubBudgetId"/>)
+			  AND Ps.parent_id        = #{id}
+			  AND ps.active_flag      = 1
+			  AND ps.total_Salary &lt; 0
+			  )
+			GROUP BY Sub_Budget_Id, Position_id
+	</select>	
+	 <!--End R8.3.1 qc_9480 Negative Amendment values making Budget FY Amount Negative after Multiple Invoices  -->
+	 
+	<!--Start of changes as a part of release 3.3.0 for defect 6444-->
+	<select id="getPendingNegAmendmentUnitsPS"
+		parameterType="com.nyc.hhs.model.PersonnelServiceBudget" resultType="java.lang.Double">
+		SELECT SUM (units) AS remaining_units
+		FROM
+		  (SELECT units
+		  FROM personnel_service
+		  WHERE parent_id   = #{id}
+		  AND sub_budget_id = #{parentSubBudgetId} 
+		  UNION ALL
+		  SELECT SUM(units) AS units
+		  FROM personnel_service
+		  WHERE SUB_BUDGET_ID IN (<include refid="fetchAmendedContractSubBudgetId"/>)
+		  AND parent_id        = #{id}
+		  AND active_flag      = 1
+		  AND units            &lt; 0
+		  )		
+	</select>
+	<!--End of changes as a part of release 3.3.0 for defect 6444-->
+	
+	<!-- Start R8.3.1 qc_9480 Negative Amendment values making Budget FY Amount Negative after Multiple Invoices  -->	
+	<select id="fetchFringeAmountForValidationInMultipleAmendments" parameterType="com.nyc.hhs.model.PersonnelServiceBudget"
+		resultType="java.math.BigDecimal">
+		SELECT SUM(RemainingAmount)
+		FROM
+		  (   SELECT ( fb.AMOUNT -  NVL(Inv.INVOICED_AMOUNT,0) ) AS RemainingAmount
+			  FROM FRINGE_BENEFIT fb
+				LEFT OUTER JOIN (SELECT inv.LINE_ITEM_ID AS LINE_ITEM_ID ,Inv.Entry_Type_Id, SUM( NVL(inv.INVOICE_AMOUNT,0) ) AS INVOICED_AMOUNT
+				FROM  INVOICE_DETAILS inv
+				inner JOIN Invoice Invvv on inv.Invoice_Id = Invvv.Invoice_Id AND Invvv.status_id IN (72, 73)
+				WHERE   inv.LINE_ITEM_ID = #{id}
+				AND Inv.Entry_Type_Id      = 13
+				GROUP BY LINE_ITEM_ID , Entry_Type_Id
+		)  inv
+		ON fb.FRINGE_BENEFIT_ID    = inv.LINE_ITEM_ID
+		 AND Inv.Entry_Type_Id      = 13
+		 WHERE Fb.Fringe_Benefit_Id = #{id}
+		  UNION ALL
+		  SELECT ps.amount AS negative_amendment_amount
+		  FROM FRINGE_BENEFIT ps
+		  INNER JOIN sub_budget sb
+		  ON sb.sub_budget_id     = Ps.sub_budget_id
+		  WHERE ps.SUB_BUDGET_ID IN (<include refid="fetchAmendedContractSubBudgetId"/>)
+		  AND Ps.parent_id        = #{id}
+		  AND ps.active_flag      = 1
+		  AND ps.amount &lt; 0
+		  ) 
+	</select>
+	<!-- End R8.3.1 qc_9480 Negative Amendment values making Budget FY Amount Negative after Multiple Invoices  -->
+	
+	<select id="fetchOTPSDetailsForValidationInMultipleAmendments" parameterType="com.nyc.hhs.model.CBOperationSupportBean"
+		resultType="java.math.BigDecimal">
+		SELECT SUM (REMAINING_AMOUNT) as REMAINING_AMOUNT
+		FROM
+		  (SELECT ops.AMOUNT - (SUM (
+		    CASE
+		      WHEN inv.STATUS_ID IN ('72','73')
+		      THEN idt.INVOICE_AMOUNT
+		      ELSE 0
+		    END )) AS REMAINING_AMOUNT
+		  FROM OPERATIONS_AND_SUPPORT ops
+		  LEFT JOIN INVOICE_DETAILS idt
+		  ON idt.LINE_ITEM_ID   = ops.OPERATIONS_SUPPORT_ID
+		  AND idt.ENTRY_TYPE_ID = '2'
+		  LEFT JOIN INVOICE inv
+		  ON inv.INVOICE_ID               = idt.INVOICE_ID
+		  WHERE ops.OPERATIONS_SUPPORT_ID = #{id}
+		  GROUP BY ops.AMOUNT
+		  UNION ALL
+		  SELECT ops.amount AS negative_amendment_amount
+		  FROM OPERATIONS_AND_SUPPORT ops
+		  INNER JOIN sub_budget sb
+		  ON sb.sub_budget_id      = ops.sub_budget_id
+		  WHERE ops.SUB_BUDGET_ID IN (<include refid="fetchAmendedContractSubBudgetId"/>)
+		  AND ops.parent_id        = #{id}
+		  AND ops.active_flag      = 1
+		  AND ops.amount &lt; 0
+		  )
+	</select>
+	
+	<select id="getPendingNegAmendmentUnitsEqp"
+		parameterType="com.nyc.hhs.model.CBEquipmentBean" resultType="java.lang.Integer">
+			SELECT SUM (units) AS remaining_units
+			FROM
+		  ( SELECT units FROM equipment WHERE parent_id = #{id} AND sub_budget_id = #{parentSubBudgetId} 
+		  UNION ALL
+		  SELECT SUM(units) AS units
+		  FROM equipment
+		  WHERE SUB_BUDGET_ID IN (<include refid="fetchAmendedContractSubBudgetId"/>)
+		  AND parent_id        = #{id}
+		  AND active_flag      = 1
+		  AND units            &lt; 0
+		  )
+	</select>
+	<!-- Start R8.3.1 qc_9480 Negative Amendment values making Budget FY Amount Negative after Multiple Invoices  -->	
+	<select id="fetchEquipmentDetailsForValidationInMultipleAmendments" parameterType="com.nyc.hhs.model.CBEquipmentBean"
+		resultMap="CBEquipmentBeanList">
+			SELECT EQUIPMENT_NAME, SUB_BUDGET_ID, SUM( NVL(REMAINING_AMOUNT,0 ) ) AS REMAINING_AMOUNT
+			FROM
+			  ( SELECT eqp.EQUIPMENT_NAME, eqp.SUB_BUDGET_ID, 
+			           eqp.AMOUNT - SUM( NVL(idt.INVOICE_AMOUNT,0) ) over(partition BY eqp.EQUIPMENT_ID) AS REMAINING_AMOUNT
+			  FROM EQUIPMENT eqp
+			  LEFT JOIN (  SELECT    SUM( NVL(idt.INVOICE_AMOUNT,0) ) AS INVOICE_AMOUNT , idt.LINE_ITEM_ID  
+			                 FROM    INVOICE inv , INVOICE_DETAILS idt 
+                            WHERE    idt.LINE_ITEM_ID = #{id}
+                              AND    idt.ENTRY_TYPE_ID = 12
+                              AND    inv.INVOICE_ID   = idt.INVOICE_ID
+                              AND    inv.STATUS_ID  in ( 72, 73 )
+                            GROUP BY LINE_ITEM_ID ) idt
+                     ON   idt.LINE_ITEM_ID   = eqp.EQUIPMENT_ID  
+			  WHERE eqp.EQUIPMENT_ID = #{id}
+			  AND eqp.PARENT_ID      = #{id}
+			  UNION ALL
+			  SELECT eqp.EQUIPMENT_NAME, sb.parent_id AS SUB_BUDGET_ID, NVL( eqp.amount , 0 )   AS REMAINING_AMOUNT
+			  FROM   equipment eqp
+			  INNER JOIN sub_budget sb   ON sb.sub_budget_id      = eqp.sub_budget_id
+			  WHERE eqp.SUB_BUDGET_ID IN (<include refid="fetchAmendedContractSubBudgetId"/>)
+			  AND eqp.parent_id        = #{id}
+			  AND eqp.active_flag      = 1
+			  AND eqp.amount   &lt; 0
+			  )
+			GROUP BY EQUIPMENT_NAME,
+			  SUB_BUDGET_ID
+	</select>
+	<!-- End R8.3.1 qc_9480 Negative Amendment values making Budget FY Amount Negative after Multiple Invoices  -->	
+	
+	<select id="fetchUtilitiesDetailsForValidationInMultipleAmendments" parameterType="com.nyc.hhs.model.CBUtilities"
+		resultMap="UtilitiesDetailsList">
+		SELECT SUM(REMAINING_AMOUNT) as REMAINING_AMOUNT
+		FROM
+		  (SELECT (util.AMOUNT - (SUM(
+		    CASE
+		      WHEN inv.STATUS_ID IS NOT NULL
+		      THEN inv_det.INVOICE_AMOUNT
+		      ELSE 0
+		    END ))) AS REMAINING_AMOUNT
+		  FROM UTILITIES util
+		  LEFT JOIN INVOICE_DETAILS inv_det
+		  ON inv_det.LINE_ITEM_ID   = util.UTILITIES_ID
+		  AND inv_det.ENTRY_TYPE_ID = '3'
+		  LEFT JOIN INVOICE inv
+		  ON inv.INVOICE_ID       = inv_det.INVOICE_ID
+		  <!-- QC 9206 R 7.7.1 change status 71 to 73 -->
+		  AND inv.STATUS_ID      IN ('73','72')
+		  WHERE util.UTILITIES_ID = #{id}
+		  GROUP BY util.AMOUNT
+		  UNION ALL
+		  SELECT amount AS REMAINING_AMOUNT
+		  FROM utilities
+		  WHERE SUB_BUDGET_ID IN (<include refid="fetchAmendedContractSubBudgetId"/>)
+		  AND parent_id        = #{id}
+		  AND active_flag      = 1
+		  AND amount           &lt; 0
+		  )
+	</select>
+	<select id="fetchProfServiceForValidationInMultipleAmendments" parameterType="com.nyc.hhs.model.CBProfessionalServicesBean"
+		resultType="BigDecimal">
+			SELECT SUM (REMAINING_AMOUNT)
+			FROM
+			  (SELECT NVL(profess.AMOUNT,'0') - NVL(invoicedetail.INVOICE_AMOUNT,'0') AS REMAINING_AMOUNT
+			  FROM PROFESSIONAL_SERVICE profess
+			  LEFT OUTER JOIN
+			    (SELECT entry_type_id,
+			      line_item_id,
+			      SUM(invoice_amount) AS INVOICE_AMOUNT
+			    FROM INVOICE_DETAILS
+			    WHERE INVOICE_ID IN
+			      (SELECT invoice_id
+			      FROM INVOICE
+			      WHERE BUDGET_ID     = #{parentBudgetId}
+			      AND STATUS_ID    IN (72,73)
+			      )
+			    AND ENTRY_TYPE_ID = 4
+			    GROUP BY entry_type_id,
+			      line_item_id
+			    ) invoicedetail
+			  ON invoicedetail.entry_type_id        = 4
+			  AND invoicedetail.line_item_id        = profess.PROFESSIONAL_SERVICE_ID
+			  WHERE profess.PROFESSIONAL_SERVICE_ID = #{id}
+			  UNION ALL
+			  SELECT amount AS REMAINING_AMOUNT
+			  FROM PROFESSIONAL_SERVICE
+			  WHERE SUB_BUDGET_ID IN (<include refid="fetchAmendedContractSubBudgetId"/>)
+			  AND parent_id        = #{id}
+			  AND active_flag      = 1
+			  AND amount           &lt; 0
+			  )
+    </select>
+    
+    <select id="getRemainingAmountRentInMultipleAmendments" resultType="java.math.BigDecimal"
+		parameterType="com.nyc.hhs.model.Rent">
+			SELECT SUM(REMAINING_AMT)
+			FROM
+			  (SELECT (
+			    CASE
+			      WHEN rt.SUB_BUDGET_ID = #{subBudgetID}
+			      THEN 0
+			      WHEN rt.SUB_BUDGET_ID = #{parentSubBudgetId}
+			      THEN rt.AMOUNT
+			    END) - SUM(
+			    CASE
+			      WHEN INVVV.STATUS_ID IS NOT NULL
+			      THEN NVL(INV.INVOICE_AMOUNT,0)
+			      ELSE 0
+			    END) AS REMAINING_AMT
+			  FROM RENT rt
+			  LEFT JOIN INVOICE_DETAILS inv
+			  ON rt.RENT_ID         = inv.LINE_ITEM_ID
+			  AND inv.ENTRY_TYPE_ID = 5
+			  LEFT JOIN INVOICE INVVV
+			  ON INVVV.INVOICE_ID  = inv.INVOICE_ID
+			  AND INVVV.STATUS_ID IN (72,73)
+			  WHERE rt.parent_id   = #{id}
+			  AND rt.active_flag   = '1'
+			  AND rt.RENT_ID       = rt.Parent_id
+			  GROUP BY rt.SUB_BUDGET_ID,
+			    rt.parent_id,
+			    rt.AMOUNT
+			  UNION ALL
+			  SELECT amount AS REMAINING_AMOUNT
+			  FROM rent
+			  WHERE SUB_BUDGET_ID IN (<include refid="fetchAmendedContractSubBudgetId"/>)
+			  AND parent_id        = #{id}
+			  AND active_flag      = 1
+			  AND amount           &lt; 0
+			  )
+	</select>
+	
+	<select id="getRemainingAmountContractedServicesInMultipleAmendments" resultType="BigDecimal"
+		parameterType="com.nyc.hhs.model.ContractedServicesBean">
+		SELECT SUM (REMAINING_AMT) AS REMAINING_AMOUNT
+		FROM
+		(
+		SELECT 
+		(
+		CASE
+		WHEN cs.SUB_BUDGET_ID =
+		#{subBudgetID}
+		THEN 0
+		WHEN cs.SUB_BUDGET_ID = #{parentSubBudgetId}
+		THEN
+		cs.AMOUNT
+		END) - SUM(
+		CASE
+		WHEN INVVV.STATUS_ID IS NOT NULL
+		THEN
+		NVL(INV.INVOICE_AMOUNT,0)
+		ELSE 0
+		END) AS REMAINING_AMT
+		FROM CONTRACTED_SERVICE cs
+		LEFT
+		JOIN INVOICE_DETAILS inv
+		ON cs.CONTRACTED_SERVICE_ID = inv.LINE_ITEM_ID
+		AND
+		inv.ENTRY_TYPE_ID = 6
+		LEFT JOIN INVOICE INVVV
+		ON INVVV.INVOICE_ID =
+		inv.INVOICE_ID
+		AND INVVV.STATUS_ID IN (72,73)
+		WHERE cs.parent_id = #{id}
+		AND cs.active_flag = '1'
+		AND cs.CONTRACTED_SERVICE_ID = cs.Parent_id
+		GROUP BY
+		cs.SUB_BUDGET_ID,
+		cs.parent_id,
+		cs.AMOUNT
+		UNION ALL
+		SELECT amount AS REMAINING_AMT
+		FROM CONTRACTED_SERVICE
+		WHERE SUB_BUDGET_ID IN (<include refid="fetchAmendedContractSubBudgetId"/>)
+		AND parent_id        = #{id}
+		AND active_flag      = 1
+		AND amount           &lt; 0
+		)
+	</select>
+	
+	
+	
+	
+	<select id="getRemainingAmountRateInMultipleAmendments" resultType="BigDecimal"
+		parameterType="com.nyc.hhs.model.RateBean">
+		select sum (REMAINING_AMT) as REMAINING_AMT from (
+		SELECT 
+		(
+		CASE
+		WHEN rt.SUB_BUDGET_ID =
+		#{subBudgetID}
+		THEN 0
+		WHEN rt.SUB_BUDGET_ID = #{parentSubBudgetId}
+		THEN
+		rt.AMOUNT
+		END) - SUM(
+		CASE
+		WHEN INVVV.STATUS_ID IS NOT NULL
+		THEN
+		NVL(INV.INVOICE_AMOUNT,0)
+		ELSE 0
+		END) AS REMAINING_AMT
+		FROM RATE rt
+		LEFT
+		JOIN INVOICE_DETAILS inv
+		ON rt.RATE_ID = inv.LINE_ITEM_ID
+		AND
+		inv.ENTRY_TYPE_ID = 7
+		LEFT JOIN INVOICE INVVV
+		ON INVVV.INVOICE_ID =
+		inv.INVOICE_ID
+		AND INVVV.STATUS_ID IN (72,73)
+		WHERE rt.parent_id = #{id}
+		AND rt.active_flag = '1'
+		AND rt.RATE_ID = rt.Parent_id
+		GROUP BY
+		rt.SUB_BUDGET_ID,
+		rt.parent_id,
+		rt.AMOUNT
+		
+		UNION ALL
+		SELECT amount AS REMAINING_AMT
+		FROM rate
+		WHERE SUB_BUDGET_ID IN (<include refid="fetchAmendedContractSubBudgetId"/>)
+		AND parent_id        = #{id}
+		AND active_flag      = 1
+		AND amount           &lt; 0
+		)
+		</select>
+		
+		
+		<select id="fetchRateValidationRemngUnitsInMultipleAmendments" parameterType="com.nyc.hhs.model.RateBean"
+		resultType="Integer">
+		select sum (REMAINING_UNITS) as REMAINING_UNITS from (
+		select
+		rt.number_of_units - SUM(CASE
+		WHEN
+		INVVV.STATUS_ID IS NOT NULL
+		THEN
+		NVL(inv.invoiced_units,0)
+		ELSE
+		0
+		END ) AS REMAINING_UNITS
+		from
+		rate rt
+		LEFT JOIN
+		INVOICE_DETAILS inv
+		ON
+		rt.RATE_ID = inv.LINE_ITEM_ID
+		AND
+		inv.ENTRY_TYPE_ID = 7
+		LEFT JOIN
+		INVOICE INVVV
+		ON
+		invvv.invoice_id =
+		inv.invoice_id
+		AND
+		invvv.status_id IN ('73')
+		WHERE
+		rt.parent_id = #{id}
+		and
+		RT.BUDGET_ID = #{parentBudgetId}
+		AND
+		RT.SUB_BUDGET_ID = #{parentSubBudgetId}
+		AND
+		RT.active_flag = 1
+		GROUP BY
+		rt.RATE_ID,
+		rt.number_of_units
+		
+		union all
+		SELECT number_of_units AS REMAINING_UNITS
+		FROM rate
+		WHERE SUB_BUDGET_ID IN (<include refid="fetchAmendedContractSubBudgetId"/>)
+		AND parent_id        = #{id}
+		AND active_flag      = 1
+		AND number_of_units   &lt; 0)
+	</select>
+	
+		
+		<select id="getBaseUnitContractBudgetRateInMultipleAmendments"
+		parameterType="com.nyc.hhs.model.RateBean" resultType="java.lang.Integer">
+		SELECT SUM (number_of_units) AS remaining_units
+		FROM
+		  (SELECT number_of_units
+		  FROM RATE
+		  WHERE  parent_id = #{id}
+		  AND sub_budget_id =
+		  #{parentSubBudgetId} 
+		  UNION ALL
+		  SELECT number_of_units
+		  FROM RATE
+		  WHERE SUB_BUDGET_ID IN (<include refid="fetchAmendedContractSubBudgetId"/>)
+		  AND parent_id        = #{id}
+		  AND active_flag      = 1
+		  AND NUMBER_OF_UNITS  &lt; 0
+		  )
+	</select>
+	
+	
+	<select id="fetchMilestoneDetailsForValidationInMultipleAmendments" parameterType="com.nyc.hhs.model.CBMileStoneBean"
+		resultMap="MilestoneList">
+		SELECT MILESTONE,
+ 		SUB_BUDGET_ID,
+  		SUM(AMOUNT)           AS AMOUNT,
+  		SUM(REMAINING_AMOUNT) AS REMAINING_AMOUNT
+		FROM
+  		(
+		SELECT MS.MILESTONE, MS.SUB_BUDGET_ID, MS.AMOUNT, (MS.AMOUNT - (SUM(CASE WHEN inv.STATUS_ID IN
+		('72','73')
+		THEN idt.INVOICE_AMOUNT
+		ELSE 0
+		END ))) as
+		REMAINING_AMOUNT
+		FROM MILESTONE MS
+
+		LEFT JOIN INVOICE_DETAILS idt
+		ON
+		idt.LINE_ITEM_ID = MS.MILESTONE_ID
+		AND
+		idt.ENTRY_TYPE_ID = 8
+
+		LEFT JOIN INVOICE inv
+		ON
+		inv.INVOICE_ID = idt.INVOICE_ID
+
+		WHERE
+		MS.MILESTONE_ID = #{id} AND MS.PARENT_ID = #{id}
+    	GROUP BY MS.MILESTONE, MS.SUB_BUDGET_ID, MS.AMOUNT
+    	UNION ALL
+		SELECT MS.MILESTONE,
+		  sb.parent_id AS SUB_BUDGET_ID,
+		  0            AS AMOUNT,
+		  MS.AMOUNT    AS REMAINING_AMOUNT
+		FROM MILESTONE ms
+		INNER JOIN sub_budget sb
+		ON sb.sub_budget_id     = ms.sub_budget_id
+		WHERE ms.SUB_BUDGET_ID IN (<include refid="fetchAmendedContractSubBudgetId"/>)
+		AND ms.parent_id        = #{id}
+		AND ms.active_flag      = 1
+		AND ms.amount           &lt; 0 
+		)
+	GROUP BY MILESTONE,
+  	SUB_BUDGET_ID 
+	</select>
+	
+	
+	<select id="getRemainingAmountUnAllocatedInMultipleAmendments" resultType="BigDecimal"
+		parameterType="com.nyc.hhs.model.UnallocatedFunds">
+		SELECT NVL(SUM (amount),0) AS REMAINING_AMT
+		FROM
+		  ( SELECT amount FROM unallocated WHERE sub_budget_id = #{parentSubBudgetId} 
+		  	AND budget_id = #{parentBudgetId} and  unallocated_id = #{parentId} <!-- QC 8394 R 7.9.0 --> 
+		  UNION ALL
+		  SELECT amount
+		  FROM unallocated
+		  WHERE SUB_BUDGET_ID IN (<include refid="fetchAmendedContractSubBudgetId"/>)
+		  AND parent_id        = #{id}
+		  AND active_flag      = 1
+		  AND amount           &lt; 0
+		  )
+		</select>
+		
+		
+	<select id="getRemainingAmountIndirectRate" parameterType="com.nyc.hhs.model.CBIndirectRateBean"
+		resultType="java.math.BigDecimal">
+			SELECT SUM (REM_AMOUNT) AS REM_AMOUNT
+			FROM
+			  (SELECT a.INDIRECT_AMOUNT - SUM(
+			    CASE
+			      WHEN inv.STATUS_ID IS NOT NULL
+			      THEN NVL(inv_det.INVOICE_AMOUNT,0)
+			      ELSE 0
+			    END ) AS REM_AMOUNT
+			  FROM INDIRECT_RATE a
+			  LEFT JOIN INVOICE_DETAILS inv_det
+			  ON inv_det.LINE_ITEM_ID   = a.INDIRECT_RATE_ID
+			  AND inv_det.ENTRY_TYPE_ID = #{entryTypeId,jdbcType=VARCHAR}
+			  LEFT JOIN INVOICE inv
+			  ON inv.INVOICE_ID     = inv_det.INVOICE_ID
+			  AND inv.STATUS_ID    IN 
+			  <foreach item="items" index="index" collection="invoiceStatusIdList"
+						open="(" separator="," close=")">
+						#{items}
+			    	</foreach>
+			  WHERE a.SUB_BUDGET_ID = #{parentSubBudgetId,jdbcType=VARCHAR}
+			  AND ACTIVE_FLAG       = 1
+			  GROUP BY a.INDIRECT_AMOUNT
+			  UNION ALL
+			  SELECT indirect_amount AS REM_AMOUNT
+			  FROM indirect_rate
+			  WHERE SUB_BUDGET_ID IN (<include refid="fetchAmendedContractSubBudgetId"/>)
+			  AND parent_id        = #{id}
+			  AND active_flag      = 1
+			  AND indirect_amount  &lt; 0
+			  )
+	</select>
+	
+	
+	
+ 	<select id="fetchProgIncomeDetailsForValidationInMultipleAmendments" parameterType="com.nyc.hhs.model.CBProgramIncomeBean"
+		resultType="java.math.BigDecimal">
+		SELECT SUM(REMAINING_AMOUNT) FROM 
+		(
+		SELECT 
+				(PI.AMOUNT - (SUM (CASE WHEN inv.STATUS_ID IN ('72','73')
+									 	 THEN idt.INVOICE_AMOUNT
+										 ELSE 0
+									END ))) 
+			as	REMAINING_AMOUNT
+		FROM PROGRAM_INCOME PI
+		LEFT JOIN INVOICE_DETAILS idt
+		ON
+		idt.LINE_ITEM_ID = PI.PROGRAM_INCOME_ID
+		AND
+		idt.ENTRY_TYPE_ID = '11'
+
+		LEFT JOIN INVOICE inv
+		ON
+		inv.INVOICE_ID = idt.INVOICE_ID
+
+		WHERE
+		PI.PROGRAM_INCOME_ID = #{id}
+    	GROUP BY PI.AMOUNT
+    	
+		union all
+		SELECT amount AS REMAINING_AMOUNT
+		FROM PROGRAM_INCOME
+		WHERE SUB_BUDGET_ID IN (<include refid="fetchAmendedContractSubBudgetId"/>)
+		AND parent_id        = #{id}
+		AND active_flag      = 1
+		AND amount           &lt; 0
+		)
+	</select>
+    <!-- R7 changes start -->
+    <insert id="insertProgramIncomeAmendmentGrid" parameterType="com.nyc.hhs.model.CBProgramIncomeBean">
+		Insert into
+		PROGRAM_INCOME
+		(
+		PROGRAM_INCOME_ID,
+		BUDGET_ID,
+		SUB_BUDGET_ID,
+		PROGRAM_INCOME_TYPE_ID,
+		PARENT_ID,
+		AMOUNT,
+		CREATED_DATE,
+		CREATED_BY_USERID,
+		CREATED_BY_STAFFID,
+		MODIFIED_DATE,
+		MODIFIED_BY_USERID,
+		MODIFIED_BY_STAFFID,
+		ACTIVE_FLAG,
+		DESCRIPTION,
+		ENTRY_TYPE_ID
+		)
+		values
+		(
+		SEQ_PROGRAM_INCOME_ID.nextval,
+		#{contractBudgetID},
+		#{subBudgetID},
+		#{empPosition,jdbcType=VARCHAR},
+		SEQ_PROGRAM_INCOME_ID.currval,
+		#{amendmentAmount},
+		SYSTIMESTAMP,
+		#{modifyByAgency,jdbcType=VARCHAR},
+		#{modifyByProvider,jdbcType=VARCHAR},
+		SYSTIMESTAMP,
+		#{modifyByAgency,jdbcType=VARCHAR},
+		#{modifyByProvider,jdbcType=VARCHAR},
+		'1',
+		#{description},
+		#{entryTypeId}
+		)
+	</insert>
+		<select id="fetchAmendmentProgramIncomeDetails"
+		parameterType="com.nyc.hhs.model.CBProgramIncomeBean" resultMap="programIncomeAmendmentList">
+		select PARENT_ID,
+		BUDGET_ID,
+		SUB_BUDGET_ID,
+		DESCRIPTION
+		from PROGRAM_INCOME
+		where PROGRAM_INCOME_ID=#{id}
+	</select>
+	<!-- R7 changes end -->
+	<!-- Unallocated Funds Amendment Queries Starts -->
+	
+	<!-- Start  QC 8394 R 7.9.0 add Add/Delete action for Unallocated Fund -->
+	<resultMap id="UnallocatedFundList" type="com.nyc.hhs.model.UnallocatedFunds"> 
+		<result property="id" column="UNALLOCATED_ID" />
+		<result property="ammount" column="AMOUNT" />
+		<result property="modificationAmount" column="MODIFICATION_AMOUNT" />
+		<result property="modCount" column="MODIFICATION_COUNT" />
+		<result property="orgCount" column="ORIGINAL_COUNT" />
+		<!-- QC 8694 R 7.9.0 apply add/delete functions for Unallocated Fund  -->
+		<result property="unallocatedFund" column="UNALLOCATED_FUND" />
+		<result property="budgetId" column="BUDGET_ID" />
+		<result property="subBudgetId" column="SUB_BUDGET_ID" />
+		<result property="parentBudgetId" column="PARENT_BUDGET_ID" />
+		<result property="parentSubBudgetId" column="PARENT_SUB_BUDGET_ID" />
+		<result property="parentId" column="PARENT_ID" />
+		<result property="childId" column="CHILD_ID" />
+		<result property="type" column="TYPE" />
+	</resultMap>
+
+	<select id="fetchAmendmentUnallocatedFunds_OLD" parameterType="com.nyc.hhs.model.CBGridBean"
+		resultMap="UnallocatedFundList">
+		select UNALLOCATED_ID, 
+		       UNALLOCATED_FUND,
+			   nvl((select (amount) from unallocated where sub_budget_id = #{parentSubBudgetId} and budget_id = #{parentBudgetId}),0) as "AMOUNT",
+   			   nvl((select amount from unallocated   where sub_budget_id = #{subBudgetID} and budget_id = #{contractBudgetID} ),0) as "MODIFICATION_AMOUNT",
+			   (select count(amount) from unallocated where sub_budget_id = #{subBudgetID} and budget_id = #{contractBudgetID}) as "MODIFICATION_COUNT"
+		from unallocated where sub_budget_id = #{parentSubBudgetId}
+	</select>
+		
+	<select id="fetchAmendmentUnallocatedFunds" parameterType="com.nyc.hhs.model.CBGridBean"
+		resultMap="UnallocatedFundList">
+		select 	UNALLOCATED_ID , 
+	      		UNALLOCATED_FUND,
+	      		nvl(amount, 0) as "AMOUNT",
+	      		0.0 as "MODIFICATION_AMOUNT",
+	      		0 as "MODIFICATION_COUNT",
+	       		parent_id,
+	      		null as "CHILD_ID",
+	      		#{parentBudgetId} as "BUDGET_ID",
+	      		#{parentSubBudgetId} as "SUB_BUDGET_ID",
+	      		#{parentBudgetId} as "PARENT_BUDGET_ID",
+	      		#{parentSubBudgetId} as "PARENT_SUB_BUDGET_ID",
+	      		'base' as "TYPE"
+	 	from unallocated
+	 	where sub_budget_id = #{parentSubBudgetId} 
+	        and budget_id = #{parentBudgetId} 
+	        and ACTIVE_FLAG=1
+	UNION ALL       
+   		select UNALLOCATED_ID , 
+      		UNALLOCATED_FUND,
+      		0.0 as "AMOUNT",
+      		amount as "MODIFICATION_AMOUNT",
+      		1 as "MODIFICATION_COUNT",
+      		parent_id,
+      		UNALLOCATED_ID as "CHILD_ID",
+      		#{contractBudgetID} as "BUDGET_ID",
+	      	#{subBudgetID} as "SUB_BUDGET_ID",
+	      	#{parentBudgetId} as "PARENT_BUDGET_ID",
+	      	#{parentSubBudgetId} as "PARENT_SUB_BUDGET_ID",
+      		'new' as "TYPE"
+  		from unallocated 
+       	where sub_budget_id = #{subBudgetID}
+        	and budget_id = #{contractBudgetID} 
+        	and UNALLOCATED_ID = parent_id
+        	and ACTIVE_FLAG=1	
+      	
+  </select>  
+	
+<select id="fetchAmendmentUnallocatedFundsToBaseLine" parameterType="com.nyc.hhs.model.CBGridBean"
+		resultMap="UnallocatedFundList">
+  	select  UNALLOCATED_ID , 
+      	    UNALLOCATED_FUND,
+      		0.0 as "AMOUNT",
+      		nvl(amount, 0) as "MODIFICATION_AMOUNT",
+      		1 as "MODIFICATION_COUNT",
+      		parent_id,
+      		UNALLOCATED_ID as "CHILD_ID",
+      		#{contractBudgetID} as "BUDGET_ID",
+	      	#{subBudgetID} as "SUB_BUDGET_ID",
+	      	#{parentBudgetId} as "PARENT_BUDGET_ID",
+	      	#{parentSubBudgetId} as "PARENT_SUB_BUDGET_ID",
+      		'amnd' as "TYPE"
+  		from unallocated 
+       	where sub_budget_id = #{subBudgetID}
+        	and budget_id = #{contractBudgetID} 
+        	and UNALLOCATED_ID != parent_id
+        	and ACTIVE_FLAG=1	
+  </select>  
+
+	<insert id="insertAmendmentUnallocatedFunds" parameterType="com.nyc.hhs.model.CBGridBean">
+		insert into UNALLOCATED(
+			UNALLOCATED_ID,
+			BUDGET_ID,
+			SUB_BUDGET_ID,
+			PARENT_ID,
+			AMOUNT,
+			CREATED_DATE,
+			CREATED_BY_USERID,
+			CREATED_BY_STAFFID,
+			MODIFIED_DATE,
+			MODIFIED_BY_USERID,
+			MODIFIED_BY_STAFFID,
+			ACTIVE_FLAG,
+			UNALLOCATED_FUND)
+		values
+		   (SEQ_UNALLOCATED_ID.NEXTVAL,
+			#{parentBudgetId, jdbcType=VARCHAR},
+			#{parentSubBudgetId ,jdbcType=VARCHAR},
+			SEQ_UNALLOCATED_ID.CURRVAL,
+			0.0,
+			current_timestamp,
+			#{modifyByAgency,jdbcType=VARCHAR},
+			#{modifyByProvider,jdbcType=VARCHAR},
+			current_timestamp,
+			#{modifyByAgency,jdbcType=VARCHAR},
+			#{modifyByProvider,jdbcType=VARCHAR},
+			'1',
+			'Unallocated Fund')
+	</insert>
+    <!-- not in use since Unallocated Funds became non-default line item QC 8394 R 7.9.0 -->
+	<insert id="insertUpdAmnUnallocatedFunds" parameterType="com.nyc.hhs.model.CBGridBean">
+		insert into UNALLOCATED(
+			UNALLOCATED_ID,
+			BUDGET_ID,
+			SUB_BUDGET_ID,
+			PARENT_ID,
+			AMOUNT,
+			CREATED_DATE,
+			CREATED_BY_USERID,
+			CREATED_BY_STAFFID,
+			MODIFIED_DATE,
+			MODIFIED_BY_USERID,
+			MODIFIED_BY_STAFFID,
+			ACTIVE_FLAG,
+			PREV_APPROVED_BUDGET,
+			UNALLOCATED_FUND)
+		values 
+			(SEQ_UNALLOCATED_ID.NEXTVAL,
+			#{contractBudgetID,jdbcType=VARCHAR},
+			#{subBudgetID,jdbcType=VARCHAR},
+			(select UNALLOCATED_ID from UNALLOCATED where sub_budget_id = #{parentSubBudgetId,jdbcType=VARCHAR}),
+			0.0,
+			current_timestamp,
+			#{modifyByAgency,jdbcType=VARCHAR},
+			#{modifyByProvider,jdbcType=VARCHAR},
+			current_timestamp,
+			#{modifyByAgency,jdbcType=VARCHAR},
+			#{modifyByProvider,jdbcType=VARCHAR},
+			'1',
+			#{subBudgetAmount},
+			#{unallocatedFund,jdbcType=VARCHAR})
+	</insert>
+    <!--  QC 8394 R 7.9.0 add Add/Delete action for Unallocated Fund -->
+	
+	<update id="deleteAmendmentUnallocatedFunds" parameterType="com.nyc.hhs.model.UnallocatedFunds">
+			DELETE FROM UNALLOCATED 
+				WHERE UNALLOCATED_ID = #{id}
+       				 or ( PARENT_ID = #{id} and SUB_BUDGET_ID = #{subBudgetId})
+       				 
+	</update>
+		
+	<insert id="addAmendmentUnallocatedFunds" parameterType="com.nyc.hhs.model.UnallocatedFunds">
+	  			        	
+			INSERT INTO UNALLOCATED(
+				UNALLOCATED_ID,
+				BUDGET_ID,
+				SUB_BUDGET_ID,
+				PARENT_ID,
+				AMOUNT,
+				CREATED_DATE,
+				CREATED_BY_USERID,
+				CREATED_BY_STAFFID,
+				MODIFIED_DATE,
+				MODIFIED_BY_USERID,
+				MODIFIED_BY_STAFFID,
+				ACTIVE_FLAG,
+				UNALLOCATED_FUND)
+			VALUES
+			   (SEQ_UNALLOCATED_ID.NEXTVAL,
+				#{contractBudgetID,jdbcType=VARCHAR},
+				#{subBudgetID,jdbcType=VARCHAR},
+				SEQ_UNALLOCATED_ID.CURRVAL,
+				#{modificationAmount},
+				current_timestamp,
+				#{modifyByAgency,jdbcType=VARCHAR},
+				#{modifyByProvider,jdbcType=VARCHAR},
+				current_timestamp,
+				#{modifyByAgency,jdbcType=VARCHAR},
+				#{modifyByProvider,jdbcType=VARCHAR},
+				'1',
+				#{unallocatedFund,jdbcType=VARCHAR})
+				
+	</insert>
+	
+	<update id="updateAmendmentUnallocatedFunds" parameterType="com.nyc.hhs.model.UnallocatedFunds">
+		UPDATE UNALLOCATED 
+		SET AMOUNT = #{modificationAmount}, 
+			MODIFIED_DATE = current_timestamp,
+			MODIFIED_BY_USERID = #{modifyByAgency,jdbcType=VARCHAR},
+			MODIFIED_BY_STAFFID = #{modifyByProvider,jdbcType=VARCHAR},
+			UNALLOCATED_FUND = #{unallocatedFund,jdbcType=VARCHAR}
+		WHERE
+		    UNALLOCATED_ID = #{childId} 
+		    and PARENT_ID = #{id}      
+	</update>
+	
+	<insert id="insertNewUnallocatedFundsForAmendment" parameterType="com.nyc.hhs.model.UnallocatedFunds">
+	  			        	
+			INSERT INTO UNALLOCATED(
+				UNALLOCATED_ID,
+				BUDGET_ID,
+				SUB_BUDGET_ID,
+				PARENT_ID,
+				AMOUNT,
+				CREATED_DATE,
+				CREATED_BY_USERID,
+				CREATED_BY_STAFFID,
+				MODIFIED_DATE,
+				MODIFIED_BY_USERID,
+				MODIFIED_BY_STAFFID,
+				ACTIVE_FLAG,
+				UNALLOCATED_FUND)
+			VALUES
+			   (SEQ_UNALLOCATED_ID.NEXTVAL,
+				#{contractBudgetID,jdbcType=VARCHAR},
+				#{subBudgetID,jdbcType=VARCHAR},
+				#{id},
+				#{modificationAmount},
+				current_timestamp,
+				#{modifyByAgency,jdbcType=VARCHAR},
+				#{modifyByProvider,jdbcType=VARCHAR},
+				current_timestamp,
+				#{modifyByAgency,jdbcType=VARCHAR},
+				#{modifyByProvider,jdbcType=VARCHAR},
+				'1',
+				#{unallocatedFund,jdbcType=VARCHAR})
+				
+	</insert>
+			
+	<!-- End   QC 8394 R 7.9.0 add Add/Delete action for Unallocated Fund -->
+	<!-- Unallocated Funds Amendment Queries Ends -->
+	
+<!-- 	    //[Start] R9.4.0 QC8522 -->
+		<select id="fetchNonGridContractedServices_AMND" parameterType="com.nyc.hhs.model.CBGridBean"  resultMap="ContractedServices">
+		SELECT NVL(SUM(amount),0)as TOTAL_PROPOSED_AMOUNT, NVL(SUM(INVOICE_AMOUNT),0) as TOTAL_YTD_INVOICE_AMOUNT 
+		FROM 
+		( SELECT SUM( CASE WHEN inv.STATUS_ID IS NOT NULL THEN NVL(inv_det.INVOICE_AMOUNT,0)
+		                   ELSE 0
+		             END ) AS INVOICE_AMOUNT,
+		         0 AS CURRENT_INVOICE_AMOUNT,  CONTRACTED_SERVICE_ID,a.AMOUNT
+		   FROM  CONTRACTED_SERVICE a 
+		   LEFT  JOIN INVOICE_DETAILS inv_det ON inv_det.LINE_ITEM_ID = a.CONTRACTED_SERVICE_ID AND inv_det.ENTRY_TYPE_ID = '6'
+		   INNER JOIN CONTRACTED_SERVICE_TYPE_MASTER b ON b.CONTRACTED_SERVICE_TYPE_ID = a.CONTRACTED_SERVICE_TYPE_ID
+		   LEFT  JOIN INVOICE inv ON inv.INVOICE_ID = inv_det.INVOICE_ID AND inv.STATUS_ID in( 72,73)
+		  WHERE  a.SUB_BUDGET_ID in (#{subBudgetID})
+		   GROUP BY
+		CONTRACTED_SERVICE_ID,
+		a.AMOUNT
+		)
+
+	</select>
+	<!-- 	    //[Start] R9.4.0 QC8522 -->
+	
+	
+</mapper>

@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.TaskServiceMapper">
+
+	<resultMap id="result" type="com.nyc.hhs.model.CommentsHistoryBean">
+		<result property="action" column="EVENT_NAME" />
+		<result property="detail" column="DATA" />
+		<result property="user" column="USER_NAME" />
+		<result property="auditDate" column="AUDIT_DATE" />
+		<result property="taskName" column="EVENT_TYPE" />
+	</resultMap>
+ 	<!-- Updated in R5 -->
+	<select id="fetchAgencyTaskHistory" parameterType="hashmap"
+		resultMap="result">	
+		SELECT EVENT_NAME, DATA, USER_NAME, AUDIT_DATE, EVENT_TYPE FROM (SELECT
+		A.EVENT_NAME,A.EVENT_TYPE,A.DATA,A.AUDIT_DATE,decode(B.FIRST_NAME||' '||B.LAST_NAME, ' ', 'N/A',B.FIRST_NAME||' '||B.LAST_NAME) AS USER_NAME FROM
+		AGENCY_AUDIT A
+		LEFT OUTER JOIN
+		CITY_USER_DETAILS B ON A.CREATED_BY_USERID =
+		B.USER_ID WHERE
+		A.ENTITY_ID=#{entityId}
+		<if test="entityType != null">AND  A.ENTITY_TYPE=#{entityType}</if>
+		<if test="entityIdList != null">AND  A.ENTITY_TYPE IN  
+			<foreach item="item" index="index" collection="entityIdList" open="(" separator=","  close=")">
+	    		#{item}
+			</foreach>
+        </if>
+		AND A.EVENT_TYPE NOT LIKE 'TLC_%' AND A.EVENT_NAME != 'TLC: Highlight Tab'
+		UNION ALL
+		SELECT
+		A.EVENT_NAME,A.EVENT_TYPE,A.DATA,A.AUDIT_DATE,B.FIRST_NAME||' '||B.LAST_NAME AS USER_NAME FROM
+		ACCELERATOR_AUDIT A
+		LEFT OUTER JOIN
+		CITY_USER_DETAILS B ON A.CREATED_BY_USERID =
+		B.USER_ID WHERE
+		A.ENTITY_ID=#{entityId} 
+		<if test="entityType != null">AND  A.ENTITY_TYPE=#{entityType}</if>
+		<if test="entityIdList != null">AND  A.ENTITY_TYPE IN  
+			<foreach item="item" index="index" collection="entityIdList" open="(" separator=","  close=")">
+	    		#{item}
+			</foreach>
+        </if>
+		UNION ALL
+		SELECT
+		C.EVENT_NAME,C.EVENT_TYPE,C.DATA,C.AUDIT_DATE,D.FIRST_NAME||' '||D.MIDDLE_INITIAL||' '||D.LAST_NAME AS USER_NAME FROM
+		PROVIDER_AUDIT
+		C LEFT OUTER JOIN
+		STAFF_DETAILS D ON C.CREATED_BY_USERID =
+		D.STAFF_ID WHERE
+		C.ENTITY_ID=#{entityId} AND ( 
+			<if test="entityType != null">c.ENTITY_TYPE=#{entityType}</if>
+			<if test="entityIdList != null">c.ENTITY_TYPE IN  
+				<foreach item="item" index="index" collection="entityIdList" open="(" separator=","  close=")">
+		    		#{item}
+				</foreach>
+	        </if>	
+		<if test="entityTypeProvider != null">
+			OR (C.ENTITY_TYPE=#{entityTypeProvider} and C.EVENT_NAME=#{eventNameComment})
+		</if> ) AND C.EVENT_TYPE NOT LIKE 'TLC_%'
+		) ORDER BY AUDIT_DATE DESC,event_type desc	
+	</select>
+	<!-- Updated in R5 -->
+	
+	<select id="fetchProviderTaskHistory" parameterType="hashmap"
+		resultMap="result">
+		SELECT EVENT_NAME, EVENT_TYPE, DATA, AUDIT_DATE, USER_NAME FROM (SELECT
+		A.EVENT_NAME,A.EVENT_TYPE,A.DATA,A.AUDIT_DATE,decode(B.FIRST_NAME||' '||B.LAST_NAME, ' ', 'N/A',B.FIRST_NAME||' '||B.LAST_NAME) AS USER_NAME FROM
+		AGENCY_AUDIT A
+		LEFT OUTER JOIN
+		CITY_USER_DETAILS B ON A.CREATED_BY_USERID =
+		B.USER_ID WHERE
+		A.ENTITY_ID=#{entityId} AND ((A.ENTITY_TYPE=#{entityTypeForAgency} AND A.EVENT_NAME=#{eventNameForAgency} AND A.EVENT_TYPE NOT LIKE 'TLC_%') OR (ENTITY_TYPE=#{entityType} AND A.EVENT_TYPE NOT LIKE 'TLC_%'))
+		UNION ALL
+		SELECT
+		E.EVENT_NAME,E.EVENT_TYPE,E.DATA,E.AUDIT_DATE,decode(B.FIRST_NAME||' '||B.LAST_NAME, ' ', 'N/A',B.FIRST_NAME||' '||B.LAST_NAME) AS USER_NAME FROM
+		ACCELERATOR_AUDIT E
+		LEFT OUTER JOIN
+		CITY_USER_DETAILS B ON E.CREATED_BY_USERID =
+		B.USER_ID WHERE
+		E.ENTITY_ID=#{entityId} AND ((E.ENTITY_TYPE=#{entityTypeForAgency} AND E.EVENT_NAME=#{eventNameForAgency}) OR ENTITY_TYPE=#{entityType})
+		UNION ALL
+		SELECT
+		C.EVENT_NAME,C.EVENT_TYPE,C.DATA,C.AUDIT_DATE,D.FIRST_NAME||' '||D.MIDDLE_INITIAL||' '||D.LAST_NAME AS USER_NAME FROM
+		PROVIDER_AUDIT
+		C LEFT OUTER JOIN
+		STAFF_DETAILS D ON C.CREATED_BY_USERID =
+		D.STAFF_ID WHERE
+		C.ENTITY_ID=#{entityId} AND C.ENTITY_TYPE=#{entityType} AND c.EVENT_NAME != #{eventName} AND c.EVENT_TYPE NOT LIKE 'TLC_%')
+		ORDER BY AUDIT_DATE DESC,event_type desc		
+	</select>
+	
+	<select id="fetchProviderTaskHistoryTabLevel" parameterType="hashmap"
+		resultMap="result">
+		SELECT EVENT_NAME, EVENT_TYPE, DATA, AUDIT_DATE, USER_NAME FROM (SELECT
+		A.EVENT_NAME,A.EVENT_TYPE,A.DATA,A.AUDIT_DATE,decode(B.FIRST_NAME||' '||B.LAST_NAME, ' ', 'N/A',B.FIRST_NAME||' '||B.LAST_NAME) AS USER_NAME FROM
+		AGENCY_AUDIT A
+		LEFT OUTER JOIN
+		CITY_USER_DETAILS B ON A.CREATED_BY_USERID =
+		B.USER_ID WHERE
+		A.ENTITY_ID=#{entityId} AND ((A.ENTITY_TYPE=#{entityTypeForAgency} AND A.EVENT_NAME=#{eventNameForAgency} AND A.EVENT_TYPE=#{eventType}) OR 
+		(ENTITY_TYPE=#{entityType} AND A.EVENT_NAME=#{eventNameForAgency} AND A.EVENT_TYPE=#{eventType}))
+		UNION ALL
+		SELECT
+		E.EVENT_NAME,E.EVENT_TYPE,E.DATA,E.AUDIT_DATE,decode(B.FIRST_NAME||' '||B.LAST_NAME, ' ', 'N/A',B.FIRST_NAME||' '||B.LAST_NAME) AS USER_NAME FROM
+		ACCELERATOR_AUDIT E
+		LEFT OUTER JOIN
+		CITY_USER_DETAILS B ON E.CREATED_BY_USERID =
+		B.USER_ID WHERE
+		E.ENTITY_ID=#{entityId} AND ((E.ENTITY_TYPE=#{entityTypeForAgency} AND E.EVENT_NAME=#{eventNameForAgency} AND E.EVENT_TYPE=#{eventType}) OR 
+		(ENTITY_TYPE=#{entityType} AND E.EVENT_NAME=#{eventNameForAgency} AND E.EVENT_TYPE=#{eventType}))
+		UNION ALL
+		SELECT
+		C.EVENT_NAME,C.EVENT_TYPE,C.DATA,C.AUDIT_DATE,D.FIRST_NAME||' '||D.MIDDLE_INITIAL||' '||D.LAST_NAME AS USER_NAME FROM
+		PROVIDER_AUDIT
+		C LEFT OUTER JOIN
+		STAFF_DETAILS D ON C.CREATED_BY_USERID =
+		D.STAFF_ID WHERE
+		C.ENTITY_ID=#{entityId} AND C.ENTITY_TYPE=#{entityType} AND c.EVENT_NAME != #{eventName} AND c.EVENT_TYPE=#{eventType})
+		ORDER BY AUDIT_DATE DESC,event_type desc		
+	</select>
+	
+	<select id="fetchAgencyTaskHistoryTabLevel" parameterType="hashmap"
+		resultMap="result">	
+		SELECT EVENT_NAME, DATA, USER_NAME, AUDIT_DATE, EVENT_TYPE FROM (SELECT
+		A.EVENT_NAME,A.EVENT_TYPE,A.DATA,A.AUDIT_DATE,decode(B.FIRST_NAME||' '||B.LAST_NAME, ' ', 'N/A',B.FIRST_NAME||' '||B.LAST_NAME) AS USER_NAME FROM
+		AGENCY_AUDIT A
+		LEFT OUTER JOIN
+		CITY_USER_DETAILS B ON A.CREATED_BY_USERID =
+		B.USER_ID WHERE
+		A.ENTITY_ID=#{entityId} AND A.ENTITY_TYPE=#{entityType} AND A.EVENT_TYPE=#{eventType}
+		UNION ALL
+		SELECT
+		A.EVENT_NAME,A.EVENT_TYPE,A.DATA,A.AUDIT_DATE,B.FIRST_NAME||' '||B.LAST_NAME AS USER_NAME FROM
+		ACCELERATOR_AUDIT A
+		LEFT OUTER JOIN
+		CITY_USER_DETAILS B ON A.CREATED_BY_USERID =
+		B.USER_ID WHERE
+		A.ENTITY_ID=#{entityId} AND A.ENTITY_TYPE=#{entityType}
+		UNION ALL
+		SELECT
+		C.EVENT_NAME,C.EVENT_TYPE,C.DATA,C.AUDIT_DATE,D.FIRST_NAME||' '||D.MIDDLE_INITIAL||' '||D.LAST_NAME AS USER_NAME FROM
+		PROVIDER_AUDIT
+		C LEFT OUTER JOIN
+		STAFF_DETAILS D ON C.CREATED_BY_USERID =
+		D.STAFF_ID WHERE
+		C.ENTITY_ID=#{entityId} AND c.EVENT_TYPE=#{eventType} AND ( C.ENTITY_TYPE=#{entityType}	
+		<if test="entityTypeProvider != null">
+			OR (C.ENTITY_TYPE=#{entityTypeProvider} and C.EVENT_NAME=#{eventNameComment})
+		</if> )
+		) ORDER BY AUDIT_DATE DESC,event_type desc	
+	</select>
+	
+	<select id="fetchProviderTabHighlightFromAgencyAudit" parameterType="hashmap"
+		resultType="string">	
+		SELECT TAB FROM
+		TAB_LEVEL_COMMENTS_HIGHLIGHT A WHERE
+		CONTRACT_ID = #{contractId} AND BUDGET_ID = #{budgetId} AND SUB_BUDGET_ID = #{subBudgetId} AND HIGHLIGHT_FLAG = '1'
+    	<if test="invoiceId != null">
+		 AND INVOICE_ID = #{invoiceId}
+		</if>
+	</select>
+	
+	<select id="fetchAcceleratorTaskHistory" parameterType="hashmap"
+		resultMap="result">
+		SELECT
+		C.EVENT_NAME,C.EVENT_TYPE,C.DATA, C.AUDIT_DATE,decode(D.FIRST_NAME||' '||D.LAST_NAME, ' ', 'N/A',D.FIRST_NAME||' '||D.LAST_NAME) AS USER_NAME FROM
+		ACCELERATOR_AUDIT
+		C LEFT OUTER JOIN
+		STAFF_CITY_USER_DETAILS D ON C.CREATED_BY_USERID =
+		D.USER_ID WHERE
+		C.ENTITY_ID=#{workflowId}
+		ORDER BY AUDIT_DATE DESC
+	</select>
+
+	<resultMap id="resultAgencyUserDetails" type="com.nyc.hhs.model.StaffDetails">
+		<result property="msStaffFirstName" column="FIRST_NAME" />
+		<result property="msStaffLastName" column="LAST_NAME" />
+		<result property="msStaffId" column="LEVEL_REVIEWER_ID" />
+	</resultMap>
+
+	<!-- Query Change made as a part of Enhancement #6280 for Release 3.3.0  --> 
+	<select id="fetchAgencyDetails" parameterType="hashmap"
+		resultMap="resultAgencyUserDetails">	
+		select
+		c.first_name,c.last_name,b.level_id,b.level_reviewer_id
+		from
+		agency_setting a,agency_setting_level_users b,city_user_details c
+		where
+		b.level_reviewer_id=c.user_id and
+		a.agency_setting_id=b.agency_setting_id
+		and
+   		a.review_process_id=#{asProcessId}
+   	    and
+		a.agency_id=#{asAgencyId} and b.level_id=#{asTaskLevel} and c.active_flag='1' 
+		order by c.first_name asc, c.last_name asc	
+ 	</select>
+ 	
+ 	<!-- Query Change made as a part of Enhancement #6280 for Release 3.3.0  --> 
+ 	<select id="fetchAgencyDetailsForInbox" parameterType="hashmap"
+		resultMap="resultAgencyUserDetails">	
+		select
+		c.first_name,c.last_name,b.level_reviewer_id
+		from
+		agency_setting a,agency_setting_level_users b,city_user_details c
+		where  
+   		a.agency_setting_id=b.agency_setting_id and
+    	a.review_process_id=#{asProcessId}
+    	and
+		a.agency_id=#{asAgencyId} and c.active_flag='1' and
+   	    b.level_reviewer_id=c.user_id and
+       level_id in (select a.level_id from agency_setting_level_users a ,agency_setting b where 
+       a.agency_setting_id=b.agency_setting_id and 
+       b.review_process_id=#{asProcessId}  and b.agency_id=#{asAgencyId} and a.level_reviewer_id=#{asUserId})
+       order by c.first_name asc, c.last_name asc
+ 	</select>
+ 	
+ 	<!-- Query Change made as a part of Enhancement #6280 for Release 3.3.0  --> 
+ 	<select id="fetchAgencyUserDetails" parameterType="hashmap" resultMap="resultAgencyUserDetails">
+     SELECT FIRST_NAME,LAST_NAME,USER_ID AS LEVEL_REVIEWER_ID FROM CITY_USER_DETAILS WHERE ORGANIZATION_NAME=#{asAgencyId} AND ACTIVE_FLAG='1' 
+     order by FIRST_NAME asc, LAST_NAME asc 
+ 	</select>
+
+	<select id="fetchLastTaskComment" parameterType="com.nyc.hhs.model.TaskDetailsBean"
+		resultType="hashmap">
+		SELECT INTERNAL_COMMENT, PROVIDER_COMMENT,CREATED_BY_USERID FROM (SELECT INTERNAL_COMMENT,PROVIDER_COMMENT,CREATED_BY_USERID
+		FROM USER_COMMENT WHERE WORKFLOW_ID = #{workFlowId, jdbcType=VARCHAR} AND
+		TASK_ID=#{taskId, jdbcType=VARCHAR} 
+		<if test="entityType != null">
+		and ENTITY_TYPE=#{entityType} 
+		</if>
+		ORDER BY AUDIT_DATE DESC) WHERE ROWNUM=1 
+	</select>
+	
+	<select id="getContractInfo" resultType="hashmap" parameterType="String">
+	select ext_ct_number , contract_title from contract where contract_id = #{asContractId}
+	</select>
+	
+	<select id="fetchLastComment" parameterType="com.nyc.hhs.model.TaskDetailsBean"
+		resultType="hashmap">
+		SELECT INTERNAL_COMMENT,PROVIDER_COMMENT,CREATED_BY_USERID FROM 
+			(SELECT INTERNAL_COMMENT,PROVIDER_COMMENT,CREATED_BY_USERID 
+			 FROM USER_COMMENT WHERE ENTITY_ID = #{entityId} and ENTITY_TYPE=#{entityType} 
+			 <if test="workFlowId == null or workFlowId == ''">
+			 	AND WORKFLOW_ID IS NULL
+			 </if> 
+			 ORDER BY AUDIT_DATE DESC) 
+		WHERE ROWNUM=1 
+	</select>
+	
+	<select id="fetchUserCommentsTabLevel" parameterType="com.nyc.hhs.model.TaskDetailsBean"
+		resultType="hashmap">
+		SELECT INTERNAL_COMMENT,PROVIDER_COMMENT,CREATED_BY_USERID FROM (SELECT INTERNAL_COMMENT,PROVIDER_COMMENT,CREATED_BY_USERID 
+		FROM USER_COMMENT WHERE ENTITY_ID = #{entityId}
+	</select>
+
+	<insert id="insertTaskLookup" parameterType="com.nyc.hhs.model.TaskLookupBean">
+		INSERT
+		INTO
+		TASK_LOOKUP
+		(
+		TASK_LOOKUP_ID,
+		AGENCY_ID,
+		WOB_NUMBER,
+		TASK_TYPE,
+		ENTITY_TYPE,
+		ENTITY_ID,
+		PROC_STATUS_ID,
+		LEVEL_ID,
+		LEVEL_REVIEWER_ID,
+		CREATED_DATE,
+		CREATED_BY_USERID,
+		MODIFIED_DATE,
+		MODIFIED_BY_USERID
+		)
+		values
+		(
+		SEQ_TASK_LOOKUP_ID.NEXTVAL,
+		#{agencyId,jdbcType=VARCHAR},
+		#{workflowId,jdbcType=VARCHAR},
+		#{taskType,jdbcType=VARCHAR},
+		#{entityType,jdbcType=VARCHAR},
+		#{entityId,jdbcType=VARCHAR},
+		#{procStatusId,jdbcType=VARCHAR},
+		#{levelId,jdbcType=VARCHAR},
+		#{levelReviewerId,jdbcType=VARCHAR},
+		current_timestamp,
+		#{userId,jdbcType=VARCHAR},
+		current_timestamp,
+		#{userId,jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<resultMap id="taskLookupDetailsWF" type="com.nyc.hhs.model.TaskLookupBean">
+		<result property="workflowId" column="WORKFLOW_ID" />
+		<result property="procStatusId" column="PROC_STATUS_ID" />
+	</resultMap>
+
+	<select id="fetchTaskIdStatus" parameterType="com.nyc.hhs.model.TaskLookupBean"
+		resultMap="taskLookupDetailsWF">
+		SELECT * FROM (SELECT WOB_NUMBER,PROC_STATUS_ID FROM
+		TASK_LOOKUP WHERE ENTITY_TYPE=#{entityType} AND ENTITY_ID=#{entityId}
+		AND TASK_TYPE=#{taskType} ORDER BY MODIFIED_DATE DESC) WHERE ROWNUM=1
+	</select>
+
+	<update id="updateTaskStatus" parameterType="com.nyc.hhs.model.TaskLookupBean">
+		UPDATE
+		TASK_LOOKUP_ID SET
+		PROC_STATUS_ID=#{procStatusId},LEVEL_REVIEWER_ID=#{levelReviewerId},MODIFIED_DATE=current_timestamp
+		WHERE ENTITY_TYPE=#{entityType} AND ENTITY_ID=#{entityId} AND
+		TASK_TYPE=#{taskType}
+    </update>
+    
+    <select id="fetchCityAgencyUserName" parameterType="String" resultType="String">
+		SELECT (FIRST_NAME||' '||LAST_NAME) AS USER_NAME FROM CITY_USER_DETAILS WHERE USER_ID=#{userID}
+	</select>
+	
+	 <select id="fetchProviderUserName" parameterType="String" resultType="String">
+		SELECT (FIRST_NAME||' '||LAST_NAME) AS USER_NAME FROM STAFF_DETAILS WHERE STAFF_ID=#{userID}
+	</select>
+	
+	<select id="fetchEvaluationLastComment" parameterType="com.nyc.hhs.model.TaskDetailsBean"
+		resultType="hashmap">
+		SELECT INTERNAL_COMMENT,PROVIDER_COMMENT,CREATED_BY_USERID FROM (SELECT INTERNAL_COMMENT,PROVIDER_COMMENT,CREATED_BY_USERID 
+		FROM USER_COMMENT WHERE ENTITY_ID = #{entityId} and ENTITY_TYPE IN (#{entityTypeForAgency},#{entityType}) ORDER BY MODIFIED_DATE DESC) WHERE ROWNUM=1 
+	</select>
+    
+    <insert id = "highlightTabInsert" parameterType="com.nyc.hhs.model.TaskDetailsBean">
+    	INSERT INTO TAB_LEVEL_COMMENTS_HIGHLIGHT (CONTRACT_ID, BUDGET_ID, SUB_BUDGET_ID,INVOICE_ID, HIGHLIGHT_FLAG, TAB, CREATED_BY_USER_ID, CREATED_DATE, MODIFIED_BY_USER_ID, MODIFIED_DATE)
+    	VALUES(#{contractId}, #{budgetId}, #{subBudgetId}, #{invoiceId,jdbcType=VARCHAR},'0',#{entityTypeTabLevel} ,#{userId}, SYSTIMESTAMP,#{userId}, SYSTIMESTAMP) 
+    </insert>
+    
+    <delete id="highlightTabDelete" parameterType="com.nyc.hhs.model.TaskDetailsBean">
+    	DELETE FROM TAB_LEVEL_COMMENTS_HIGHLIGHT
+    	WHERE CONTRACT_ID = #{contractId} AND BUDGET_ID = #{budgetId} AND SUB_BUDGET_ID = #{subBudgetId} AND TAB = #{entityTypeTabLevel}
+    	<if test="invoiceId != null">
+		 AND INVOICE_ID = #{invoiceId}
+		</if> 
+    </delete>
+    
+    <update id = "highlightTabUpdate" parameterType="com.nyc.hhs.model.TaskDetailsBean">
+    	UPDATE TAB_LEVEL_COMMENTS_HIGHLIGHT
+    	SET HIGHLIGHT_FLAG = '0' WHERE
+    	CONTRACT_ID = #{contractId} AND BUDGET_ID = #{budgetId} AND SUB_BUDGET_ID = #{subBudgetId} AND TAB = #{entityTypeTabLevel}
+    	<if test="invoiceId != null">
+		 AND INVOICE_ID = #{invoiceId}
+		</if>
+    </update>
+    
+    <update id = "highlightTabUpdateOnAgencyTaskFinish" parameterType="com.nyc.hhs.model.TaskDetailsBean">
+    	UPDATE TAB_LEVEL_COMMENTS_HIGHLIGHT
+    	SET HIGHLIGHT_FLAG = '1' WHERE
+    	CONTRACT_ID = #{contractId,jdbcType=VARCHAR} AND BUDGET_ID = #{budgetId,jdbcType=VARCHAR}
+    	<if test="invoiceId != null">
+		 AND INVOICE_ID = #{invoiceId}
+		</if>
+    </update>
+    <!-- Start of updates in build 3.2.0 for enhancement #6361 -->
+    <select id="fetchSelectedUserAssignedLevel" parameterType="hashmap" resultType="String">
+		SELECT LEVEL_ID FROM AGENCY_SETTING_LEVEL_USERS ASLU, AGENCY_SETTING ASET WHERE ASLU.LEVEL_REVIEWER_ID=#{lsTaskOwnerName,jdbcType=VARCHAR} AND ASET.AGENCY_ID = #{asAgencyId,jdbcType=VARCHAR} AND ASET.REVIEW_PROCESS_ID =#{asProcessId,jdbcType=VARCHAR}
+		AND ASLU.AGENCY_SETTING_ID  =ASET.AGENCY_SETTING_ID
+	</select>
+	<!-- Start of updates in build 3.2.0 for enhancement #6361 -->
+	<!-- Added in R5 -->
+	<select id="checkAuditInsert" parameterType="hashmap"
+		resultType="int">
+		select count(EVENT_NAME) from agency_audit where Entity_type='Approve PSR' and entity_id=#{entityId} and event_name='Task Creation'
+	</select>
+	
+	<select id="fetchFinalizeAwardLastComment" parameterType="com.nyc.hhs.model.TaskDetailsBean"
+		resultType="hashmap">
+		SELECT INTERNAL_COMMENT,PROVIDER_COMMENT,CREATED_BY_USERID FROM 
+			(SELECT INTERNAL_COMMENT,PROVIDER_COMMENT,CREATED_BY_USERID 
+			 FROM USER_COMMENT WHERE ENTITY_TYPE=#{entityType} 
+			 	AND WORKFLOW_ID = #{workFlowId}
+			 ORDER BY AUDIT_DATE DESC) 
+		WHERE ROWNUM=1 
+	</select>
+	<select id="fetchInvoiceDetailForTaskExport" parameterType="com.nyc.hhs.model.AgencyTaskBean" resultType="hashmap">
+	SELECT TO_CHAR(INVOICE_START_DATE,'MM/DD/YYYY') AS
+		INVOICE_START_DATE,
+		TO_CHAR(INVOICE_END_DATE,'MM/DD/YYYY') AS
+		INVOICE_END_DATE FROM INVOICE WHERE INVOICE_ID= #{invoiceNumber,jdbcType=VARCHAR}
+	</select>
+	<select id="fetchUserNameForTaskExport" parameterType="com.nyc.hhs.model.AgencyTaskBean" resultType="String">
+    select FIRST_NAME||' '||LAST_NAME as name from STAFF_CITY_USER_DETAILS where USER_ID=#{submittedBy,jdbcType=VARCHAR} AND ROWNUM=1
+	</select>
+	<select id="getExportTaskList" parameterType="String" resultType="hashmap">
+	SELECT ORG_TYPE,USER_ROLE,USER_ORG_TYPE,EXPORT_REQUEST_ID,to_char(CREATED_DATE,'mm/dd/yyyy hh24:mi:ss') CREATED_DATE FROM BULK_TASK_EXPORT WHERE STATUS_ID= #{asStatus,jdbcType=VARCHAR}
+	</select>
+	<!-- Added in R5 -->
+</mapper>

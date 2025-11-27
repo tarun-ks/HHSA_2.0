@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapping>
+<!--Start : Added in R6 -->
+	<page name="returnedPaymentAgency">
+		<status name="185">
+			<action>View Details</action>
+			<action>Initiate Task</action>
+			<action>Cancel</action>
+		</status>
+		<status name="186">
+			<action>View Details</action>
+			<action>Cancel</action>
+		</status>
+		<status name="187">
+			<action>View Details</action>
+			<action>Cancel</action>
+		</status>
+		<status name="188">
+			<action>View Details</action>
+		</status>
+	</page>
+	
+	<page name="returnedPaymentProviderCity">
+		<status name="185">
+			<action>View Details</action>
+		</status>
+		<status name="186">
+			<action>View Details</action>
+		</status>
+		<status name="187">
+			<action>View Details</action>
+		</status>
+		<status name="188">
+			<action>View Details</action>
+		</status>
+	</page>
+	
+	<!--End : Added in R6 -->
+</mapping>

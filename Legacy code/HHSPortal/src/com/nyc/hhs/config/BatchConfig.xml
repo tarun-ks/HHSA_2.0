@@ -1,0 +1,134 @@
+<batch-config>
+	<batch name="R1">
+		<key id="notification_batch" class="com.nyc.hhs.batch.impl.NotificationBatch" transaction="/com/nyc/hhs/config/TransactionConfig.xml" key="transaction" />
+		<key id="printview_batch" class="com.nyc.hhs.batch.impl.PrintViewBatch" transaction="/com/nyc/hhs/config/TransactionConfig.xml" key="transaction"/>
+	</batch>
+		<batch name="R6">
+		<key id="bulknotification_batch" class="com.nyc.hhs.batch.impl.BulkNotificationsBatch" transaction="/com/nyc/hhs/config/TransactionConfig.xml" key="transaction" />
+	</batch>
+	<!-- Separate ID has been created for DocLapsing batch to change its frequency once in a day. Release 2.6.0 defect 5573 -->
+	<batch name="DocLapsing">
+		<key id="doclapsing_batch" class="com.nyc.hhs.batch.impl.DocLapsingBatch" transaction="/com/nyc/hhs/config/TransactionConfig.xml" key="transaction" />
+	</batch>
+	<batch name="Reporting">
+		<key id="reports_batch" class="com.nyc.hhs.batch.impl.ReportsBatch" transaction="/com/nyc/hhs/config/TransactionConfig.xml" key="transaction"/>
+	</batch>
+	<batch name="R2">
+		<key id="sm_notification_batch" class="com.nyc.hhs.procurementsbatch.impl.RemindersBatch" transaction="/com/nyc/hhs/config/SMBatchTransactionConfig.xml" key="transactionR2"/>
+	</batch>
+	<batch name="R3">
+		<key id="contracts_batch" class="com.nyc.hhs.contractsbatch.impl.ContractsStatusUpdateBatch" transaction="/com/nyc/hhs/config/ContractsBatchTransactionConfig.xml" key="transactionComponent"/>
+		<key id="payments_batch" class="com.nyc.hhs.contractsbatch.impl.PaymentUpdateBatch" transaction="/com/nyc/hhs/config/ContractsBatchTransactionConfig.xml" key="transactionComponent"/>
+	</batch>
+	<batch name="LDAP">
+		<key id="ldap_batch" class="com.nyc.hhs.batch.impl.LdapBatch" transaction="/com/nyc/hhs/config/TransactionConfig.xml" key="transaction"/>
+	</batch>
+	<batch name="PDF-generation">
+		<key id="pdf_batch" class="com.nyc.hhs.batch.impl.PDFGenerationBatch" transaction="/com/nyc/hhs/config/TransactionConfigR2.xml" key="transactionR2"/>
+	</batch>
+	<!-- R5 change starts -->
+	<batch name="PDF-PSR-generation">
+		<key id="PDF-PSR-generation" class="com.nyc.hhs.batch.impl.PDFGenerationPsrBatch" transaction="/com/nyc/hhs/config/TransactionConfigR5.xml" key="transactionR5"/>
+	</batch>
+	<!-- R5 change ends -->
+	<batch name="bulk-upload">
+		<key id="bulk_upload" class="com.batch.bulkupload.BulkUploadBatch" transaction="/com/nyc/hhs/config/TransactionConfigR2.xml" key="transactionR2"/>
+	</batch>
+	<batch name="Amendment_status">
+		<key id="Amendment_status" class="com.nyc.hhs.batch.impl.DataConversionAmendmentStatusBatch" transaction="/com/nyc/hhs/config/TransactionConfigR2.xml" key="transactionR2"/>
+	</batch>
+	<batch name="proc_doc_zip_batch">
+		<key id="procdoc_zip" class="com.nyc.hhs.batch.impl.ProcurementDocsZipBatch" transaction="/com/nyc/hhs/config/TransactionConfigR2.xml" key="transactionR2"/>
+	</batch>
+	<batch name="proc_doc_zip_delete">
+		<key id="procdoc_zip_delete" class="com.nyc.hhs.batch.impl.ProcurementDocsZipDeleteBatch" transaction="/com/nyc/hhs/config/TransactionConfigR2.xml" key="transactionR2"/>
+	</batch>
+	<batch name="ProposalReport_DueDate">
+		<key id="ProposalReportOnDueDate" class="com.nyc.hhs.batch.impl.ProposalReportOnDueDateBatch" transaction="/com/nyc/hhs/config/TransactionConfig.xml" key="transaction"/>
+	</batch>
+
+	<batch name="ProposalReport_BeforeDueDate">
+		<key id="ProposalReportBeforeDueDate" class="com.nyc.hhs.batch.impl.ProposalReportBeforeDueDateBatch" transaction="/com/nyc/hhs/config/TransactionConfig.xml" key="transaction"/>
+	</batch>
+	<!--  New batch Added in Build 3.6.0 to notify the number of stuck task in component queue and maintainance Queue -->
+	<batch name="stuck_work_items_batch">
+		<key id="stuck_work_items_batch" class="com.nyc.hhs.batch.impl.StuckQueueItemsNotificationBatch" transaction="/com/nyc/hhs/config/TransactionConfigR2.xml" key="transactionR2"/>
+	</batch>
+	<!--  New batch Added in Build 3.8.0 enhancement 6564 to update accounting lines post interim period  -->	
+	<!--Start Added in R5 -->
+	<batch name="daily_digest_financials_tasks">
+		<key id="daily_digest_financials_tasks_batch" class="com.nyc.hhs.batch.impl.DailyDigestFinancialsTaskBatch" transaction="/com/nyc/hhs/config/TransactionConfigR2.xml" key="transactionR2"/>
+	</batch>
+	<!--End Added in R5 -->
+	<batch name="update_acc_line_batch">
+		<key id="update_acc_line_batch" class="com.nyc.hhs.batch.impl.UpdateAccountingLineBatch" transaction="/com/nyc/hhs/config/TransactionConfigR2.xml" key="transactionR2"/>
+	</batch>
+
+	<!--  New batch Added in Build 3.12.0 enhancement 6578 to update accounting lines as per latest FMS feed  -->	
+	<batch name="update_acc_line_batch_as_per_fms_feed">
+		<key id="update_acc_line_batch_as_per_fms_feed" class="com.nyc.hhs.batch.impl.UpdateAccountingLinesAsPerFmsFeed" transaction="/com/nyc/hhs/config/TransactionConfigR2.xml" key="transactionR2"/>
+	</batch>
+	<!--Start Added in R5 -->
+	<batch name="downloadAllBatch">
+		<key id="downloadAllBatch" class="com.nyc.hhs.batch.impl.FileDownloaderAndZip" transaction="/com/nyc/hhs/config/TransactionConfigR5.xml" key="transactionR5"/>
+	</batch>
+	
+	<batch name="exportAllTaskBatch">
+		<key id="exportAllTaskBatch" class="com.nyc.hhs.batch.impl.ExportAllTasks" transaction="/com/nyc/hhs/config/TransactionConfigR5.xml" key="transactionR5"/>
+	</batch>
+	
+	<batch name="CreateCustomObjForOrganization">
+		<key id="CreateCustomObjForOrganization" class="com.nyc.hhs.batch.impl.CreateCustomObjForOrganization" transaction="/com/nyc/hhs/config/TransactionConfigR5.xml" key="transactionR5"/>
+	</batch>
+	
+	<!-- Batch Entry for Filenet Migration Batch-->
+	<batch name="FileNetBatch">
+		<key id="FileNetBatch" class="com.nyc.hhs.batch.impl.FileNetBatch" transaction="/com/nyc/hhs/config/TransactionConfigR5.xml" key="transactionR5" />
+	</batch>
+	
+	<batch name="bulkFilenetUpload">
+		<key id="bulkFilenetUpload" class="com.nyc.hhs.batch.impl.OffShoreBatch" transaction="/com/nyc/hhs/config/TransactionConfigR5.xml" key="transactionR5" />
+	</batch>
+	<batch name="bulkFolderUpload">
+		<key id="bulkFolderUpload" class="com.nyc.hhs.batch.impl.OffShoreBatch" transaction="/com/nyc/hhs/config/TransactionConfigR5.xml" key="transactionR5" />
+	</batch>
+	
+	<batch name="linkageConsistency">
+		<key id="linkageConsistency" class="com.nyc.hhs.batch.impl.LinkageConsistencyBatch" transaction="/com/nyc/hhs/config/TransactionConfigR5.xml" key="transactionR5" />
+	</batch>
+	
+	<!--End Added in R5 -->
+
+	<!-- R6- Inbound interface batch starts -->
+	<batch name="R6_bulk_upload">
+		<key id="contracts_batch" class="com.nyc.hhs.contractsbatch.impl.ContractsConfigureBatch" transaction="/com/nyc/hhs/config/TransactionConfigR2.xml" key="transactionR2"/>
+	</batch>
+	<!-- R6- Inbound interface batch ends -->
+	<!-- R7 Start- Modification Auto Approve batch -->
+	<batch name="R7_modification">
+		<key id="R7_modification" class="com.nyc.hhs.batch.impl.AutoApproveBatch" transaction="/com/nyc/hhs/config/TransactionConfig.xml" key="transaction" />
+	</batch>
+	<!-- R7 End- Modification Auto Approve batch -->
+	
+	<!-- R8.1.0 ShirinkNotificationData -->
+	<batch name="ShrinkNotification_Archive">
+		<key id="ShrinkNotification_Archive" class="com.nyc.hhs.batch.impl.ShrinkNotificationInfoBatch" transaction="/com/nyc/hhs/config/TransactionConfig.xml" key="transaction"/>
+	</batch>
+	<!-- R8.1.0  -->
+
+
+	<!-- R8.4.0 QC9492 : Amd MOD xml regen -->
+	<batch name="BudgetXML_Regen">
+		<key id="BudgetXML_Regen" class="com.nyc.hhs.batch.impl.BudgetXMLRegen" transaction="/com/nyc/hhs/config/TransactionConfig.xml" key="transaction"/>
+	</batch>
+	<!-- R8.4.0  -->
+
+
+	
+	<!-- R8.4.0 QC9492 : Amd MOD xml regen -->
+	<batch name="Clear_Dup_User_DN">
+		<key id="Clear_Dup_User_DN" class="com.nyc.hhs.batch.impl.UserDNDupCleaning" transaction="/com/nyc/hhs/config/TransactionConfig.xml" key="transaction"/>
+	</batch>
+	<!-- R8.4.0  -->
+	
+</batch-config>

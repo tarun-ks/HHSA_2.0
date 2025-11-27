@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<organizationId name="provider_org">
+		<HelpCategory screenName="Procurement Roadmap" HelpCategory="Procurement Roadmap (Provider)"/>
+		<HelpCategory screenName="Procurement Summary" HelpCategory="Procurement Roadmap (Provider)"/>
+		<HelpCategory screenName="Services and Providers" HelpCategory="Procurement Roadmap (Provider)"/>
+		<HelpCategory screenName="RFP Documents" HelpCategory="Procurement Roadmap (Provider)"/>
+		<HelpCategory screenName="Proposal Summary" HelpCategory="Procurement Roadmap (Provider)"/>
+		<HelpCategory screenName="Proposal Details" HelpCategory="Proposal and Award"/>
+		<HelpCategory screenName="Proposal Details - Add Site" HelpCategory="Proposal and Award"/>
+		<HelpCategory screenName="Proposal Documents" HelpCategory="Proposal and Award"/>
+		<HelpCategory screenName="Submit Proposal" HelpCategory="Proposal and Award"/>
+		<HelpCategory screenName="View Evaluation Scores" HelpCategory="Proposal and Award"/>
+		<HelpCategory screenName="Selection Details" HelpCategory="Proposal and Award"/>
+		<HelpCategory screenName="Home (Provider)" HelpCategory="Home"/>
+		<HelpCategory screenName="Selection Details Summary" HelpCategory="Proposal and Award"/>
+		
+		<HelpCategory screenName="Contract List" HelpCategory="Contract (Provider)"/>
+        <HelpCategory screenName="Budget List" HelpCategory="Budget (Provider)"/>
+        <HelpCategory screenName="Invoice List" HelpCategory="Invoice (Provider)"/>
+        <HelpCategory screenName="Payment List" HelpCategory="Payment (Provider)"/>
+        <HelpCategory screenName="Amendment List" HelpCategory="Amendment"/>
+        <HelpCategory screenName="Financials" HelpCategory="Certification of Funds"/>
+        <HelpCategory screenName="Contract Budget" HelpCategory="Contract Budget"/>
+        <HelpCategory screenName="Invoice" HelpCategory="Invoice (Provider)"/>
+        <HelpCategory screenName="Payment Details" HelpCategory="Payment"/>
+        <HelpCategory screenName="Advance Payment Details" HelpCategory="Payment"/>
+        <HelpCategory screenName="Contract Budget Amendment" HelpCategory="Amendment"/>
+        <HelpCategory screenName="Budget Modification" HelpCategory="Modification"/>
+        <HelpCategory screenName="Budget Update" HelpCategory="Budget Update"/>
+	</organizationId>
+	<organizationId name="agency_org">
+		<HelpCategory screenName="Procurement Roadmap" HelpCategory="Procurement Roadmap (Agency)"/>
+		<HelpCategory screenName="Procurement Summary" HelpCategory="Procurement Roadmap (Agency)"/>
+		<HelpCategory screenName="Financials" HelpCategory="Procurement Roadmap (Agency)"/>
+		<HelpCategory screenName="Services and Providers" HelpCategory="Procurement Roadmap (Agency)"/>
+		<HelpCategory screenName="Approved Providers" HelpCategory="Procurement Roadmap (Agency)"/>
+		<HelpCategory screenName="Proposal Configuration" HelpCategory="Procurement Roadmap (Agency)"/>
+		<HelpCategory screenName="Competition Configuration" HelpCategory="Procurement Roadmap (Agency)"/>
+		<HelpCategory screenName="Release RFP" HelpCategory="Procurement Roadmap (Agency)"/>
+		<HelpCategory screenName="RFP Documents" HelpCategory="Procurement Roadmap (Agency)"/>
+		<HelpCategory screenName="Evaluation Criteria" HelpCategory="Procurement Roadmap (Agency)"/>
+		<HelpCategory screenName="Evaluation Settings" HelpCategory="Evaluation and Award"/>
+		<HelpCategory screenName="Evaluation Status" HelpCategory="Evaluation and Award"/>
+		<HelpCategory screenName="Evaluation Results and Selections" HelpCategory="Evaluation and Award"/>
+		<HelpCategory screenName="View Proposal" HelpCategory="Evaluation and Award"/>
+		<HelpCategory screenName="Evaluation Summary" HelpCategory="Evaluation and Award"/>
+		<HelpCategory screenName="View Award Documents" HelpCategory="Evaluation and Award"/>
+		<HelpCategory screenName="Awards and Contracts" HelpCategory="Evaluation and Award"/>
+		<HelpCategory screenName="Task Details - Evaluate Proposal" HelpCategory="Tasks - Evaluation and Award"/>
+		<HelpCategory screenName="Task Details - Accept Proposal" HelpCategory="Tasks - Evaluation and Award"/>
+		<HelpCategory screenName="Task Details - Review Scores" HelpCategory="Tasks - Evaluation and Award"/>
+		<HelpCategory screenName="Task Details - Configure Award Documents" HelpCategory="Tasks - Evaluation and Award"/>
+		<HelpCategory screenName="Home (Agency)" HelpCategory="Home (Agency)"/>
+		<HelpCategory screenName="Competition Configuration" HelpCategory="Procurement Roadmap (Agency)"/>
+		<HelpCategory screenName="Evaluation Groups - Proposals" HelpCategory="Evaluation and Award"/>
+		<HelpCategory screenName="Proposals and Evaluations Summary" HelpCategory="Evaluation and Award"/>
+		<HelpCategory screenName="Evaluation Groups - Awards" HelpCategory="Evaluation and Award"/>
+		<HelpCategory screenName="Awards and Contracts Summary" HelpCategory="Evaluation and Award"/>
+		
+		<HelpCategory screenName="Procurement Certification of Funds Task" HelpCategory="Certification of Funds (Agency)"/>
+	    <HelpCategory screenName="Contract Configuration (Initial/Renewal/Add Contract) Task" HelpCategory="Certification of Funds (Agency)"/>
+        <HelpCategory screenName="Contract Certification of Funds (Initial/Renewal/Add Contract) Task" HelpCategory="Certification of Funds (Agency)"/>
+        <HelpCategory screenName="Agency Settings" HelpCategory="Agency Settings (Agency)"/>
+        <HelpCategory screenName="Contract List" HelpCategory="Contract (Agency)"/>
+        <HelpCategory screenName="Budget List" HelpCategory="Budget (Agency)"/>
+        <HelpCategory screenName="Invoice List" HelpCategory="Invoice (Agency)"/>
+        <HelpCategory screenName="Payment List" HelpCategory="Payment (Agency)"/>
+        <HelpCategory screenName="Amendment List" HelpCategory="Amendment (Agency)"/>
+        <!--R6 Start help category name added-->
+        <HelpCategory screenName="Contract Budget Review (Initial/New FY/Renewal) Task" HelpCategory="Contract Budget (Agency)"/>
+       	<!--R6 end-->
+       	<HelpCategory screenName="Contract Budget Review Task" HelpCategory="Contract Budget (Agency)"/>
+        <HelpCategory screenName="Invoice Review Task" HelpCategory="Invoice (Agency)"/>
+        <HelpCategory screenName="Advance Review Task" HelpCategory="Payment (Agency)"/>
+        <HelpCategory screenName="Payment Review Task" HelpCategory="Payment (Agency)"/>
+        <HelpCategory screenName="Advance Payment Task" HelpCategory="Payment (Agency)"/>
+        <HelpCategory screenName="Amendment Configuration Task" HelpCategory="Amendment (Agency)"/>
+        <HelpCategory screenName="Amendment Certification of Funds Task" HelpCategory="Amendment (Agency)"/>
+        <HelpCategory screenName="Amendment Budget Review Task" HelpCategory="Amendment (Agency)"/>
+        <HelpCategory screenName="Modification Budget Review Task" HelpCategory="Modification (Agency)"/>
+        <HelpCategory screenName="New FY Configuration Task" HelpCategory="Budget Update (Agency)"/>
+        <HelpCategory screenName="Configuration Update Task" HelpCategory="Budget Update (Agency)"/>
+        <HelpCategory screenName="Update Budget Review Task" HelpCategory="Budget Update (Agency)"/>
+        <HelpCategory screenName="Contract Budget" HelpCategory="Contract Budget"/>
+        <HelpCategory screenName="Invoice" HelpCategory="Invoice"/>
+        <HelpCategory screenName="Payment Details" HelpCategory="Payment"/>
+        <HelpCategory screenName="Advance Payment Details" HelpCategory="Payment"/>
+        <HelpCategory screenName="Contract Budget Amendment" HelpCategory="Amendment"/>
+        <HelpCategory screenName="Budget Modification" HelpCategory="Modification"/>
+        <HelpCategory screenName="Budget Update" HelpCategory="Budget Update"/>
+        <HelpCategory screenName="Tasks" HelpCategory="Tasks"/>
+        <!--R6 Start Returned Payment for help category-->
+        <HelpCategory screenName="Returned Payment Review" HelpCategory="Contract Budget"/>
+        <!--R6 End Returned Payment for help category-->
+	</organizationId>
+</root>

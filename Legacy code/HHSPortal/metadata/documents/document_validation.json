@@ -1,0 +1,382 @@
+{
+  "version": "2.0.0",
+  "description": "Enterprise Document Validation and Compliance",
+  "validation_engine": {
+    "validation_types": [
+      "content_validation",
+      "format_validation",
+      "metadata_validation",
+      "compliance_validation",
+      "security_validation",
+      "virus_scanning"
+    ],
+    "real_time_validation": true,
+    "batch_validation": true,
+    "async_validation": true,
+    "validation_caching": true
+  },
+  "validation_rules": {
+    "content_validation": {
+      "required_sections": {
+        "contract_agreement": [
+          "header",
+          "parties",
+          "terms",
+          "payment_terms",
+          "signatures"
+        ],
+        "amendment_document": [
+          "amendment_header",
+          "amendment_details",
+          "changes_summary",
+          "amendment_signatures"
+        ],
+        "report": [
+          "report_header",
+          "executive_summary",
+          "contract_details"
+        ]
+      },
+      "forbidden_content": [
+        "confidential_terms",
+        "proprietary_information",
+        "internal_notes"
+      ],
+      "required_keywords": {
+        "contract_agreement": [
+          "contract",
+          "agreement",
+          "parties",
+          "terms",
+          "conditions"
+        ],
+        "amendment_document": [
+          "amendment",
+          "modification",
+          "change",
+          "effective date"
+        ]
+      },
+      "content_length_limits": {
+        "min_length": 100,
+        "max_length": 1000000
+      }
+    },
+    "format_validation": {
+      "file_format_rules": {
+        "pdf": {
+          "allowed": true,
+          "max_size_mb": 50,
+          "validation_rules": [
+            "pdf_structure_valid",
+            "text_extractable",
+            "not_password_protected"
+          ]
+        },
+        "docx": {
+          "allowed": true,
+          "max_size_mb": 25,
+          "validation_rules": [
+            "docx_structure_valid",
+            "macros_disabled",
+            "not_corrupted"
+          ]
+        },
+        "xlsx": {
+          "allowed": true,
+          "max_size_mb": 15,
+          "validation_rules": [
+            "xlsx_structure_valid",
+            "macros_disabled",
+            "not_corrupted"
+          ]
+        }
+      },
+      "naming_conventions": {
+        "contract_agreement": "^[A-Z]{2}[0-9]{6}_Contract\\.(pdf|docx)$",
+        "amendment_document": "^[A-Z]{2}[0-9]{6}_Amendment_[0-9]{3}\\.(pdf|docx)$",
+        "report": "^Report_[0-9]{4}-[0-9]{2}-[0-9]{2}\\.(pdf|docx|xlsx)$"
+      }
+    },
+    "metadata_validation": {
+      "required_metadata": {
+        "contract_agreement": [
+          "contract_id",
+          "contract_type",
+          "parties",
+          "effective_date",
+          "expiry_date",
+          "contract_value",
+          "currency"
+        ],
+        "amendment_document": [
+          "amendment_id",
+          "parent_contract_id",
+          "amendment_type",
+          "effective_date",
+          "description"
+        ]
+      },
+      "metadata_types": {
+        "contract_id": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}[0-9]{6}$",
+          "required": true
+        },
+        "contract_value": {
+          "type": "number",
+          "min_value": 0,
+          "required": true
+        },
+        "effective_date": {
+          "type": "date",
+          "format": "YYYY-MM-DD",
+          "required": true
+        },
+        "parties": {
+          "type": "array",
+          "min_items": 2,
+          "required": true
+        }
+      }
+    },
+    "compliance_validation": {
+      "gdpr_compliance": {
+        "enabled": true,
+        "rules": [
+          "no_personal_data_in_content",
+          "data_retention_compliance",
+          "consent_tracking"
+        ]
+      },
+      "sox_compliance": {
+        "enabled": true,
+        "rules": [
+          "financial_data_accuracy",
+          "audit_trail_completeness",
+          "approval_chain_validation"
+        ]
+      },
+      "industry_standards": {
+        "iso_27001": {
+          "enabled": true,
+          "rules": [
+            "information_security_controls",
+            "access_control_validation",
+            "data_protection_measures"
+          ]
+        }
+      }
+    },
+    "security_validation": {
+      "virus_scanning": {
+        "enabled": true,
+        "scan_engines": ["clamav", "sophos"],
+        "quarantine_infected": true,
+        "scan_timeout_seconds": 30
+      },
+      "malware_detection": {
+        "enabled": true,
+        "detection_rules": [
+          "suspicious_macros",
+          "embedded_scripts",
+          "unusual_file_structure"
+        ]
+      },
+      "encryption_validation": {
+        "enabled": true,
+        "rules": [
+          "sensitive_data_encrypted",
+          "transmission_encrypted",
+          "storage_encrypted"
+        ]
+      }
+    }
+  },
+  "validation_workflows": {
+    "document_upload_validation": {
+      "id": "document_upload_validation",
+      "name": "Document Upload Validation",
+      "description": "Validation workflow for uploaded documents",
+      "enabled": true,
+      "steps": [
+        {
+          "step": "virus_scan",
+          "name": "Virus Scanning",
+          "type": "automated",
+          "timeout_seconds": 30,
+          "on_failure": "reject_document"
+        },
+        {
+          "step": "format_validation",
+          "name": "Format Validation",
+          "type": "automated",
+          "timeout_seconds": 10,
+          "on_failure": "reject_document"
+        },
+        {
+          "step": "metadata_extraction",
+          "name": "Metadata Extraction",
+          "type": "automated",
+          "timeout_seconds": 15,
+          "on_failure": "manual_review"
+        },
+        {
+          "step": "content_validation",
+          "name": "Content Validation",
+          "type": "automated",
+          "timeout_seconds": 20,
+          "on_failure": "manual_review"
+        },
+        {
+          "step": "compliance_check",
+          "name": "Compliance Check",
+          "type": "automated",
+          "timeout_seconds": 30,
+          "on_failure": "manual_review"
+        }
+      ]
+    },
+    "document_approval_validation": {
+      "id": "document_approval_validation",
+      "name": "Document Approval Validation",
+      "description": "Validation workflow for document approval",
+      "enabled": true,
+      "steps": [
+        {
+          "step": "completeness_check",
+          "name": "Completeness Check",
+          "type": "automated",
+          "timeout_seconds": 10,
+          "on_failure": "request_changes"
+        },
+        {
+          "step": "accuracy_validation",
+          "name": "Accuracy Validation",
+          "type": "manual",
+          "assignee": "{{references.user_roles.ACCO_MANAGER.code}}",
+          "sla_hours": 24
+        },
+        {
+          "step": "compliance_validation",
+          "name": "Compliance Validation",
+          "type": "manual",
+          "assignee": "{{references.user_roles.ACCO_MANAGER.code}}",
+          "sla_hours": 48
+        }
+      ]
+    }
+  },
+  "validation_engines": {
+    "content_validation_engine": {
+      "id": "content_validation_engine",
+      "name": "Content Validation Engine",
+      "description": "Validates document content and structure",
+      "enabled": true,
+      "rules": [
+        "required_sections_present",
+        "forbidden_content_absent",
+        "required_keywords_present",
+        "content_length_valid"
+      ],
+      "performance": {
+        "max_processing_time_seconds": 30,
+        "cache_results": true,
+        "parallel_processing": true
+      }
+    },
+    "format_validation_engine": {
+      "id": "format_validation_engine",
+      "name": "Format Validation Engine",
+      "description": "Validates document format and structure",
+      "enabled": true,
+      "rules": [
+        "file_format_valid",
+        "file_size_within_limits",
+        "file_not_corrupted",
+        "naming_convention_valid"
+      ],
+      "performance": {
+        "max_processing_time_seconds": 15,
+        "cache_results": true,
+        "parallel_processing": true
+      }
+    },
+    "compliance_validation_engine": {
+      "id": "compliance_validation_engine",
+      "name": "Compliance Validation Engine",
+      "description": "Validates document compliance with regulations",
+      "enabled": true,
+      "rules": [
+        "gdpr_compliance",
+        "sox_compliance",
+        "industry_standards_compliance"
+      ],
+      "performance": {
+        "max_processing_time_seconds": 60,
+        "cache_results": true,
+        "parallel_processing": false
+      }
+    }
+  },
+  "validation_results": {
+    "result_types": [
+      "passed",
+      "failed",
+      "warning",
+      "requires_manual_review"
+    ],
+    "result_details": {
+      "validation_id": "string",
+      "document_id": "string",
+      "validation_type": "string",
+      "result": "string",
+      "errors": "array",
+      "warnings": "array",
+      "recommendations": "array",
+      "validation_time": "datetime",
+      "validator_version": "string"
+    },
+    "error_codes": {
+      "V001": "Required section missing",
+      "V002": "Forbidden content detected",
+      "V003": "File format not supported",
+      "V004": "File size exceeds limit",
+      "V005": "Virus detected",
+      "V006": "Metadata validation failed",
+      "V007": "Compliance check failed",
+      "V008": "Naming convention invalid"
+    }
+  },
+  "validation_monitoring": {
+    "metrics": [
+      "validation_success_rate",
+      "validation_processing_time",
+      "validation_error_frequency",
+      "compliance_violation_rate"
+    ],
+    "alerting": {
+      "high_error_rate": {
+        "threshold": 0.1,
+        "action": "send_alert",
+        "recipients": ["{{references.user_roles.ACCO_MANAGER.code}}"]
+      },
+      "validation_timeout": {
+        "threshold_seconds": 120,
+        "action": "send_alert",
+        "recipients": ["{{references.user_roles.ACCO_MANAGER.code}}"]
+      }
+    }
+  },
+  "metadata": {
+    "created_at": "2024-01-01T00:00:00Z",
+    "created_by": "system",
+    "version": "2.0.0",
+    "description": "Enterprise document validation and compliance system",
+    "tags": ["validation", "compliance", "security", "documents", "enterprise"],
+    "dependencies": [
+      "schema/references.json",
+      "documents/document_types.json"
+    ]
+  }
+}

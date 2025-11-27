@@ -1,0 +1,78 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<webservice-policy-ref xmlns="http://www.bea.com/ns/weblogic/90" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <!-- Use WebLogic Server Admin Console to add new policies -->
+    <ref-name>Default Policies for the WSRP Producer</ref-name>
+
+    <port-policy>
+        <port-name>WSRPBaseService</port-name>
+        <ws-policy>
+            <uri>#ProducerDefaultPolicy</uri>
+            <direction>inbound</direction>
+        </ws-policy>
+    </port-policy>
+    <port-policy>
+        <port-name>WSRPServiceDescriptionService</port-name>
+        <ws-policy>
+            <uri>#ProducerDefaultPolicy</uri>
+            <direction>inbound</direction>
+        </ws-policy>
+    </port-policy>
+    <port-policy>
+        <port-name>WSRPRegistrationService</port-name>
+        <ws-policy>
+            <uri>#ProducerDefaultPolicy</uri>
+            <direction>inbound</direction>
+        </ws-policy>
+    </port-policy>
+    <port-policy>
+        <port-name>WSRPPortletManagementService</port-name>
+        <ws-policy>
+            <uri>#ProducerDefaultPolicy</uri>
+            <direction>inbound</direction>
+        </ws-policy>
+    </port-policy>
+    <port-policy>
+        <port-name>WLP_WSRP_Ext_Service</port-name>
+        <ws-policy>
+            <uri>#ProducerDefaultPolicy</uri>
+            <direction>inbound</direction>
+        </ws-policy>
+    </port-policy>
+
+    <port-policy>
+        <port-name>WSRP_v2_Markup_Service</port-name>
+        <ws-policy>
+            <uri>#ProducerDefaultPolicy</uri>
+            <direction>inbound</direction>
+        </ws-policy>
+    </port-policy>
+    <port-policy>
+        <port-name>WSRP_v2_ServiceDescription_Service</port-name>
+        <ws-policy>
+            <uri>#ProducerDefaultPolicy</uri>
+            <direction>inbound</direction>
+        </ws-policy>
+    </port-policy>
+    <port-policy>
+        <port-name>WSRP_v2_Registration_Service</port-name>
+        <ws-policy>
+            <uri>#ProducerDefaultPolicy</uri>
+            <direction>inbound</direction>
+        </ws-policy>
+    </port-policy>
+    <port-policy>
+        <port-name>WSRP_v2_PortletManagement_Service</port-name>
+        <ws-policy>
+            <uri>#ProducerDefaultPolicy</uri>
+            <direction>inbound</direction>
+        </ws-policy>
+    </port-policy>
+    <port-policy>
+        <port-name>WLP_WSRP_v2_Ext_Service</port-name>
+        <ws-policy>
+            <uri>#ProducerDefaultPolicy</uri>
+            <direction>inbound</direction>
+        </ws-policy>
+    </port-policy>
+</webservice-policy-ref>

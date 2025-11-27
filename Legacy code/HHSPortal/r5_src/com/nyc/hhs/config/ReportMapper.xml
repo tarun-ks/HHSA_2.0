@@ -1,0 +1,1617 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.ReportMapper">
+<cache type="com.nyc.hhs.db.cache.CoherenceCache" />
+
+
+
+		<select id="getFirstFiscalYearDashBoard" resultType="int" parameterType="com.nyc.hhs.model.ReportBean" >
+		select distinct fiscal_year_id from budget where active_flag=1 and status_id not in (89,106,87,88)
+		and budget_type_id in (1,2,3,4)
+		<if test="organizationType !=null and organizationType =='agency_org'">
+		<if test="agencyId != null and agencyId !=''">
+			and agency_id = #{agencyId}  
+		</if> 
+		</if>
+		<if test="organizationType !=null and organizationType =='provider_org'">
+		<if test="providerIdReport != null and providerIdReport !=''">
+		   and organization_id = #{providerIdReport} 
+		</if> 
+		</if>
+		order by fiscal_year_id desc
+		</select>
+
+		
+		<select id="getFirstFiscalYear" resultType="int" parameterType="com.nyc.hhs.model.ReportBean" >
+		select distinct fiscal_year_id from budget where active_flag=1 and status_id not in (89,106,87,88)
+		and budget_type_id in (1,2,3,4)
+		<if test="organizationType !=null and organizationType =='provider_org'">
+		<if test="providerIdReport != null and providerIdReport !=''">
+		   and organization_id = #{providerIdReport} 
+		</if> 
+		</if>
+		order by fiscal_year_id desc
+		</select>
+		
+	<resultMap id="proposalStatusInfo" type="com.nyc.hhs.model.ProposalStatusInfo">
+	  <result property="proposalStatusId" column="status_id" />
+	  <result property="proposalStatusName" column="status" />
+	</resultMap>	
+		<select id="getProposalStatusInfo" resultMap="proposalStatusInfo">
+		select status_id,status from status_master_r2_r3 where status_id in (23,24,25)
+		</select>
+
+	<resultMap id="buReportDetails" type="com.nyc.hhs.model.ReportBean">
+	<result property="recoupedAmount" column="amountRecoupedInvoice" />
+	<result property="amountType" column="type" />
+	<result property="budgetId" column="budget_id" />
+	<result property="invoiceId" column="invoice_id" />
+	  <result property="paymentAmount" column="pa" />
+	  <result property="invociedAmount" column="ia"/>
+	  <result property="invoicedAmount" column="ia"/>
+	  <result property="paymentAmountGrid" column="pa"/>
+	  <result property="budgetAmount" column="ba"/>
+	  <result property="serviceStartDate" column="invoice_start_date"/>
+	  <result property="agencyInvoiceNumber" column="agency_invoice_number"/>
+	  <result property="monthRowNum" column="mrn" />
+	  <result property="monthName" column="months" />
+	  <result property="fyYear" column="fiscal_year_id"/>
+	  <result property="rowNumber" column="rownum"/>
+	  <result property="sortoder" column="sortoder"/>
+	  <result property="ctNumber" column="ext_ct_number"/>
+	  <result property="contractTitle" column="contract_title"/>
+	  <result property="fyYearAmount" column="fiscal_year_amount"/>
+	  <result property="totalFYAmount" column="total_fy"/>
+	   <result property="programName" column="program_name"/>
+	   <result property="budgetStartDate" column="budget_start_date"/>
+	   <result property="budgetEndDate" column="budget_end_date"/>
+	   <result property="provider" column="organization_legal_name"/>
+	   <result property="agencyName" column="agency_id" />
+	   <result property="contractEPIN" column="ext_epin" />
+	   <result property="amountType" column="type" />
+	   <result property="invoiceNumber" column="invoice_number" />
+	<result property="providerInvoiceNumber" column="provider_invoice_number" />
+	<result property="desc" column="advanceDescription" />
+	 <result property="serviceEndDate" column="invoice_end_date" />
+     <result property="status" column="status" />
+     <result property="statusId" column="status_id" />
+     <result property="submitDate" column="invoice_submitted_date" />
+     <result property="dateApproved" column="invoice_approved_date" />
+     <result property="advanceAmount" column="advanceAmount" /> 
+     <result property="advanceRecouped" column="amount_recouped" />
+     <result property="assignmentAmount" column="assignmentAmount" />
+     <result property="paymentVoucherNumber" column="payment_voucher_num" />
+      <result property="disbursmentNumber" column="check_eft_num" />
+      <result property="disbursmentDate" column="disbursement_date" />
+       <result property="percentUtilized" column="percentUtilized" />
+       <result property="overUnder" column="overUnder" />
+       <result property="currentMonth" column="current_month" />
+	</resultMap>
+	
+	<resultMap type="com.nyc.hhs.model.ReportBean" id="fsReportDetails">
+		 <result property="fyYearAmount" column="fiscal_year_amount"/>
+		 <result property="pendingFyAmendmentAmount" column="pending_amendment_amount"/>
+	  	 <result property="amountType" column="type"/>
+	  	 <result property="providerCount" column="providerCount"/>
+	  	 <result property="agencyCount" column="agencyCount"/>
+	  	 <result property="registeredContractCount" column="registeredContractCount"/>
+	  	 <result property="programCount" column="programCount"/>
+	  	 <result property="cityBudgetAmount" column="totalBudgetAmount"/>
+	  	 <result property="pendingAmendAmount" column="totalAmendmentBudgetAmount"/>
+		<result property="fyYear" column="fiscal_year_id" />
+		<result property="agencyName" column="agency_id" />
+		<result property="programName" column="program_name" />
+		<result property="provider" column="organization_legal_name" />
+		<result property="contractTitle" column="contract_title" />
+		<result property="ctNumber" column="ext_ct_number" />
+		<result property="contractEPIN" column="ext_epin" />
+		<result property="amendmentEPIN" column="amendmentEpin" />
+		<result property="amendmentContractTitle" column="amendmentTitle" />
+		<result property="budgetStartDate" column="budget_start_date" />
+		<result property="budgetEndDate" column="budget_end_date" />
+		<result property="contractStartDate" column="contract_start_date" />
+		<result property="contractEndDate" column="contract_end_date" />
+		<result property="contractType" column="ContractType" />
+		<result property="contractStatus" column="contractStatus" />
+	</resultMap>
+	
+	<resultMap type="com.nyc.hhs.model.ReportBean" id="budgetCatUtilizationDetail">
+		<result property="fyYear" column="fiscal_year_id"/>
+	  	 <result property="amountType" column="type"/>
+	  	 <result property="budgetAmount" column="fy_amount"/>
+	  	 <result property="fyYearAmount" column="fy_amount"/>
+	  	 <result property="invociedAmount" column="invoiced_Amount"/>
+	  	 <result property="amount" column="invoiced_Amount"/>
+	  	 <result property="percentUtilized" column="percent_utilized"/>
+	  	 <result property="overUnder" column="over_under_utilized"/>
+	  	 <result property="provider" column="organization_legal_name" />
+	  	<result property="agencyName" column="agency_id" />
+		<result property="programName" column="program_name" />
+		<result property="contractTitle" column="contract_title" />
+		<result property="contractEPIN" column="ext_epin" />
+		<result property="subBudgetName" column="sub_budget_name" />
+		 <result property="amountType" column="type"/>
+	  	 <result property="percentUtilized" column="percent_utilized"/>
+	  	 <result property="overUnder" column="over_under_utilized"/>
+	  	 <result property="currentMonth" column="current_month"/>
+	  	 <result property="sortoder" column="sortOrder"/>
+	  	 <result property="ctNumber" column="ext_ct_number"/>
+	</resultMap>
+	
+	<select id="getBudgetUtlizationDetails_ForGrid" parameterType="com.nyc.hhs.model.ReportBean" resultMap="buReportDetails">
+		select fiscal_year_id, organization_id,organization_legal_name, agency_id, program_name,
+			contract_title, ext_ct_number, ext_epin,fiscal_year_amount,
+		  percentUtilized,overUnder,advanceAmount,amount_recouped,ia,assignmentAmount,pa
+      from budget_utlizaton_grid_mat_view
+      where  fiscal_year_id is not null
+		<if test="fyYear != null and fyYear !=''">
+			and fiscal_year_id = #{fyYear}
+			</if>
+			<if test="agencyId != null and agencyId !=''">
+			and agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="ctNumber != null and ctNumber !=''">
+			and (lower(ext_ct_number) LIKE
+			lower('%${ctNumber}%'))  
+			</if>
+			<if test="contractTitle != null and contractTitle !=''">
+			and (lower(contract_title) LIKE
+			lower(#{contractTitle}))   
+			</if>
+			<if test="provider != null and provider !=''">
+			and lower(Organization_legal_name) LIKE
+			lower(#{provider})  
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		   and organization_id = #{providerIdReport} 
+		  </if>
+		  	order by 
+		percentUtilized desc
+	</select>
+	
+	<select id="getBudgetUtlizationDetails_ForGridInvoice" parameterType="com.nyc.hhs.model.ReportBean" resultMap="buReportDetails">
+	select fiscal_year_id, organization_legal_name,organization_id, agency_id, program_name,contract_title, ext_ct_number, ext_epin,type, invoice_number,
+		provider_invoice_number,agency_invoice_number,advanceDescription,TO_CHAR(invoice_end_date,'MM/DD/YYYY')  invoice_end_date,TO_CHAR(invoice_start_date,'MM/DD/YYYY') invoice_start_date,EXTRACT(year FROM invoice_start_date) as year,status, invoice_submitted_date, invoice_approved_date,
+		sum(invoicedAmount) as ia, sum(amount_recouped) amount_recouped, sum(assignmentAmount) assignmentAmount, 
+		budget_id,fiscal_year_amount,contract_id,budget_start_date,month from (
+		select b.fiscal_year_id, organization.organization_legal_name,organization.organization_id, base.agency_id, program_master.program_name,base.contract_title, base.ext_ct_number, base.ext_epin,'Invoice' type, invoice.invoice_number,
+		invoice.provider_invoice_number,invoice.AGENCY_INVOICE_NUMBER,null advanceDescription,invoice.invoice_start_date,invoice.invoice_end_date,status_master_r2_r3.status, invoice.invoice_submitted_date, invoice.invoice_approved_date,
+		(case when invoice_details.entry_type_id not in (11,14) then invoice_details.invoice_amount else 0 end) invoicedAmount, invoice_advance.amount_recouped , 
+		(case when invoice_details.entry_type_id in (14) then invoice_details.invoice_amount else 0 end) assignmentAmount,  
+		b.budget_id,b.fiscal_year_amount,b.contract_id,b.budget_start_date,to_char(invoice.invoice_start_date,'Mon') as month
+		from  budget b,contract base,
+		program_master, status_master_r2_r3, organization, invoice, invoice_details, invoice_advance  where base.contract_id = b.contract_id and base.contract_type_id in (1,3) and base.delete_flag = 0 
+		and base.program_id = program_master.program_id 
+
+		and b.status_id=85
+		and b.budget_type_id=2 and b.organization_id = organization.organization_id and  invoice_details.invoice_id (+)= invoice.invoice_id
+		and invoice.budget_id (+)= b.budget_id  
+		and invoice_advance.invoice_id(+) = invoice.invoice_id   and invoice.status_id in (72,73)
+		and status_master_r2_r3.status_id = invoice.status_id
+		
+			)  
+		where fiscal_year_id is not null
+		<if test="fyYear != null and fyYear !=''">
+			and fiscal_year_id = #{fyYear}
+			</if>
+			<if test="agencyId != null and agencyId !=''">
+			and agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="ctNumber != null and ctNumber !=''">
+			and (lower(ext_ct_number) LIKE
+			lower('%${ctNumber}%'))  
+			</if>
+			<if test="contractTitle != null and contractTitle !=''">
+			and (lower(contract_title) LIKE
+			lower(#{contractTitle}))   
+			</if>
+			<if test="provider != null and provider !=''">
+			and lower(Organization_legal_name) LIKE
+			lower(#{provider})  
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		   and organization_id = #{providerIdReport} 
+		  </if>
+		group by fiscal_year_id, organization_legal_name, agency_id, program_name,contract_title, ext_ct_number, ext_epin,type, invoice_number,
+		provider_invoice_number,agency_invoice_number,advanceDescription,invoice_start_date,invoice_end_date,status, invoice_submitted_date, invoice_approved_date
+		,budget_id,fiscal_year_amount,contract_id,budget_start_date,month,organization_id
+		order by invoice_number desc
+	</select>
+	
+	<!-- Made changes for Emergency Build 4.0.1 defect 8373 -->
+	<select id="getBudgetUtlizationDetailsUpdated" parameterType="com.nyc.hhs.model.ReportBean" resultMap="buReportDetails">
+		select type, months, case when mrn>6.5 then mrn-6 else mrn+6 end sortoder,fiscal_year_id, nvl(sum(PA),0) PA, nvl(sum(IA),0) IA, nvl(BA,0) BA,nvl(avg(total_fy),0) total_fy from
+  (select 
+			(SELECT 
+			(case when #{fyYear} > current_year  and current_month >=7 THEN current_month -6
+			      when #{fyYear} > current_year  and current_month &lt; 7 then current_month +6
+			      else 12 end
+			)
+			 current_month      
+				FROM
+				  (SELECT EXTRACT (MONTH FROM sysdate) AS current_month,EXTRACT (year FROM sysdate) AS current_year FROM dual
+				  )   ) current_month,
+			nvl(pa,0) pa,nvl(ia,0) ia,
+		nvl(ba,0) ba,nvl(total_fy,0) total_fy,months, mrn, year fiscal_year_id,nvl(status_id,'0') status_id,type,
+		rownum sortoder from (
+		select nvl(pa,0) pa,nvl(ia,0) ia,a.month as months,budget_amount ba,total_fy, mrn,(budget_amount/12)*mrn median, mrnForStrainghtLine,
+		(case when mrn &lt;= 6.5 then to_number(#{fyYear})+1 else to_number(#{fyYear}) end ) as year
+		,b.budget_id,b.invoice_id,assignmentAmount,amountRecouped.amount_recouped,amountRecoupedInvoice.amount_recouped amountRecoupedInvoice, b.status_id,b.status,b.type
+		  from 
+
+		(	
+			WITH MONTH_COUNTER AS (
+		  	SELECT LEVEL-1 AS ID 
+		  	FROM DUAL 
+		  	CONNECT BY LEVEL &lt;= 12
+			) 
+		SELECT TO_CHAR(ADD_MONTHS(TO_DATE('01/01/1000', 'DD/MM/RRRR'), ID),'Mon') month, id+1 mrn FROM MONTH_COUNTER
+		 union all
+    	select 'Post Jun',6.5 from dual
+		) a,
+		(select sum(amount_recouped) amount_recouped,budget_id from invoice_Advance where invoice_Advance.budget_id = budget_id group by budget_id) amountRecouped,
+		(select sum(amount_recouped) amount_recouped,invoice_id from invoice_Advance where invoice_Advance.invoice_id = invoice_id group by invoice_id) amountRecoupedInvoice,
+		(select type,year,status_id,status, budget_id,invoice_id,
+		ia,  assignmentAmount,fiscal_year_id, organization_legal_name,organization_id, agency_id, program_name,contract_title, ext_ct_number, ext_epin
+		, pa, month from budget_utlization_mat_view
+		where fiscal_year_id is not null
+		<if test="fyYear != null and fyYear !=''">
+			and fiscal_year_id = #{fyYear}
+		</if>
+		<if test="agencyId != null and agencyId !=''">
+			and agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="ctNumber != null and ctNumber !=''">
+			and (lower(ext_ct_number) LIKE
+			lower('%${ctNumber}%'))  
+			</if>
+			<if test="contractTitle != null and contractTitle !=''">
+			and (lower(contract_title) LIKE
+			lower(#{contractTitle}))   
+			</if> 
+			<if test="provider != null and provider !=''">
+			and lower(Organization_legal_name) LIKE
+			lower(#{provider})  
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		   and organization_id = #{providerIdReport} 
+		  </if>  
+		) b,    
+		
+		(
+		select nvl(SUM(budget_amount) OVER(ORDER BY mrnForStrainghtLine),0) budget_amount,month,mrnForStrainghtLine,remaining_month from (
+		select 
+		(case when mrn &lt;= 6 then budget_amount/(7 - mrn) else budget_amount/(19-mrn) end) budget_amount ,a1.month,
+		(case when mrn &lt;= 6 then (7 - mrn) else (19-mrn) end) remaining_month,
+		(case when mrn &lt;= 6 then mrn+6 else mrn -6 end) mrnForStrainghtLine
+		from 
+		(	
+			WITH MONTH_COUNTER AS (
+		  	SELECT LEVEL-1 AS ID 
+		  	FROM DUAL 
+		  	CONNECT BY LEVEL &lt;= 12
+			) 
+		SELECT TO_CHAR(ADD_MONTHS(TO_DATE('01/01/1000', 'DD/MM/RRRR'), ID),'Mon') month, id+1 mrn FROM MONTH_COUNTER
+		) a1,
+		(select sum(fiscal_year_amount) as budget_amount,to_char(budget_start_date,'Mon') month from budget b,contract c,program_master,organization
+			where  b.status_id=85 and b.active_flag = 1 
+			and b.contract_id = c.contract_id and program_master.program_id = c.program_id
+			and organization.organization_id = c.organization_id
+			
+			and b.fiscal_year_id = #{fyYear}
+			<if test="fyYear != null and fyYear !=''">
+			and b.fiscal_year_id = #{fyYear}
+			</if>
+			<if test="agencyId != null and agencyId !=''">
+			and c.agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(program_master.program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="ctNumber != null and ctNumber !=''">
+			and (lower(c.ext_ct_number) LIKE
+			lower('%${ctNumber}%'))  
+			</if>
+			<if test="contractTitle != null and contractTitle !=''">
+			and (lower(c.contract_title) LIKE
+			lower(#{contractTitle}))   
+			</if> 
+			<if test="provider != null and provider !=''">
+			and lower(organization.Organization_legal_name) LIKE
+			lower(#{provider})  
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		   and organization.organization_id = #{providerIdReport} 
+		  </if>
+			
+		group by to_char(budget_start_date,'Mon') ) b1
+		where  b1.month (+)= a1.month
+		)
+		
+		) ba,
+		(
+		    select sum(fiscal_year_amount) total_fy from budget b,contract c,program_master,organization
+			where  b.status_id=85 and b.active_flag = 1 
+			and b.contract_id = c.contract_id and program_master.program_id = c.program_id
+			and organization.organization_id = c.organization_id
+		
+			and b.fiscal_year_id = #{fyYear}
+			<if test="fyYear != null and fyYear !=''">
+			and b.fiscal_year_id = #{fyYear}
+			</if>
+			<if test="agencyId != null and agencyId !=''">
+			and c.agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(program_master.program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="ctNumber != null and ctNumber !=''">
+			and (lower(c.ext_ct_number) LIKE
+			lower('%${ctNumber}%'))  
+			</if>
+			<if test="contractTitle != null and contractTitle !=''">
+			and (lower(c.contract_title) LIKE
+			lower(#{contractTitle}))   
+			</if> 
+			<if test="provider != null and provider !=''">
+			and lower(organization.Organization_legal_name) LIKE
+			lower(#{provider})  
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		   and organization.organization_id = #{providerIdReport} 
+		  </if>
+			
+		) total_fy
+		where b.month (+)= a.month
+		and ba.month (+)= a.month
+		and amountRecouped.budget_id (+)= b.budget_id
+		and amountRecoupedInvoice.invoice_id (+)= b.invoice_id
+    
+		))
+    where status_id in (65,72,73,0)
+    group by type,mrn,months, fiscal_year_id,ba
+    order by type,fiscal_year_id,sortoder
+    
+	</select>
+	
+	<!-- Made changes for Emergency Build 4.0.1 defect 8373 -->
+	<select id="getBudgetUtlizationDetails" parameterType="com.nyc.hhs.model.ReportBean" resultMap="buReportDetails">
+			select 
+			(SELECT 
+			(case when #{fyYear} = current_year  and current_month >=7 THEN current_month -6
+			      when #{fyYear} = current_year  and current_month &lt; 7 then current_month +6
+			       when #{fyYear} > current_year then 0
+			      else 12 end
+			)
+			 current_month      
+				FROM
+				  (SELECT EXTRACT (MONTH FROM sysdate) AS current_month, (case when EXTRACT(MONTH FROM sysdate) >=7 then EXTRACT(year FROM sysdate)+1 else EXTRACT(year FROM sysdate) end) AS current_year FROM dual 
+				  )   ) current_month,
+			nvl(pa,0) pa,nvl(ia,0) ia,
+		nvl(ba,0) ba,nvl(total_fy,0) total_fy,months, to_char(invoice_start_date,'MM/DD/YYYY') invoice_start_date, to_char(invoice_end_date,'MM/DD/YYYY') invoice_end_date,
+		 invoice_number,provider_invoice_number,agency_invoice_number,advanceDescription, mrn, year fiscal_year_id,#{fyYear} fyID,ext_ct_number,to_char(invoice_submitted_date,'MM/DD/YYYY')  invoice_submitted_date,
+		 to_char(invoice_approved_date,'MM/DD/YYYY')  invoice_approved_date,payment_voucher_num, check_eft_num,
+		disbursement_date,contract_title,agency_id,fiscal_year_amount,budget_start_date,contract_id,budget_id,nvl(invoice_id,0) invoice_id,organization_legal_name,program_name,
+		ext_epin,assignmentAmount,amount_recouped,amountRecoupedInvoice,status,status_id,type,
+		rownum sortoder from (
+		select nvl(pa,0) pa,nvl(ia,0) ia,a.month as months,budget_amount ba,total_fy, mrn,invoice_start_date,invoice_end_date, invoice_number,
+		provider_invoice_number,agency_invoice_number,advanceDescription,invoice_submitted_date, invoice_approved_date,payment_voucher_num, check_eft_num,
+		disbursement_date,(budget_amount/12)*mrn median, mrnForStrainghtLine,
+		(case when mrn &lt;= 6.5 then to_number(#{fyYear})+1 else to_number(#{fyYear}) end ) as year,ext_ct_number,contract_title,agency_id,fiscal_year_amount,budget_start_date,
+		contract_id,b.budget_id,b.invoice_id,organization_legal_name,program_name,ext_epin,assignmentAmount,amountRecouped.amount_recouped,amountRecoupedInvoice.amount_recouped amountRecoupedInvoice, b.status_id,b.status,b.type
+		  from 
+
+		(	
+			WITH MONTH_COUNTER AS (
+		  	SELECT LEVEL-1 AS ID 
+		  	FROM DUAL 
+		  	CONNECT BY LEVEL &lt;= 12
+			) 
+		SELECT TO_CHAR(ADD_MONTHS(TO_DATE('01/01/1000', 'DD/MM/RRRR'), ID),'Mon') month, id+1 mrn FROM MONTH_COUNTER
+		 union all
+    	select 'Post Jun',6.5 from dual
+		) a,
+		(select sum(amount_recouped) amount_recouped,budget_id from invoice_Advance where invoice_Advance.budget_id = budget_id group by budget_id) amountRecouped,
+		(select sum(amount_recouped) amount_recouped,invoice_id from invoice_Advance where invoice_Advance.invoice_id = invoice_id group by invoice_id) amountRecoupedInvoice,
+		(
+		select fiscal_year_id, organization_legal_name,organization_id, agency_id, program_name,contract_title, ext_ct_number, ext_epin,type, invoice_number,
+		provider_invoice_number,agency_invoice_number,advanceDescription,invoice_end_date,invoice_start_date,EXTRACT(year FROM invoice_end_date) as year,status_id,status, invoice_submitted_date, invoice_approved_date,
+		sum(invoicedAmount) as ia, sum(assignmentAmount) assignmentAmount, payment_voucher_num, check_eft_num,
+		disbursement_date, sum(payment_amount) pa,budget_id,invoice_id,fiscal_year_amount,contract_id,budget_start_date,nvl(month,'Jul') month from (
+		<!-- code for main inner query -->
+		select b.fiscal_year_id, organization.organization_legal_name,organization.organization_id, base.agency_id, program_master.program_name,base.contract_title, base.ext_ct_number, base.ext_epin,'Invoice' type, 
+		   to_char(invoice.invoice_number) invoice_number,invoice.invoice_id  invoice_id,
+		invoice.provider_invoice_number,invoice.agency_invoice_number,null advanceDescription,invoice.invoice_start_date,invoice.invoice_end_date,status_master_r2_r3.status_id,status_master_r2_r3.status, 
+		invoice.invoice_submitted_date, invoice.invoice_approved_date,
+		  (select sum(invoice_amount) from invoice_details where entry_type_id not in (11,14) and invoice_details.invoice_id = invoice.invoice_id ) invoicedAmount,
+      (select sum(invoice_amount) from invoice_details where entry_type_id in (14) and invoice_details.invoice_id = invoice.invoice_id ) assignmentAmount,
+		payment.payment_voucher_num, payment.check_eft_num,
+		payment.disbursement_date, (case when payment.status_id=65 and payment.delete_flag = 0 then payment.payment_amount else 0 end) payment_amount,
+		b.budget_id,b.fiscal_year_amount,b.contract_id,b.budget_start_date,
+    to_char(invoice.invoice_end_date,'Mon') as month
+		from  contract base,
+		program_master, organization,
+    budget b
+    left join  invoice  on invoice.budget_id = b.budget_id and invoice.status_id in (72,73)
+    left join status_master_r2_r3 on status_master_r2_r3.status_id = invoice.status_id
+   left join payment on payment.invoice_id = invoice.invoice_id  and payment.delete_flag = 0 
+    where base.contract_id = b.contract_id 
+		and base.program_id = program_master.program_id 
+		and b.status_id =85 and  b.active_flag =1
+		and b.budget_type_id=2 and b.organization_id = organization.organization_id 
+     
+     union all
+      select b.fiscal_year_id, organization.organization_legal_name,organization.organization_id, base.agency_id, program_master.program_name,base.contract_title, base.ext_ct_number, base.ext_epin,'Advance' type, to_char(budget_advance_number) invoice_number,to_number(budget_advance.budget_advance_id)  invoice_id,
+		null provider_invoice_number,null agency_invoice_number,budget_advance.ADVANCE_DESCRIPTION advanceDescription,null invoice_start_date, null invoice_end_date,status_master_r2_r3.status_id,status_master_r2_r3.status, null invoice_submitted_date, null invoice_approved_date,
+		budget_advance.amount invoicedAmount , 
+		(select sum(assignment_amount) from advance_assignment where advance_assignment.budget_Advance_id = budget_advance.budget_Advance_id ) assignmentAmount,
+		payment.payment_voucher_num, payment.check_eft_num,
+		payment.disbursement_date, (case when payment.status_id=65 and payment.delete_flag = 0 then payment.payment_amount else 0 end) payment_amount
+		,b.budget_id,b.fiscal_year_amount,b.contract_id
+   		 ,b.budget_start_date,to_char(budget_advance.request_date,'Mon') as month
+	   from  contract base,
+		program_master, organization,
+    budget b
+    left join  budget_advance  on budget_advance.budget_id = b.budget_id and budget_advance.status_id in (125) and budget_advance.delete_flag = 0
+    left join status_master_r2_r3 on status_master_r2_r3.status_id = budget_advance.status_id
+   left join payment on payment.budget_advance_id = budget_advance.budget_advance_id  and payment.delete_flag = 0 
+    where base.contract_id = b.contract_id 
+		and base.program_id = program_master.program_id 
+		and b.status_id =85 and  b.active_flag =1
+		and b.budget_type_id=2 and b.organization_id = organization.organization_id 
+    union all
+    
+  select b.fiscal_year_id, organization.organization_legal_name,organization.organization_id, base.agency_id, program_master.program_name,base.contract_title, base.ext_ct_number, base.ext_epin,'Payment' type, 
+   null invoice_number,to_number(decode(i.invoice_id,null,
+ba.budget_advance_id,i.invoice_id)) invoice_id ,
+		null provider_invoice_number,null agency_invoice_number,null advanceDescription,null invoice_start_date,null invoice_end_date,
+    status_master_r2_r3.status_id, status_master_r2_r3.status,null invoice_submitted_date,null invoice_approved_date,
+		null invoicedAmount , 
+		null assignmentAmount, payment.payment_voucher_num, payment.check_eft_num,
+		payment.disbursement_date, 
+    payment_amount,
+		b.budget_id,b.fiscal_year_amount,b.contract_id,b.budget_start_date,
+    case when payment.DISBURSEMENT_DATE is not null and payment.DISBURSEMENT_DATE >= '01-JUL-'||#{fyYear} then 
+     'Post Jun'
+     else
+     (to_char((case when payment.DISBURSEMENT_DATE is not null then payment.DISBURSEMENT_DATE 
+    when i.invoice_end_Date is not null then i.invoice_end_Date else
+    ba.request_date end),'Mon'))
+    end
+    as month 
+		from  budget b,contract base,
+		program_master, organization, payment,invoice i, budget_advance ba,status_master_r2_r3 where base.contract_id = b.contract_id 
+		and base.program_id = program_master.program_id 
+		and b.status_id =85 and  b.active_flag =1
+		and b.budget_type_id=2 and b.organization_id = organization.organization_id
+    and payment.budget_id (+)= b.budget_id 
+    and  i.invoice_id  (+)=  payment.invoice_id
+		and  ba.budget_advance_id (+)=  payment.budget_advance_id
+		and status_master_r2_r3.status_id (+)= payment.status_id
+    and payment.delete_flag = 0
+		<!-- code for main inner query -->
+		)
+		where fiscal_year_id = #{fyYear}
+			<if test="agencyId != null and agencyId !=''">
+			and agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="ctNumber != null and ctNumber !=''">
+			and (lower(ext_ct_number) LIKE
+			lower('%${ctNumber}%'))  
+			</if>
+			<if test="contractTitle != null and contractTitle !=''">
+			and (lower(contract_title) LIKE
+			lower(#{contractTitle}))   
+			</if> 
+			<if test="provider != null and provider !=''">
+			and lower(Organization_legal_name) LIKE
+			lower(#{provider})  
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		   and organization_id = #{providerIdReport} 
+		  </if>  
+		group by fiscal_year_id, organization_legal_name,organization_id, agency_id, program_name,contract_title, ext_ct_number, ext_epin,type, invoice_number,
+		provider_invoice_number,agency_invoice_number,advanceDescription,invoice_start_date,invoice_end_date,status,status_id, invoice_submitted_date, invoice_approved_date
+		, payment_voucher_num, check_eft_num,
+		disbursement_date,budget_id,fiscal_year_amount,contract_id,budget_start_date,month,invoice_id
+		) b,    
+		
+		(
+		select nvl(SUM(budget_amount) OVER(ORDER BY mrnForStrainghtLine),0) budget_amount,month,mrnForStrainghtLine,remaining_month from (
+		select 
+		(case when mrn &lt;= 6 then budget_amount/(7 - mrn) else budget_amount/(19-mrn) end) budget_amount ,a1.month,
+		(case when mrn &lt;= 6 then (7 - mrn) else (19-mrn) end) remaining_month,
+		(case when mrn &lt;= 6 then mrn+6 else mrn -6 end) mrnForStrainghtLine
+		from 
+		(	
+			WITH MONTH_COUNTER AS (
+		  	SELECT LEVEL-1 AS ID 
+		  	FROM DUAL 
+		  	CONNECT BY LEVEL &lt;= 12
+			) 
+		SELECT TO_CHAR(ADD_MONTHS(TO_DATE('01/01/1000', 'DD/MM/RRRR'), ID),'Mon') month, id+1 mrn FROM MONTH_COUNTER
+		) a1,
+		(select sum(fiscal_year_amount) as budget_amount,to_char(budget_start_date,'Mon') month from budget b,contract c,program_master,organization
+			where  b.status_id=85 and b.active_flag = 1 
+			and b.contract_id = c.contract_id and program_master.program_id = c.program_id
+			and organization.organization_id = c.organization_id
+			<if test="fyYear != null and fyYear !=''">
+			and b.fiscal_year_id = #{fyYear}
+			</if>
+			<if test="agencyId != null and agencyId !=''">
+			and c.agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(program_master.program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="ctNumber != null and ctNumber !=''">
+			and (lower(c.ext_ct_number) LIKE
+			lower('%${ctNumber}%'))  
+			</if>
+			<if test="contractTitle != null and contractTitle !=''">
+			and (lower(c.contract_title) LIKE
+			lower(#{contractTitle}))   
+			</if> 
+			<if test="provider != null and provider !=''">
+			and lower(organization.Organization_legal_name) LIKE
+			lower(#{provider})  
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		   and organization.organization_id = #{providerIdReport} 
+		  </if>
+		group by to_char(budget_start_date,'Mon') ) b1
+		where  b1.month (+)= a1.month
+		)
+		
+		) ba,
+		(
+		    select sum(fiscal_year_amount) total_fy from budget b,contract c,program_master,organization
+			where  b.status_id=85 and b.active_flag = 1 
+			and b.contract_id = c.contract_id and program_master.program_id = c.program_id
+			and organization.organization_id = c.organization_id
+			<if test="fyYear != null and fyYear !=''">
+			and b.fiscal_year_id = #{fyYear}
+			</if>
+			<if test="agencyId != null and agencyId !=''">
+			and c.agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(program_master.program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="ctNumber != null and ctNumber !=''">
+			and (lower(c.ext_ct_number) LIKE
+			lower('%${ctNumber}%'))  
+			</if>
+			<if test="contractTitle != null and contractTitle !=''">
+			and (lower(c.contract_title) LIKE
+			lower(#{contractTitle}))   
+			</if> 
+			<if test="provider != null and provider !=''">
+			and lower(organization.Organization_legal_name) LIKE
+			lower(#{provider})  
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		   and organization.organization_id = #{providerIdReport} 
+		  </if>
+		) total_fy
+		where b.month (+)= a.month
+		and ba.month (+)= a.month
+		and amountRecouped.budget_id (+)= b.budget_id
+		and amountRecoupedInvoice.invoice_id (+)= b.invoice_id
+		order by year, mrn,budget_id,invoice_id)
+	</select>
+
+	<!-- Made changes for Emergency Build 4.0.1 defect 8373 -->
+	<select id="getBudgetCatUtilization" parameterType="com.nyc.hhs.model.ReportBean" resultMap="budgetCatUtilizationDetail">
+		select 
+		(SELECT 
+			(case when #{fyYear} = current_year  and current_month >=7 THEN current_month -6
+			      when #{fyYear} = current_year  and current_month &lt; 7 then current_month +6
+			       when #{fyYear} > current_year then 0
+			      else 12 end
+			)
+			 current_month      
+				FROM
+				  (SELECT EXTRACT (MONTH FROM sysdate) AS current_month, (case when EXTRACT(MONTH FROM sysdate) >=7 then EXTRACT(year FROM sysdate)+1 else EXTRACT(year FROM sysdate) end) AS current_year FROM dual 
+				  )   ) current_month,
+		a.fiscal_year_id,a.organization_legal_name,a.organization_id,a.agency_id,a.program_name,a.contract_title,a.ext_ct_number,a.ext_epin,a.sub_budget_name,
+			a.sortOrder,nvl(a.fy_amount,0) fy_amount,nvl(a.invoiced_Amount,0) invoiced_Amount,a.sub_budget_id,a.type as type from 
+			(
+			
+			
+		select fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,'Personnel Services' type,1 sortOrder,
+					 sum(total_salary) fy_amount,sum(invoice_Amount) invoiced_Amount, sub_budget_id from (
+		       
+		select fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,'Personnel Services' type,1 sortOrder,
+					 sum(total_salary) total_salary,sum(invoice_Amount) invoice_Amount, sub_budget_id from (
+					select b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, s.sub_budget_name,
+					 total_salary,a.personnel_service_id,
+					nvl(sum(case when id.entry_type_id= 1 and i.status_id in (72,73) and id.line_item_id = a.personnel_service_id then id.invoice_Amount else 0 end),0) invoice_Amount, s.sub_budget_id from 
+					invoice_Details id,invoice i, personnel_service a, organization o, sub_budget s, budget b, contract c, program_master p
+					where     i.budget_id(+)= b.budget_id  and  id.invoice_id(+) = i.invoice_id
+					and a.sub_budget_id (+)= s.sub_budget_id and a.budget_id (+)= s.budget_id and s.budget_id= b.budget_id and b.contract_id = c.contract_id and c.organization_id= o.organization_id
+					and p.program_id =c.program_id
+					and b.budget_type_id=2 and b.active_flag=1 and b.status_id in (85)
+					group by b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, c.contract_title, s.sub_budget_name,s.sub_budget_id,total_salary,a.personnel_service_id
+					) group by 
+					fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,  sub_budget_id
+		
+				union all
+					select fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,'Personnel Services Fringes' type,13 sortOrder,
+					 sum(amount) total_salary,sum(invoice_Amount) invoice_Amount, sub_budget_id from (
+					select b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, s.sub_budget_name,
+					 amount,a.fringe_benefit_id,
+					nvl(sum(case when id.entry_type_id= 13 and i.status_id in (72,73) and id.line_item_id = a.fringe_benefit_id then id.invoice_Amount else 0 end),0) invoice_Amount, s.sub_budget_id from 
+					invoice_Details id,invoice i, fringe_benefit a, organization o, sub_budget s, budget b, contract c, program_master p
+					where     i.budget_id(+)= b.budget_id  and  id.invoice_id(+) = i.invoice_id
+					and a.sub_budget_id (+)= s.sub_budget_id and a.budget_id (+)= s.budget_id and s.budget_id= b.budget_id and b.contract_id = c.contract_id and c.organization_id= o.organization_id
+					and p.program_id =c.program_id
+					and b.budget_type_id=2 and b.active_flag=1  and b.status_id in (85)
+					group by b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, c.contract_title, s.sub_budget_name,s.sub_budget_id,amount,a.fringe_benefit_id
+					) group by 
+					fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,  sub_budget_id
+		      )
+		      group by 
+					fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,  sub_budget_id
+					
+
+			union all
+			
+			select fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,'Operations and Support' type,2 sortOrder,
+			 sum(amount) amount, sum(invoice_Amount) invoice_Amount, sub_budget_id from (
+			select fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,'Operations and Support' type,2 sortOrder,
+			 sum(amount) amount,sum(invoice_Amount) invoice_Amount, sub_budget_id from (
+			select b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, s.sub_budget_name,
+			 amount,a.operations_support_id,
+			nvl(sum(case when id.entry_type_id= 2 and i.status_id in (72,73) and id.line_item_id = a.operations_support_id then id.invoice_Amount else 0 end),0) invoice_Amount, s.sub_budget_id from 
+			invoice_Details id,invoice i, operations_and_support a, organization o, sub_budget s, budget b, contract c, program_master p
+			where     i.budget_id(+)= b.budget_id  and  id.invoice_id(+) = i.invoice_id
+			and a.sub_budget_id (+)= s.sub_budget_id and a.budget_id (+)= s.budget_id and s.budget_id= b.budget_id and b.contract_id = c.contract_id and c.organization_id= o.organization_id
+			and p.program_id =c.program_id
+			and b.budget_type_id=2  and b.active_flag=1 and b.status_id in (85)
+			group by b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, c.contract_title, s.sub_budget_name,s.sub_budget_id,amount,a.operations_support_id
+			) group by 
+			fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,  sub_budget_id
+      
+      union all
+
+	select fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,'Equipments' type,2 sortOrder,
+			 sum(amount) amount,sum(invoice_Amount) invoice_Amount, sub_budget_id from (
+			select b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, s.sub_budget_name,
+			 amount,a.equipment_id,
+			nvl(sum(case when id.entry_type_id= 12 and i.status_id in (72,73) and id.line_item_id = a.equipment_id then id.invoice_Amount else 0 end),0) invoice_Amount, s.sub_budget_id from 
+			invoice_Details id,invoice i, equipment a, organization o, sub_budget s, budget b, contract c, program_master p
+			where     i.budget_id(+)= b.budget_id  and  id.invoice_id(+) = i.invoice_id
+			and a.sub_budget_id (+)= s.sub_budget_id and a.budget_id (+)= s.budget_id and s.budget_id= b.budget_id and b.contract_id = c.contract_id and c.organization_id= o.organization_id
+			and p.program_id =c.program_id
+			and b.budget_type_id=2  and b.active_flag=1 and b.status_id in (85)
+			group by b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, c.contract_title, s.sub_budget_name,s.sub_budget_id,amount,a.equipment_id
+			) group by 
+			fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,  sub_budget_id
+			
+      )
+      group by 
+			fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,  sub_budget_id
+			
+			
+			
+			
+			union all
+			
+			
+			select fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,'Utilities' type,3 sortOrder,
+			 sum(amount),sum(invoice_Amount), sub_budget_id from (
+			select b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, s.sub_budget_name,
+			 amount,a.Utilities_id,
+			nvl(sum(case when id.entry_type_id= 3 and i.status_id in (72,73) and id.line_item_id = a.Utilities_id then id.invoice_Amount else 0 end),0) invoice_Amount, s.sub_budget_id from 
+			invoice_Details id,invoice i, Utilities a, organization o, sub_budget s, budget b, contract c, program_master p
+			where     i.budget_id(+)= b.budget_id  and  id.invoice_id(+) = i.invoice_id
+			and a.sub_budget_id (+)= s.sub_budget_id and a.budget_id (+)= s.budget_id and s.budget_id= b.budget_id and b.contract_id = c.contract_id and c.organization_id= o.organization_id
+			and p.program_id =c.program_id
+			and b.budget_type_id=2  and b.active_flag=1 and b.status_id in (85)
+			group by b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, c.contract_title, s.sub_budget_name,s.sub_budget_id,amount,a.Utilities_id
+			) group by 
+			fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name, sub_budget_id
+			
+			union all
+			
+			select fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,'Professional Services' type,4 sortOrder,
+			 sum(amount),sum(invoice_Amount), sub_budget_id from (
+			select b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, s.sub_budget_name,
+			 amount,a.professional_service_id,
+			nvl(sum(case when id.entry_type_id= 4 and i.status_id in (72,73) and id.line_item_id = a.professional_service_id then id.invoice_Amount else 0 end),0) invoice_Amount, s.sub_budget_id from 
+			invoice_Details id,invoice i, professional_service a, organization o, sub_budget s, budget b, contract c, program_master p
+			where     i.budget_id(+)= b.budget_id  and  id.invoice_id(+) = i.invoice_id
+			and a.sub_budget_id (+)= s.sub_budget_id and a.budget_id (+)= s.budget_id and s.budget_id= b.budget_id and b.contract_id = c.contract_id and c.organization_id= o.organization_id
+			and p.program_id =c.program_id
+			and b.budget_type_id=2  and b.active_flag=1 and b.status_id in (85)
+			group by b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, c.contract_title, s.sub_budget_name,s.sub_budget_id,amount,a.professional_service_id
+			) group by 
+			fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,  sub_budget_id
+			
+			union all
+			
+			select fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,'Rent' type,5 sortOrder,
+			 sum(amount),sum(invoice_Amount), sub_budget_id from (
+			select b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, s.sub_budget_name,
+			 amount,a.Rent_id,
+			nvl(sum(case when id.entry_type_id= 5 and i.status_id in (72,73) and id.line_item_id = a.Rent_id then id.invoice_Amount else 0 end),0) invoice_Amount, s.sub_budget_id from 
+			invoice_Details id,invoice i, Rent a, organization o, sub_budget s, budget b, contract c, program_master p
+			where     i.budget_id(+)= b.budget_id  and  id.invoice_id(+) = i.invoice_id
+			and a.sub_budget_id (+)= s.sub_budget_id and a.budget_id (+)= s.budget_id and s.budget_id= b.budget_id and b.contract_id = c.contract_id and c.organization_id= o.organization_id
+			and p.program_id =c.program_id
+			and b.budget_type_id=2  and b.active_flag=1 and b.status_id in (85)
+			group by b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, c.contract_title, s.sub_budget_name,s.sub_budget_id,amount,a.Rent_id
+			) group by 
+			fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,  sub_budget_id
+			
+			union all
+			
+			
+			select fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,'Contracted Services' type,6 sortOrder,
+			 sum(amount),sum(invoice_Amount), sub_budget_id from (
+			select b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, s.sub_budget_name,
+			 amount,a.contracted_service_id,
+			nvl(sum(case when id.entry_type_id= 6 and i.status_id in (72,73) and id.line_item_id = a.contracted_service_id then id.invoice_Amount else 0 end),0) invoice_Amount, s.sub_budget_id from 
+			invoice_Details id,invoice i, contracted_service a, organization o, sub_budget s, budget b, contract c, program_master p
+			where     i.budget_id(+)= b.budget_id  and  id.invoice_id(+) = i.invoice_id
+			and a.sub_budget_id (+)= s.sub_budget_id and a.budget_id (+)= s.budget_id and s.budget_id= b.budget_id and b.contract_id = c.contract_id and c.organization_id= o.organization_id
+			and p.program_id =c.program_id
+			and b.budget_type_id=2  and b.active_flag=1 and b.status_id in (85)
+			group by b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, c.contract_title, s.sub_budget_name,s.sub_budget_id,amount,a.contracted_service_id
+			) group by 
+			fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,  sub_budget_id
+			
+			union all
+			
+			select fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,'Rate' type,7 sortOrder,
+			 sum(amount),sum(invoice_Amount), sub_budget_id from (
+			select b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, s.sub_budget_name,
+			 amount,a.rate_id,
+			nvl(sum(case when id.entry_type_id= 7 and i.status_id in (72,73) and id.line_item_id = a.rate_id then id.invoice_Amount else 0 end),0) invoice_Amount, s.sub_budget_id from 
+			invoice_Details id,invoice i, rate a, organization o, sub_budget s, budget b, contract c, program_master p
+			where     i.budget_id(+)= b.budget_id  and  id.invoice_id(+) = i.invoice_id
+			and a.sub_budget_id (+)= s.sub_budget_id and a.budget_id (+)= s.budget_id and s.budget_id= b.budget_id and b.contract_id = c.contract_id and c.organization_id= o.organization_id
+			and p.program_id =c.program_id
+			and b.budget_type_id=2  and b.active_flag=1 and b.status_id in (85)
+			group by b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, c.contract_title, s.sub_budget_name,s.sub_budget_id,amount,a.rate_id
+			) group by 
+			fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,  sub_budget_id
+			
+			union all
+			
+			select fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,'Milestone' type,8 sortOrder,
+			 sum(amount),sum(invoice_Amount), sub_budget_id from (
+			select b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, s.sub_budget_name,
+			 amount,a.Milestone_id,
+			nvl(sum(case when id.entry_type_id= 8 and i.status_id in (72,73) and id.line_item_id = a.Milestone_id then id.invoice_Amount else 0 end),0) invoice_Amount, s.sub_budget_id from 
+			invoice_Details id,invoice i, Milestone a, organization o, sub_budget s, budget b, contract c, program_master p
+			where     i.budget_id(+)= b.budget_id  and  id.invoice_id(+) = i.invoice_id
+			and a.sub_budget_id (+)= s.sub_budget_id and a.budget_id (+)= s.budget_id and s.budget_id= b.budget_id and b.contract_id = c.contract_id and c.organization_id= o.organization_id
+			and p.program_id =c.program_id
+			and b.budget_type_id=2  and b.active_flag=1 and b.status_id in (85)
+			group by b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, c.contract_title, s.sub_budget_name,s.sub_budget_id,amount,a.Milestone_id
+			) group by 
+			fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,  sub_budget_id
+			union all
+			
+			select fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,'Unallocated Funds' type,9 sortOrder,
+			 sum(amount),sum(invoice_Amount), sub_budget_id from (
+			select b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, s.sub_budget_name,
+			 amount,a.Unallocated_id,
+			nvl(sum(case when id.entry_type_id= 9 and i.status_id in (72,73) and id.line_item_id = a.Unallocated_id then id.invoice_Amount else 0 end),0) invoice_Amount, s.sub_budget_id from 
+			invoice_Details id,invoice i, Unallocated a, organization o, sub_budget s, budget b, contract c, program_master p
+			where     i.budget_id(+)= b.budget_id  and  id.invoice_id(+) = i.invoice_id
+			and a.sub_budget_id (+)= s.sub_budget_id and a.budget_id (+)= s.budget_id and s.budget_id= b.budget_id and b.contract_id = c.contract_id and c.organization_id= o.organization_id
+			and p.program_id =c.program_id
+			and b.budget_type_id=2  and b.active_flag=1 and b.status_id in (85)
+			group by b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, c.contract_title, s.sub_budget_name,s.sub_budget_id,amount,a.Unallocated_id
+			) group by 
+			fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,  sub_budget_id
+			
+			union all
+			
+			select fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,'Indirect Rate' type,10 sortOrder,
+			 sum(indirect_Amount),sum(invoice_Amount), sub_budget_id from (
+			select b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, s.sub_budget_name,
+			 indirect_Amount,a.indirect_rate_id,
+			nvl(sum(case when id.entry_type_id= 10 and i.status_id in (72,73) and id.line_item_id = a.indirect_rate_id then id.invoice_Amount else 0 end),0) invoice_Amount, s.sub_budget_id from 
+			invoice_Details id,invoice i, indirect_rate a, organization o, sub_budget s, budget b, contract c, program_master p
+			where     i.budget_id(+)= b.budget_id  and  id.invoice_id(+) = i.invoice_id
+			and a.sub_budget_id (+)= s.sub_budget_id and a.budget_id (+)= s.budget_id and s.budget_id= b.budget_id and b.contract_id = c.contract_id and c.organization_id= o.organization_id
+			and p.program_id =c.program_id
+			and b.budget_type_id=2  and b.active_flag=1 and b.status_id in (85)
+			group by b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, c.contract_title, s.sub_budget_name,s.sub_budget_id,indirect_Amount,a.indirect_rate_id
+			) group by 
+			fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,  sub_budget_id
+			
+			
+			union all
+			
+			
+			select fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,'Program Income' type,11 sortOrder,
+			 sum(amount),sum(invoice_Amount), sub_budget_id from (
+			select b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, s.sub_budget_name,
+			 amount,a.program_income_id,
+			nvl(sum(case when id.entry_type_id= 11 and i.status_id in (72,73) and id.line_item_id = a.program_income_id then id.invoice_Amount else 0 end),0) invoice_Amount, s.sub_budget_id from 
+			invoice_Details id,invoice i, program_income a, organization o, sub_budget s, budget b, contract c, program_master p
+			where     i.budget_id(+)= b.budget_id  and  id.invoice_id(+) = i.invoice_id
+			and a.sub_budget_id (+)= s.sub_budget_id and a.budget_id (+)= s.budget_id and s.budget_id= b.budget_id and b.contract_id = c.contract_id and c.organization_id= o.organization_id
+			and p.program_id =c.program_id
+			and b.budget_type_id=2  and b.active_flag=1 and b.status_id in (85)
+			group by b.fiscal_year_id, o.organization_legal_name,o.organization_id,c.agency_id,p.program_name, c.contract_title, c.ext_ct_number,ext_epin, c.contract_title, s.sub_budget_name,s.sub_budget_id,amount,a.program_income_id
+			) group by 
+			fiscal_year_id, organization_legal_name,organization_id,agency_id,program_name, contract_title, ext_ct_number,ext_epin, sub_budget_name,  sub_budget_id
+      ) a
+       where   a.fiscal_year_id is not null
+      	<if test="fyYear != null and fyYear !=''">
+			and a.fiscal_year_id = #{fyYear}
+			</if>
+			<if test="agencyId != null and agencyId !=''">
+			and a.agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(a.program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="ctNumber != null and ctNumber !=''">
+			and (lower(a.ext_ct_number) LIKE
+			lower('%${ctNumber}%'))  
+			</if>
+			<if test="contractTitle != null and contractTitle !=''">
+			and (lower(a.contract_title) LIKE
+			lower(#{contractTitle}))   
+			</if>
+			<if test="provider != null and provider !=''">
+			and lower(a.Organization_legal_name) LIKE
+			lower(#{provider})  
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		   and a.organization_id = #{providerIdReport} 
+		  </if>
+	</select>
+	
+	<!-- Made changes for Emergency Build 4.0.1 defect 8373 -->
+	<select id="getBudgetCatUtilization_ForGrid" parameterType="com.nyc.hhs.model.ReportBean" resultMap="budgetCatUtilizationDetail">
+		select nvl(sum(a.fy_amount),0) fy_amount,nvl(sum(a.invoiced_Amount),0) invoiced_Amount,a.type,a.entry_type_id,a.sortOrder,
+		nvl(decode(sum(a.fy_amount),0,0, round((sum(a.invoiced_Amount)/sum(a.fy_amount))*100,2)),0) percent_utilized,
+		nvl(decode(sum(a.fy_amount),0,0,
+		round((
+		
+		(sum(a.invoiced_Amount)/sum(a.fy_amount))*100
+		-
+		((100/12)*
+		(SELECT 
+		(case when #{fyYear} = current_year  and current_month >=7 THEN current_month -6
+		      when #{fyYear} = current_year  and current_month &lt; 7 then current_month +6
+		       when #{fyYear} > current_year then 0
+		      else 12 end
+		)
+		 current_month      
+				FROM
+				  (SELECT EXTRACT (MONTH FROM sysdate) AS current_month, (case when EXTRACT(MONTH FROM sysdate) >=7 then EXTRACT(year FROM sysdate)+1 else EXTRACT(year FROM sysdate) end) AS current_year FROM dual 
+				  )   )
+		) ),2)),0) over_under_utilized
+		 from budget_cat_mat_view a
+		 where a.fiscal_year_id is not null
+       <if test="fyYear != null and fyYear !=''">
+			and a.fiscal_year_id = #{fyYear}
+			</if>
+			<if test="agencyId != null and agencyId !=''">
+			and a.agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(a.program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="ctNumber != null and ctNumber !=''">
+			and (lower(a.ext_ct_number) LIKE
+			lower('%${ctNumber}%'))  
+			</if>
+			<if test="contractTitle != null and contractTitle !=''">
+			and (lower(a.contract_title) LIKE
+			lower(#{contractTitle}))   
+			</if>
+			<if test="provider != null and provider !=''">
+			and lower(a.Organization_legal_name) LIKE
+			lower(#{provider})  
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		   and a.organization_id = #{providerIdReport} 
+		  </if>
+      group by a.type,a.entry_type_id,a.sortOrder
+      order by a.entry_type_id
+     
+    </select>
+	
+	
+	<sql id="fetchBudgetIdForFy">
+	select contract_id  from budget where active_flag=1 and budget_type_id = 2 and status_id in (82,83,84,85,86) 
+	 <if test="fyYear != null and fyYear !=''">
+			and fiscal_year_id = #{fyYear}
+	</if>
+	</sql>
+	
+	<select id="getFundingSummaryDetails" parameterType="com.nyc.hhs.model.ReportBean" resultMap="fsReportDetails">
+		select fiscal_year_id,agency_id, program_name,contract_title, type, ext_ct_number, ext_epin, amendmentEpin,
+				amendmentTitle, status,contractStatus,budget_start_date, budget_end_date, nvl(fiscal_year_amount,0) fiscal_year_amount,nvl(providerCount,0) providerCount,
+		    nvl(agencyCount,0) agencyCount,nvl(registeredContractCount,0) registeredContractCount,nvl(totalBudgetAmount,0) totalBudgetAmount,nvl(totalAmendmentBudgetAmount,0) totalAmendmentBudgetAmount,nvl(programCount,0) programCount,Organization_legal_name,ContractType,
+		    to_char(contract_start_date,'mm/dd/yyyy') contract_start_date,to_char(contract_end_date,'mm/dd/yyyy') contract_end_date
+		from
+		  (select nvl(count(distinct organization_id),0) providerCount from contract where delete_flag = 0
+		   <if test="agencyId != null and agencyId !=''">
+		  	and agency_id = #{agencyId}
+		  	</if>
+		  and contract_id in (<include refid="fetchBudgetIdForFy"/>)
+		  ),
+		    (select nvl(count(distinct agency_id),0)  agencyCount from contract where delete_flag  = 0 
+		    <if test="providerIdReport != null and providerIdReport !=''">
+		    and organization_id = #{providerIdReport} 
+		    </if>
+		    and contract_id in (<include refid="fetchBudgetIdForFy"/>)
+		   ),
+		    (select nvl(count (distinct contract_id),0) registeredContractCount from contract where status_id in (61, 62) 
+			  <if test="agencyId != null and agencyId !=''">
+			  and agency_id = #{agencyId}
+			  </if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		    and organization_id = #{providerIdReport} 
+		    </if>
+		    and delete_flag = 0
+		   	and contract_id in (<include refid="fetchBudgetIdForFy"/>)
+		    ),
+		    <!--  Start Emergency Build 4.0.1 defect 8359 -->
+		    (select nvl(sum(fiscal_year_amount),0) totalBudgetAmount from budget b,contract c where b.active_flag=1 and b.budget_type_id = 2 and b.status_id in (82,83,84,85,86)
+		    and b.contract_id = c.contract_id and c.status_id in (61,62) 
+		    <!--  End Emergency Build 4.0.1 defect 8359 -->
+		     <if test="agencyId != null and agencyId !=''">
+		  	and b.agency_id = #{agencyId}
+		  	</if>
+		  	 <if test="providerIdReport != null and providerIdReport !=''">
+		   and b.organization_id = #{providerIdReport} 
+		  </if>
+		  <if test="fyYear != null and fyYear !=''">
+			and b.fiscal_year_id = #{fyYear}
+			</if>
+			),
+		   	(select sum(totalAmendmentBudgetAmount) totalAmendmentBudgetAmount from (
+         select nvl(sum(fiscal_year_amount),0) totalAmendmentBudgetAmount from budget b,contract  c
+         where b.contract_id = c.contract_id and 
+         b.active_flag=1 and budget_type_id = 1 and b.status_id in (82,83,84,86)
+          and b.fiscal_year_amount >0
+         and c.status_id in (128,129,130,61) 
+        <if test="agencyId != null and agencyId !=''">
+			  and c.agency_id = #{agencyId}
+		</if>
+		<if test="providerIdReport != null and providerIdReport !=''">
+		   and c.organization_id = #{providerIdReport} 
+		</if>
+		<if test="fyYear != null and fyYear !=''">
+			and b.fiscal_year_id = #{fyYear}
+		</if>
+         union all
+          select nvl(sum(fiscal_year_amount),0) totalAmendmentBudgetAmount from budget b,contract  c
+         where b.contract_id = c.contract_id and 
+         b.active_flag=1 and budget_type_id = 1 and b.status_id in (82,83,84)
+         and b.fiscal_year_amount &lt;0
+        and c.status_id in (128,129,130,61) 
+         <if test="agencyId != null and agencyId !=''">
+			  and c.agency_id = #{agencyId}
+		</if>
+		<if test="providerIdReport != null and providerIdReport !=''">
+		   and c.organization_id = #{providerIdReport} 
+		</if>
+		<if test="fyYear != null and fyYear !=''">
+			and b.fiscal_year_id = #{fyYear}
+		</if>
+         )
+		   	),
+		    (select nvl(count(distinct program_id),0)  programCount from contract where delete_flag=0
+			   <if test="agencyId != null and agencyId !=''">
+			  and agency_id = #{agencyId}
+			  </if>
+			   <if test="providerIdReport != null and providerIdReport !=''">
+		   and organization_id = #{providerIdReport} 
+		  </if>		  
+		  and contract_id in (select contract_id  from budget where active_flag=1 and budget_type_id = 2 and status_id in (82,83,84,85,86)
+		  <if test="fyYear != null and fyYear !=''">
+			and fiscal_year_id = #{fyYear}
+			</if>
+		  )
+		    ),
+		
+		(
+		select fiscal_year_id,agency_id, program_name,contract_title,type, ext_ct_number, ext_epin, amendmentEpin,
+				amendmentTitle, status, budget_start_date, budget_end_date, fiscal_year_amount,Organization_legal_name,Organization_id,
+				ContractType,contract_start_date,contract_end_date,
+				(case when #{providerIdReport, jdbcType=VARCHAR} is not null and contractStatus = 'Sent for Registration' then 'Pending Registration' else to_char(contractStatus) end) contractStatus
+		from funding_mat_view
+		where fiscal_year_id is not null
+		<if test="fyYear != null and fyYear !=''">
+			and fiscal_year_id = #{fyYear}
+			</if>
+			<if test="agencyId != null and agencyId !=''">
+			and agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="ctNumber != null and ctNumber !=''">
+			and (lower(ext_ct_number) LIKE
+			lower('%${ctNumber}%'))  
+			</if>
+			<if test="contractTitle != null and contractTitle !=''">
+			and (lower(contract_title) LIKE
+			lower(#{contractTitle}))   
+			</if>
+			<if test="provider != null and provider !=''">
+			and lower(Organization_legal_name) LIKE
+			lower(#{provider})  
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		    and organization_id = #{providerIdReport} 
+		    </if>
+				)a
+	</select>
+	
+	<select id="getFundingSummaryDetails_ForGrid" parameterType="com.nyc.hhs.model.ReportBean" resultMap="fsReportDetails">
+		select fiscal_year_id,agency_id, program_name,contract_title,'Contract' type, ext_ct_number, ext_epin,
+		 status,to_char(budget_start_date,'mm/dd/yyyy') budget_start_date, to_char(budget_end_date,'mm/dd/yyyy') budget_end_date, Organization_legal_name,
+		  nvl(fiscal_year_amount,0) fiscal_year_amount,nvl(pending_amendment_amount,0) pending_amendment_amount from
+		(
+		select b.fiscal_year_id,base.agency_id, program_master.program_name,base.contract_title,'Contract' type, base.ext_ct_number, base.ext_epin, '' amendmentEpin,ORGANIZATION.Organization_legal_name,
+		'' amendmentTitle, status_master_r2_r3.status,b.budget_start_date, b.budget_end_date, b.fiscal_year_amount,a.pending_amendment_amount,rownum rn from  budget b,contract base,
+		program_master, status_master_r2_r3,ORGANIZATION,
+		(
+	    select parent_id,sum(fiscal_year_Amount) pending_amendment_amount from budget b,contract c where c.contract_id = b.contract_id and b.status_id in (82,83,84) and c.status_id in (128,129,130,61) and b.budget_type_id =1 and b.active_flag=1 and fiscal_year_Amount &lt;0 group by b.parent_id
+	    union all
+	    select parent_id,sum(fiscal_year_Amount) pending_amendment_amount from budget b,contract c where c.contract_id = b.contract_id and b.status_id in (82,83,84,86) and c.status_id in (128,129,130,61) and b.budget_type_id =1 and b.active_flag=1 and fiscal_year_Amount >0 group by b.parent_id
+	    ) a
+		 where base.contract_id = b.contract_id and base.contract_type_id in (1,3) and base.delete_flag = 0 and base.status_id in (61,62)
+		and base.program_id = program_master.program_id and base.status_id= status_master_r2_r3.status_id and b.status_id in (82,83,84,85,86)
+		and ORGANIZATION.ORGANIZATION_id = b.ORGANIZATION_id
+		and b.budget_type_id=2 and b.active_flag=1
+		and a.parent_id (+)= b.budget_id
+		<if test="fyYear != null and fyYear !=''">
+			and b.fiscal_year_id = #{fyYear}
+			</if>
+			<if test="agencyId != null and agencyId !=''">
+			and b.agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(program_master.program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="ctNumber != null and ctNumber !=''">
+			and (lower(base.ext_ct_number) LIKE
+			lower('%${ctNumber}%'))  
+			</if>
+			<if test="contractTitle != null and contractTitle !=''">
+			and (lower(base.contract_title) LIKE
+			lower(#{contractTitle}))   
+			</if>
+			<if test="provider != null and provider !=''">
+			and lower(ORGANIZATION.Organization_legal_name) LIKE
+			lower(#{provider})  
+			</if>
+			 <if test="providerIdReport != null and providerIdReport !=''">
+		   and ORGANIZATION.organization_id = #{providerIdReport} 
+		  </if>
+		  order by fiscal_year_amount desc
+			) b 
+	</select>
+ 
+ 	  <resultMap type="com.nyc.hhs.model.ReportBean" id="recievableReportDetails">
+		 <result property="fyYear" column="fiscal_year_id"/>
+	  	 <result property="statusId" column="status_id"/>
+	  	 <result property="invociedAmount" column="invoicedAmount"/>
+	  	 <result property="score" column="Assignment"/>
+	  	 <result property="recoupedAmount" column="amountrecouped"/>
+	  	 <result property="proposedPaymentToVendor" column="proposedPaymentToVendor"/>
+	  	 <result property="agencyName" column="agency_id"/>
+	  	 <result property="ctNumber" column="ext_ct_number"/>
+	  	 <result property="contractTitle" column="contract_title"/>
+	  	 <result property="approvedInvoicedPendingDsiburesement" column="approvedInvoicedPendingDis"/>
+	  	 <result property="approvedAdvancePendingDsiburesement" column="approvedAdvancePendingDis"/>
+	  	 <result property="provider" column="organization_legal_name"/>
+	  	  <result property="programName" column="program_name"/>
+	  	  <result property="contractEPIN" column="ext_epin"/>
+	  	  <result property="amountType" column="type"/>
+	  	  <result property="status" column="status"/>
+	  	  <result property="invoiceNumber" column="invoice_number"/>
+	  	  <result property="providerInvoiceNumber" column="provider_invoice_number"/>
+	  	  <result property="agencyInvoiceNumber" column="agency_invoice_number"/>
+	  	  <result property="desc" column="descr"/>
+	  	  <result property="paymentVoucherNumber" column="payee_vendor_id"/>
+	  	  <result property="voucherNumber" column="payment_voucher_num"/>
+	  	  <result property="providerCount" column="chartDataCount"/>
+	</resultMap>
+	
+	
+	<select id="getRecievablesDetails_ForGrid" parameterType="com.nyc.hhs.model.ReportBean" resultMap="recievableReportDetails">
+	  select budget.fiscal_year_id, organization.organization_legal_name,organization.organization_id, base.agency_id, program_master.program_name,base.contract_title, 
+        base.ext_ct_number, base.ext_epin,				
+				sum(case when payment.payee_vendor_id is null and invoice_id is not null then payment.payment_amount else 0 end) approvedInvoicedPendingDis,
+        sum(case when payment.payee_vendor_id is null and budget_Advance_id is not null then payment.payment_amount else 0 end) approvedAdvancePendingDis
+  			  from  
+  			  
+  			  contract base,
+				  program_master, organization,budget left join  
+          payment on payment.budget_id = budget.budget_id and payment.delete_flag = 0 and payment.status_id in (63,64)
+       	  where base.contract_id = budget.contract_id and base.contract_type_id in (1,3) and base.delete_flag = 0 
+				  and base.program_id = program_master.program_id 
+				  and budget.status_id=85
+				  and budget.budget_type_id=2 and budget.organization_id = organization.organization_id 
+			      and  base.ext_epin in (select ext_epin from (<include refid="getRecievablesDetailsReport"/>))
+	       <if test="fyYear != null and fyYear !=''">
+			and budget.fiscal_year_id  = #{fyYear}
+			</if>
+			<if test="agencyId != null and agencyId !=''">
+			and budget.agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(program_master.program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="ctNumber != null and ctNumber !=''">
+			and (lower(base.ext_ct_number) LIKE
+			lower('%${ctNumber}%'))  
+			</if>
+			<if test="contractTitle != null and contractTitle !=''">
+			and (lower(base.contract_title) LIKE
+			lower(#{contractTitle}))   
+			</if>
+			<if test="provider != null and provider !=''">
+			and lower(Organization.Organization_legal_name) LIKE
+			lower(#{provider})  
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		   and Organization.organization_id = #{providerIdReport} 
+		  </if>
+	group by budget.fiscal_year_id, organization.organization_legal_name,organization.organization_id, base.agency_id, program_master.program_name,base.contract_title, 
+        base.ext_ct_number, base.ext_epin
+        order by approvedInvoicedPendingDis desc
+	</select>
+	
+	<sql id="getRecievablesDetailsReport">
+	select fiscal_year_id ,organization_legal_name,organization_id,agency_id,program_name,contract_title,ext_ct_number,ext_epin
+		,invoice_number,provider_invoice_number,agency_invoice_number,descr,type,status,
+		invoicedAmount,	amountrecouped,	Assignment, proposedPaymentToVendor,payee_vendor_id,payment_voucher_num, sortorder,status_id from recievables_mat_view
+		where fiscal_year_id is not null
+	 <if test="fyYear != null and fyYear !=''">
+			and fiscal_year_id = #{fyYear}
+			</if>
+			<if test="agencyId != null and agencyId !=''">
+			and agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="ctNumber != null and ctNumber !=''">
+			and (lower(ext_ct_number) LIKE
+			lower('%${ctNumber}%'))  
+			</if>
+			<if test="contractTitle != null and contractTitle !=''">
+			and (lower(contract_title) LIKE
+			lower(#{contractTitle}))   
+			</if>
+			<if test="provider != null and provider !=''">
+			and lower(Organization_legal_name) LIKE
+			lower(#{provider})  
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		   and organization_id = #{providerIdReport} 
+			</if>
+	</sql>
+	
+	<select id="getRecievablesDetails" parameterType="com.nyc.hhs.model.ReportBean" resultMap="recievableReportDetails">
+		<include refid="getRecievablesDetailsReport"/>
+	</select>		
+
+
+	<select id="getRecievablesDetailsChart" parameterType="com.nyc.hhs.model.ReportBean" resultMap="recievableReportDetails">
+		select type,status,
+		sum(invoicedAmount) invoicedAmount ,	sum(amountrecouped) invoicedAmount,	Assignment, sum(proposedPaymentToVendor) proposedPaymentToVendor, sortorder,status_id from (
+		<include refid="getRecievablesDetailsReport"/>
+		)
+    group by type,status,Assignment,sortorder,status_id
+	</select>		
+	
+	
+	<resultMap type="com.nyc.hhs.model.ReportBean" id="advRecoupDetails">
+	  	 <result property="sortoder" column="sortOrder"/>
+	  	 <result property="monthName" column="month"/>
+	  	 <result property="totalAdvance" column="totalAdvance"/>
+	  	 <result property="advanceAmount" column="advance_amount"/>
+	  	 <result property="recoupedAmount" column="amount_recouped"/>
+	  	 <result property="contractTitle" column="CONTRACT_TITLE"/>
+	  	 <result property="providerId" column="budget_advance_id"/>
+	  	 <result property="agencyName" column="AGENCY_ID"/>
+	  	 <result property="ctNumber" column="EXT_CT_NUMBER"/>
+	  	 <result property="contractTitle" column="CONTRACT_TITLE"/>
+ 		 <result property="desc" column="ADVANCE_DESCRIPTION"/>
+ 		 <result property="advanceAmount" column="advance_amount"/>
+ 		 <result property="recoupedAmount" column="amount_recouped"/>
+  		<result property="percentRecouped" column="percentRecouped"/>
+  		<result property="fyYear" column="FISCAL_YEAR_ID"/>
+  		<result property="programName" column="PROGRAM_NAME"/>
+  		<result property="contractEPIN" column="EXT_EPIN"/>
+  		<result property="status" column="status"/>
+  		<result property="disbursmentNumber" column="CHECK_EFT_NUM"/>
+  		<result property="provider" column="organization_legal_name"/>
+  		<result property="paymentVoucherNumber" column="PAYMENT_VOUCHER_NUM"/>
+  		<result property="payeeVendorId" column="payee_vendor_id"/>
+  		<result property="invoiceNumber" column="budget_advance_number"/>
+	</resultMap>
+
+
+	<select id="getAdvRecoupmentChart" parameterType="com.nyc.hhs.model.ReportBean" resultMap="advRecoupDetails">
+	select 		  
+		     nvl(sum(advance_amount),0) advance_amount, nvl(sum(amount_recouped),0) amount_recouped,	 month,mrn   sortOrder,totalAdvance
+	   from (
+				select 
+		 FISCAL_YEAR_ID,AGENCY_ID,PROGRAM_NAME,CONTRACT_TITLE,EXT_CT_NUMBER,EXT_EPIN,ADVANCE_DESCRIPTION,STATUS,STATUS_ID,
+		     amount_recouped,organization_id,organization_legal_name,nvl(b1.advance_amount,0) advance_amount,
+			 a1.month,  (case when a1.mrn &lt;= 6 then 6+a1.mrn else a1.mrn-6 end ) mrn, b1.budget_advance_id,(nvl(( amount_recouped),0)/b1.advance_amount)*100 percentRecouped,
+		   nvl(totalAdvance.advance_amount,0) totalAdvance,payment_voucher_num
+			from
+			(select fiscal_year_id, agency_id, program_name, contract_title, ext_ct_number,
+			 ext_epin, advance_description, status, status_id, advance_amount, budget_advance_id, month, 
+			 organization_id,organization_legal_name, amount_recouped, payment_voucher_num from advance_mat_view
+			 where fiscal_year_id is not null
+			<if test="fyYear != null and fyYear !=''">
+			and fiscal_year_id = #{fyYear}
+			</if>
+			<if test="agencyId != null and agencyId !=''">
+			and agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="ctNumber != null and ctNumber !=''">
+			and (lower(ext_ct_number) LIKE
+			lower('%${ctNumber}%'))  
+			</if>
+			<if test="contractTitle != null and contractTitle !=''">
+			and (lower(contract_title) LIKE
+			lower(#{contractTitle}))   
+			</if>
+			<if test="provider != null and provider !=''">
+			and lower(Organization_legal_name) LIKE
+			lower(#{provider})  
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		    and organization_id = #{providerIdReport} 
+		    </if>
+			    ) b1, 
+			   (	
+					WITH MONTH_COUNTER AS (
+				  	SELECT LEVEL-1 AS ID 
+				  	FROM DUAL 
+				  	CONNECT BY LEVEL &lt;= 12
+					) 
+				SELECT TO_CHAR(ADD_MONTHS(TO_DATE('01/01/1000', 'DD/MM/RRRR'), ID),'Mon') month, id+1 mrn FROM MONTH_COUNTER
+				) a1,
+		      (select sum(amount) advance_amount from budget_Advance where status_id = 125 and budget_id in (
+		      select budget_id  from budget b,organization o,program_master p,contract c where b.active_flag=1 and b.budget_type_id = 2 and b.status_id in (85) 
+					and p.program_id = b.program_id and b.organization_id = o.organization_id  and c.contract_id = b.contract_id 
+					<if test="fyYear != null and fyYear !=''">
+			and b.fiscal_year_id = #{fyYear}
+			</if>
+			<if test="agencyId != null and agencyId !=''">
+			and c.agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(p.program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="ctNumber != null and ctNumber !=''">
+			and (lower(c.ext_ct_number) LIKE
+			lower('%${ctNumber}%'))  
+			</if>
+			<if test="contractTitle != null and contractTitle !=''">
+			and (lower(c.contract_title) LIKE
+			lower(#{contractTitle}))   
+			</if>
+			<if test="provider != null and provider !=''">
+			and lower(o.Organization_legal_name) LIKE
+			lower(#{provider})  
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		    and o.organization_id = #{providerIdReport} 
+		    </if>
+					) and delete_flag = 0) totalAdvance
+		      where  b1.month (+)= a1.month
+			     order by mrn 
+			    ) group by month,  mrn,totalAdvance
+			    order by mrn 
+    </select>
+	<select id="getAdvRecoupment" parameterType="com.nyc.hhs.model.ReportBean" resultMap="advRecoupDetails">
+		select 
+		  FISCAL_YEAR_ID,AGENCY_ID,PROGRAM_NAME,CONTRACT_TITLE,EXT_CT_NUMBER,EXT_EPIN,ADVANCE_DESCRIPTION,STATUS,STATUS_ID,
+		     advance_amount, amount_recouped, organization_id,organization_legal_name,
+			 month,  mrn sortOrder, budget_advance_id,percentRecouped,totalAdvance,budget_advance_id,payment_voucher_num,budget_advance_number
+		   from (
+				select 
+		 FISCAL_YEAR_ID,AGENCY_ID,PROGRAM_NAME,CONTRACT_TITLE,EXT_CT_NUMBER,EXT_EPIN,ADVANCE_DESCRIPTION,STATUS,STATUS_ID,
+		     amount_recouped,organization_id,organization_legal_name,nvl(b1.advance_amount,0) advance_amount,
+			 a1.month,  (case when a1.mrn &lt;= 6 then 6+a1.mrn else a1.mrn-6 end ) mrn, b1.budget_advance_id,(nvl(( amount_recouped),0)/b1.advance_amount)*100 percentRecouped,
+		   nvl(totalAdvance.advance_amount,0) totalAdvance,payment_voucher_num,budget_advance_number
+			from
+			(select fiscal_year_id, agency_id, program_name, contract_title, ext_ct_number,
+			 ext_epin, advance_description, status, status_id, advance_amount, budget_advance_id,budget_advance_number, month, 
+			 organization_id,organization_legal_name, amount_recouped, payment_voucher_num from advance_mat_view
+			 where fiscal_year_id is not null
+			<if test="fyYear != null and fyYear !=''">
+			and fiscal_year_id = #{fyYear}
+			</if>
+			<if test="agencyId != null and agencyId !=''">
+			and agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="ctNumber != null and ctNumber !=''">
+			and (lower(ext_ct_number) LIKE
+			lower('%${ctNumber}%'))  
+			</if>
+			<if test="contractTitle != null and contractTitle !=''">
+			and (lower(contract_title) LIKE
+			lower(#{contractTitle}))   
+			</if>
+			<if test="provider != null and provider !=''">
+			and lower(Organization_legal_name) LIKE
+			lower(#{provider})  
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		    and organization_id = #{providerIdReport} 
+		    </if>
+			    ) b1, 
+			   (	
+					WITH MONTH_COUNTER AS (
+				  	SELECT LEVEL-1 AS ID 
+				  	FROM DUAL 
+				  	CONNECT BY LEVEL &lt;= 12
+					) 
+				SELECT TO_CHAR(ADD_MONTHS(TO_DATE('01/01/1000', 'DD/MM/RRRR'), ID),'Mon') month, id+1 mrn FROM MONTH_COUNTER
+				) a1,
+		      (select sum(amount) advance_amount from budget_Advance where status_id = 125 and budget_id in (
+		      select budget_id  from budget b,organization o,program_master p,contract c where b.active_flag=1 and b.budget_type_id = 2 and b.status_id in (85) 
+					and p.program_id = b.program_id and b.organization_id = o.organization_id  and c.contract_id = b.contract_id 
+					<if test="fyYear != null and fyYear !=''">
+			and b.fiscal_year_id = #{fyYear}
+			</if>
+			<if test="agencyId != null and agencyId !=''">
+			and c.agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(p.program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="ctNumber != null and ctNumber !=''">
+			and (lower(c.ext_ct_number) LIKE
+			lower('%${ctNumber}%'))  
+			</if>
+			<if test="contractTitle != null and contractTitle !=''">
+			and (lower(c.contract_title) LIKE
+			lower(#{contractTitle}))   
+			</if>
+			<if test="provider != null and provider !=''">
+			and lower(o.Organization_legal_name) LIKE
+			lower(#{provider})  
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		    and o.organization_id = #{providerIdReport} 
+		    </if>
+					) and delete_flag = 0) totalAdvance
+		      where  b1.month (+)= a1.month
+			     order by mrn 
+			    )
+    </select>
+    
+    
+    <select id="getAdvRecoupment_ForGrid" parameterType="com.nyc.hhs.model.ReportBean" resultMap="advRecoupDetails">
+		  select b.FISCAL_YEAR_ID,c.AGENCY_ID,pm.PROGRAM_NAME,c.CONTRACT_TITLE,c.EXT_CT_NUMBER,c.EXT_EPIN,ba.ADVANCE_DESCRIPTION,sm.STATUS,
+		  ba.AMOUNT as advance_amount,ba.budget_advance_id,organization.organization_id,organization.organization_legal_name,
+		 nvl(sum( a.amount_recouped),0) amount_recouped,
+		 round(decode(ba.AMOUNT,0,0,(NVL(SUM( a.amount_recouped),0)/ba.AMOUNT)*100),2) percentRecouped
+		  from BUDGET_ADVANCE ba
+		     left join  (select invoice.invoice_id,INVOICE_ADVANCE.budget_advance_id,invoice.invoice_end_date,INVOICE_ADVANCE.amount_recouped from 
+		     invoice,INVOICE_ADVANCE where INVOICE_ADVANCE.invoice_id = invoice.invoice_id and invoice.status_id = 73) a
+		      on a.budget_advance_id = ba.budget_advance_id 
+		      left join budget b on ba.BUDGET_ID=b.BUDGET_ID left join contract c on  b.contract_id=c.contract_id  
+			    left join STATUS_MASTER_R2_R3 sm on ba.STATUS_ID=sm.STATUS_ID left join PROGRAM_MASTER pm on c.PROGRAM_ID=pm.PROGRAM_ID 
+		      left join organization on organization.organization_id = b.organization_id
+			    where b.FISCAL_YEAR_ID= #{fyYear} and ba.delete_Flag = 0 and ba.status_id = 125
+			    and b.status_id = 85 and b.active_flag = 1
+		  <if test="fyYear != null and fyYear !=''">
+			and b.fiscal_year_id = #{fyYear}
+			</if>
+			<if test="agencyId != null and agencyId !=''">
+			and c.agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(pm.program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="ctNumber != null and ctNumber !=''">
+			and (lower(c.ext_ct_number) LIKE
+			lower('%${ctNumber}%'))  
+			</if>
+			<if test="contractTitle != null and contractTitle !=''">
+			and (lower(c.contract_title) LIKE
+			lower(#{contractTitle}))   
+			</if>
+			<if test="provider != null and provider !=''">
+			and lower(organization.Organization_legal_name) LIKE
+			lower(#{provider})  
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		    and organization.organization_id = #{providerIdReport} 
+		    </if>
+		     group by 
+		      b.FISCAL_YEAR_ID,c.AGENCY_ID,pm.PROGRAM_NAME,c.CONTRACT_TITLE,c.EXT_CT_NUMBER,c.EXT_EPIN,ba.ADVANCE_DESCRIPTION,sm.STATUS,
+		  ba.AMOUNT ,ba.budget_advance_id,organization.organization_id,organization.organization_legal_name
+		  order by c.EXT_CT_NUMBER desc
+	 </select>
+  
+  
+	<resultMap type="com.nyc.hhs.model.ReportBean" id="proposalSumarryReportDetails">
+	  	  <result property="score" column="avgscore"/>
+	  	  <result property="agencyId" column="agency_id"/>
+	  	  <result property="programName" column="program_name"/>
+	  	  <result property="procurementTitle" column="procurement_title"/>
+	  	   <result property="proposalTitle" column="PROPOSAL_TITLE"/>
+	  	  <result property="status" column="proposalstatus"/>
+	  	  <result property="providerStatus" column="providerStatus"/>
+	  	  <result property="refReleaseDate" column="rfp_release_date"/>
+	  	  <result property="updProposalDueDate" column="upd_proposal_due_date"/>
+	  	  <result property="plndProposalDueDate" column="PLND_PROPOSAL_DUE_DATE"/>
+	  	  <result property="compitionPool" column="competition_pool_title"/>
+	  	  <result property="ein" column="ein_id_nn"/>
+	  	  <result property="provider" column="organization_legal_name"/>
+	  	   <result property="proposalId" column="proposal_id"/>
+	  	  <result property="modifiedDate" column="modified_date"/>
+	  	  <result property="modifiedByUserId" column="modified_by_userid"/>
+	  	  <result property="procurementStatus" column="procurementStatus"/>
+	  	   <result property="submitDate" column="audit_date"/>
+	  	   <result property="statusId" column="status_id"/>
+	  	   <result property="contractStartDate" column="upd_contract_start_date"/>
+	  	   <result property="contractEndDate" column="upd_contract_end_date"/> 
+	  	   <result property="amountType" column="avgscoreExport"/>
+	</resultMap>
+	
+    <select id="getProposalDetails" parameterType="com.nyc.hhs.model.ReportBean" resultMap="proposalSumarryReportDetails">
+   select avgscoreExport,
+		avgscore,
+           PROCUREMENT_TITLE,AGENCY_ID,proposal_id,PROPOSAL_TITLE,proposalstatus,statusId,procurementstatus,audit_date,
+		   providerstatus, RFP_RELEASE_DATE, UPD_PROPOSAL_DUE_DATE,
+		   PLND_PROPOSAL_DUE_DATE,upd_contract_start_date,upd_contract_end_date,
+		   EPIN,ORGANIZATION_LEGAL_NAME, MODIFIED_DATE,
+		   modified_by_userid,program_name,ein_id_nn,
+		   COMPETITION_POOL_TITLE
+	from	proposal_mat_view where statusId is not null
+			<if test="statusId == null or statusId ==''">
+		    and statusId in (23,24,25)
+		    </if>
+		    <if test="statusId != null and statusId !=''">
+		     and statusId = #{statusId}
+		    </if>
+		    <if test="agencyId != null and agencyId !=''">
+			and agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="procurementTitle != null and procurementTitle !=''">
+			and (lower(PROCUREMENT_TITLE) LIKE
+			lower(#{procurementTitle}))   
+			</if>
+			<if test="compitionPool != null and compitionPool !=''">
+			and (lower(COMPETITION_POOL_TITLE) LIKE
+			lower('%${compitionPool}%'))   
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		   and organization_id = #{providerIdReport} 
+		  	</if>
+		  	<if test="submitDateFrom != null and submitDateFrom!=''">
+			AND TO_DATE(audit_date, 'MM/DD/YYYY') &gt;= TO_DATE(#{submitDateFrom}, 'MM/DD/YYYY')
+			</if>
+			<if test="submitDateTo != null and submitDateTo !=''">
+			AND TO_DATE(audit_date, 'MM/DD/YYYY') &lt;=TO_DATE(#{submitDateTo}, 'MM/DD/YYYY')
+			</if>
+		order by TO_DATE(audit_date, 'MM/DD/YYYY') desc,AGENCY_ID,PROCUREMENT_TITLE,COMPETITION_POOL_TITLE,proposal_id,avgscore desc, TO_DATE(MODIFIED_DATE, 'MM/DD/YYYY') 
+    </select>
+    
+    
+    <select id="getProposalDetailsChart" parameterType="com.nyc.hhs.model.ReportBean" resultMap="proposalSumarryReportDetails">
+     	select 		
+           to_number(count(proposal_id)) proposal_id,to_number(statusId) statusId,
+           to_number(round((select avg(avgscore) from proposal_mat_view where statusid in (23,24)
+		    <if test="agencyId != null and agencyId !=''">
+			and agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="procurementTitle != null and procurementTitle !=''">
+			and (lower(PROCUREMENT_TITLE) LIKE
+			lower(#{procurementTitle}))   
+			</if>
+			<if test="compitionPool != null and compitionPool !=''">
+			and (lower(COMPETITION_POOL_TITLE) LIKE
+			lower('%${compitionPool}%'))   
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		   and organization_id = #{providerIdReport} 
+		  	</if>
+		  	<if test="submitDateFrom != null and submitDateFrom!=''">
+			AND TO_DATE(audit_date, 'MM/DD/YYYY') &gt;= TO_DATE(#{submitDateFrom}, 'MM/DD/YYYY')
+			</if>
+			<if test="submitDateTo != null and submitDateTo !=''">
+			AND TO_DATE(audit_date, 'MM/DD/YYYY') &lt;=TO_DATE(#{submitDateTo}, 'MM/DD/YYYY')
+			</if>  
+           ),2)) avgscore
+			from	proposal_mat_view where statusId is not null
+			<if test="statusId == null or statusId ==''">
+		    and statusId in (23,24,25)
+		    </if>
+		    <if test="statusId != null and statusId !=''">
+		     and statusId = #{statusId}
+		    </if>
+		    <if test="agencyId != null and agencyId !=''">
+			and agency_id = #{agencyId}  
+			</if>
+			<if test="programName != null and programName !=''">
+			and (lower(program_name) LIKE
+			lower(#{programName}))    
+			</if>
+			<if test="procurementTitle != null and procurementTitle !=''">
+			and (lower(PROCUREMENT_TITLE) LIKE
+			lower(#{procurementTitle}))   
+			</if>
+			<if test="compitionPool != null and compitionPool !=''">
+			and (lower(COMPETITION_POOL_TITLE) LIKE
+			lower('%${compitionPool}%'))   
+			</if>
+			<if test="providerIdReport != null and providerIdReport !=''">
+		   and organization_id = #{providerIdReport} 
+		  	</if>
+		  	<if test="submitDateFrom != null and submitDateFrom!=''">
+			AND TO_DATE(audit_date, 'MM/DD/YYYY') &gt;= TO_DATE(#{submitDateFrom}, 'MM/DD/YYYY')
+			</if>
+			<if test="submitDateTo != null and submitDateTo !=''">
+			AND TO_DATE(audit_date, 'MM/DD/YYYY') &lt;=TO_DATE(#{submitDateTo}, 'MM/DD/YYYY')
+			</if>
+	  group by statusId
+    </select>
+</mapper>

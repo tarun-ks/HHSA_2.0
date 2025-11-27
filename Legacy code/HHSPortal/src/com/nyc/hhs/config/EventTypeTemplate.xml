@@ -1,0 +1,2187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eventtypetemplate>
+	<!-- Provider notified of Business Review Application approval -->
+	<notification eventid="NT001" eventtype="email" alerttype="Business Application">
+		<subjecttemp>HHS Accelerator Business Application - Approved</subjecttemp>
+		<bodytemp>Congratulations! Your HHS Accelerator Business Application is approved. Please note you will also receive a status notification for each Service Application you submitted.<br/><br/>Please use the link below to login to HHS Accelerator and view your application summary.<br/><br/><a href='{#LINK}'>Summary of Applications</a></bodytemp>
+		<generalized>yes</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<!-- Provider notified of Business Review Application deferral -->
+	<notification eventid="NT002" eventtype="email" alerttype="Business Application">
+		<subjecttemp>HHS Accelerator Business Application - Deferred</subjecttemp>
+		<bodytemp>Your HHS Accelerator Business Application is Deferred. Please contact the HHS Accelerator Team if you have questions about this status.<br/><br/>Please use the link below to login to HHS Accelerator and view your application summary.<br/><br/><a href='{#LINK}'>Summary of Applications</a></bodytemp>
+		<generalized>yes</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<!-- Provider notified of Business Application returned for revisions -->
+	<notification eventid="NT003" eventtype="email" alerttype="Business Application">
+		<subjecttemp>HHS Accelerator Business Application - Returned for Revisions</subjecttemp>
+		<bodytemp>Your organization’s HHS Accelerator Business Application has been Returned for Revision. If your organization wishes to complete its HHS Prequalification, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever! To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account. Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage'  rel='noopener noreferrer'  target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort. 
+                  <br/><br/>
+                  Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:  
+                  <br/>
+                    1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.  
+                     <br/>
+                    2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application. 
+                     <br/>
+                    3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.  
+                  <br/><br/>
+                  An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs. 
+                  <br/><br/>
+                  <font style="color:red"><b>PLEASE NOTE</b></font>: <b>You can disregard this message if your organization already submitted a renewal application through PASSPort.  If you started a renewal application in HHS Accelerator but did not submit it or receive approval for it, please restart the application in PASSPort</b>.
+                  <br/> 
+        </bodytemp>
+		<generalized>yes</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<!-- Provider notified of Service Application approval -->
+	<notification eventid="NT004" eventtype="email" alerttype="Service Application">
+		<subjecttemp>HHS Accelerator Service Application - Approved</subjecttemp>
+		<bodytemp>Congratulations!  Your HHS Accelerator Service Application for {#SERVICE} is approved. Please note you will receive a status notification for each Service Application you submitted.<br/><br/>Please use the link below to login to HHS Accelerator and view your application summary.<br/><br/><a href='{#LINK}'>Summary of Applications</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT005" eventtype="email" alerttype="Service Application">
+		<subjecttemp>HHS Accelerator - Service Application - {#SERVICE} - Deferred</subjecttemp>
+		<bodytemp>Your HHS Accelerator Service Application for {#SERVICE} is Deferred. Please note you will receive a status notification for each Service Application you submitted.<br/><br/>Please use the link below to login to HHS Accelerator and view your application summary.<br/><br/><a href='{#LINK}'>Summary of Applications</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT006" eventtype="email" alerttype="Service Application">
+		<subjecttemp>HHS Accelerator Service Application - {#SERVICE} - Returned for Revisions</subjecttemp>
+		<bodytemp>Your organization’s HHS Accelerator Service Application for {#SERVICE} has been Returned for Revision. HHS Prequalification is now hosted in PASSPort – it is streamlined and easier than ever to complete! Service Applications are no longer required for HHS Prequalification. If your organization wishes to complete its HHS Prequalification, please submit a new application in PASSPort. To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account. Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage'  rel='noopener noreferrer'  target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort.
+                  <br/><br/>
+                  Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:  
+                  <br/>
+                    1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.  
+                     <br/>
+                    2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application. 
+                     <br/>
+                    3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.  
+                  <br/><br/>
+                  An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs. 
+                  <br/><br/>
+                  While a Service Application is no longer required, it is recommended that organizations identify the services that they are able to deliver through PASSPort Commodity Codes in order to receive targeted communications for specific contracting opportunities.
+                  <br/> 
+		</bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT007" eventtype="email" alerttype="Filings">
+		<subjecttemp>HHS Accelerator has Returned - {#DOCUMENT TYPE}</subjecttemp>
+		<bodytemp>The {#DOCUMENT TYPE} with a name of {#DOCUMENT NAME} has been Returned for Revision by the HHS Accelerator team. To restore your Provider Status and eligibility to receive RFPs through the HHS Accelerator system, you must upload a current filing or extension document.<br/><br/>Reason:  {#Provider Comments from the Task Details}<br/><br/>Please use the link below to login to HHS Accelerator and upload a new document.<br/><br/><a href='{#LINK}'>Document Vault</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<!-- Provider notified of Business Application Conditional Approval -->
+	<notification eventid="NT009" eventtype="email" alerttype="Business Application">
+		<subjecttemp>HHS Accelerator Business - Conditionally Approved
+		</subjecttemp>
+		<bodytemp>Your HHS Accelerator Business Application is Conditionally Approved. Within the next 90 days, you must login to HHS Accelerator using the link below and complete and submit your organization's application.<br/><br/><a href='{#LINK}'>Summary of Applications</a></bodytemp>
+		<generalized>yes</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<!--Provider notified of Service Application Conditional Approval -->
+	<notification eventid="NT010" eventtype="email" alerttype="Service Application">
+		<subjecttemp>HHS Accelerator Service - {#SERVICE} - Conditionally Approved</subjecttemp>
+		<bodytemp>Your HHS Accelerator Service Application for {#SERVICE} is Conditionally Approved. Please note you will also receive a status notification for each Service Application you submitted.<br/><br/>Within the next 90 days. you must complete and submit your Service Application for {#SERVICE}.<br/><br/><a href='{#LINK}'>HHS Accelerator Log In</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT011" eventtype="email" alerttype="Account Request">
+		<subjecttemp>HHS Accelerator Account Request Approved</subjecttemp>
+		<bodytemp>
+		Your request for an HHS Accelerator account is approved. HHS Accelerator offers digital budgeting and invoicing for human services contracts.  Please use the link below to login to HHS Accelerator using your NYC ID. 
+		<br/><br/>
+        <a href='{#LINK}'>HHS Accelerator Log In</a>
+        <br/><br/>
+		HHS Prequalification is now hosted in PASSPort - it is streamlined and easier to complete! If your organization wishes to begin the HHS Prequalification application process or has a pending prequalification application in HHS Accelerator, you must submit a new application in PASSPort. To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account. Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage'   target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort.
+        <br/><br/>
+        PASSPort is also the central platform to find and respond to human services RFPs. Organizations must have a PASSPort account and be prequalified to submit a response to a human services RFP.
+        <br/><br/>
+		To learn more about PASSPort or if you need assistance, please visit <a href="https://www.nyc.gov/mocshelp" target="_blank">www.nyc.gov/mocshelp</a> for resources and the MOCS Service Desk contact form.
+        <br/>
+		</bodytemp>
+		<generalized>yes</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Provider Executive Director"></group>
+					<group name="Provider Administrator"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT012" eventtype="email" alerttype="Account Request">
+		<subjecttemp>HHS Accelerator Account Request Denied</subjecttemp>
+		<bodytemp>
+		Your request for an HHS Accelerator account has not been approved.  An HHS Accelerator account is required to manage many human services contract budgets and invoices. 
+		<br/><br/>
+		If your organization wishes to become prequalified to respond to human services RFPs, the prequalification process is now available through PASSPort. It is streamlined and easier than ever to complete!  To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account. Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage'   target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The same NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort.
+        <br/><br/>
+        PASSPort is also the central platform to find and respond to human services RFPs.  Organizations must have a PASSPort account and be prequalified to submit a response to a human services RFP.
+        <br/><br/>
+		For more information about HHS Accelerator or PASSPort, please visit <a href="https://www.nyc.gov/mocshelp" target="_blank">www.nyc.gov/mocshelp</a> for resources and the MOCS Service Desk contact form.
+        <br/>
+        </bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Provider Executive Director"></group>
+					<group name="Provider Administrator"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT015" eventtype="email" alerttype="Business Application">
+		<subjecttemp>HHS Accelerator Withdrawal Request Approved - Business Review Application</subjecttemp>
+		<bodytemp>HHS Accelerator approved your request to withdraw your Business application.</bodytemp>
+		<generalized>yes</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT016" eventtype="email" alerttype="Business Application">
+		<subjecttemp>HHS Accelerator Withdrawal Request Denied - Business Review Application</subjecttemp>
+		<bodytemp>HHS Accelerator denied your request to withdraw your Business Application.<br/><br/>Reason:  {#Provider Comments from the Task Details}</bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT017" eventtype="email" alerttype="Service Application">
+		<subjecttemp>HHS Accelerator - Withdrawal Request Approved - Service Application - {#SERVICE}</subjecttemp>
+		<bodytemp>HHS Accelerator approved your request to withdraw your Service Application for {#SERVICE}. Please note this does not affect the status of other Service Applications.<br/><br/>Please use the link below to login to HHS Accelerator and view your application summary.<br/><br/><a href='{#LINK}'>Summary of Applications</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT018" eventtype="email" alerttype="Service Application">
+		<subjecttemp>HHS Accelerator Withdrawal Request Denied - Service Application - {#SERVICE}</subjecttemp>
+		<bodytemp>HHS Accelerator has denied your request to withdraw your Service Application for {#SERVICE}. Please note this does not affect the status of other Service Applications. <br/><br/>Reason:  {#Provider Comments from the Task Details}<br/><br/>Please use the link below to login to HHS Accelerator and view your application summary.<br/><br/><a href='{#LINK}'>Summary of Applications</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<!-- Provider Administrator notified of user account request -->
+	<notification eventid="NT019" eventtype="email" alerttype="Account Request">
+		<subjecttemp>HHS Accelerator - User Account Requested</subjecttemp>
+		<bodytemp>{#NAME} requested access to HHS Accelerator for your organization. Please use the link below to review the request.<br/><br/><a href='{#LINK}'>Members and Users</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Provider Administrator"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<!-- User notified of approved account request -->
+	<notification eventid="NT020" eventtype="email" alerttype="Account Request">
+		<subjecttemp>HHS Accelerator - User Account Approved</subjecttemp>
+		<bodytemp>{#USERNAME}<br/><br/>Your HHS Accelerator user account request is approved. Please use the link below to login using your NYC ID.<br/><br/><a href='{#LINK}'>HHS Accelerator Login</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto></sentto>
+	</notification>
+	<!-- User notified of rejected account request -->
+	<notification eventid="NT021" eventtype="email" alerttype="Account Request">
+		<subjecttemp>HHS Accelerator - User Account Denied</subjecttemp>
+		<bodytemp>{#USERNAME}<br/><br/>Your HHS Accelerator user account request has not been approved.  Please contact your organization's Account Administrator for more information.</bodytemp>
+		<generalized>no</generalized>
+		<sentto></sentto>
+	</notification>
+	<!-- User notified test -->
+	
+	<!-- Start QC9611 R 9.1 Update in-system notifications and alerts for CHAR 500  Redirect to PASSPort -->
+		<notification eventid="NT022" eventtype="email" alerttype="Filings">
+		<subjecttemp>HHS Accelerator Filing Expiring in {#LEFTDAYS} Days - {#DOCUMENT TYPE}</subjecttemp>
+		<bodytemp>
+		Your organization's {#DOCUMENT TYPE} filing will be out of date in {#LEFTDAYS} days. If your organization wishes to remain prequalified, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever!  To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account.
+		Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage' rel='noopener noreferrer' target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort.<br/><br/>
+
+		Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:<br/> 
+		1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.<br/> 
+		2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application.<br/>
+		3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.<br/><br/> 
+		
+		An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs.<br/><br/> 
+		
+		<font color="red">PLEASE NOTE:</font>  <b>If you already submitted a new HHS Prequalification application through PASSPort you can disregard this message.</b><br/><br/>  
+		</bodytemp>
+        <generalized>no</generalized>
+        <sentto>
+	        <organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="NT023" eventtype="email" alerttype="Filings">
+		<subjecttemp>HHS Accelerator Filing Expiring in {#LEFTDAYS} Days - {#DOCUMENT TYPE}</subjecttemp>
+		<bodytemp>
+		Your organization's {#DOCUMENT TYPE} filing will be out of date in {#LEFTDAYS} days. If your organization wishes to remain prequalified, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever!  To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account.
+		Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage' rel='noopener noreferrer' target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort.<br/><br/>
+
+		Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:<br/> 
+		1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.<br/> 
+		2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application.<br/>
+		3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.<br/><br/> 
+		
+		An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs.<br/><br/> 
+		
+		<font color="red">PLEASE NOTE:</font>  <b>If you already submitted a new HHS Prequalification application through PASSPort you can disregard this message.</b><br/><br/>  
+	    </bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="NT024" eventtype="email" alerttype="Filings">
+		<subjecttemp>HHS Accelerator Filing Expiring in {#LEFTDAYS} Days - {#DOCUMENT TYPE}</subjecttemp>
+		<bodytemp>
+		Your organization's {#DOCUMENT TYPE} filing will be out of date in {#LEFTDAYS} days. If your organization wishes to remain prequalified, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever!  To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account.
+		Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage' rel='noopener noreferrer' target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort.<br/><br/>
+
+		Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:<br/> 
+		1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.<br/> 
+		2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application.<br/>
+		3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.<br/><br/> 
+		
+		An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs.<br/><br/> 
+		
+		<font color="red">PLEASE NOTE:</font>  <b>If you already submitted a new HHS Prequalification application through PASSPort you can disregard this message.</b><br/><br/>  
+		</bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Board Chair"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<!-- End QC9611 R 9.1 Update in-system notifications and alerts for CHAR 500  Redirect to PASSPort -->
+		
+	<notification eventid="NT025" eventtype="email" alerttype="Business Application">
+		<subjecttemp>HHS Accelerator Application is Expiring</subjecttemp>
+		<bodytemp>The HHS Accelerator Team is sending you an early reminder that your HHS Accelerator Application will expire on {#MMDDYYYY}. Your organization will remain eligible to receive RFPs through the HHS Accelerator system until the expiration date. You may submit a new Business Application and at least one Service Application for your organization at any time between now and the expiration date.<br/><br/>If you would like to start a new HHS Accelerator Application for your organization, please use the link below.<br/><br/><a href='{#LINK}'>Summary of Applications</a></bodytemp>		
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT026" eventtype="email" alerttype="Business Application">
+		<subjecttemp>HHS Accelerator Application is Expiring in {#LEFTDAYS} Days</subjecttemp>
+		<bodytemp>Your organization’s HHS Accelerator Prequalification Application will expire in {#LEFTDAYS} days. If your organization wishes to renew its HHS Prequalification, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever! To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account. Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage'   target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort. 
+                  <br/><br/>
+                  Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:  
+                  <br/>
+                    1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.  
+                     <br/>
+                    2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application. 
+                     <br/>
+                    3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.  
+                  <br/><br/>
+                  An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs. 
+                  <br/><br/>
+                  <font style="color:red"><b>PLEASE NOTE</b></font>: <b>You can disregard this message if your organization already submitted a renewal application through PASSPort.  If you started a renewal application in HHS Accelerator but did not submit it or receive approval for it, please restart the application in PASSPort</b>.
+                  <br/> 
+        </bodytemp>
+		<generalized>yes</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT027" eventtype="email" alerttype="Business Application">
+		<subjecttemp>HHS Accelerator Application is Expiring - {#LEFTDAYS} Days</subjecttemp>
+		<bodytemp>Your organization’s HHS Accelerator Prequalification Application will expire in {#LEFTDAYS} days. If your organization wishes to renew its HHS Prequalification, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever! To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account. Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage'  rel='noopener noreferrer'  target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort. 
+                  <br/><br/>
+                  Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:  
+                  <br/>
+                    1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.  
+                     <br/>
+                    2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application. 
+                     <br/>
+                    3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.  
+                  <br/><br/>
+                  An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs. 
+                  <br/><br/>
+                  <font style="color:red"><b>PLEASE NOTE</b></font>: <b>You can disregard this message if your organization already submitted a renewal application through PASSPort.  If you started a renewal application in HHS Accelerator but did not submit it or receive approval for it, please restart the application in PASSPort</b>.
+                  <br/>
+        </bodytemp>
+		<generalized>yes</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="NT028" eventtype="email" alerttype="Business Application">
+		<subjecttemp>HHS Accelerator Application is Expiring - {#LEFTDAYS} Days</subjecttemp>
+		<bodytemp>Your organization’s HHS Accelerator Prequalification Application will expire in {#LEFTDAYS} days. If your organization wishes to renew its HHS Prequalification, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever! To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account. Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage'  rel='noopener noreferrer'  target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort. 
+                  <br/><br/>
+                  Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:  
+                  <br/>
+                    1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.  
+                     <br/>
+                    2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application. 
+                     <br/>
+                    3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.  
+                  <br/><br/>
+                  An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs. 
+                  <br/><br/>
+                  <font style="color:red"><b>PLEASE NOTE</b></font>: <b>You can disregard this message if your organization already submitted a renewal application through PASSPort.  If you started a renewal application in HHS Accelerator but did not submit it or receive approval for it, please restart the application in PASSPort</b>.
+                  <br/>
+        </bodytemp>
+		<generalized>yes</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="NT029" eventtype="email" alerttype="Business Application">
+		<subjecttemp>HHS Accelerator Application is Expiring - {#LEFTDAYS} Days</subjecttemp>
+		<bodytemp>Your organization’s HHS Accelerator Prequalification Application will expire in {#LEFTDAYS} days. If your organization wishes to renew its HHS Prequalification, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever! To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account. Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage'  rel='noopener noreferrer'  target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort. 
+                  <br/><br/>
+                  Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:  
+                  <br/>
+                    1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.  
+                     <br/>
+                    2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application. 
+                     <br/>
+                    3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.  
+                  <br/><br/>
+                  An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs. 
+                  <br/><br/>
+                  <font style="color:red"><b>PLEASE NOTE</b></font>: <b>If you already submitted a renewal application through HHS Accelerator, that was approved by the HHS Accelerator Team, you can disregard this message. If you started a renewal application in HHS Accelerator but did not submit it or receive approval for it, please restart the application in PASSPort</b>.
+                  <br/>
+        </bodytemp>
+		<generalized>yes</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="NT030" eventtype="email" alerttype="Business Application">
+		<subjecttemp>HHS Accelerator Application has Expired</subjecttemp>
+		<bodytemp>Your organization’s HHS Accelerator Prequalification Application is Expired. If your organization wishes to renew its HHS Prequalification, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever! To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account. Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage'  rel='noopener noreferrer'  target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort. 
+                  <br/><br/>
+                  Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:  
+                  <br/>
+                    1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.  
+                     <br/>
+                    2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application. 
+                     <br/>
+                    3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.  
+                  <br/><br/>
+                  An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs. 
+                  <br/><br/>
+                  <font style="color:red"><b>PLEASE NOTE</b></font>: <b>If you already submitted a renewal application through HHS Accelerator, that was approved by the HHS Accelerator Team, you can disregard this message. If you started a renewal application in HHS Accelerator but did not submit it or receive approval for it, please restart the application in PASSPort</b>.
+                  <br/>
+        </bodytemp>
+		<generalized>yes</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+
+	<!-- Provider/agency notified that another provider has shared a document with their organization -->
+	<notification eventid="NT031a" eventtype="email" alerttype="Document Sharing">
+		<subjecttemp>{#PROVIDER} - Shared Document</subjecttemp>
+		<bodytemp>{#PROVIDER} has shared documents with your organization.<br/><br/>Please use the link below to view the shared document(s).<br/><br/><a href='{#LINK}'>Organization Documents</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="NT031b" eventtype="email" alerttype="Document Sharing">
+		<subjecttemp>{#PROVIDER} - Shared Document</subjecttemp>
+		<bodytemp>{#PROVIDER} has shared documents with your organization.<br/><br/>Please use the link below to view the shared document(s).<br/><br/><a href='{#LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="staff"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+
+	<!--HHS Accelerator notified when Provider Executive Director or CEO is 
+		made inactive -->
+	<notification eventid="NT032" eventtype="email" alerttype="Account Request">
+		<subjecttemp>{#PROVIDER} has inactivated their Executive Director/CEO</subjecttemp>
+		<bodytemp> {#PROVIDER} has inactivated their Executive Director/CEO<br/><br/><a href='{#LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="accelerator">
+				<groups>
+					<group name="manager"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+
+	<!-- HHS Accelerator notified when Provider Executive Director or CEO is 
+		activated -->
+	<notification eventid="NT033" eventtype="email" alerttype="Account Request">
+		<subjecttemp>{#PROVIDER} has activated a new Executive Director/CEO</subjecttemp>
+		<bodytemp> {#PROVIDER} has activated a new Executive Director/CEO<br/><br/><a href='{#LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="accelerator">
+				<groups>
+					<group name="manager"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+
+	<!-- User notified of NYC.ID account creation -->
+	<notification eventid="NT034" eventtype="email" alerttype="Account Request">
+		<subjecttemp>Your NYC.ID has been created</subjecttemp>
+		<bodytemp>{#USERNAME}<br/><br/>Your NYC.ID has been created. Please use the link below to activate your NYC.ID and login to request your HHS Accelerator account.<br/><br/><a href='{#LINK}'>HHS Accelerator Log In</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto></sentto>
+	</notification>
+	
+	<!-- Start QC9611 R 9.1 Update in-system notifications and alerts for CHAR 500  Redirect to PASSPort -->
+	<!-- Provider notified that a filing has expired -->
+	<notification eventid="NT035" eventtype="email" alerttype="Filings">
+		<subjecttemp>HHS Accelerator Provider Status Suspended - Lapsed - {#DOCUMENT TYPE} Filing</subjecttemp>
+		<bodytemp>
+		Your organization's HHS Accelerator Provider Status has been Suspended because your {#DOCUMENT TYPE} filing is out of date. If your organization wishes to remain prequalified, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever!  To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account.
+		Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage' rel='noopener noreferrer' target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort.<br/><br/>
+
+		Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:<br/> 
+		1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.<br/> 
+		2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application.<br/>
+		3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.<br/><br/> 
+		
+		An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs.<br/><br/> 
+		
+		<font color="red">PLEASE NOTE:</font>  <b>If you already submitted a new HHS Prequalification application through PASSPort you can disregard this message.</b><br/><br/>  
+			
+		</bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Board Chair"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<!--End QC9611 R 9.1 Update in-system notifications and alerts for CHAR 500  Redirect to PASSPort -->
+
+	<!-- HHS Accelerator notified when Provider updates their Accounting Period -->
+	<notification eventid="NT036" eventtype="email" alerttype="Business Application">
+		<subjecttemp>{#PROVIDER} has updated their Accounting Period</subjecttemp>
+		<bodytemp>{#PROVIDER} has updated their Accounting Period.<br/><br/>Prior Accounting Period: {#OldFromMonth} to {#OldToMonth}<br/><br/>New Accounting Period: {#NewFromMonth} to {#NewToMonth}<br/><br/><a href='{#LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="accelerator">
+				<groups>
+					<group name="manager"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+
+	<!-- Provider user has successfully reset his/her NYC.ID password -->
+	<notification eventid="NT037" eventtype="email" alerttype="Account Request">
+		<subjecttemp>NYC.ID Password reset successfully</subjecttemp>
+		<bodytemp>You have changed your NYC.ID Email Address/Username to {#NEWEMAIL}. Please use the link below to activate your new NYC.ID login. If you did not request this change, the Mayor's Office of Contract Services (MOCS) is happy to assist you. Please visit <a href="https://www.nyc.gov/mocshelp" target="_blank">www.nyc.gov/mocshelp</a> for resources and the MOCS Service Desk contact form.</bodytemp>
+		<generalized>no</generalized>
+		<sentto></sentto>
+	</notification>
+
+	<!-- Provider user has requested to reset his/her NYC.ID password by email -->
+	<notification eventid="NT038" eventtype="email" alerttype="Account Request">
+		<subjecttemp>NYC.ID Password reset request</subjecttemp>
+		<bodytemp>{#USERNAME}<br/><br/>You have requested a NYC.ID password reset from the HHS Accelerator system. Please click the link below to reset your NYC.ID password.<br/><br/>If you did not request this reset, no action is required.<br/><br/><a href='{#LINK}'>NYC.ID Password Reset</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto></sentto>
+	</notification>
+	
+	<notification eventid="NT039" eventtype="email" alerttype="Account Request">
+		<subjecttemp>NYC.ID Email/Username Reset</subjecttemp>
+		<bodytemp>You have changed your NYC.ID Email Address/Username to {#NEWEMAIL}. Please use the link below to activate your new NYC.ID login. If you did not request this change, the Mayor's Office of Contract Services (MOCS) is happy to assist you. MOCS can be contacted via  <a href="https://www.nyc.gov/mocshelp" target="_blank">www.nyc.gov/mocshelp</a>.</bodytemp>
+		<generalized>no</generalized>
+		<sentto></sentto>
+	</notification>
+	
+	
+	<notification eventid="AL001" eventtype="alert" alerttype="Business Application">
+		<subjecttemp>Business Application - Approved</subjecttemp>
+		<bodytemp>Congratulations!  Your HHS Accelerator Business Application is approved. Please note you will also receive a status notification for each Service Application you submitted.<br/><br/>Please use the link below to login to HHS Accelerator and view your application summary.<br/><br/><a href='{#LINK}'>Summary of Applications</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL002" eventtype="alert" alerttype="Business Application">
+		<subjecttemp>Business Application - Deferred</subjecttemp>
+		<bodytemp>Your HHS Accelerator Business Application is Deferred.  Please contact the HHS Accelerator Team if you have questions about this status.<br/><br/>Please use the link below to login to HHS Accelerator and view your application summary.<br/><br/><a href='{#LINK}'>Summary of Applications</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL003" eventtype="alert" alerttype="Business Application">
+		<subjecttemp>Business Application - Conditionally Approved</subjecttemp>
+		<bodytemp>Your HHS Accelerator Business Application is Conditionally Approved for 90 days. <b>Once you meet the conditions to become fully approved, you must submit a new Prequalification Application in PASSPort</b>, the City’s digital Procurement and Sourcing Solutions Portal, by clicking this link. You must have an active Prequalification Application to be eligible to receive human services RFPs and certain Discretionary awards.  Please note that PASSPort is the central portal for all RFPs, including human services RFPs.
+                  <br/><br/>
+                  Please use the link below to start a new HHS Prequalification Application in PASSPort.
+                  <br/><br/>
+                  <a href='https://www1.nyc.gov/site/mocs/systems/about-go-to-passport.page'>PASSPort</a> 
+		</bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL005" eventtype="alert" alerttype="Business Application">
+		<subjecttemp>Business Application - Returned for Revisions</subjecttemp>
+		<bodytemp>
+		          Your organization’s HHS Accelerator Business Application has been Returned for Revision. If your organization wishes to complete its HHS Prequalification, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever! To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account. Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage'  rel='noopener noreferrer'  target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort. 
+                  <br/><br/>
+                  Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:  
+                  <br/>
+                    1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.  
+                     <br/>
+                    2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application. 
+                     <br/>
+                    3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.  
+                  <br/><br/>
+                  An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs. 
+                  <br/><br/>
+                  <font style="color:red"><b>PLEASE NOTE</b></font>: <b>You can disregard this message if your organization already submitted a renewal application through PASSPort.  If you started a renewal application in HHS Accelerator but did not submit it or receive approval for it, please restart the application in PASSPort</b>.
+                  <br/> 
+        </bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL006" eventtype="alert" alerttype="Service Application">
+		<subjecttemp>Service Application - {#SERVICE} - Approved</subjecttemp>
+		<bodytemp>Congratulations!  Your HHS Accelerator Service Application for {#SERVICE} is approved. Please note you will receive a status notification for each Service Application you submitted.<br/><br/>Please use the link below to login to HHS Accelerator and view your application summary.<br/><br/><a href='{#LINK}'>Summary of Applications</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL007" eventtype="alert" alerttype="Service Application">
+		<subjecttemp>Service Application - {#SERVICE} - Deferred</subjecttemp>
+		<bodytemp>Your HHS Accelerator Service Application for {#SERVICE} is Deferred. Please note you will receive a status notification for each Service Application you submitted.<br/><br/>Please use the link below to login to HHS Accelerator and view your application summary.<br/><br/><a href='{#LINK}'>Summary of Applications</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL008" eventtype="alert" alerttype="Service Application">
+		<subjecttemp>Service - {#SERVICE} - Conditionally Approved</subjecttemp>
+		        <bodytemp><b>Your HHS Accelerator Service Application for {#SERVICE} is Conditionally Approved</b> for 90 days. <b>Please note you will also receive a status notification for each Service Application you submitted.<br></br><br></br> Once you meet the conditions to become fully approved, you must submit a new Prequalification Application in PASSPort</b>, the City’s digital Procurement and Sourcing Solutions Portal, by clicking this <a href='https://www1.nyc.gov/site/mocs/systems/about-go-to-passport.page'>link</a>. You must have an active Prequalification Application to be eligible to receive human services RFPs and many Discretionary awards.  Please note that PASSPort is the central portal for all RFPs, including human services RFPs.
+                  <br/><br/>
+                  Please use the link below to start a new HHS Prequalification Application in PASSPort.
+                  <br/><br/>
+                  <a href='https://www1.nyc.gov/site/mocs/systems/about-go-to-passport.page'>PASSPort</a> 
+                </bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL010" eventtype="alert" alerttype="Service Application">
+		<subjecttemp>Service Application - {#SERVICE} - Returned for Revisions</subjecttemp>
+		<bodytemp>Your organization’s HHS Accelerator Service Application for {#SERVICE} has been Returned for Revision. HHS Prequalification is now hosted in PASSPort – it is streamlined and easier than ever to complete! Service Applications are no longer required for HHS Prequalification. If your organization wishes to complete its HHS Prequalification, please submit a new application in PASSPort. To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account. Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage'  rel='noopener noreferrer'  target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort.
+                  <br/><br/>
+                  Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:  
+                  <br/>
+                    1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.  
+                     <br/>
+                    2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application. 
+                     <br/>
+                    3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.  
+                  <br/><br/>
+                  An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs. 
+                  <br/><br/>
+                  While a Service Application is no longer required, it is recommended that organizations identify the services that they are able to deliver through PASSPort Commodity Codes in order to receive targeted communications for specific contracting opportunities.
+                  <br/>
+		</bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL011" eventtype="alert" alerttype="Filings">
+		<subjecttemp>{#DOCUMENT TYPE} - Returned</subjecttemp>
+		<bodytemp>The {#DOCUMENT TYPE} with a name of {#DOCUMENT NAME} has been Returned for Revision by the HHS Accelerator team. To restore your Provider Status and eligibility to receive RFPs through the HHSAccelerator system, you must upload a current filing or extension document.<br/><br/>Reason:  {#Provider Comments from the Task Details}<br/><br/>Please use the link below to  upload a new document.<br/><br/><a href='{#LINK}'>Document Vault</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL015" eventtype="alert" alerttype="Business Application">
+		<subjecttemp>Withdrawal Request Approved - Business Application</subjecttemp>
+		<bodytemp>HHS Accelerator approved your request to withdraw your Business Application.</bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL016" eventtype="alert" alerttype="Business Application">
+		<subjecttemp>Withdrawal Request Denied - Business Review Application</subjecttemp>
+		<bodytemp>HHS Accelerator denied your request to withdraw your Business Application.<br/><br/>Reason:  {#Provider Comments from the Task Details}</bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL017" eventtype="alert" alerttype="Service Application">
+		<subjecttemp>Withdrawal Request Approved - Service Application - {#SERVICE}</subjecttemp>
+		<bodytemp>HHS Accelerator approved your request to withdraw your Service Application for {#SERVICE}. Please note this does not affect the status of other Service Applications.<br/><br/>Please use the link below to view your application summary.<br/><br/><a href='{#LINK}'>Summary of Applications</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL018" eventtype="alert" alerttype="Service Application">
+		<subjecttemp>Withdrawal Request Denied - Service Application - {#SERVICE}</subjecttemp>
+		<bodytemp>HHS Accelerator has denied your request to withdraw your Service Application for {#SERVICE}. Please note this does not affect the status of other Service Applications.<br/><br/>Reason:  {#Provider Comments from the Task Details}<br/><br/>Please use the link below to view your application summary.<br/><br/><a href='{#LINK}'>Summary of Applications</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL019" eventtype="alert" alerttype="Account Request">
+		<subjecttemp>User Account Requested</subjecttemp>
+		<bodytemp>{#NAME} requested access to HHS Accelerator for your organization. Please use the link below to review the request.<br/><br/><a href='{#LINK}'>Members &amp; Users</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Provider Administrator"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<!-- Start QC9611 R 9.1 Update in-system notifications and alerts for CHAR 500  Redirect to PASSPort -->
+	
+	<notification eventid="AL020" eventtype="alert" alerttype="Filings">
+		<subjecttemp>{#DOCUMENT TYPE} Filing - Expiring in {#LEFTDAYS} Days</subjecttemp>
+		<bodytemp>
+		Your organization's {#DOCUMENT TYPE} filing will be out of date in {#LEFTDAYS} days. If your organization wishes to remain prequalified, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever! To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account.
+		Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage' rel='noopener noreferrer' target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort.<br/><br/>
+
+		Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:<br/> 
+		1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.<br/> 
+		2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application.<br/>
+		3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.<br/><br/> 
+		
+		An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs.<br/><br/> 
+		
+		<font color="red">PLEASE NOTE:</font>  <b>If you already submitted a new HHS Prequalification application through PASSPort you can disregard this message.</b><br/><br/>  
+		
+		</bodytemp>
+		
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL021" eventtype="alert" alerttype="Filings">
+		<subjecttemp>{#DOCUMENT TYPE} Filing - Expiring in {#LEFTDAYS} Days</subjecttemp>
+		<bodytemp>
+		Your organization's {#DOCUMENT TYPE} filing will be out of date in {#LEFTDAYS} days. If your organization wishes to remain prequalified, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever! To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account.
+		Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage' rel='noopener noreferrer' target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort.<br/><br/>
+
+		Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:<br/> 
+		1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.<br/> 
+		2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application.<br/>
+		3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.<br/><br/> 
+		
+		An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs.<br/><br/> 
+		
+		<font color="red">PLEASE NOTE:</font>  <b>If you already submitted a new HHS Prequalification application through PASSPort you can disregard this message.</b><br/><br/>  
+		</bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL022" eventtype="alert" alerttype="Filings">
+		<subjecttemp>{#DOCUMENT TYPE} Filing - Expiring in {#LEFTDAYS} Days</subjecttemp>
+		<bodytemp>
+		Your organization's {#DOCUMENT TYPE} filing will be out of date in {#LEFTDAYS} days. If your organization wishes to remain prequalified, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever! To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account.
+		Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage' rel='noopener noreferrer' target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort.<br/><br/>
+
+		Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:<br/> 
+		1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.<br/> 
+		2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application.<br/>
+		3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.<br/><br/> 
+		
+		An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs.<br/><br/> 
+		
+		<font color="red">PLEASE NOTE:</font>  <b>If you already submitted a new HHS Prequalification application through PASSPort you can disregard this message.</b><br/><br/>  
+		</bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<!-- End QC9611 R 9.1 Update in-system notifications and alerts for CHAR 500  Redirect to PASSPort -->
+	
+	<notification eventid="AL023" eventtype="alert" alerttype="Business Application">
+		<subjecttemp>HHS Accelerator Application is Expiring in {#LEFTDAYS} days</subjecttemp>
+		<bodytemp>Your organization’s HHS Accelerator Prequalification Application will expire in {#LEFTDAYS} days. If your organization wishes to renew its HHS Prequalification, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever! To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account. Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage'  rel='noopener noreferrer' target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort. 
+                  <br/><br/>
+                  Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:  
+                  <br/>
+                    1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.  
+                     <br/>
+                    2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application. 
+                     <br/>
+                    3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.  
+                  <br/><br/>
+                  An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs. 
+                  <br/><br/>
+                  <font style="color:red"><b>PLEASE NOTE</b></font>: <b>You can disregard this message if your organization already submitted a renewal application through PASSPort.  If you started a renewal application in HHS Accelerator but did not submit it or receive approval for it, please restart the application in PASSPort</b>.
+                  <br/> 
+        </bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL024" eventtype="alert" alerttype="Business Application">
+		<subjecttemp>HHS Accelerator Application is Expiring in {#LEFTDAYS} days</subjecttemp>
+		<bodytemp>Your organization’s HHS Accelerator Prequalification Application will expire in {#LEFTDAYS} days. If your organization wishes to renew its HHS Prequalification, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever! To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account. Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage'  rel='noopener noreferrer'  target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort. 
+                  <br/><br/>
+                  Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:  
+                  <br/>
+                    1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.  
+                     <br/>
+                    2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application. 
+                     <br/>
+                    3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.  
+                  <br/><br/>
+                  An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs. 
+                  <br/><br/>
+                  <font style="color:red"><b>PLEASE NOTE</b></font>: <b>You can disregard this message if your organization already submitted a renewal application through PASSPort.  If you started a renewal application in HHS Accelerator but did not submit it or receive approval for it, please restart the application in PASSPort</b>.
+                  <br/>
+        </bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL025" eventtype="alert" alerttype="Business Application">
+		<subjecttemp>HHS Accelerator Application is Expiring in {#LEFTDAYS} days</subjecttemp>
+		<bodytemp>Your organization’s HHS Accelerator Prequalification Application will expire in {#LEFTDAYS} days. If your organization wishes to renew its HHS Prequalification, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever! To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account. Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage'  rel='noopener noreferrer'  target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort. 
+                  <br/><br/>
+                  Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:  
+                  <br/>
+                    1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.  
+                     <br/>
+                    2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application. 
+                     <br/>
+                    3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.  
+                  <br/><br/>
+                  An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs. 
+                  <br/><br/>
+                  <font style="color:red"><b>PLEASE NOTE</b></font>: <b>You can disregard this message if your organization already submitted a renewal application through PASSPort.  If you started a renewal application in HHS Accelerator but did not submit it or receive approval for it, please restart the application in PASSPort</b>.
+                  <br/>
+        </bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL026" eventtype="alert" alerttype="Business Application">
+		<subjecttemp>HHS Accelerator Application is Expiring in {#LEFTDAYS} days</subjecttemp>
+		<bodytemp>Your organization’s HHS Accelerator Prequalification Application will expire in {#LEFTDAYS} days. If your organization wishes to renew its HHS Prequalification, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever! To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account. Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage'  rel='noopener noreferrer'  target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort. 
+                  <br/><br/>
+                  Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:  
+                  <br/>
+                    1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.  
+                     <br/>
+                    2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application. 
+                     <br/>
+                    3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.  
+                  <br/><br/>
+                  An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs. 
+                  <br/><br/>
+                  <font style="color:red"><b>PLEASE NOTE</b></font>: <b>You can disregard this message if your organization already submitted a renewal application through PASSPort.  If you started a renewal application in HHS Accelerator but did not submit it or receive approval for it, please restart the application in PASSPort</b>.
+                  <br/> 
+        </bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Board Chair"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL027" eventtype="alert" alerttype="Business Application">
+		<subjecttemp>HHS Accelerator Application has Expired</subjecttemp>
+		<bodytemp>Your organization’s HHS Accelerator Prequalification Application is Expired. If your organization wishes to renew its HHS Prequalification, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever! To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account. Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage'  rel='noopener noreferrer'  target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort. 
+                  <br/><br/>
+                  Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:  
+                  <br/>
+                    1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.  
+                     <br/>
+                    2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application. 
+                     <br/>
+                    3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.  
+                  <br/><br/>
+                  An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs. 
+                  <br/><br/>
+                  <font style="color:red"><b>PLEASE NOTE</b></font>: <b>If you already submitted a renewal application through HHS Accelerator, that was approved by the HHS Accelerator Team, you can disregard this message. If you started a renewal application in HHS Accelerator but did not submit it or receive approval for it, please restart the application in PASSPort</b>.
+                  <br/>
+        </bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Board Chair"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+	<notification eventid="AL028" eventtype="alert" alerttype="Document Sharing">
+		<subjecttemp>{#PROVIDER} - Shared Document</subjecttemp>
+		<bodytemp>{#PROVIDER} has shared documents with your organization.<br/><br/>Please use the link below to view the shared document(s).<br/><br/><a href='{#LINK}'>Organization Documents</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+			<organizationtype name="agency">
+				<groups>
+					<group name="staff"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<!-- QC9611 R 9.1 Change text fot CHAR500 notifications and alerts -->
+	<notification eventid="AL029" eventtype="alert" alerttype="Filings">
+		<subjecttemp>Provider Status Suspended - Lapsed - {#DOCUMENT TYPE} Filing</subjecttemp>
+		<bodytemp>
+		Your organization's HHS Accelerator Provider Status has been Suspended because your {#DOCUMENT TYPE} filing is out of date. If your organization wishes to remain prequalified, please submit a new application in PASSPort. PASSPort HHS Prequalification is streamlined and easier than ever!  To complete an HHS Prequalification Application in PASSPort, you must have a PASSPort account.
+		Click <a href='https://passport.cityofnewyork.us/page.aspx/en/usr/login?blockSSORedirect=false&amp;%20ReturnUrl=/page.aspx/en/buy/homepage' rel='noopener noreferrer' target='_blank'>here</a> to create a PASSPort account using your NYC.ID or to log into an existing PASSPort account. The <Strong>same</Strong> NYC.ID login credentials you use to access HHS Accelerator may be used to login or create an account in PASSPort.<br/><br/>
+
+		Once logged into your PASSPort account, follow the instructions below to begin the HHS Prequalification Application process in PASSPort:<br/> 
+		1. Navigate to the RFx tab on the top banner and select <Strong>Browse Prequalified Lists</Strong> from the dropdown.<br/> 
+		2. Search for the HHS Accelerator Prequalification application and click on the <Strong>PQL label</Strong> to access the application.<br/>
+		3. Click the <Strong>Create New Application</Strong> button located at the top of the page, complete the questionnaire, and click <Strong>Submit for Review</Strong>.<br/><br/> 
+		
+		An active Prequalification Application is required to be eligible to receive human services RFPs and many Discretionary awards. Please note that PASSPort is the central portal for all RFPs, including human services RFPs.<br/><br/> 
+		
+		<font color="red">PLEASE NOTE:</font>  <b>If you already submitted a new HHS Prequalification application through PASSPort you can disregard this message.</b><br/><br/>  
+			
+		</bodytemp>
+		
+		
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+
+	<!-- Notification And alerts for R2/R3 -->
+	
+	<notification eventid="AL201" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>RFP Released</subjecttemp>
+		<bodytemp>An RFP that your organization is eligible to submit a Proposal for has been released through the HHS Accelerator system. The Procurement is titled {#PROCUREMENT_TITLE}.<br/><br/>Please use the link below to view the Procurement.<br/><br/><a href='{#PROVIDER_LINK}'>Procurement Summary</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL202" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>RFP Released</subjecttemp>
+		<bodytemp>The RFP for your Procurement titled {#PROCUREMENT_TITLE} has been released.<br/><br/>Please use the link below to view the Procurement.<br/><br/><a href='{#AGENCY_LINK}'>Procurement Summary</a></bodytemp>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="ACCO_STAFF"></group>
+					<group name="ACCO_MANAGER"></group>
+					<group name="ACCO_ADMIN_STAFF"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL203" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>Proposal Selected</subjecttemp>
+		<bodytemp>One or more of your Proposals has been determined eligible for award for {#PROCUREMENT_TITLE}. Awards are subject to timely completion of contract negotiation, responsibility determination and contract registration.<br/>Please follow the below instructions to complete required award activities:<p>1. Use this link to review detailed award notification and to upload additional required documentation</p><br/><a href='{#LINK1}'>Selection Details</a><p>2. Use this link to view Budget List and complete Budget for this Award</p><br/><a href='{#LINK2}'>Budget List</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL204" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>First Round Evaluation Due Date Approaching</subjecttemp>
+		<bodytemp>The first round Evaluation for the Procurement titled {#PROCUREMENT_TITLE} is due in 3 days.<br/><br/>Please use the link below to view the Evaluation.<br/><br/><a href='{#LINK}'>Evaluation Status</a></bodytemp>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="ACCO_STAFF"></group>
+					<group name="ACCO_MANAGER"></group>
+					<group name="ACCO_ADMIN_STAFF"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL205" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>Evaluation Due Date Approaching</subjecttemp>
+		<bodytemp>Evaluations for the Procurement titled {#PROCUREMENT_TITLE} are due in 3 days.<br/><br/>Please use the link below to view the Evaluation.<br/><br/><a href='{#LINK}'>Task Inbox</a></bodytemp>
+		<sentto></sentto>
+	</notification>
+	<notification eventid="AL206" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>Final Round Evaluation Due Date Approaching</subjecttemp>
+		<bodytemp>The final round Evaluation for the Procurement titled {#PROCUREMENT_TITLE} is due in 3 days.<br/><br/>Please use the link below to view the Evaluation.<br/><br/><a href='{#LINK}'>Evaluation Results and Selections</a></bodytemp>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="ACCO_STAFF"></group>
+					<group name="ACCO_MANAGER"></group>
+					<group name="ACCO_ADMIN_STAFF"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL207" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>Proposal Due Date Approaching - 7 days</subjecttemp>
+		<bodytemp>Proposals for the Procurement titled {#PROCUREMENT_TITLE} are due in 7 days.<br/><br/>Please use the link below to view the Procurement.<br/><br/><a href='{#LINK}'>Procurement Summary</a></bodytemp>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="ACCO_STAFF"></group>
+					<group name="ACCO_MANAGER"></group>
+					<group name="ACCO_ADMIN_STAFF"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL208" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>Proposal Due Date Approaching - 1 day</subjecttemp>
+		<bodytemp>Proposals for the Procurement titled {#PROCUREMENT_TITLE} are due in 1 day.<br/><br/>Please use the link below to view the Evaluation.<br/><br/><a href='{#LINK}'>Procurement Summary</a></bodytemp>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="ACCO_STAFF"></group>
+					<group name="ACCO_MANAGER"></group>
+					<group name="ACCO_ADMIN_STAFF"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL209" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>Proposal Due Date Approaching - 7 days</subjecttemp>
+		<bodytemp>Proposals for the Procurement titled {#PROCUREMENT_TITLE} are due in 7 days. You are eligible to propose to this RFP.<br/><br/>Please use the link below to view the Procurement.<br/><br/><a href='{#LINK}'>Procurement Summary</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL210" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>Proposal Due Date Approaching - 1 day</subjecttemp>
+		<bodytemp>Proposals for the Procurement titled {#PROCUREMENT_TITLE} are due in 1 day.<br/><br/>Please use the link below to view the Procurement.<br/><br/><a href='{#LINK}'>Procurement Summary</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL212" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>Proposal Returned for Revision</subjecttemp>
+		<bodytemp>Your Proposal for the Procurement titled {#PROCUREMENT_TITLE} has been Returned for Revisions.<br/><br/>Reason: {#ACCELERATOR_COMMENTS}<br/><br/>Please use the link below to revise the Proposal.<br/><br/><a href='{#LINK}'>Proposal Summary</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL213" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>Award Selections Returned</subjecttemp>
+		<bodytemp>The HHS Accelerator Team has returned your award selections.<br/><br/>Reason: {#ACCELERATOR_COMMENTS}<br/><br/>Please use the link below to revise the selections.<br/><br/><a href='{#LINK}'>Evaluation Results and Selections</a></bodytemp>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="ACCO_MANAGER"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL214" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>Addendum Released</subjecttemp>
+		<bodytemp>An Addendum to the Procurement titled {#PROCUREMENT_TITLE} has been released.<br/><br/>Please use the link below to view the Addendum.<br/><br/><a href='{#AGENCY_LINK}'>RFP Documents</a></bodytemp>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="ACCO_MANAGER"></group>
+					<group name="ACCO_STAFF"></group>
+					<group name="ACCO_ADMIN_STAFF"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL215" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>Addendum Released</subjecttemp>
+		<bodytemp>An Addendum to the Procurement titled {#PROCUREMENT_TITLE} has been released.<br/><br/>Please use the link below to view the Addendum.<br/><br/><a href='{#PROVIDER_LINK}'>RFP Documents</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL216" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>Procurement Published to Roadmap</subjecttemp>
+		<bodytemp>The HHS Accelerator team would like you to know that your Procurement titled {#PROCUREMENT_TITLE} has been published to the Roadmap.<br/><br/>Please use the link below to view the Procurement.<br/><br/><a href='{#LINK}'>Procurement Summary</a></bodytemp>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="ACCO_MANAGER"></group>
+					<group name="ACCO_STAFF"></group>
+					<group name="ACCO_ADMIN_STAFF"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL217" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>Proposal Accepted for Evaluation</subjecttemp>
+		<bodytemp>The Proposal that your organization recently submitted through the HHS Accelerator system in response to the Procurement titled {#PROCUREMENT_TITLE} has been Accepted for Evaluation.<br/><br/>Please use the link below to view the Proposal.<br/><br/><a href='{#LINK}'>Proposal Summary</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL218" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator Proposal Determined to be Non-Responsive</subjecttemp>
+		<bodytemp>The Proposal that your organization recently submitted in response to the Procurement titled {#PROCUREMENT_TITLE} has been determined to be Non-Responsive.<br/><br/>Reason: {#ACCELERATOR_COMMENTS}<br/><br/>Please use the link below for more information.<br/><br/><a href='{#LINK}'>Proposal Summary</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL219" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator - Proposal Resubmitted</subjecttemp>
+		<bodytemp>{#PROVIDER_NAME} has updated and resubmitted {#PROPOSAL_TITLE} for the Procurement titled {#PROCUREMENT_TITLE}.  There is a new "Accept Proposal" task for you to complete<br/><br/>Use the link below to go to your task inbox.<br/><br/><a href='{#AGENCY_LINK}'>Task Inbox</a></bodytemp>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="ACCO_MANAGER"></group>
+					<group name="ACCO_STAFF"></group>
+					<group name="ACCO_ADMIN_STAFF"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL220" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>All Required Award Document(s) Submitted</subjecttemp>
+		<bodytemp>{#PROVIDER_NAME} has uploaded all required Award Document(s).<br/><br/>Please use the link below to view the document(s).<br/><br/><a href='{#LINK}'>Awards and Contracts</a></bodytemp>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="ACCO_MANAGER"></group>
+					<group name="ACCO_STAFF"></group>
+					<group name="ACCO_ADMIN_STAFF"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL221" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>Proposal Selected</subjecttemp>
+		<bodytemp>One or more of your Proposals has been determined eligible for award for {#PROCUREMENT_TITLE}. Awards are subject to timely completion of contract negotiation, responsibility determination and contract registration.<br/><br/>Please use the link below to review detailed award notification and to upload additional required documentation.<br/><br/><a href='{#LINK}'>Selection Details</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL222" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>Selections Made for Procurement</subjecttemp>
+		<bodytemp>Selections have been made for the Procurement titled {#PROCUREMENT_TITLE} for which you have submitted one or more proposals.<br/><br/>Please use the link below to view your Proposal(s) and their status(es).<br/><br/><a href='{#LINK}'>Proposal Summary</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL223" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>Award Selections Approved</subjecttemp>
+		<bodytemp>The HHS Accelerator Team has approved your award selections for {#PROCUREMENT_TITLE}. You will receive a task to configure award documents. For Procurements using HHS Accelerator Financials, your Agency's Finance staff will receive a Budget Configuration task that must be completed prior to award documents configuration. When both tasks have been completed, Providers will be notified.<br/><br/>Please use the link below to view the award selections for reference.<br/><br/><a href='{#LINK}'>Evaluation Results and Selections</a></bodytemp>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="ACCO_MANAGER"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL224" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>Proposal Returned for Revision</subjecttemp>
+		<bodytemp>Your Proposal for the Procurement titled {#PROCUREMENT_TITLE} has been Returned for Revisions.<br/><br/>Please use the link below to revise the proposal.<br/><br/><a href='{#LINK}'>Proposal Summary</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL225" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator Proposal Determined to be Non-Responsive</subjecttemp>
+		<bodytemp>The Proposal that your organization recently submitted in response to the Procurement titled {#PROCUREMENT_TITLE} has been determined to be Non-Responsive.<br/><br/>Please use the link below for more information.<br/><br/><a href='{#LINK}'>Proposal Summary</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL226" eventtype="alert" alerttype="Procurement">
+		<subjecttemp>Proposal Submission Confirmation</subjecttemp>
+		<bodytemp>{#PROVIDER_NAME},<br/><br/>Thank you for submitting your Proposal titled {#PROPOSAL_TITLE} for the {#PROCUREMENT_TITLE} Procurement. Your submission was received by {#AGENCY_NAME} on {#PROPOSAL_SUBMITTED_TIME}. Use the link below to view your Proposal Summary.<br/><br/><a href='{#PROVIDER_LINK}'>Proposal Summary</a></bodytemp>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT201" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator - RFP Released</subjecttemp>
+		<bodytemp>An RFP that your organization is eligible to submit a Proposal for has been released through the HHS Accelerator system. The Procurement is titled {#PROCUREMENT_TITLE}.<br/><br/>Please use the link below to login to HHS Accelerator and view the Procurement.<br/><br/><a href='{#PROVIDER_LINK}'>Procurement Summary</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+					<group name="Executive Director"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT202" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator RFP Released</subjecttemp>
+		<bodytemp>The HHS Accelerator team would like you to know that the RFP for your procurement titled {#PROCUREMENT_TITLE} has been released.<br/><br/>Please use the link below to login to HHS Accelerator and view the Procurement.<br/><br/><a href='{#AGENCY_LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto></sentto>
+	</notification>
+	<notification eventid="NT203" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator - Proposal Selected</subjecttemp>
+		<bodytemp>One or more of your Proposals has been determined eligible for award for {#PROCUREMENT_TITLE}. Awards are subject to timely completion of contract negotiation, responsibility determination and contract registration<br/><br/>Please follow the below instructions and login to HHS Accelerator to complete required award activities:<p>1. Use this link to review detailed award notification and to upload additional required documentation</p><br/><br/><a href='{#LINK1}'>Selection Details</a><p>2. Use this link to view Budget List and complete Budget for this Award</p><br/><br/><a href='{#LINK2}'>Budget List</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Executive Director"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT204" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator - First Round Evaluations Due Date Approaching</subjecttemp>
+		<bodytemp>Evaluations for the Procurement titled {#PROCUREMENT_TITLE} are due in 3 days.<br/><br/>Please use the link below to login to HHS Accelerator and view the Evaluation.<br/><br/><a href='{#LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto></sentto>
+	</notification>
+	<notification eventid="NT205" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator - Proposal Due Date Approaching</subjecttemp>
+		<bodytemp>Proposals for the Procurement titled {#PROCUREMENT_TITLE} are due in 7 days. You are eligible to propose to this RFP.<br/><br/>Please use the link below to login to HHS Accelerator and view the Procurement.<br/><br/><a href='{#LINK}'>Procurement Summary</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+					<group name="Executive Director"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT207" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator - Proposal Returned for Revisions</subjecttemp>
+		<bodytemp>Your Proposal to the Procurement titled {#PROCUREMENT_TITLE} has been Returned for Revisions.<br/><br/>Reason: {#ACCELERATOR_COMMENTS}<br/><br/>Please use the link below to login to HHS Accelerator and revise the Proposal.<br/><br/><a href='{#LINK}'>Proposal Summary</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+					<group name="Executive Director"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT208" eventtype="email" alerttype="Procurement">
+		<subjecttemp>Award Selections Returned</subjecttemp>
+		<bodytemp>The HHS Accelerator Team has returned your award selections.<br/><br/>Reason: {#ACCELERATOR_COMMENTS}<br/><br/>Please use the link below to log in to HHS Accelerator and revise the selections.<br/><br/><a href='{#LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="ACCO_MANAGER"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT209" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator - Addendum Released</subjecttemp>
+		<bodytemp>An Addendum to the Procurement titled {#PROCUREMENT_TITLE} has been released.<br/><br/>Please use the link below to login to HHS Accelerator and view the Addendum.<br/><br/><a href='{#PROVIDER_LINK}'>RFP Documents</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+					<group name="Executive Director"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT210" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator - Assignment of Proposal Evaluation Task</subjecttemp>
+		<bodytemp>You have been assigned as an Evaluator for the Procurement titled {#PROCUREMENT_TITLE}.<br/><br/>Please use the link below to login to HHS Accelerator and view the Task(s).<br/><br/><a href='{#LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto></sentto>
+	</notification>
+	<notification eventid="NT211" eventtype="email" alerttype="Procurement">
+		<subjecttemp>RFP Release Date Approaching - {#PROCUREMENT_TITLE}</subjecttemp>
+		<bodytemp>The RFP for the Procurement titled {#PROCUREMENT_TITLE} is scheduled to be released in 20 days.<br/><br/>Please use the link below to login to HHS Accelerator and view the Procurement. <br/><br/><a href='{#LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="accelerator">
+				<groups>
+					<group name="manager"></group>
+					<group name="staff"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT212" eventtype="email" alerttype="Procurement">
+		<subjecttemp>RFP Release Date Approaching - {#PROCUREMENT_TITLE}</subjecttemp>
+		<bodytemp>The RFP for the Procurement titled {#PROCUREMENT_TITLE} is scheduled to be released in 7 days.<br/><br/>Please use the link below to login to HHS Accelerator and view the Procurement. <br/><br/><a href='{#LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="accelerator">
+				<groups>
+					<group name="manager"></group>
+					<group name="staff"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT213" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator - Proposal Determined to be Non-Responsive</subjecttemp>
+		<bodytemp>The Proposal that your organization recently submitted through the HHS Accelerator system in response to the Procurement titled {#PROCUREMENT_TITLE} has been determined to be Non-Responsive.<br/><br/>Reason:  {#ACCELERATOR_COMMENTS}<br/><br/>Please use the link below to login to HHS Accelerator and view more information.<br/><br/><a href='{#LINK}'>Proposal Summary</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+					<group name="Executive Director"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT214" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator - Proposal Resubmitted</subjecttemp>
+		<bodytemp>{#PROVIDER_NAME} has updated and resubmitted {#PROPOSAL_TITLE} for the Procurement titled {#PROCUREMENT_TITLE}.  There is a new "Accept Proposal" task for you to complete.<br/><br/>Use the link below to login to HHS Accelerator and view your task inbox.<br/><br/><a href='{#AGENCY_LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="ACCO_MANAGER"></group>
+					<group name="ACCO_STAFF"></group>
+					<group name="ACCO_ADMIN_STAFF"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT215" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator - Final Round Evaluations Due Date Approaching</subjecttemp>
+		<bodytemp>The final round Evaluation for the Procurement titled {#PROCUREMENT_TITLE} is due in 3 days.<br/><br/>Please use the link below to login to HHS Accelerator and view the Evaluation.<br/><br/><a href='{#LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="ACCO_MANAGER"></group>
+					<group name="ACCO_STAFF"></group>
+					<group name="ACCO_ADMIN_STAFF"></group>
+				</groups>
+			</organizationtype>
+			<organizationtype name="accelerator">
+				<groups>
+					<group name="manager"></group>
+					<group name="staff"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT216" eventtype="email" alerttype="Procurement">
+		<subjecttemp>Proposal Due Date Approaching</subjecttemp>
+		<bodytemp>Proposals for the Procurement titled {#PROCUREMENT_TITLE} are due in 7 days.<br/><br/>Please use the link below to login to HHS Accelerator and view the Procurement.<br/><br/><a href='{#LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="accelerator">
+				<groups>
+					<group name="manager"></group>
+					<group name="staff"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT217" eventtype="email" alerttype="Procurement">
+		<subjecttemp>Proposal Due Date Approaching</subjecttemp>
+		<bodytemp>Proposals for the Procurement titled {#PROCUREMENT_TITLE} are due in 1 day.<br/><br/>Please use the link below to login to HHS Accelerator and view the Procurement.<br/><br/><a href='{#LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="accelerator">
+				<groups>
+					<group name="manager"></group>
+					<group name="staff"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT218" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator - First Round Evaluations Due Date Approaching</subjecttemp>
+		<bodytemp>The first round Evaluation for the Procurement titled {#PROCUREMENT_TITLE} is due in 3 days.<br/><br/>Please use the link below to login to HHS Accelerator and view the Evaluation. <br/><br/><a href='{#LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="ACCO_MANAGER"></group>
+					<group name="ACCO_STAFF"></group>
+					<group name="ACCO_ADMIN_STAFF"></group>
+				</groups>
+			</organizationtype>
+			<organizationtype name="accelerator">
+				<groups>
+					<group name="manager"></group>
+					<group name="staff"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT219" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator - All Required Award Document(s) Submitted</subjecttemp>
+		<bodytemp>{#PROVIDER_NAME} has uploaded all required Award Document(s).<br/><br/>Please use the link below to login to HHS Accelerator and view the document(s).<br/><br/><a href='{#LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="ACCO_MANAGER"></group>
+					<group name="ACCO_STAFF"></group>
+					<group name="ACCO_ADMIN_STAFF"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT220" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator - Score Amendment Requested</subjecttemp>
+		<bodytemp>A score amendment has been requested for the evaluation you completed for the Procurement Title {#PROCUREMENT_TITLE}. There is a new "Evaluate Proposal" task for you to complete. Please update your scores as requested.<br/><br/>Use the link below to login to HHS Accelerator and view your task inbox.<br/><br/><a href='{#LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto></sentto>
+	</notification>
+	<notification eventid="NT221" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator - Proposal Accepted for Evaluation</subjecttemp>
+		<bodytemp>The Proposal that your organization recently submitted through the HHS Accelerator system in response to the Procurement titled {#PROCUREMENT_TITLE} has been Accepted for Evaluation.<br/><br/>Use the link below to login to HHS Accelerator and view the Proposal.<br/><br/><a href='{#LINK}'>Proposal Summary</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+					<group name="Executive Director"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT222" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator - Proposal Selected</subjecttemp>
+		<bodytemp>One or more of your Proposals has been determined eligible for award for {#PROCUREMENT_TITLE}. Awards are subject to timely completion of contract negotiation, responsibility determination and contract registration.<br/><br/>Please use the link below to login to HHS Accelerator and review detailed award notification and to upload additional required documentation<br/><br/><a href='{#LINK}'>Selection Details</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Executive Director"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT223" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator - Selections Made for Procurement</subjecttemp>
+		<bodytemp>Selections have been made for the Procurement titled {#PROCUREMENT_TITLE} for which you have submitted one or more proposals.<br/><br/>Please use the link below to login to HHS Accelerator and view your Proposal(s) and their status(es).<br/><br/><a href='{#LINK}'>Proposal Summary</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+					<group name="Executive Director"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT224" eventtype="email" alerttype="Procurement">
+		<subjecttemp>Award Selections Approved</subjecttemp>
+		<bodytemp>The HHS Accelerator Team has approved your award selections for {#PROCUREMENT_TITLE}. You will receive a task to configure award documents. For Procurements using HHS Accelerator Financials, your Agency's Finance staff will receive a Budget Configuration task that must be completed prior to award documents configuration. When both tasks have been completed, Providers will be notified.<br/><br/>Please use the link below to login to HHS Accelerator and view the award selections for reference. <br/><br/><a href='{#LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="ACCO_MANAGER"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT225" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator - Proposal Returned for Revisions</subjecttemp>
+		<bodytemp>Your Proposal to the Procurement titled {#PROCUREMENT_TITLE} has been Returned for Revisions.<br/><br/>Please use the link below to login to HHS Accelerator and revise the proposal.<br/><br/><a href='{#LINK}'>Proposal Summary</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT226" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator - Proposal Determined to be Non-Responsive</subjecttemp>
+		<bodytemp>The Proposal that your organization recently submitted through the HHS Accelerator system in response to the Procurement titled {#PROCUREMENT_TITLE} has been determined to be Non-Responsive.<br/><br/>Please use the link below to login to HHS Accelerator and view more information.<br/><br/><a href='{#LINK}'>Proposal Summary</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT227" eventtype="email" alerttype="Procurement">
+		<subjecttemp>HHS Accelerator Proposal Submission Confirmation</subjecttemp>
+		<bodytemp>Thank you for submitting your Proposal titled {#PROPOSAL_TITLE} for the {#PROCUREMENT_TITLE} Procurement. Your submission was received by {#AGENCY_NAME} on {#PROPOSAL_SUBMITTED_TIME}. Use the link below to log in to HHS Accelerator and view your Proposal Summary.<br/><br/><a href='{#PROVIDER_LINK}'>Proposal Summary</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Executive Director"></group>
+					<group name="Level 2"></group>
+					<group name="Level 1"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+		<!-- R3 Alert and Notifications -->
+	<notification eventid="AL301" eventtype="alert" alerttype="Contract Budget">
+		<subjecttemp>Contract Budget Revisions Required</subjecttemp>
+		<bodytemp>A Contract Budget for the {#PROCUREMENT_TITLE} contract (CT#: {#CT}) has been returned for revisions because of the reason(s) listed below. <br/><br/>Please use the link below to revise and resubmit the Contract Budget.<br/><br/>Reason: {#ACCELERATOR_COMMENTS}<br/><br/><a href='{#LINK}'>Contract Budget</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL302" eventtype="alert" alerttype="Contract Budget">
+		<subjecttemp>Contract Budget Active</subjecttemp>
+		<bodytemp>A Contract Budget for the {#PROCUREMENT_TITLE} contract (CT#: {#CT}) has been activated. You may now submit invoices for services delivered against this budget. Please use the link below to review and perform actions against the Active Budget.<br/><br/><a href='{#LINK}'>Contract Budget</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL303" eventtype="alert" alerttype="Invoice">
+		<subjecttemp>Invoice Revisions Required</subjecttemp>
+		<bodytemp>An Invoice (Invoice #: {#InvoiceNumber}) for the  {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been returned for revisions because of the reason(s) listed below. Please use the link below to revise and resubmit the invoice.<br/><br/>Reason: {#ACCELERATOR_COMMENTS}<br/><br/><a href='{#LINK}'>Invoice</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL304" eventtype="alert" alerttype="Payment">
+		<subjecttemp>Payment Disbursed</subjecttemp>
+		<bodytemp>A payment (Voucher#: {#PAYMENT_VOUCHER_NO}) has been approved on the  {#PROCUREMENT_TITLE}  contract (CT#: {#CT}). Please use the link below to view the Payment List.<br/><br/><a href='{#LINK}'>Payment List</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL305" eventtype="alert" alerttype="Advance">
+		<subjecttemp>Advance Request Rejected</subjecttemp>
+		<bodytemp>A request for an advanced payment for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been rejected because of the reason(s) listed below. Please use the link below to view the details of this transaction.<br/><br/> Reason: {#ACCELERATOR_COMMENTS}<br/><br/><a href='{#LINK}'>Budget List</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto></sentto>
+	</notification>
+	<notification eventid="AL306" eventtype="alert" alerttype="Contract Budget">
+		<subjecttemp>Complete New FY Budget</subjecttemp>
+		<bodytemp>A New Fiscal Year Contract Budget for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) is pending completion by your organization. Please use the link below to complete this action.<br/><br/><a href='{#LINK}'>Contract Budget</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL307" eventtype="alert" alerttype="Contract Budget Update">
+		<subjecttemp>Complete Contract Budget Update</subjecttemp>
+		<bodytemp>A Contract Budget Update for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) is pending completion by your organization. Please use the link below to complete this action.<br/><br/><a href='{#LINK}'>Budget List</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL308" eventtype="alert" alerttype="Contract Budget Update">
+		<subjecttemp>Contract Budget Update Revisions Required</subjecttemp>
+		<bodytemp>A Contract Budget Update for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been returned for revisions because of the reason(s) listed below. Please use the link below to revise and resubmit the Contract Budget Update. <br/><br/>Reason: {#ACCELERATOR_COMMENTS} <br/><br/><a href='{#LINK}'>Contract Budget Update</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL309" eventtype="alert" alerttype="Contract Budget Update">
+		<subjecttemp>Contract Budget Update Approved</subjecttemp>
+		<bodytemp>A Contract Budget Update for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been approved. Please use the link below to view the Updated Contract Budget.<br/><br/><a href='{#LINK}'>Contract Budget</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL310" eventtype="alert" alerttype="Contract Budget Modification">
+		<subjecttemp>Contract Budget Modification Revisions Required</subjecttemp>
+		<bodytemp>A Contract Budget Modification for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been returned for revisions because of the reason(s) listed below. Please use the link below to revise and resubmit the Contract Budget Modification.<br/><br/> Reason: {#ACCELERATOR_COMMENTS} <br/><br/><a href='{#LINK}'>Contract Budget Modification</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL311" eventtype="alert" alerttype="Contract Budget Modification">
+		<subjecttemp>Contract Budget Modification Approved</subjecttemp>
+		<bodytemp>A Contract Budget Modification for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been approved. Please use the link below to login to HHS Accelerator to view the Modified Contract Budget.<br/><br/><a href='{#LINK}'>Contract Budget</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL312" eventtype="alert" alerttype="Contract Budget Amendment">
+		<subjecttemp>Contract Budget Amendment Available</subjecttemp>
+		<bodytemp>A Contract Budget Amendment for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) is pending completion by your organization. Please use the link below to complete this action.<br/><br/><a href='{#LINK}'>Budget List</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL313" eventtype="alert" alerttype="Contract Budget Amendment">
+		<subjecttemp>Contract Budget Amendment Revisions Required</subjecttemp>
+		<bodytemp>A Contract Budget Amendment for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been returned for revisions because of the reason(s) listed below. Please use the link below to revise and resubmit the Contract Budget Amendment.<br/><br/>Reason: {#ACCELERATOR_COMMENTS}<br/><br/><a href='{#LINK}'>Contract Budget Amendment</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL314" eventtype="alert" alerttype="Contract Budget Amendment">
+		<subjecttemp>Contract Budget Amendment Approved</subjecttemp>
+		<bodytemp>A Contract Budget Amendment for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been approved. Please use the link below to view the Approved Contract Budget Amendment.<br/><br/><a href='{#LINK}'>Contract Budget Amendment</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL315" eventtype="alert" alerttype="Advance">
+		<subjecttemp>Advance Approved</subjecttemp>
+		<bodytemp>A request for an advanced payment (Advance#: {#ADVANCE_NUMBER}) for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been approved. Please use the link below to view the details of the status of this Advance in the Contract Budget screen.<br/><br/><a href='{#LINK}'>Contract Budget</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto></sentto>
+	</notification>
+	<notification eventid="AL318" eventtype="alert" alerttype="Payment">
+		<subjecttemp>Approved Payment rejected by FMS</subjecttemp>
+		<bodytemp>An Approved Payment (Voucher#: {#PAYMENT_VOUCHER_NO}) has been rejected in FMS. The following errors occurred:<br/><br/>{#FMS_ERROR_CODE}: {#FMS_ERROR_DESCRIPTION}<br/><br/> This payment voucher must be corrected in FMS.</bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="Finance Manager"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="AL320" eventtype="alert" alerttype="Contract Amendment">
+		<subjecttemp>Contract Amendment Registered in FMS</subjecttemp>
+		<bodytemp>A Contract Amendment has been registered in FMS. CT# {#CT}, Award E-PIN# {#AWARD_E-PIN} was registered. Please use the link below to login to view the Approved Contract Budget Amendment.<br/><br/><a href='{#LINK}'>Contract List</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="agency">
+				<groups>
+					<group name="FINANCE_MANAGER"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT301" eventtype="email" alerttype="Contract Budget">
+		<subjecttemp>Contract Budget Revisions Required</subjecttemp>
+		<bodytemp>A Contract Budget for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been returned for revisions because of the reason(s) listed below. Please use the link below to login to HHS Accelerator to revise and resubmit the Contract Budget.<br/><br/>Reason: {#ACCELERATOR_COMMENTS}<br/><br/><a href='{#LINK}'>Contract Budget</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT302" eventtype="email" alerttype="Contract Budget">
+		<subjecttemp>Contract Budget Active</subjecttemp>
+		<bodytemp>A Contract Budget for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been activated. You may now submit invoices for services delivered against this budget. Please use the link below to review and perform actions against the Active Budget.<br/><br/><a href='{#LINK}'>Contract Budget</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT303" eventtype="email" alerttype="Invoice">
+		<subjecttemp>Invoice Revisions Required</subjecttemp>
+		<bodytemp>An Invoice (Invoice #: {#InvoiceNumber}) for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been returned for revisions because of the reason(s) listed below. Please use the link below login to HHS Accelerator to revise and resubmit the invoice.<br/><br/> Reason: {#ACCELERATOR_COMMENTS}<br/><br/><a href='{#LINK}'>Invoice</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>	
+	<notification eventid="NT304" eventtype="email" alerttype="Payment">
+		<subjecttemp>Payment Disbursed</subjecttemp>
+		<bodytemp>A payment (Voucher#: {#PAYMENT_VOUCHER_NO}) has been approved on the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}). Please use the link below to login to HHS Accelerator to view the Payment List.<br/><br/><a href='{#LINK}'>Payment List</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification> 
+	<notification eventid="NT305a" eventtype="email" alerttype="Advance">
+		<subjecttemp>Advance Request Rejected</subjecttemp>
+		<bodytemp>A request for an advanced payment for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been rejected because of the reason(s) listed below. Please use the link below to login to HHS Accelerator to view the details of this transaction.<br/><br/>Reason: {#ACCELERATOR_COMMENTS}<br/><br/><a href='{#LINK}'>Budget List</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto></sentto>
+	</notification>
+	<notification eventid="NT305b" eventtype="email" alerttype="Advance">
+		<subjecttemp>Advance Request Rejected</subjecttemp>
+		<bodytemp>A request for an advanced payment for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been rejected because of the reason(s) listed below. Please use the link below to login to HHS Accelerator to view the details of this transaction.<br/><br/>Reason: {#ACCELERATOR_COMMENTS}<br/><br/><a href='{#LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto></sentto>
+	</notification>
+	<notification eventid="NT306" eventtype="email" alerttype="Contract Budget">
+		<subjecttemp>Complete New FY Budget</subjecttemp>
+		<bodytemp>A New Fiscal Year Contract Budget for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) is pending completion by your organization. Please use the link below to login to HHS Accelerator to complete this action.<br/><br/><a href='{#LINK}'>Contract Budget</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT307" eventtype="email" alerttype="Contract Budget Update">
+		<subjecttemp>Complete Contract Budget Update</subjecttemp>
+		<bodytemp>A Contract Budget action for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) is pending completion by your organization. Please use the link below to login to HHS Accelerator to complete this action.<br/><br/><a href='{#LINK}'>Budget List</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT308" eventtype="email" alerttype="Contract Budget Update">
+		<subjecttemp>Contract Budget Update Revisions Required</subjecttemp>
+		<bodytemp>A Contract Budget Update for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been returned for revisions because of the reason(s) listed below. Please use the link below to login to HHS Accelerator and revise the Contract Budget Update.<br/><br/>Reason: {#ACCELERATOR_COMMENTS}<br/><br/><a href='{#LINK}'>Contract Budget Update</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT309" eventtype="email" alerttype="Contract Budget Update">
+		<subjecttemp>Contract Budget Update Approved</subjecttemp>
+		<bodytemp>A Contract Budget Update for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been approved. Please use the link below to login to HHS Accelerator to view the Updated Contract Budget.<br/><br/><a href='{#LINK}'>Contract Budget</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT310" eventtype="email" alerttype="Contract Budget Modification">
+		<subjecttemp>Contract Budget Modification Revisions Required</subjecttemp>
+		<bodytemp>A Contract Budget Modification for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been returned for revisions because of the reason(s) listed below. Please use the link below to login to HHS Accelerator to revise and resubmit the Modified Contract Budget.<br/><br/>Reason: {#ACCELERATOR_COMMENTS} <br/><br/><a href='{#LINK}'>Contract Budget Modification</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT311" eventtype="email" alerttype="Contract Budget Modification">
+		<subjecttemp>Contract Budget Modification Approved</subjecttemp>
+		<bodytemp>A Contract Budget Modification for the {#PROCUREMENT_TITLE}  contract  contract (CT#: {#CT}) has been approved. Please use the link below to login to HHS Accelerator to view the Modified Contract Budget.<br/><br/><a href='{#LINK}'>Contract Budget</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT312" eventtype="email" alerttype="Contract Budget Amendment">
+		<subjecttemp>Contract Budget Amendment Available</subjecttemp>
+		<bodytemp>A Contract Budget Amendment for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) is pending completion by your organization. Please use the link below to login to HHS Accelerator to complete this action.<br/><br/><a href='{#LINK}'>Budget List</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT313" eventtype="email" alerttype="Contract Budget Amendment">
+		<subjecttemp>Contract Budget Amendment Revisions Required</subjecttemp>
+		<bodytemp>A Contract Budget Amendment for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been returned for revisions because of the reason(s) listed below. Please use the link below to login to HHS Accelerator and revise and resubmit the Contract Budget Amendment.<br/><br/>Reason:  {#ACCELERATOR_COMMENTS} <br/><br/><a href='{#LINK}'>Contract Budget Amendment</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT314" eventtype="email" alerttype="Contract Budget Amendment">
+		<subjecttemp>Contract Budget Amendment Approved</subjecttemp>
+		<bodytemp>A Contract Budget Amendment for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been approved. Please use the link below to login to HHS Accelerator to view the Approved Contract Budget Amendment.<br/><br/><a href='{#LINK}'>Contract Budget Amendment</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	<notification eventid="NT315a" eventtype="email" alerttype="Advance">
+		<subjecttemp>Advance Approved</subjecttemp>
+		<bodytemp>A request for an advanced payment (Advance#: {#ADVANCE_NUMBER}) for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been approved. Please use the link below to login to HHS Accelerator to view the status of the Advance Request on the Contract Budget page.<br/><br/><a href='{#LINK}'>Contract Budget</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto></sentto>
+	</notification>
+		<notification eventid="NT315b" eventtype="email" alerttype="Advance">
+		<subjecttemp>Advance Approved</subjecttemp>
+		<bodytemp>A request for an advanced payment (Advance#: {#ADVANCE_NUMBER}) for the {#PROCUREMENT_TITLE}  contract (CT#: {#CT}) has been approved. Please use the link below to login to HHS Accelerator to view the status of the Advance Request on the Contract Budget page.<br/><br/><a href='{#LINK}'>HHS Accelerator</a></bodytemp>
+		<generalized>no</generalized>
+		<sentto></sentto>
+	</notification>
+	<notification eventid="NT318" eventtype="email" alerttype="">
+		<subjecttemp>Approved Payment rejected by FMS</subjecttemp>
+		<bodytemp>An Approved Payment (Voucher#: {#PAYMENT_VOUCHER_NO}) has been rejected in FMS. The following errors occurred:<br/><br/>{#FMS_ERROR_CODE}: {#FMS_ERROR_DESCRIPTION}<br/><br/>This payment voucher must be corrected in FMS.<br/><br/></bodytemp>
+		<generalized>no</generalized>
+		<sentto>
+			<organizationtype name="provider">
+				<groups>
+					<group name="Level 2"></group>
+				</groups>
+			</organizationtype>
+		</sentto>
+	</notification>
+	
+</eventtypetemplate>

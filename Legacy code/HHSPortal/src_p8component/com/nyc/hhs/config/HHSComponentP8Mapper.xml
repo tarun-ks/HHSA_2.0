@@ -1,0 +1,1831 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.nyc.hhs.service.db.services.application.HHSComponentP8Mapper">
+
+	<select id="fetchProposalIdList" parameterType="map" resultType="string">
+		SELECT P.PROPOSAL_ID FROM PROPOSAL_CONFIG P, ORGANIZATION O
+		WHERE P.ORGANIZATION_ID = O.ORGANIZATION_ID
+		AND P.PROCUREMENT_ID = #{asProcurementId}	
+	</select>
+
+
+	<resultMap id="fetchProcProv" type="com.nyc.hhs.model.Procurement">
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="procurementEpin" column="EPIN" />
+		<result property="agencyId" column="AGENCY_ID" />
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<result property="firstEvalCompletionDateUpdated" column="UPD_FST_RND_EVAL_CMPLT_DATE" />
+		<result property="finalEvalCompletionDateUpdated" column="UPD_FINALIZE_EVAL_DATE" />
+		<result property="awardSelectionDateUpdated" column="UPD_AWARD_SELECTION_DATE" />
+		<result property="isOpenEndedRFP" column="IS_OPEN_ENDED_RFP" />
+	</resultMap>
+
+	<select id="fetchProcurementSummaryProvider" parameterType="map"
+		resultMap="fetchProcProv">
+		select C.PROCUREMENT_TITLE,
+		C.PROCUREMENT_ID,
+		C.EPIN,
+		to_char(C.UPD_FINALIZE_EVAL_DATE, 'MM/DD/YYYY hh:mm:ss am') as UPD_FINALIZE_EVAL_DATE,
+		to_char(C.UPD_AWARD_SELECTION_DATE, 'MM/DD/YYYY hh:mm:ss am') as
+		UPD_AWARD_SELECTION_DATE,
+		to_char(C.UPD_FST_RND_EVAL_CMPLT_DATE, 'MM/DD/YYYY hh:mm:ss am') as UPD_FST_RND_EVAL_CMPLT_DATE,
+		C.IS_OPEN_ENDED_RFP,
+		A.AGENCY_ID
+		from
+		NYC_AGENCY_DETAILS A, PROCUREMENT C
+		WHERE 
+		C.AGENCY_ID = A.AGENCY_ID and
+		C.PROCUREMENT_ID = #{asProcurementId,jdbcType=VARCHAR}
+	</select>
+
+	<resultMap id="proposalDetails" type="com.nyc.hhs.model.ProposalDetailsBean">
+		<result property="organizationId" column="ORGANIZATION_ID" />
+		<result property="proposalTitle" column="PROPOSAL_TITLE" />
+		<result property="providerContactId" column="STAFF_ID" />
+		<result property="proposalStatus" column="PROPOSAL_STATUS_ID" />
+		<result property="proposalStatusName" column="STATUS" />
+		<result property="totalNumberOfService" column="TOTAL_NUM_OF_SERVICE_REQUEST" />
+		<result property="totalFundingRequest" column="TOTAL_FUNDING_REQUEST" />
+		<result property="providerName" column="USER_NAME" />
+		<result property="providerOfficeTitle" column="MEMBER_NAME" />
+		<result property="providerPhone" column="PHONE" />
+		<result property="providerEmailId" column="EMAIL" />
+	</resultMap>
+
+	<select id="fetchProposalDetails" parameterType="map"
+		resultMap="proposalDetails">
+		Select details.ORGANIZATION_ID, details.PROPOSAL_TITLE,
+		details.STAFF_ID,
+		details.PROPOSAL_STATUS_ID, sm.STATUS,
+		details.TOTAL_NUM_OF_SERVICE_REQUEST, details.TOTAL_FUNDING_REQUEST,
+		(s.FIRST_NAME||' '||s.MIDDLE_INITIAL||' '||s.LAST_NAME) USER_NAME,
+		m.MEMBER_NAME, s.EMAIL, s.PHONE
+		from PROPOSAL_CONFIG details,
+		STAFF_DETAILS s, MEMBER_TITLE m, STATUS_MASTER_R2_R3 sm
+		where
+		details.PROPOSAL_ID = #{asProposalId} AND
+		s.STAFF_ID = details.STAFF_ID
+		AND
+		s.TITLE = m.MEMBER_ID AND
+		sm.STATUS_ID = details.PROPOSAL_STATUS_ID
+	</select>
+
+	<resultMap id="mapContractDetails" type="com.nyc.hhs.model.ContractDetailsBean">
+		<result property="contractId" column="CONTRACT_ID" />
+		<result property="contractTitle" column="CONTRACT_TITLE" />
+		<result property="contractConfigurationId" column="CONTRACT_CONFIGURATION_ID" />
+		<result property="contractNumber" column="EXT_CT_NUMBER" />
+		<result property="providerId" column="ORGANIZATION_ID" />
+		<result property="providerName" column="ORGANIZATION_LEGAL_NAME" />
+	</resultMap>
+	<!-- Updated in R5 -->
+	<select id="fetchMultipleContractDetails" parameterType="map"
+		resultMap="mapContractDetails">
+		select
+		co.organization_id,
+		co.contract_id,
+		co.ext_ct_number,
+		co.contract_title,
+		co.contract_title,
+		org.organization_legal_name
+		from contract co,organization org
+		where 
+		<if test="null != evaluationPoolMappingId">
+			co.evaluation_pool_mapping_id = #{evaluationPoolMappingId} and
+		</if>
+		co.procurement_id=#{asProcurementId}
+		<choose>
+				<when test="null != IsNegotiationRequired">
+				and co.status_id = 126 and co.contract_type_id=1
+				</when>
+				<otherwise>and co.status_id = 180</otherwise>
+		</choose>
+		and co.contract_source_id=1
+		and co.organization_id=org.organization_id		
+	</select>
+	<!-- Updated in R5 -->
+	<update id="updateMultipleContractsDetails" parameterType="java.lang.String">
+		UPDATE CONTRACT SET STATUS_ID = 59 WHERE CONTRACT_ID = #{lsContractId}
+	</update>
+
+	<resultMap id="mapProposalDetails" type="com.nyc.hhs.model.ProposalDetailsBean">
+		<result property="proposalId" column="PROPOSAL_ID" />
+		<result property="proposalTitle" column="PROPOSAL_TITLE" />
+		<result property="organizationId" column="ORGANIZATION_ID" />
+		<result property="providerName" column="ORGANIZATION_LEGAL_NAME" />
+		<result property="competitionPoolTitle" column="COMPETITION_POOL_TITLE" />
+		<result property="evaluationGroupTitle" column="EVALUATION_GROUP_TITLE" />
+		<result property="evaluationPoolMappingId" column="EVALUATION_POOL_MAPPING_ID" />
+	</resultMap>
+	
+	<select id="fetchMultipleProposalsDetails" parameterType="map"
+		resultMap="mapProposalDetails">
+    	SELECT P.PROPOSAL_ID, P.PROPOSAL_TITLE, O.ORGANIZATION_ID,
+		O.ORGANIZATION_LEGAL_NAME, CC.COMPETITION_POOL_TITLE, 
+    	EG.EVALUATION_GROUP_TITLE, EVALUATION_POOL_MAPPING_ID
+		FROM PROPOSAL_CONFIG P, ORGANIZATION O, COMPETITION_POOL CC,
+    	EVALUATION_GROUP EG, EVALUATION_POOL_MAPPING EPM
+		WHERE
+		P.ORGANIZATION_ID = O.ORGANIZATION_ID
+    	AND P.COMPETITION_POOL_ID = CC.COMPETITION_POOL_ID
+		AND P.PROCUREMENT_ID = #{asProcurementId} and P.PROPOSAL_STATUS_ID = 18
+    	and p.EVALUATION_GROUP_ID = EG.EVALUATION_GROUP_id
+    	and p.EVALUATION_GROUP_ID = #{evalGroupId}
+        and epm.COMPETITION_POOL_ID = p.COMPETITION_POOL_ID
+        AND epm.EVALUATION_GROUP_ID = p.EVALUATION_GROUP_ID
+	</select>
+
+	<select id="fetchMultipleProposalsDetailsByProposal"
+		parameterType="map" resultMap="mapProposalDetails">
+		SELECT P.PROPOSAL_ID, P.PROPOSAL_TITLE,
+		O.ORGANIZATION_ID, O.ORGANIZATION_LEGAL_NAME
+		<if test="evaluationPoolMappingId != null">
+			,CC.COMPETITION_POOL_TITLE, EG.EVALUATION_GROUP_TITLE
+		</if>
+		FROM PROPOSAL_CONFIG P,
+		ORGANIZATION O
+		<if test="evaluationPoolMappingId != null">
+			, COMPETITION_POOL CC, EVALUATION_GROUP EG
+		</if>
+		WHERE P.ORGANIZATION_ID = O.ORGANIZATION_ID
+		<if test="evaluationPoolMappingId != null">
+			AND P.COMPETITION_POOL_ID = CC.COMPETITION_POOL_ID
+			and p.EVALUATION_GROUP_id = EG.EVALUATION_GROUP_id
+		</if>
+		AND P.PROPOSAL_ID IN ${asProposalIds}
+	</select>
+
+	<resultMap type="com.nyc.hhs.model.Evaluator" id="mapEvaluationSettingInternal">
+		<result property="agencyId" column="AGENCY_ID" />
+		<result property="name" column="Name" />
+		<result property="userId" column="INT_EVALUATOR_USERID" />
+		<result property="internalEvaluatorName" column="INT_EVALUATOR_USERID" />
+		<result property="evalSettingId" column="EVAL_SETTINGS_INT_ID" />
+	</resultMap>
+
+	<resultMap type="com.nyc.hhs.model.Evaluator" id="mapEvaluationSettingExternal">
+		<result property="agencyId" column="AGENCY_ID" />
+		<result property="extEvaluatorName" column="EXT_EVALUATOR_NAME" />
+		<result property="agencyUserId" column="AGENCY_USERID" />
+		<result property="name" column="Name" />
+		<result property="evalSettingId" column="EVAL_SETTINGS_EXT_ID" />
+	</resultMap>
+
+	<select id="fetchInternalEvaluationsList" parameterType="map"
+		resultMap="mapEvaluationSettingInternal">
+		SELECT CITY.USER_ID,TRIM(NVL(CITY.FIRST_NAME,'')||'
+		'||NVL(CITY.LAST_NAME,'')) NAME,AGENCY_ID
+		,INTERNAL_USER.INT_EVALUATOR_USERID,INTERNAL_USER.EVAL_SETTINGS_INT_ID
+		FROM
+		EVALUATION_SETTINGS_INTERNAL INTERNAL_USER,
+		CITY_USER_DETAILS CITY
+		WHERE INTERNAL_USER.INT_EVALUATOR_USERID = CITY.USER_ID AND PROCUREMENT_ID
+		= #{asProcurementId} and INTERNAL_USER.ADD_DELETE_FLAG='N'
+		and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+        </select>
+
+	<select id="fetchExternalEvaluationsList" parameterType="map"
+		resultMap="mapEvaluationSettingExternal">
+		SELECT TRIM(NVL(CITY.FIRST_NAME,'')||' '||NVL(CITY.LAST_NAME,'')) NAME
+		,EXT_EVALUATOR_NAME,AGENCY_USERID,AGENCY_ID,
+		EXTERNAL_USER.EVAL_SETTINGS_EXT_ID FROM EVALUATION_SETTINGS_EXTERNAL
+		EXTERNAL_USER,CITY_USER_DETAILS CITY
+		WHERE EXTERNAL_USER.AGENCY_USERID = CITY.USER_ID AND PROCUREMENT_ID =
+		#{asProcurementId} and EXTERNAL_USER.ADD_DELETE_FLAG='N'
+		and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+        </select>
+
+
+
+	<resultMap type="com.nyc.hhs.model.EvaluationReassignDetailsBean"
+		id="mapEvaluationReassignInternalDetails">
+		<result property="evalSettingsIntExtId" column="EVAL_SETTINGS_INT_ID" />
+		<result property="addDeleteFlag" column="ADD_DELETE_FLAG" />
+	</resultMap>
+
+	<select id="fetchEvaluationReassignInternalDetails"
+		parameterType="map" resultMap="mapEvaluationReassignInternalDetails">
+		select esi.eval_settings_int_id, esi.add_delete_flag
+		from
+		evaluation_settings_internal esi
+		where esi.procurement_id = #{asProcurementId}
+		and esi.add_delete_flag is not
+		null and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</select>
+
+	<resultMap type="com.nyc.hhs.model.EvaluationReassignDetailsBean"
+		id="mapEvaluationReassignExternalDetails">
+		<result property="evalSettingsIntExtId" column="EVAL_SETTINGS_EXT_ID" />
+		<result property="addDeleteFlag" column="ADD_DELETE_FLAG" />
+	</resultMap>
+
+	<select id="fetchEvaluationReassignExternalDetails"
+		parameterType="map" resultMap="mapEvaluationReassignExternalDetails">
+		select ese.eval_settings_ext_id, ese.add_delete_flag
+		from
+		evaluation_settings_external ese
+		where ese.procurement_id =
+		#{asProcurementId}
+		and ese.add_delete_flag is not null
+		and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</select>
+
+	<select id="fetchEvaluationStatusInternalDetails" parameterType="List"
+		resultType="string">
+		select es.evaluation_status_id
+		from evaluation_status es
+		where
+		es.eval_settings_int_id=#{asEvalSettingsIntId}
+	</select>
+
+	<select id="fetchEvaluationStatusExternalDetails" parameterType="List"
+		resultType="string">
+		select es.evaluation_status_id
+		from evaluation_status es
+		where
+		es.eval_settings_ext_id=#{asEvalSettingsExtId}
+	</select>
+
+	<delete id="deleteEvaluationScore" parameterType="java.lang.String">
+		delete from
+		evaluation_score where evaluation_status_id = #{evaluationStatusId}
+	</delete>
+
+	<delete id="deleteEvaluationStatus" parameterType="java.lang.String">
+		delete from
+		evaluation_status where evaluation_status_id = #{evaluationStatusId}
+	</delete>
+
+	<delete id="deleteEvaluatorExternal" parameterType="hashmap">
+		delete from
+		evaluation_settings_external where add_delete_flag ='D' and
+		procurement_id = #{asProcurementId}
+		<if test="null != evaluationPoolMappingId">
+			and	EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		</if>
+	</delete>
+
+	<delete id="deleteEvaluatorInternal" parameterType="hashmap">
+		delete from
+		evaluation_settings_internal where add_delete_flag ='D' and
+		procurement_id = #{asProcurementId}
+		<if test="null != evaluationPoolMappingId">
+			and	EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		</if>
+	</delete>
+
+	<update id="updateEvaluatorExternal" parameterType="hashmap">
+		update
+		evaluation_settings_external set add_delete_flag ='' where
+		add_delete_flag ='N' and procurement_id = #{asProcurementId}
+		<if test="null != evaluationPoolMappingId">
+			and	EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		</if>
+	</update>
+	<update id="updateEvaluatorInternal" parameterType="hashmap">
+		update
+		evaluation_settings_internal set add_delete_flag ='' where
+		add_delete_flag ='N' and procurement_id = #{asProcurementId}
+		<if test="null != evaluationPoolMappingId">
+			and	EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		</if>
+	</update>
+
+	<resultMap type="com.nyc.hhs.model.EvaluationStatusBean" id="mapProposalConfigDetails">
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<result property="proposalId" column="PROPOSAL_ID" />
+		<result property="organizationId" column="ORGANIZATION_ID" />
+		<result property="procStatusId" column="PROC_STATUS_ID" />
+		<result property="statusId" column="EVALUATION_STATUS_ID" />
+		<result property="evaluationPoolMappingId" column="evaluation_pool_mapping_id" />
+	</resultMap>
+
+	<select id="fetchProposalConfigDetails" parameterType="map"
+		resultMap="mapProposalConfigDetails">
+		select
+		pc.PROCUREMENT_ID,
+		pc.PROPOSAL_ID,
+		pc.ORGANIZATION_ID,
+		pc.PROC_STATUS_ID,
+		epm.evaluation_pool_mapping_id
+		from
+		proposal_config pc, evaluation_pool_mapping epm
+		where pc.evaluation_group_id = epm.evaluation_group_id
+    	and pc.COMPETITION_POOL_id = epm.COMPETITION_POOL_id
+    	and epm.evaluation_pool_mapping_id = #{evaluationPoolMappingId}
+    	and pc.PROPOSAL_STATUS_ID=20 and
+		pc.PROCUREMENT_ID=#{asProcurementId}
+	</select>
+
+	<select id="fetchAcceptedProposalID" parameterType="map"
+		resultType="string">
+		SELECT P.PROPOSAL_ID
+		FROM PROPOSAL_CONFIG P
+		<if test="null != evaluationPoolMappingId">
+			, EVALUATION_POOL_MAPPING E 
+		</if>
+		WHERE
+		<if test="null != evaluationPoolMappingId">
+			E.COMPETITION_POOL_ID = P.COMPETITION_POOL_ID
+	    	and E.EVALUATION_GROUP_ID = P.EVALUATION_GROUP_ID
+	    	and E.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId} and
+		</if>
+	     P.PROCUREMENT_ID = #{procurementId} and P.PROPOSAL_STATUS_ID = 20
+	</select>
+
+	<select id="fetchEvaluationStatusIdsByInternalEvaluatorDetails"
+		parameterType="map" resultType="string">
+		select EVALUATION_STATUS_ID
+		from EVALUATION_STATUS where EVAL_SETTINGS_INT_ID = #{asEvalSettingsIntId}
+	</select>
+
+	<select id="fetchEvaluationStatusIdsByExternalEvaluatorDetails"
+		parameterType="map" resultType="string">
+		select EVALUATION_STATUS_ID
+		from EVALUATION_STATUS where EVAL_SETTINGS_EXT_ID = #{asEvalSettingsIntId}
+	</select>
+
+	<insert id="insertEvaluationStatus" parameterType="com.nyc.hhs.model.EvaluationStatusBean">
+		INSERT INTO EVALUATION_STATUS(EVALUATION_STATUS_ID, PROCUREMENT_ID,
+		PROPOSAL_ID, ORGANIZATION_ID,
+		EVAL_SETTINGS_INT_ID,EVAL_SETTINGS_EXT_ID,
+		STATUS_ID, CREATED_DATE, CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID, EVALUATION_POOL_MAPPING_ID)
+		VALUES (EVALUATION_STATUS_ID.nextval, #{procurementId}, #{proposalId},
+		#{organizationId},
+		#{evalSettingsIntId, jdbcType=VARCHAR},#{evalSettingsExt, jdbcType=VARCHAR},#{statusId},
+		systimestamp, #{createdByUserId},
+		systimestamp, #{modifiedByUserId}, #{evaluationPoolMappingId})		
+	</insert>
+
+	<select id="fetchEvalIdInternal" parameterType="map" resultType="string">
+		select EVALUATION_STATUS_ID from EVALUATION_STATUS where
+		EVAL_SETTINGS_INT_ID=#{intExtEvaluatorId} and
+		PROPOSAL_ID=#{ProposalID}
+	</select>
+
+	<select id="fetchEvalIdExternal" parameterType="map" resultType="string">
+		select EVALUATION_STATUS_ID from EVALUATION_STATUS where
+		EVAL_SETTINGS_EXT_ID=#{intExtEvaluatorId} and
+		PROPOSAL_ID=#{ProposalID}
+	</select>
+
+	<resultMap id="contractDetailsFromWF" type="com.nyc.hhs.model.FinancialWFBean">
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="contractTitle" column="CONTRACT_TITLE" />
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<result property="agencyId" column="AGENCY_ID" />
+		<result property="providerId" column="ORGANIZATION_ID" />
+		<result property="contractNum" column="EXT_CT_NUMBER" />
+		<result property="procEpin" column="EPIN" />
+		<result property="awardEpin" column="EXT_EPIN" />
+		<result property="programName" column="PROGRAM_NAME" />
+		<result property="providerName" column="ORGANIZATION_LEGAL_NAME" />
+	</resultMap>
+
+	<select id="findContractDetailsByContractIdForWF" parameterType="map"
+		resultMap="contractDetailsFromWF">
+		SELECT A.CONTRACT_TITLE AS
+		PROCUREMENT_TITLE,A.PROCUREMENT_ID,A.AGENCY_ID,A.ORGANIZATION_ID,A.EXT_CT_NUMBER,
+		NVL(A.EXT_EPIN, 'N/A') AS EXT_EPIN,
+		B.ORGANIZATION_LEGAL_NAME,
+		C.PROGRAM_NAME,NVL(P.EPIN, 'N/A') AS EPIN
+		FROM
+		CONTRACT A,ORGANIZATION B,PROGRAM_MASTER C,PROCUREMENT P
+		WHERE
+		A.CONTRACT_ID= #{contractId}
+		AND A.ORGANIZATION_ID=B.ORGANIZATION_ID
+		AND A.PROGRAM_ID=C.PROGRAM_ID
+		AND P.PROCUREMENT_ID(+)= A.PROCUREMENT_ID
+	</select>
+	
+	<!-- R6: Duplicate epin from non apt sources changes -->
+	<select id="findProcEpinR3ContractForWF" parameterType="String"
+		resultMap="contractDetailsWF">
+		select
+		PROCUREMENT_AWARD_EPIN AS EPIN
+		FROM
+		REF_APT_EPIN_MASTER
+		where
+		REF_APT_EPIN_ID =(select PROCUREMENT_EPIN_ID
+		from REF_APT_EPIN_MASTER
+		where
+		REF_APT_EPIN_ID = (select REF_APT_EPIN_ID
+		from CONTRACT where CONTRACT_ID=#{contractId}
+		))
+	</select>
+	<!--Start Added in R5 -->
+	<resultMap id="contractDetailsWF" type="com.nyc.hhs.model.FinancialWFBean">
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="contractTitle" column="CONTRACT_TITLE" />
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<result property="agencyId" column="AGENCY_ID" />
+		<result property="providerId" column="ORGANIZATION_ID" />
+		<result property="contractNum" column="EXT_CT_NUMBER" />
+		<result property="procEpin" column="EPIN" />
+		<result property="awardEpin" column="EXT_EPIN" />
+		<result property="programName" column="PROGRAM_NAME" />
+		<result property="providerName" column="ORGANIZATION_LEGAL_NAME" />
+	</resultMap>
+	<!--End Added in R5 -->
+	<select id="fetchContractIdByProcurement" parameterType="map"
+		resultType="string">
+		select contract_id from contract where PROCUREMENT_ID = #{asProcurementId}
+	</select>
+
+	<select id="fetchCountofSelectedProposals" parameterType="map"
+		resultType="Integer">
+		Select count(1) as found_proposals from proposal_config
+		where
+		procurement_id=#{asProcurementId}
+		and proc_review_status_id = 23
+	</select>
+
+	<select id="fetchReopenedEvaluationTaskIds" parameterType="map"
+		resultType="string">
+		select EVALUATION_STATUS_ID from evaluation_status where STATUS_ID='42' and
+		proposal_id = #{ProposalID}
+	</select>
+
+	<select id="fetchAcceleratorComments" parameterType="map"
+		resultType="string">
+		SELECT PROVIDER_COMMENT FROM (SELECT PROVIDER_COMMENT
+		FROM USER_COMMENT WHERE
+		ENTITY_ID = #{entityId} and ENTITY_TYPE=#{entityType} ORDER BY
+		AUDIT_DATE DESC) WHERE ROWNUM=1 
+	</select>
+
+	<select id="fetchAgencyComments" parameterType="map" resultType="string">
+		SELECT DATA FROM (SELECT DATA
+		FROM AGENCY_AUDIT WHERE EVENT_NAME='Agency Comments' and ENTITY_ID =
+		#{entityId} and ENTITY_TYPE=#{entityType}
+		ORDER BY AUDIT_DATE DESC) WHERE ROWNUM=1 
+	</select>
+
+	<select id="fetchEvaluatorIdsEvaluation" parameterType="hashmap"
+		resultType="string">
+		SELECT DISTINCT EMAIL_ID FROM
+		city_user_details where user_id in
+		(SELECT AGENCY_USERID userid FROM EVALUATION_SETTINGS_EXTERNAL WHERE
+		PROCUREMENT_ID=#{procurementId} 
+		<if test="evaluationPoolMappingId != null">and EVALUATION_POOL_MAPPING_ID=#{evaluationPoolMappingId}</if>
+		and ADD_DELETE_FLAG='N' UNION ALL
+		SELECT INT_EVALUATOR_USERID userid FROM EVALUATION_SETTINGS_INTERNAL
+		WHERE PROCUREMENT_ID=#{procurementId} 
+		<if test="evaluationPoolMappingId != null">and EVALUATION_POOL_MAPPING_ID=#{evaluationPoolMappingId}</if> 
+		and ADD_DELETE_FLAG='N')
+	</select>
+
+	<select id="fetchEvaluatorIdsReviewScore" parameterType="java.lang.String"
+		resultType="string">
+		SELECT DISTINCT EMAIL_ID FROM city_user_details where user_id in
+		(SELECT INT_EVALUATOR_USERID FROM EVALUATION_SETTINGS_INTERNAL WHERE
+		EVAL_SETTINGS_INT_ID IN
+		(select EVAL_SETTINGS_INT_ID from evaluation_status where STATUS_ID='42' and
+		proposal_id = #{ProposalID})
+		and ADD_DELETE_FLAG = 'N'
+		union all
+		SELECT AGENCY_USERID FROM EVALUATION_SETTINGS_EXTERNAL WHERE
+		EVAL_SETTINGS_EXT_ID IN
+		(select EVAL_SETTINGS_EXT_ID from evaluation_status where STATUS_ID='42' and
+		proposal_id = #{ProposalID})
+		and ADD_DELETE_FLAG = 'N') 
+	</select>
+
+	<update id="updateModifiedFlag" parameterType="map">
+		update
+		evaluation_results set MODIFIED_FLAG = '0'
+		where EVALUATION_RESULTS_ID
+		in (select EVALUATION_RESULTS_ID from evaluation_results er inner join
+		proposal_config pc
+		on pc.PROPOSAL_ID = er.PROPOSAL_ID where
+		pc.PROCUREMENT_ID=#{procurementId} and pc.PROPOSAL_STATUS_ID in
+		(23,24))
+	</update>
+
+	<resultMap id="assignmentDetails" type="com.nyc.hhs.model.AssignementDetailsBean">
+		<result property="msVendorId" column="VENDOR_ID" />
+		<result property="mdAmount" column="AMOUNT" />
+	</resultMap>
+
+	<select id="fetchAssignments" parameterType="map" resultMap="assignmentDetails">
+		select a.vend_cust_cd as VENDOR_ID,ASSIGNMENT_AMOUNT as AMOUNT
+		from
+		ADVANCE_ASSIGNMENT adv inner join assignment a
+		on adv.ASSIGNMENT_ID = a.ASSIGNMENT_ID
+		where adv.BUDGET_ID = #{budgetId} and adv.BUDGET_ADVANCE_ID =
+		#{budgetAdvanceId,jdbcType=VARCHAR}
+		and adv.ASSIGNMENT_AMOUNT > 0
+		union all
+		select vend_cust_cd as VENDOR_ID,INVOICE_AMOUNT as AMOUNT from assignment a
+		inner join invoice_details inv on inv.LINE_ITEM_ID = a.ASSIGNMENT_ID
+		where inv.entry_type_id = 14
+		and inv.invoice_id = #{invoiceId,jdbcType=VARCHAR}
+		and a.budget_id =
+		#{budgetId}
+		and inv.INVOICE_AMOUNT > 0 
+	</select>
+	<!-- Made changes in this method for Enhancement 6405 and Release 3.3.0 -->
+	<select id="getPaymentVendorAddressIdFromT" parameterType="hashmap" resultType="string">
+	select distinct (ad_id) as ad_id from(select (ad_id) as ad_id from ref_vendor_t t
+				where exists (select invoice_id from invoice_details where
+				entry_type_id = 14 and
+				invoice_id = #{invoiceId,jdbcType=VARCHAR}) and vend_cust_cd =
+				#{vend_cust_cd,jdbcType=VARCHAR} and ad_id is not null
+		    AND T.AD_TYP  = 'PA'
+		AND T. EFBGN_DT &lt;= sysdate
+		AND (T. EFEND_DT &gt;= sysdate OR T. EFEND_DT IS NULL)
+		AND T.ALW_EFT_FL = '1'
+		AND T.EFT_STA = '3'  
+		and T.PRVNT_NEW_SPND_IND = '0'
+				union
+				select (ad_id) as ad_id from ref_vendor_t t where exists (select
+				BUDGET_ADVANCE_ID from ADVANCE_ASSIGNMENT where
+				BUDGET_ADVANCE_ID = #{budgetAdvanceId,jdbcType=VARCHAR}) and vend_cust_cd =
+				#{vend_cust_cd,jdbcType=VARCHAR} and ad_id is not null
+		    AND T.AD_TYP  = 'PA'
+		AND T. EFBGN_DT &lt;= sysdate
+		AND (T. EFEND_DT &gt;= sysdate OR T. EFEND_DT IS NULL)
+		AND T.ALW_EFT_FL = '1'
+		AND T.EFT_STA = '3'  
+		and T.PRVNT_NEW_SPND_IND = '0'
+		)
+	</select>
+	
+	<select id="getPaymentVendorAddressIdFromTMoreThanOne" parameterType="hashmap" resultType="string">
+		select distinct (ad_id) as ad_id from(select (ad_id) as ad_id from ref_vendor_t t
+				where exists (select invoice_id from invoice_details where
+				entry_type_id = 14 and
+				invoice_id = #{invoiceId,jdbcType=VARCHAR}) and vend_cust_cd =
+				#{vend_cust_cd,jdbcType=VARCHAR} and ad_id is not null
+		    AND T.AD_TYP  = 'PA'
+		AND T. EFBGN_DT &lt;= sysdate
+		AND (T. EFEND_DT &gt;= sysdate OR T. EFEND_DT IS NULL)
+		AND T.ALW_EFT_FL = '1'
+		AND T.EFT_STA = '3'  
+		AND T.DFLT_AD_TYP ='1'
+		and T.PRVNT_NEW_SPND_IND = '0'
+				union
+				select (ad_id) as ad_id from ref_vendor_t t where exists (select
+				BUDGET_ADVANCE_ID from ADVANCE_ASSIGNMENT where
+				BUDGET_ADVANCE_ID = #{budgetAdvanceId,jdbcType=VARCHAR}) and vend_cust_cd =
+				#{vend_cust_cd,jdbcType=VARCHAR} and ad_id is not null
+		    AND T.AD_TYP  = 'PA'
+		AND T. EFBGN_DT &lt;= sysdate
+		AND (T. EFEND_DT &gt;= sysdate OR T. EFEND_DT IS NULL)
+		AND T.ALW_EFT_FL = '1'
+		AND T.EFT_STA = '3'  
+		AND T.DFLT_AD_TYP ='1'
+		and T.PRVNT_NEW_SPND_IND = '0'
+		)
+	</select>
+	
+	<select id="getPaymentVendorAddressIdFromV" parameterType="hashmap" resultType="string">
+	select distinct (ad_id) as ad_id from(select (ad_id) as ad_id from ref_vendor_v t
+				where exists (select invoice_id from invoice_details where
+				entry_type_id = 14 and
+				invoice_id = #{invoiceId,jdbcType=VARCHAR}) and vend_cust_cd =
+				#{vend_cust_cd,jdbcType=VARCHAR} and ad_id is not null
+		    AND T.AD_TYP  = 'PA'
+		AND T. EFBGN_DT &lt;= sysdate
+		AND (T. EFEND_DT &gt;= sysdate OR T. EFEND_DT IS NULL)
+		AND T.ALW_EFT_FL = '1'
+		AND T.EFT_STA = '3'  
+		and T.PRVNT_NEW_SPND_IND = '0'
+				union
+				select (ad_id) as ad_id from ref_vendor_v t where exists (select
+				BUDGET_ADVANCE_ID from ADVANCE_ASSIGNMENT where
+				BUDGET_ADVANCE_ID = #{budgetAdvanceId,jdbcType=VARCHAR}) and vend_cust_cd =
+				#{vend_cust_cd,jdbcType=VARCHAR} and ad_id is not null
+		    AND T.AD_TYP  = 'PA'
+		AND T. EFBGN_DT &lt;= sysdate
+		AND (T. EFEND_DT &gt;= sysdate OR T. EFEND_DT IS NULL)
+		AND T.ALW_EFT_FL = '1'
+		AND T.EFT_STA = '3' 
+		and T.PRVNT_NEW_SPND_IND = '0' 
+		)
+	</select>
+		<!-- Made changes in this method for Enhancement 6405 and Release 3.3.0 -->
+		<select id="getVendorAddressIdFromT" parameterType="hashmap" resultType="string">
+		SELECT distinct AD_ID FROM ref_vendor_t T WHERE VEND_CUST_CD in (
+		SELECT distinct VEND_CUST_CD FROM ref_vendor_V WHERE TIN =( 
+		SELECT distinct EIN_id_NN FROM ORGANIZATION WHERE ORGANIZATION_ID = 
+		#{organizationId}))
+		
+		AND T.AD_TYP  = 'PA'
+		AND T. EFBGN_DT &lt;= sysdate
+		AND (T. EFEND_DT &gt;= sysdate OR T. EFEND_DT IS NULL)
+		AND T.ALW_EFT_FL = '1'
+		AND T.EFT_STA = '3'  
+		and T.PRVNT_NEW_SPND_IND = '0'
+		</select>
+		
+		<select id="getVendorAddressIdFromTMoreThanOne" parameterType="hashmap" resultType="string">
+		SELECT distinct AD_ID FROM ref_vendor_t T WHERE VEND_CUST_CD in (
+		SELECT distinct VEND_CUST_CD FROM ref_vendor_V WHERE TIN =( 
+		SELECT distinct EIN_id_NN FROM ORGANIZATION WHERE ORGANIZATION_ID = 
+		#{organizationId}))
+		
+		AND T.AD_TYP  = 'PA'
+		AND T. EFBGN_DT &lt;= sysdate
+		AND (T. EFEND_DT &gt;= sysdate OR T. EFEND_DT IS NULL)
+		AND T.ALW_EFT_FL = '1'
+		AND T.EFT_STA = '3'  
+		AND T.DFLT_AD_TYP ='1'
+		and T.PRVNT_NEW_SPND_IND = '0'
+		</select>
+		
+		<select id="getVendorAddressIdFromV" parameterType="hashmap" resultType="string">
+		SELECT distinct AD_ID FROM ref_vendor_V T WHERE VEND_CUST_CD in (
+		SELECT distinct VEND_CUST_CD FROM ref_vendor_V WHERE TIN =( 
+		SELECT distinct EIN_id_NN FROM ORGANIZATION WHERE ORGANIZATION_ID = 
+		#{organizationId}))
+		
+		AND T.AD_TYP  = 'PA'
+		AND T. EFBGN_DT &lt;= sysdate
+		AND (T. EFEND_DT &gt;= sysdate OR T. EFEND_DT IS NULL)
+		AND T.ALW_EFT_FL = '1'
+		AND T.EFT_STA = '3'  
+		and T.PRVNT_NEW_SPND_IND = '0'
+		</select>
+
+
+
+	<!-- Made changes for Release 3.6.0Enhancement id 6405.-->
+	<select id="getVendorAddressIdFromTCondFirst" parameterType="hashmap" resultType="string">
+		select AD_ID from (SELECT min(REF_VENDOR_T.AD_ID) as AD_ID 
+		   FROM REF_VENDOR_T,
+		  REF_VENDOR_V,REF_CONTRACTS_V
+		  WHERE 
+		  REF_VENDOR_V.VEND_CUST_CD=REF_CONTRACTS_V.VEND_CUST_CD 
+		  AND REF_VENDOR_V.VEND_CUST_CD=REF_VENDOR_T.VEND_CUST_CD
+		  AND (REF_VENDOR_V.ALW_EFT_FL=1 AND REF_VENDOR_V.EFT_STA=3)
+		  AND (REF_VENDOR_T.EFT_STA ='' OR  REF_VENDOR_T.EFT_STA  is null OR REF_VENDOR_T.EFT_STA= 3)
+		  AND REF_VENDOR_T.EFBGN_DT     &lt; SYSDATE
+		  AND (REF_VENDOR_T.EFEND_DT  is null OR REF_VENDOR_T.EFEND_DT  &gt; SYSDATE)
+		  AND REF_VENDOR_T.AD_TYP = 'PA'
+		  AND REF_VENDOR_T.PRVNT_NEW_SPND_IND ='0' 
+		  AND REF_CONTRACTS_V.DOC_CD||REF_CONTRACTS_V.DOC_DEPT_CD||REF_CONTRACTS_V.DOC_ID = (select ext_ct_number from contract where contract_id=#{ContractID}))
+		  where AD_ID is not null
+	</select>
+	
+		<!-- Made changes for Release 3.6.0Enhancement id 6405.-->
+	<select id="getVendorAddressIdFromTCondSecond" parameterType="hashmap" resultType="string">
+		select AD_ID from (SELECT min(REF_VENDOR_T.AD_ID) as AD_ID 
+		  FROM REF_VENDOR_T,
+		  REF_VENDOR_V,REF_CONTRACTS_V
+		  WHERE 
+		  REF_VENDOR_V.VEND_CUST_CD=REF_CONTRACTS_V.VEND_CUST_CD 
+		  AND REF_VENDOR_V.VEND_CUST_CD=REF_VENDOR_T.VEND_CUST_CD
+		  AND (REF_VENDOR_V.ALW_EFT_FL=1 AND REF_VENDOR_V.EFT_STA!=3)
+		  AND REF_VENDOR_T.EFT_STA= 3
+		  AND REF_VENDOR_T.DFLT_AD_TYP =1
+		  AND REF_VENDOR_T.EFBGN_DT     &lt; SYSDATE
+		  AND (REF_VENDOR_T.EFEND_DT    is null OR REF_VENDOR_T.EFEND_DT      &gt; SYSDATE)
+		  AND REF_VENDOR_T.AD_TYP = 'PA'
+		  AND REF_VENDOR_T.PRVNT_NEW_SPND_IND ='0'
+		  AND REF_CONTRACTS_V.DOC_CD||REF_CONTRACTS_V.DOC_DEPT_CD||REF_CONTRACTS_V.DOC_ID = (select ext_ct_number from contract where contract_id=#{ContractID}))
+		  where AD_ID is not null
+	</select>
+	
+		<!-- Made changes for Release 3.6.0Enhancement id 6405.-->
+	<select id="getVendorAddressIdFromTCondSecondHalf" parameterType="hashmap" resultType="string">
+		select AD_ID from (SELECT min(REF_VENDOR_T.AD_ID) as AD_ID 
+		  FROM REF_VENDOR_T,
+		  REF_VENDOR_V,REF_CONTRACTS_V
+		  WHERE 
+		  REF_VENDOR_V.VEND_CUST_CD=REF_CONTRACTS_V.VEND_CUST_CD 
+		  AND REF_VENDOR_V.VEND_CUST_CD=REF_VENDOR_T.VEND_CUST_CD
+		  AND (REF_VENDOR_V.ALW_EFT_FL=1 AND REF_VENDOR_V.EFT_STA!=3)
+		  AND REF_VENDOR_T.EFT_STA= 3
+		  AND REF_VENDOR_T.EFBGN_DT     &lt; SYSDATE
+		  AND (REF_VENDOR_T.EFEND_DT    is null OR REF_VENDOR_T.EFEND_DT      &gt; SYSDATE)
+		  AND REF_VENDOR_T.AD_TYP = 'PA'
+		  AND REF_VENDOR_T.PRVNT_NEW_SPND_IND ='0'
+		  AND REF_CONTRACTS_V.DOC_CD||REF_CONTRACTS_V.DOC_DEPT_CD||REF_CONTRACTS_V.DOC_ID = (select ext_ct_number from contract where contract_id=#{ContractID}))
+		  where AD_ID is not null
+	</select>	
+	
+		<!-- Made changes for Release 3.6.0Enhancement id 6405.-->
+	<select id="getVendorAddressIdFromTCondThird" parameterType="hashmap" resultType="string">
+		  select AD_ID from (SELECT min(REF_VENDOR_T.AD_ID) as AD_ID 
+		   FROM REF_VENDOR_T,
+		  REF_VENDOR_V,REF_CONTRACTS_V
+		  WHERE 
+		  REF_VENDOR_V.VEND_CUST_CD=REF_CONTRACTS_V.VEND_CUST_CD 
+		  AND REF_VENDOR_V.VEND_CUST_CD=REF_VENDOR_T.VEND_CUST_CD
+		  AND (REF_VENDOR_V.ALW_EFT_FL!=1)
+		  AND REF_VENDOR_T.EFBGN_DT     &lt; SYSDATE
+		  AND (REF_VENDOR_T.EFEND_DT    is null OR REF_VENDOR_T.EFEND_DT      &gt; SYSDATE)
+		  AND REF_VENDOR_T.AD_TYP = 'PA'
+		  AND REF_VENDOR_T.PRVNT_NEW_SPND_IND ='0'
+		  AND REF_CONTRACTS_V.DOC_CD||REF_CONTRACTS_V.DOC_DEPT_CD||REF_CONTRACTS_V.DOC_ID = (select ext_ct_number from contract where contract_id=#{ContractID}))
+		  where AD_ID is not null
+	</select>
+	
+	<select id="getVendorAddressIdFromTCondFourth" parameterType="hashmap" resultType="string">
+		  select AD_ID from (SELECT min(REF_VENDOR_T.AD_ID) as AD_ID 
+		   FROM REF_VENDOR_T,REF_VENDOR_V,
+		  REF_CONTRACTS_V
+		  WHERE
+		  REF_VENDOR_V.VEND_CUST_CD=REF_CONTRACTS_V.VEND_CUST_CD 
+		  AND REF_VENDOR_V.VEND_CUST_CD=REF_VENDOR_T.VEND_CUST_CD
+		  AND REF_VENDOR_T.EFBGN_DT     &lt; SYSDATE
+		  AND (REF_VENDOR_T.EFEND_DT    is null OR REF_VENDOR_T.EFEND_DT      &gt; SYSDATE)
+		  AND REF_VENDOR_T.AD_TYP = 'PA'
+		  AND REF_VENDOR_T.PRVNT_NEW_SPND_IND ='0'
+		  AND REF_CONTRACTS_V.DOC_CD||REF_CONTRACTS_V.DOC_DEPT_CD||REF_CONTRACTS_V.DOC_ID = (select ext_ct_number from contract where contract_id=#{ContractID}))
+		  where AD_ID is not null
+	</select>	
+	
+	<!-- Updated in R7: Defect 6659 -->
+	<select id="getPaymentVendorAddressIdFromTCondFirst" parameterType="hashmap" resultType="string">
+		select AD_ID from(SELECT min(REF_VENDOR_T.AD_ID) as AD_ID
+		   FROM REF_VENDOR_T,
+		  REF_VENDOR_V,REF_CONTRACTS_V
+		  WHERE exists (select invoice_id from invoice_details where
+						entry_type_id = 14 and
+						invoice_id = #{invoiceId,jdbcType=VARCHAR}) 
+		<!-- AND REF_CONTRACTS_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR} --> 
+		  AND REF_VENDOR_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR} 
+		  AND REF_VENDOR_V.VEND_CUST_CD=REF_VENDOR_T.VEND_CUST_CD
+		  AND (REF_VENDOR_V.ALW_EFT_FL=1 AND REF_VENDOR_V.EFT_STA=3)
+		  AND (REF_VENDOR_T.EFT_STA ='' OR  REF_VENDOR_T.EFT_STA  is null OR REF_VENDOR_T.EFT_STA= 3)
+		  AND REF_VENDOR_T.EFBGN_DT     &lt; SYSDATE
+		  AND (REF_VENDOR_T.EFEND_DT  is null OR REF_VENDOR_T.EFEND_DT  &gt; SYSDATE)
+		  AND REF_VENDOR_T.AD_TYP = 'PA'
+		  AND REF_VENDOR_T.PRVNT_NEW_SPND_IND ='0'                 
+		  union
+		SELECT min(REF_VENDOR_T.AD_ID) as AD_ID
+		   FROM REF_VENDOR_T,
+		  REF_VENDOR_V,REF_CONTRACTS_V
+		  where exists (select
+						BUDGET_ADVANCE_ID from ADVANCE_ASSIGNMENT where
+						BUDGET_ADVANCE_ID = #{budgetAdvanceId,jdbcType=VARCHAR}) 
+		 <!-- AND REF_CONTRACTS_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR} --> 
+		  AND REF_VENDOR_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR} 
+		  AND REF_VENDOR_V.VEND_CUST_CD=REF_VENDOR_T.VEND_CUST_CD
+		  AND (REF_VENDOR_V.ALW_EFT_FL=1 AND REF_VENDOR_V.EFT_STA=3)
+		  AND (REF_VENDOR_T.EFT_STA ='' OR  REF_VENDOR_T.EFT_STA  is null OR REF_VENDOR_T.EFT_STA= 3)
+		  AND REF_VENDOR_T.EFBGN_DT     &lt; SYSDATE
+		  AND (REF_VENDOR_T.EFEND_DT  is null OR REF_VENDOR_T.EFEND_DT  &gt; SYSDATE)
+		  AND REF_VENDOR_T.AD_TYP = 'PA'
+		  AND REF_VENDOR_T.PRVNT_NEW_SPND_IND ='0')  where AD_ID is not null
+	</select>
+	    
+	    <!--Updated in R7: Defect 6659-->
+		<select id="getPaymentVendorAddressIdFromTCondSecond" parameterType="hashmap" resultType="string">
+		select AD_ID from(SELECT min(REF_VENDOR_T.AD_ID) as AD_ID
+			   FROM REF_VENDOR_T,
+			  REF_VENDOR_V,REF_CONTRACTS_V
+			  WHERE exists (select invoice_id from invoice_details where
+							entry_type_id = 14 and
+							invoice_id = #{invoiceId,jdbcType=VARCHAR}) 
+	 <!-- AND REF_CONTRACTS_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR} --> 
+		  AND REF_VENDOR_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR} 
+		  AND REF_VENDOR_V.VEND_CUST_CD=REF_VENDOR_T.VEND_CUST_CD
+	  AND (REF_VENDOR_V.ALW_EFT_FL=1 AND REF_VENDOR_V.EFT_STA!=3)                             
+	  AND REF_VENDOR_T.EFT_STA= 3
+	  AND REF_VENDOR_T.DFLT_AD_TYP =1
+	  AND REF_VENDOR_T.EFBGN_DT     &lt; SYSDATE
+	  AND (REF_VENDOR_T.EFEND_DT    is null OR REF_VENDOR_T.EFEND_DT      &gt; SYSDATE)
+		  AND REF_VENDOR_T.AD_TYP = 'PA'
+		  AND REF_VENDOR_T.PRVNT_NEW_SPND_IND ='0'
+	                
+			  union
+			SELECT min(REF_VENDOR_T.AD_ID) as AD_ID
+			   FROM REF_VENDOR_T,
+			  REF_VENDOR_V,REF_CONTRACTS_V
+			  where exists (select
+							BUDGET_ADVANCE_ID from ADVANCE_ASSIGNMENT where
+							BUDGET_ADVANCE_ID = #{budgetAdvanceId,jdbcType=VARCHAR}) 
+	 <!-- AND REF_CONTRACTS_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR} --> 
+		  AND REF_VENDOR_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR} 
+		  AND REF_VENDOR_V.VEND_CUST_CD=REF_VENDOR_T.VEND_CUST_CD
+	  AND (REF_VENDOR_V.ALW_EFT_FL=1 AND REF_VENDOR_V.EFT_STA!=3)                             
+	  AND REF_VENDOR_T.EFT_STA= 3
+	  AND REF_VENDOR_T.DFLT_AD_TYP =1
+	  AND REF_VENDOR_T.EFBGN_DT     &lt; SYSDATE
+	  AND (REF_VENDOR_T.EFEND_DT    is null OR REF_VENDOR_T.EFEND_DT      &gt; SYSDATE)
+		  AND REF_VENDOR_T.AD_TYP = 'PA'
+		  AND REF_VENDOR_T.PRVNT_NEW_SPND_IND ='0') where AD_ID is not null
+		</select>
+		
+		<!--Updated in R7: Defect 6659 -->
+		<select id="getPaymentVendorAddressIdFromTCondSecondHalf" parameterType="hashmap" resultType="string">
+		select AD_ID from(SELECT min(REF_VENDOR_T.AD_ID) as AD_ID
+			   FROM REF_VENDOR_T,
+			  REF_VENDOR_V,REF_CONTRACTS_V
+			  WHERE exists (select invoice_id from invoice_details where
+							entry_type_id = 14 and
+							invoice_id = #{invoiceId,jdbcType=VARCHAR}) 
+	 <!-- AND REF_CONTRACTS_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR}  -->
+		  AND REF_VENDOR_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR} 
+		  AND REF_VENDOR_V.VEND_CUST_CD=REF_VENDOR_T.VEND_CUST_CD
+	  AND (REF_VENDOR_V.ALW_EFT_FL=1 AND REF_VENDOR_V.EFT_STA!=3)                             
+	  AND REF_VENDOR_T.EFT_STA= 3
+	  AND REF_VENDOR_T.EFBGN_DT     &lt; SYSDATE
+	  AND (REF_VENDOR_T.EFEND_DT    is null OR REF_VENDOR_T.EFEND_DT      &gt; SYSDATE)
+		  AND REF_VENDOR_T.AD_TYP = 'PA'
+		  AND REF_VENDOR_T.PRVNT_NEW_SPND_IND ='0'
+	                
+			  union
+			SELECT min(REF_VENDOR_T.AD_ID) as AD_ID
+			   FROM REF_VENDOR_T,
+			  REF_VENDOR_V,REF_CONTRACTS_V
+			  where exists (select
+							BUDGET_ADVANCE_ID from ADVANCE_ASSIGNMENT where
+							BUDGET_ADVANCE_ID = #{budgetAdvanceId,jdbcType=VARCHAR}) 
+	 <!-- AND REF_CONTRACTS_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR}  -->
+		  AND REF_VENDOR_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR} 
+		  AND REF_VENDOR_V.VEND_CUST_CD=REF_VENDOR_T.VEND_CUST_CD
+	  AND (REF_VENDOR_V.ALW_EFT_FL=1 AND REF_VENDOR_V.EFT_STA!=3)                             
+	  AND REF_VENDOR_T.EFT_STA= 3
+	  AND REF_VENDOR_T.EFBGN_DT     &lt; SYSDATE
+	  AND (REF_VENDOR_T.EFEND_DT    is null OR REF_VENDOR_T.EFEND_DT      &gt; SYSDATE)
+		  AND REF_VENDOR_T.AD_TYP = 'PA'
+		  AND REF_VENDOR_T.PRVNT_NEW_SPND_IND ='0') where AD_ID is not null
+		</select>
+		
+		<!--Updated in R7: Defect 6659 -->		
+		<select id="getPaymentVendorAddressIdFromTCondThird" parameterType="hashmap" resultType="string">
+		 select AD_ID from(SELECT min(REF_VENDOR_T.AD_ID) as AD_ID
+					   FROM REF_VENDOR_T,
+					  REF_VENDOR_V,REF_CONTRACTS_V
+					  WHERE exists (select invoice_id from invoice_details where
+									entry_type_id = 14 and
+									invoice_id = #{invoiceId,jdbcType=VARCHAR}) 
+		 <!-- AND REF_CONTRACTS_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR} --> 
+		  AND REF_VENDOR_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR} 
+		  AND REF_VENDOR_V.VEND_CUST_CD=REF_VENDOR_T.VEND_CUST_CD
+		  AND (REF_VENDOR_V.ALW_EFT_FL!=1)
+		  AND REF_VENDOR_T.EFBGN_DT     &lt; SYSDATE
+		  AND (REF_VENDOR_T.EFEND_DT    is null OR REF_VENDOR_T.EFEND_DT      &gt; SYSDATE)
+		  AND REF_VENDOR_T.AD_TYP = 'PA'
+		  AND REF_VENDOR_T.PRVNT_NEW_SPND_IND ='0'		  
+			                
+					  union
+					SELECT min(REF_VENDOR_T.AD_ID) as AD_ID
+					   FROM REF_VENDOR_T,
+					  REF_VENDOR_V,REF_CONTRACTS_V
+					  where exists (select
+									BUDGET_ADVANCE_ID from ADVANCE_ASSIGNMENT where
+									BUDGET_ADVANCE_ID = #{budgetAdvanceId,jdbcType=VARCHAR}) 
+		 <!-- AND REF_CONTRACTS_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR} --> 
+		  AND REF_VENDOR_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR} 
+		  AND REF_VENDOR_V.VEND_CUST_CD=REF_VENDOR_T.VEND_CUST_CD
+		  AND (REF_VENDOR_V.ALW_EFT_FL!=1)
+		  AND REF_VENDOR_T.EFBGN_DT     &lt; SYSDATE
+		  AND (REF_VENDOR_T.EFEND_DT    is null OR REF_VENDOR_T.EFEND_DT      &gt; SYSDATE)
+		  AND REF_VENDOR_T.AD_TYP = 'PA'
+		  AND REF_VENDOR_T.PRVNT_NEW_SPND_IND ='0') where AD_ID is not null
+		</select>
+		
+		<!--Updated in R7: Defect 6659 -->
+		<select id="getPaymentVendorAddressIdFromTCondFourth" parameterType="hashmap" resultType="string">
+		select AD_ID from(SELECT min(REF_VENDOR_T.AD_ID) as AD_ID
+					   FROM REF_VENDOR_T,
+					  REF_VENDOR_V,REF_CONTRACTS_V
+					  WHERE exists (select invoice_id from invoice_details where
+									entry_type_id = 14 and
+									invoice_id = #{invoiceId,jdbcType=VARCHAR})
+	 <!-- AND REF_CONTRACTS_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR} --> 
+		  AND REF_VENDOR_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR} 
+		  AND REF_VENDOR_V.VEND_CUST_CD=REF_VENDOR_T.VEND_CUST_CD
+		  AND REF_VENDOR_T.EFBGN_DT     &lt; SYSDATE
+		  AND (REF_VENDOR_T.EFEND_DT    is null OR REF_VENDOR_T.EFEND_DT      &gt; SYSDATE)
+		  AND REF_VENDOR_T.AD_TYP = 'PA'
+		  AND REF_VENDOR_T.PRVNT_NEW_SPND_IND ='0'
+			                
+					  union
+					SELECT min(REF_VENDOR_T.AD_ID) as AD_ID
+					   FROM REF_VENDOR_T,
+					  REF_VENDOR_V,REF_CONTRACTS_V
+					  where exists (select
+									BUDGET_ADVANCE_ID from ADVANCE_ASSIGNMENT where
+									BUDGET_ADVANCE_ID = #{budgetAdvanceId,jdbcType=VARCHAR}) 
+		 <!-- AND REF_CONTRACTS_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR} --> 
+		  AND REF_VENDOR_V.VEND_CUST_CD=#{vend_cust_cd,jdbcType=VARCHAR} 
+		  AND REF_VENDOR_V.VEND_CUST_CD=REF_VENDOR_T.VEND_CUST_CD
+		  AND REF_VENDOR_T.EFBGN_DT     &lt; SYSDATE
+		  AND (REF_VENDOR_T.EFEND_DT    is null OR REF_VENDOR_T.EFEND_DT      &gt; SYSDATE)
+		  AND REF_VENDOR_T.AD_TYP = 'PA'
+		  AND REF_VENDOR_T.PRVNT_NEW_SPND_IND ='0') where AD_ID is not null
+		</select>		
+	<!-- latest changes Release 3.6.0 end -->
+	
+	<!-- Made changes in this method for Enhancement 6405 and Release 3.3.0 -->
+	<insert id="insertIntoPayment" parameterType="map">
+		Insert into PAYMENT
+		(PAYMENT_ID,
+		PAYMENT_VOUCHER_NUM,
+		CONTRACT_ID,
+		BUDGET_ID,
+		INVOICE_ID,
+		AGENCY_ID,
+		ORGANIZATION_ID,
+		PROGRAM_ID,
+		CT_NUMBER,
+		BUDGET_FISCAL_YEAR_ID,
+		FISCAL_YEAR_ID,
+		BUDGET_ADVANCE_ID,
+		PERIOD,
+		PAYMENT_AMOUNT,
+		VENDOR_ADDRESS_ID,
+		PAYEE_NAME,
+		PAYEE_VENDOR_ID,
+		PAYEE_VENDOR_ADDRESS_ID,
+		PAYMENT_SUBMITTED_DATE,
+		PAYMENT_APPROVED_DATE,
+		STATUS_ID,
+		PROCESS_FLAG,
+		LAST_UPDATE_DATE,
+		DELETE_FLAG,
+		CREATED_DATE,
+		CREATED_BY_USERID,
+		MODIFIED_DATE,
+		MODIFIED_BY_USERID)
+		values
+		(seq_payment_id.nextval,
+		#{paymentVoucherNumber},
+		#{ContractID},
+		#{budgetId},
+		#{invoiceId,jdbcType=VARCHAR},
+		#{AgencyID},
+		#{organizationId},
+		(SELECT PROGRAM_ID FROM BUDGET WHERE BUDGET_ID = #{budgetId}),
+		#{ctNumber},
+		(SELECT FISCAL_YEAR_ID FROM BUDGET WHERE BUDGET_ID = #{budgetId}),
+		(SELECT TO_CHAR(TRUNC(ADD_MONTHS (SYSDATE,6),'YEAR'),'YYYY') AS FISCAL_YEAR
+		FROM DUAL),
+		#{budgetAdvanceId,jdbcType=VARCHAR},
+		#{period},
+		#{amount},
+		<!--(SELECT min(AD_ID) FROM REF_CONTRACTS_V WHERE DOC_CD||DOC_DEPT_CD||DOC_ID =
+		#{ctNumber}),-->
+		#{vendorAddressId,jdbcType=VARCHAR},
+		(select lgl_nm from ref_vendor_v where exists (select invoice_id from
+		invoice_details where entry_type_id = 14 and
+		invoice_id = #{invoiceId,jdbcType=VARCHAR}) and vend_cust_cd =
+		#{vend_cust_cd,jdbcType=VARCHAR}
+		union
+		select lgl_nm from ref_vendor_v where exists (select BUDGET_ADVANCE_ID from
+		ADVANCE_ASSIGNMENT where
+		BUDGET_ADVANCE_ID = #{budgetAdvanceId,jdbcType=VARCHAR}) and vend_cust_cd =
+		#{vend_cust_cd,jdbcType=VARCHAR}),
+		#{vend_cust_cd,jdbcType=VARCHAR},
+		<!--(select min(ad_id) as ad_id from(select min(ad_id) as ad_id from ref_vendor_a
+		where exists (select invoice_id from invoice_details where
+		entry_type_id = 14 and
+		invoice_id = #{invoiceId,jdbcType=VARCHAR}) and vend_cust_cd =
+		#{vend_cust_cd,jdbcType=VARCHAR} and ad_id is not null
+		union
+		select min(ad_id) as ad_id from ref_vendor_a where exists (select
+		BUDGET_ADVANCE_ID from ADVANCE_ASSIGNMENT where
+		BUDGET_ADVANCE_ID = #{budgetAdvanceId,jdbcType=VARCHAR}) and vend_cust_cd =
+		#{vend_cust_cd,jdbcType=VARCHAR} and ad_id is not null)),-->
+		#{paymentVendorAddressId,jdbcType=VARCHAR},
+		sysdate,
+		null,
+		#{statusId},
+		#{processFlag},
+		sysdate,
+		#{deleteFlag},
+		sysdate,
+		#{createdByUserId},
+		sysdate,
+		#{modifiedByUserId})
+		<selectKey keyProperty="paymentId" resultType="string">
+			select
+			seq_payment_id.currval from Dual
+					</selectKey>
+	</insert>
+
+	<!-- Query modified to fetch all accounting lines corresponding to fiscal year (FY_DC) as a part of enhancement 6536 release 3.8.0 -->
+	<!-- Query modified to insert BFY in Payment allocation for enhancement 6515 release 3.6.0 -->
+	<!-- Query modified to update the interim business logic as a part of release 3.1.0 -->
+	<!-- Query changed as a part of release 3.2.0 for defect 6419  -->	
+	<!-- Made changes in this method for Enhancement 6360 and Release 3.3.0 -->
+	<insert id="insertIntoPaymentAllocation" parameterType="map">
+	INSERT  INTO PAYMENT_ALLOCATION
+	(
+	PAYMENT_ALLOCATION_ID,
+	PAYMENT_ID,
+	COMMODITY_LINE,
+	ACCOUNTING_LINE,
+	UNIT_OF_APPROPRIATION,
+	BUDGET_CODE,
+	OBJECT_CODE,
+	SUB_OBJECT_CODE,
+	REPORTING_CATEGORY,
+	LINE_AMOUNT,
+	ACTUALS,
+	REMAINING_AMOUNT,
+	PAYMENT_AMOUNT,
+	CREATED_DATE,
+	CREATED_BY_USERID,
+	MODIFIED_DATE,
+	MODIFIED_BY_USERID,
+	FUND_CD,
+	RFED_DOC_CD,
+	RFED_COMM_LN_NO,
+	RFED_DOC_DEPT_CD,
+	RFED_DOC_ID,
+	RFED_VEND_LN_NO,
+	RFED_ACTG_LN_NO,
+	CL_NUMBER,
+	CL_CODE,
+	Cl_Description,
+	LN_TYPE,
+    LN_DESCRIPTION,
+    BFY
+	)
+	WITH Ref_A AS (SELECT      A.*, MAX(Doc_Vers_No) Over (Partition BY (Doc_Cd ||Doc_Dept_Cd 	||Doc_Id)) Max_Doc_Vers_No
+				     FROM      Ref_Contracts_A A
+				    Where      doc_id =  ( select SUBSTR(CT_NUMBER,7,length(CT_NUMBER) ) from Payment where payment_id = #{paymentId} )
+				   ),
+	Curr_Ref_A AS  (SELECT     Ref_A.*, doc_cd ||doc_dept_cd ||doc_id AS ct_number 
+					  FROM     Ref_A
+	                 WHERE     Doc_Vers_No = Max_Doc_Vers_No
+	               ),
+	Ref_C AS      ( SELECT   C.*,	MAX(Doc_Vers_No) Over (Partition BY (Doc_Cd ||Doc_Dept_Cd 	||Doc_Id)) Max_Doc_Vers_No
+					FROM       Ref_Contracts_C C
+					 Where      doc_id =  ( select SUBSTR(CT_NUMBER,7,length(CT_NUMBER) ) from Payment where payment_id = #{paymentId} )
+	               ),
+	Curr_Ref_C AS  	 (SELECT   Ref_C.*, Doc_Cd ||Doc_Dept_Cd 	||Doc_Id AS Ct_Number
+	                    FROM   Ref_C
+	                   WHERE   Doc_Vers_No = Max_Doc_Vers_No
+	                  )
+	SELECT Seq_Payment_Allocation_Id.Nextval AS Payment_Allocation_Id,
+			pay.payment_id,
+			Curr_Ref_A.DOC_COMM_LN_NO AS COMMODITY_LINE ,
+			Curr_Ref_A.DOC_ACTG_LN_NO AS ACCOUNTING_LINE ,
+			Curr_Ref_A.APPR_CD AS UNIT_OF_APPROPRIATION ,
+			Curr_Ref_A.FUNC_CD AS BUDGET_CODE ,
+			Curr_Ref_A.OBJ_CD AS OBJECT_CODE ,
+			Curr_Ref_A.SOBJ_CD AS SUB_OBJECT_CODE ,
+			Curr_Ref_A.ACTV_CD AS REPORTING_CATEGORY ,
+			Curr_Ref_A.LN_OPEN_AM AS LINE_AMOUNT ,
+			Curr_Ref_A.LN_OPEN_AM AS ACTUALS ,
+			Curr_Ref_A.LN_OPEN_AM AS REMAINING_AMOUNT ,
+			0 AS PAYMENT_AMOUNT ,
+			SYSDATE AS CREATED_DATE ,
+			#{createdByUserId}, --/* CREATED_BY_USERID */,
+			SYSDATE, --/* MODIFIED_DATE */,
+			#{modifiedByUserId}, --/* MODIFIED_BY_USERID */,
+			Curr_Ref_A.FUND_CD AS FUND_CD ,
+			Curr_Ref_A.DOC_CD AS RFED_DOC_CD ,
+			Curr_Ref_A.RFED_COMM_LN_NO AS RFED_COMM_LN_NO ,
+			Curr_Ref_A.DOC_DEPT_CD AS RFED_DOC_DEPT_CD ,
+			Curr_Ref_A.DOC_ID AS RFED_DOC_ID ,
+			Curr_Ref_A.RFED_VEND_LN_NO AS RFED_VEND_LN_NO ,
+			NVL(Curr_Ref_A.RFED_ACTG_LN_NO,0) AS RFED_ACTG_LN_NO,
+			Curr_Ref_C.DOC_COMM_LN_NO AS CL_NUMBER ,
+			Curr_Ref_C. COMM_CD AS CL_CODE,
+			Curr_Ref_C.CL_DSCR AS CL_DESCRIPTION,
+			Curr_Ref_C.LN_TYP AS LN_TYPE,
+		      (
+		      CASE
+			      WHEN Curr_Ref_C.LN_TYP = 1 THEN 'Item'
+			      WHEN Curr_Ref_C.LN_TYP = 2 THEN 'Service'
+			      WHEN Curr_Ref_C.LN_TYP = 3 THEN 'Discount'
+			      ELSE ''
+		      END
+		      ) as LN_DESCRIPTION,
+		    Curr_Ref_A.BFY AS BFY
+	FROM Payment Pay, Curr_Ref_A, Curr_Ref_C, Budget
+	WHERE Pay.Payment_Id = #{paymentId}
+	AND Pay.Ct_Number =Curr_Ref_A.Ct_Number
+	AND Pay.Ct_Number =Curr_Ref_C.Ct_Number
+	AND Curr_Ref_A.Doc_Id = Curr_Ref_C.Doc_Id
+	AND Curr_Ref_A.doc_comm_ln_no = Curr_Ref_C.doc_comm_ln_no
+	AND pay.process_flag = 0
+	AND Pay.Status_Id IN (63,64)
+	AND Pay.Budget_Id =Budget.Budget_Id
+	AND Curr_Ref_A.FY_DC in (select FISCAL_YEAR_ID from payment where PAYMENT_ID = 	#{paymentId})
+	AND Curr_Ref_A.LN_OPEN_AM &gt; 0
+						
+	</insert>
+
+	<!-- Query modified to fetch all accounting lines corresponding to fiscal year (FY_DC) as a part of enhancement 6536 release 3.8.0 -->
+	<insert id="insertIntoPaymentAllocationForBFYgreaterThanFY" parameterType="map">
+	INSERT INTO PAYMENT_ALLOCATION
+	(
+		PAYMENT_ALLOCATION_ID,
+		PAYMENT_ID,
+		COMMODITY_LINE,
+		ACCOUNTING_LINE,
+		UNIT_OF_APPROPRIATION,
+		BUDGET_CODE,
+		OBJECT_CODE,
+		SUB_OBJECT_CODE,
+		REPORTING_CATEGORY,
+		LINE_AMOUNT,
+		ACTUALS,
+		REMAINING_AMOUNT,
+		PAYMENT_AMOUNT,
+		CREATED_DATE,
+		CREATED_BY_USERID,
+		MODIFIED_DATE,
+		MODIFIED_BY_USERID,
+		FUND_CD,
+		RFED_DOC_CD,
+		RFED_COMM_LN_NO,
+		RFED_DOC_DEPT_CD,
+		RFED_DOC_ID,
+		RFED_VEND_LN_NO,
+		RFED_ACTG_LN_NO,
+		CL_NUMBER,
+		CL_CODE,
+		Cl_Description,
+		LN_TYPE,
+	    LN_DESCRIPTION,
+	    BFY
+	)
+	WITH Ref_A AS (SELECT      A.*, MAX(Doc_Vers_No) Over (Partition BY (Doc_Cd ||Doc_Dept_Cd 	||Doc_Id)) Max_Doc_Vers_No
+				     FROM      Ref_Contracts_A A
+				    Where      doc_id =  ( select SUBSTR(CT_NUMBER,7,length(CT_NUMBER) ) from Payment where payment_id = #{paymentId} )
+				   ),
+	Curr_Ref_A AS  (SELECT     Ref_A.*, doc_cd ||doc_dept_cd ||doc_id AS ct_number 
+					  FROM     Ref_A
+	                 WHERE     Doc_Vers_No = Max_Doc_Vers_No
+	               ),
+	Ref_C AS      ( SELECT   C.*,	MAX(Doc_Vers_No) Over (Partition BY (Doc_Cd ||Doc_Dept_Cd 	||Doc_Id)) Max_Doc_Vers_No
+					FROM       Ref_Contracts_C C
+					 Where      doc_id =  ( select SUBSTR(CT_NUMBER,7,length(CT_NUMBER) ) from Payment where payment_id = #{paymentId} )
+	               ),
+	Curr_Ref_C AS  	 (SELECT   Ref_C.*, Doc_Cd ||Doc_Dept_Cd 	||Doc_Id AS Ct_Number
+	                    FROM   Ref_C
+	                   WHERE   Doc_Vers_No = Max_Doc_Vers_No
+	                  )
+	SELECT Seq_Payment_Allocation_Id.Nextval AS Payment_Allocation_Id,
+			pay.payment_id,
+			Curr_Ref_A.DOC_COMM_LN_NO AS COMMODITY_LINE ,
+			Curr_Ref_A.DOC_ACTG_LN_NO AS ACCOUNTING_LINE ,
+			Curr_Ref_A.APPR_CD AS UNIT_OF_APPROPRIATION ,
+			Curr_Ref_A.FUNC_CD AS BUDGET_CODE ,
+			Curr_Ref_A.OBJ_CD AS OBJECT_CODE ,
+			Curr_Ref_A.SOBJ_CD AS SUB_OBJECT_CODE ,
+			Curr_Ref_A.ACTV_CD AS REPORTING_CATEGORY ,
+			Curr_Ref_A.LN_OPEN_AM AS LINE_AMOUNT ,
+			Curr_Ref_A.LN_OPEN_AM AS ACTUALS ,
+			Curr_Ref_A.LN_OPEN_AM AS REMAINING_AMOUNT ,
+			0 AS PAYMENT_AMOUNT ,
+			SYSDATE AS CREATED_DATE ,
+			#{createdByUserId}, --/* CREATED_BY_USERID */,
+			SYSDATE, --/* MODIFIED_DATE */,
+			#{modifiedByUserId}, --/* MODIFIED_BY_USERID */,
+			Curr_Ref_A.FUND_CD AS FUND_CD ,
+			Curr_Ref_A.DOC_CD AS RFED_DOC_CD ,
+			Curr_Ref_A.RFED_COMM_LN_NO AS RFED_COMM_LN_NO ,
+			Curr_Ref_A.DOC_DEPT_CD AS RFED_DOC_DEPT_CD ,
+			Curr_Ref_A.DOC_ID AS RFED_DOC_ID ,
+			Curr_Ref_A.RFED_VEND_LN_NO AS RFED_VEND_LN_NO ,
+			NVL(Curr_Ref_A.RFED_ACTG_LN_NO,0) AS RFED_ACTG_LN_NO,
+			Curr_Ref_C.DOC_COMM_LN_NO AS CL_NUMBER ,
+			Curr_Ref_C. COMM_CD AS CL_CODE,
+			Curr_Ref_C.CL_DSCR AS CL_DESCRIPTION,
+			Curr_Ref_C.LN_TYP AS LN_TYPE,
+		      (
+		      CASE
+			      WHEN Curr_Ref_C.LN_TYP = 1 THEN 'Item'
+			      WHEN Curr_Ref_C.LN_TYP = 2 THEN 'Service'
+			      WHEN Curr_Ref_C.LN_TYP = 3 THEN 'Discount'
+			      ELSE ''
+		      END
+		      ) as LN_DESCRIPTION,
+		    Curr_Ref_A.BFY AS BFY
+	FROM Payment Pay, Curr_Ref_A,	Curr_Ref_C, Budget
+	WHERE Pay.Payment_Id = #{paymentId}
+	AND Pay.Ct_Number =Curr_Ref_A.Ct_Number
+	AND Pay.Ct_Number =Curr_Ref_C.Ct_Number
+	AND Curr_Ref_A.Doc_Id = Curr_Ref_C.Doc_Id
+	AND Curr_Ref_A.doc_comm_ln_no = Curr_Ref_C.doc_comm_ln_no
+	AND pay.process_flag = 0
+	AND Pay.Status_Id IN (63,64)
+	AND Pay.Budget_Id =Budget.Budget_Id
+	AND Curr_Ref_A.BFY in (select BUDGET_FISCAL_YEAR_ID from payment where PAYMENT_ID = #{paymentId})
+	AND Curr_Ref_A.LN_OPEN_AM &gt; 0
+					
+	</insert>
+
+	<!-- Query modified to fetch all accounting lines corresponding to fiscal year (FY_DC) as a part of enhancement 6536 release 3.8.0 -->
+	<insert id="insertIntoPAOutsideInterimForBFYgreaterThanFY" parameterType="map">
+	INSERT INTO PAYMENT_ALLOCATION
+	(
+			PAYMENT_ALLOCATION_ID,
+			PAYMENT_ID,
+			COMMODITY_LINE,
+			ACCOUNTING_LINE,
+			UNIT_OF_APPROPRIATION,
+			BUDGET_CODE,
+			OBJECT_CODE,
+			SUB_OBJECT_CODE,
+			REPORTING_CATEGORY,
+			LINE_AMOUNT,
+			ACTUALS,
+			REMAINING_AMOUNT,
+			PAYMENT_AMOUNT,
+			CREATED_DATE,
+			CREATED_BY_USERID,
+			MODIFIED_DATE,
+			MODIFIED_BY_USERID,
+			FUND_CD,
+			RFED_DOC_CD,
+			RFED_COMM_LN_NO,
+			RFED_DOC_DEPT_CD,
+			RFED_DOC_ID,
+			RFED_VEND_LN_NO,
+			RFED_ACTG_LN_NO,
+			CL_NUMBER,
+			CL_CODE,
+			Cl_Description,
+			LN_TYPE,
+		    LN_DESCRIPTION,
+		    BFY
+	)
+	WITH Ref_A AS (SELECT      A.*, MAX(Doc_Vers_No) Over (Partition BY (Doc_Cd 	||Doc_Dept_Cd 	||Doc_Id)) Max_Doc_Vers_No
+				     FROM      Ref_Contracts_A A
+				     Where      doc_id =  ( select SUBSTR(CT_NUMBER,7,length(CT_NUMBER) ) from Payment where payment_id = #{paymentId} )
+				   ),
+	Curr_Ref_A AS  (SELECT     Ref_A.*, doc_cd ||doc_dept_cd ||doc_id AS ct_number 
+					  FROM     Ref_A
+	                 WHERE     Doc_Vers_No = Max_Doc_Vers_No
+	               ),
+	Ref_C AS      ( SELECT   C.*,	MAX(Doc_Vers_No) Over (Partition BY (Doc_Cd ||Doc_Dept_Cd 	||Doc_Id)) Max_Doc_Vers_No
+					FROM       Ref_Contracts_C C
+					Where      doc_id =  ( select SUBSTR(CT_NUMBER,7,length(CT_NUMBER) ) from Payment where payment_id = #{paymentId} )
+	               ),
+	Curr_Ref_C AS  	 (SELECT   Ref_C.*, Doc_Cd ||Doc_Dept_Cd 	||Doc_Id AS Ct_Number
+	                    FROM   Ref_C
+	                   WHERE   Doc_Vers_No = Max_Doc_Vers_No
+	                 )
+	SELECT Seq_Payment_Allocation_Id.Nextval AS Payment_Allocation_Id,
+			pay.payment_id,
+			Curr_Ref_A.DOC_COMM_LN_NO AS COMMODITY_LINE ,
+			Curr_Ref_A.DOC_ACTG_LN_NO AS ACCOUNTING_LINE ,
+			Curr_Ref_A.APPR_CD AS UNIT_OF_APPROPRIATION ,
+			Curr_Ref_A.FUNC_CD AS BUDGET_CODE ,
+			Curr_Ref_A.OBJ_CD AS OBJECT_CODE ,
+			Curr_Ref_A.SOBJ_CD AS SUB_OBJECT_CODE ,
+			Curr_Ref_A.ACTV_CD AS REPORTING_CATEGORY ,
+			Curr_Ref_A.LN_OPEN_AM AS LINE_AMOUNT ,
+			Curr_Ref_A.LN_OPEN_AM AS ACTUALS ,
+			Curr_Ref_A.LN_OPEN_AM AS REMAINING_AMOUNT ,
+			0 AS PAYMENT_AMOUNT ,
+			SYSDATE AS CREATED_DATE ,
+			#{createdByUserId}, --/* CREATED_BY_USERID */,
+			SYSDATE, --/* MODIFIED_DATE */,
+			#{modifiedByUserId}, --/* MODIFIED_BY_USERID */,
+			Curr_Ref_A.FUND_CD AS FUND_CD ,
+			Curr_Ref_A.DOC_CD AS RFED_DOC_CD ,
+			Curr_Ref_A.RFED_COMM_LN_NO AS RFED_COMM_LN_NO ,
+			Curr_Ref_A.DOC_DEPT_CD AS RFED_DOC_DEPT_CD ,
+			Curr_Ref_A.DOC_ID AS RFED_DOC_ID ,
+			Curr_Ref_A.RFED_VEND_LN_NO AS RFED_VEND_LN_NO ,
+			NVL(Curr_Ref_A.RFED_ACTG_LN_NO,0) AS RFED_ACTG_LN_NO,
+			Curr_Ref_C.DOC_COMM_LN_NO AS CL_NUMBER ,
+			Curr_Ref_C. COMM_CD AS CL_CODE,
+			Curr_Ref_C.CL_DSCR AS CL_DESCRIPTION,
+			Curr_Ref_C.LN_TYP AS LN_TYPE,
+		      (
+		      CASE
+		      WHEN Curr_Ref_C.LN_TYP = 1 THEN 'Item'
+		      WHEN Curr_Ref_C.LN_TYP = 2 THEN 'Service'
+		      WHEN Curr_Ref_C.LN_TYP = 3 THEN 'Discount'
+		      ELSE ''
+		      END
+		      ) as LN_DESCRIPTION,
+		    Curr_Ref_A.BFY AS BFY
+	FROM Payment Pay, Curr_Ref_A, Curr_Ref_C, Budget
+	WHERE Pay.Payment_Id = #{paymentId}
+	AND Pay.Ct_Number =Curr_Ref_A.Ct_Number
+	AND Pay.Ct_Number =Curr_Ref_C.Ct_Number
+	AND Curr_Ref_A.Doc_Id = Curr_Ref_C.Doc_Id
+	AND Curr_Ref_A.doc_comm_ln_no = Curr_Ref_C.doc_comm_ln_no
+	AND pay.process_flag = 0
+	AND Pay.Status_Id IN (63,64)
+	AND Pay.Budget_Id =Budget.Budget_Id
+	AND Curr_Ref_A.FY_DC in (select FISCAL_YEAR_ID-1 as FISCAL_YEAR_ID from payment where PAYMENT_ID = #{paymentId})
+	AND Curr_Ref_A.LN_OPEN_AM &gt; 0
+					
+	</insert>
+	
+<!-- Query added as a part of 3.8.0 -->	
+	<insert id="insertIntoPAOutsideInterimForBFYgreaterThanFY1" parameterType="map">
+	INSERT 	INTO PAYMENT_ALLOCATION
+	(
+	PAYMENT_ALLOCATION_ID,
+	PAYMENT_ID,
+	COMMODITY_LINE,
+	ACCOUNTING_LINE,
+	UNIT_OF_APPROPRIATION,
+	BUDGET_CODE,
+	OBJECT_CODE,
+	SUB_OBJECT_CODE,
+	REPORTING_CATEGORY,
+	LINE_AMOUNT,
+	ACTUALS,
+	REMAINING_AMOUNT,
+	PAYMENT_AMOUNT,
+	CREATED_DATE,
+	CREATED_BY_USERID,
+	MODIFIED_DATE,
+	MODIFIED_BY_USERID,
+	FUND_CD,
+	RFED_DOC_CD,
+	RFED_COMM_LN_NO,
+	RFED_DOC_DEPT_CD,
+	RFED_DOC_ID,
+	RFED_VEND_LN_NO,
+	RFED_ACTG_LN_NO,
+	CL_NUMBER,
+	CL_CODE,
+	Cl_Description,
+	LN_TYPE,
+    LN_DESCRIPTION,
+    BFY
+	)
+	WITH Ref_A AS (SELECT      A.*, MAX(Doc_Vers_No) Over (Partition BY (Doc_Cd 	||Doc_Dept_Cd 	||Doc_Id)) Max_Doc_Vers_No
+				     FROM      Ref_Contracts_A A
+				     Where      doc_id =  ( select SUBSTR(CT_NUMBER,7,length(CT_NUMBER) ) from Payment where payment_id = #{paymentId} )
+				   ),
+	Curr_Ref_A AS  (SELECT     Ref_A.*, doc_cd ||doc_dept_cd ||doc_id AS ct_number 
+					  FROM     Ref_A
+	                 WHERE     Doc_Vers_No = Max_Doc_Vers_No
+	               ),
+	Ref_C AS      ( SELECT   C.*,	MAX(Doc_Vers_No) Over (Partition BY (Doc_Cd ||Doc_Dept_Cd 	||Doc_Id)) Max_Doc_Vers_No
+					FROM       Ref_Contracts_C C
+					Where      doc_id =  ( select SUBSTR(CT_NUMBER,7,length(CT_NUMBER) ) from Payment where payment_id = #{paymentId} )
+	               ),
+	Curr_Ref_C AS  	 (SELECT   Ref_C.*, Doc_Cd ||Doc_Dept_Cd 	||Doc_Id AS Ct_Number
+	                    FROM   Ref_C
+	                   WHERE   Doc_Vers_No = Max_Doc_Vers_No
+	                  )
+	SELECT Seq_Payment_Allocation_Id.Nextval AS Payment_Allocation_Id,
+	pay.payment_id,
+	Curr_Ref_A.DOC_COMM_LN_NO AS COMMODITY_LINE ,
+	Curr_Ref_A.DOC_ACTG_LN_NO AS ACCOUNTING_LINE ,
+	Curr_Ref_A.APPR_CD AS UNIT_OF_APPROPRIATION ,
+	Curr_Ref_A.FUNC_CD AS BUDGET_CODE ,
+	Curr_Ref_A.OBJ_CD AS OBJECT_CODE ,
+	Curr_Ref_A.SOBJ_CD AS SUB_OBJECT_CODE ,
+	Curr_Ref_A.ACTV_CD AS REPORTING_CATEGORY ,
+	Curr_Ref_A.LN_OPEN_AM AS LINE_AMOUNT ,
+	Curr_Ref_A.LN_OPEN_AM AS ACTUALS ,
+	Curr_Ref_A.LN_OPEN_AM AS REMAINING_AMOUNT ,
+	0 AS PAYMENT_AMOUNT ,
+	SYSDATE AS CREATED_DATE ,
+	#{createdByUserId}, --/* CREATED_BY_USERID */,
+	SYSDATE, --/* MODIFIED_DATE */,
+	#{modifiedByUserId}, --/* MODIFIED_BY_USERID */,
+	Curr_Ref_A.FUND_CD AS FUND_CD ,
+	Curr_Ref_A.DOC_CD AS RFED_DOC_CD ,
+	Curr_Ref_A.RFED_COMM_LN_NO AS RFED_COMM_LN_NO ,
+	Curr_Ref_A.DOC_DEPT_CD AS RFED_DOC_DEPT_CD ,
+	Curr_Ref_A.DOC_ID AS RFED_DOC_ID ,
+	Curr_Ref_A.RFED_VEND_LN_NO AS RFED_VEND_LN_NO ,
+	NVL(Curr_Ref_A.RFED_ACTG_LN_NO,0) AS RFED_ACTG_LN_NO,
+	Curr_Ref_C.DOC_COMM_LN_NO AS CL_NUMBER ,
+	Curr_Ref_C. COMM_CD AS CL_CODE,
+	Curr_Ref_C.CL_DSCR AS CL_DESCRIPTION,
+	Curr_Ref_C.LN_TYP AS LN_TYPE,
+      (
+      CASE
+	      WHEN Curr_Ref_C.LN_TYP = 1 THEN 'Item'
+	      WHEN Curr_Ref_C.LN_TYP = 2 THEN 'Service'
+	      WHEN Curr_Ref_C.LN_TYP = 3 THEN 'Discount'
+	      ELSE ''
+      END
+      ) as LN_DESCRIPTION,
+    Curr_Ref_A.BFY AS BFY
+	FROM Payment Pay,
+	Curr_Ref_A,
+	Curr_Ref_C,
+	Budget
+	WHERE Pay.Payment_Id = #{paymentId}
+	AND Pay.Ct_Number =Curr_Ref_A.Ct_Number
+	AND Pay.Ct_Number =Curr_Ref_C.Ct_Number
+	AND Curr_Ref_A.Doc_Id = Curr_Ref_C.Doc_Id
+	AND Curr_Ref_A.doc_comm_ln_no = Curr_Ref_C.doc_comm_ln_no
+	AND pay.process_flag = 0
+	AND Pay.Status_Id IN (63,64)
+	AND Pay.Budget_Id =Budget.Budget_Id
+	AND Curr_Ref_A.FY_DC in (select BUDGET_FISCAL_YEAR_ID from payment where PAYMENT_ID = #{paymentId})
+	AND Curr_Ref_A.LN_OPEN_AM &gt; 0
+					
+	</insert>	
+	
+	<update id="updateProcessFlagOnPayment" parameterType="map">
+		update
+		payment set PROCESS_FLAG = '1'
+		where payment_submitted_date &lt;
+		sysdate
+		and invoice_id = #{invoiceId}
+	</update>
+
+	<select id="fetchFisalYearId" parameterType="map" resultType="Integer">
+		SELECT FISCAL_YEAR_ID FROM BUDGET WHERE BUDGET_ID = #{budgetId}
+	</select>
+
+	<select id="fetchBudgetId" parameterType="map" resultType="string">
+		SELECT BUDGET_ID FROM BUDGET WHERE CONTRACT_ID = #{ContractID} AND
+		FISCAL_YEAR_ID = #{asFiscalYearId}
+	</select>
+
+	<select id="fetchInvoiceNumber" parameterType="map" resultType="string">
+		SELECT INVOICE_NUMBER FROM INVOICE WHERE INVOICE_ID =#{invoiceId}
+	</select>
+
+	<select id="fetchAdvanceNumber" parameterType="map" resultType="string">
+		SELECT BUDGET_ADVANCE_NUMBER FROM BUDGET_ADVANCE WHERE
+		BUDGET_ADVANCE_ID = #{budgetAdvanceId}
+	</select>
+
+	<select id="fetchAmountforInvoiceWF" parameterType="map"
+		resultType="double">
+		SELECT
+		sum(TOTAL_INVOICE_AMOUNT) -
+		sum(ASSIGNMENT_INVOICE_AMOUNT) -
+		sum(AMOUNT_RECOUPED) as AMOUNT
+		FROM
+		(
+		SELECT
+		SUM(inv_det.INVOICE_AMOUNT) as TOTAL_INVOICE_AMOUNT, 0 AS
+		ASSIGNMENT_INVOICE_AMOUNT, 0 AS AMOUNT_RECOUPED
+		FROM INVOICE_DETAILS
+		inv_det
+		inner join
+		INVOICE inv on inv.INVOICE_ID = inv_det.INVOICE_ID
+		where
+		inv_det.INVOICE_ID =#{invoiceId,jdbcType=VARCHAR} and
+		inv_det.entry_type_id not in ('14', '11')
+
+		union all
+
+		SELECT
+		0 as TOTAL_INVOICE_AMOUNT, SUM(inv_det.INVOICE_AMOUNT)
+		AS
+		ASSIGNMENT_INVOICE_AMOUNT, 0 AS AMOUNT_RECOUPED
+		FROM INVOICE_DETAILS
+		inv_det
+		inner join
+		INVOICE inv on inv.INVOICE_ID = inv_det.INVOICE_ID
+		where
+		inv_det.INVOICE_ID =#{invoiceId,jdbcType=VARCHAR} and
+		inv_det.entry_type_id = 14
+
+		union all
+
+		SELECT
+		0 as TOTAL_INVOICE_AMOUNT, 0 AS
+		ASSIGNMENT_INVOICE_AMOUNT,
+		sum(iad.amount_recouped) AS AMOUNT_RECOUPED
+		FROM INVOICE_ADVANCE IAD
+		inner join
+		INVOICE inv on inv.INVOICE_ID =
+		IAD.INVOICE_ID
+		where
+		iAD.INVOICE_ID =
+		#{invoiceId,jdbcType=VARCHAR})
+	</select>
+
+	<select id="fetchAmountforAdvanceWF" parameterType="map"
+		resultType="double">
+		SELECT NVL(BA.AMOUNT,0) - NVL(sum(AST.ASSIGNMENT_AMOUNT),0) as AMOUNT 
+		FROM budget_advance BA 
+        lEFT JOIN ADVANCE_ASSIGNMENT AST ON BA.budget_advance_id =AST.budget_advance_id 
+        WHERE 
+        BA.budget_advance_id =#{budgetAdvanceId,jdbcType=VARCHAR}
+        GROUP BY BA.AMOUNT, AST.budget_advance_id 
+	</select>
+	
+	<select id="fetchRequiredProposalsDetails"
+		parameterType="map" resultMap="mapProposalDetails">
+		SELECT P.PROPOSAL_ID, P.PROPOSAL_TITLE, O.ORGANIZATION_ID,
+		O.ORGANIZATION_LEGAL_NAME, cc.competition_pool_title, eg.evaluation_group_title
+		FROM 
+    	PROPOSAL_CONFIG P, ORGANIZATION O, EVALUATION_POOL_MAPPING E, 
+        COMPETITION_POOL cc, EVALUATION_GROUP eg
+		WHERE
+		P.ORGANIZATION_ID = O.ORGANIZATION_ID
+	    and E.COMPETITION_POOL_ID = P.COMPETITION_POOL_ID
+	    and E.EVALUATION_GROUP_ID = P.EVALUATION_GROUP_ID
+        and cc.COMPETITION_POOL_ID = p.COMPETITION_POOL_ID
+        and eg.EVALUATION_GROUP_ID = P.EVALUATION_GROUP_ID
+	    and E.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+        and P.PROCUREMENT_ID = #{asProcurementId} and P.PROPOSAL_STATUS_ID = 20
+	</select>
+	
+	<select id="fetchContractInfo" parameterType="String"
+		resultType="hashmap">
+			SELECT  MAX(con1.CONTRACT_TYPE_ID)AS CONTRACT_TYPE_ID ,
+	        MAX(con2.CONTRACT_ID) AS CONTRACT_ID,
+	        MAX(con1.CONTRACT_SOURCE_ID) AS CONTRACT_SOURCE_ID
+			FROM contract con1,
+			contract con2
+			WHERE con1.CONTRACT_ID = #{asContractId}
+			AND con2.CONTRACT_ID = con1.PARENT_CONTRACT_ID
+	</select>
+
+
+	<select id="fetchAgencyCityProviderEmail" parameterType="String" resultType="String">
+		select email from (select email from staff_details where staff_id=#{userId}
+		union all
+		select email_id from city_user_details where user_id=#{userId})
+	</select>
+		
+	<!--Start Added in R5 -->
+	<select id="fetchAgencyCityProviderName" resultMap="invocieMap">
+	select first_name || ' '|| last_name  as name,staff_id from staff_details
+		union all
+		select first_name || ' '|| last_name  as name,user_id  from city_user_details 
+	</select>
+	
+	<resultMap id="invocieMap" type="com.nyc.hhs.model.AgencyTaskBean">
+		<result property="serviceStartDate" column="invoice_start_date" />
+		<result property="serviceEndDate" column="invoice_end_date" />
+		<result property="invoiceNumber" column="invoice_id" />
+		<result property="submittedBy" column="name" />
+		<result property="submittedById" column="staff_id" />
+	</resultMap>
+	
+	<!-- Start Emergency release 4.0.1  8354 -->
+	<select id="fetchServceStartEndDate"  resultMap="invocieMap">
+    select to_Char(invoice_start_date,'mm/dd/yyyy') invoice_start_date, to_Char(invoice_end_date,'mm/dd/yyyy') invoice_end_date,invoice_id from invoice
+	</select>
+	<!-- End  Emergency release 4.0.1  8354 -->
+	<!--End Added in R5 -->
+	
+	<select id="fetchBaseBudIdFromModBudId" parameterType="String" resultType="String">
+		select parent_id from budget where budget_id = #{asModBudId,jdbcType=VARCHAR} 
+	</select>
+	
+	<select id="fetchBaseContractId" parameterType="String" resultType="String">
+		select contract_id from budget where budget_id = #{asBudgetId,jdbcType=VARCHAR} 
+	</select>
+	
+	<select id="getSelPropCountForEvalPoolMappingId" parameterType="map"
+		resultType="Integer">
+		Select count(1) as found_proposals from proposal_config pc, evaluation_pool_mapping epm
+		where epm.evaluation_group_id = pc.evaluation_group_id
+   		and epm.competition_pool_id = pc.competition_pool_id
+    	and epm.evaluation_pool_mapping_id = #{evaluationPoolMappingId}
+		and pc.proc_review_status_id = #{PROPOSAL_SELECTED}
+	</select>
+	
+	<select id="fetchCompetitionPoolTitle" parameterType="string" resultType="string">
+		select cp.competition_pool_title from contract con, evaluation_pool_mapping epm, competition_pool cp
+		where con.evaluation_pool_mapping_id = epm.evaluation_pool_mapping_id
+		and epm.competition_pool_id = cp.competition_pool_id
+		and con.contract_id = #{contractId}
+	</select>
+
+    <!-- Query added as a part of release 3.4.0 defect 6453 -->	
+	<select id="fetchProcurementStatus" parameterType="hashmap" resultType="Integer">
+		select status_id as procurementStatus from procurement where procurement_id = #{procurementId}
+	</select>
+	
+    <!-- Query added as a part of enhancement 6536 release 3.8.0 -->	
+	<select id="fetchBudgetFiscalYearInformation" parameterType="string" resultType="map">
+		select budget_fiscal_year_id, fiscal_year_id from payment where payment_id = #{paymentId}
+	</select>
+	
+	<!-- Queries added for Payment Batch - Updating Accounting Line - starts-->	
+	<select id="selectMaxInterimPerionEndDate"  resultType="Date">
+		select max(INTERIM_PERIOD_END_DATE) as INTERIM_PERIOD_END_DATE from interim_period_end_date
+	</select>
+		
+	<select id="fetchPendingApprovalPayments" resultType="string">
+		select distinct(pa.PAYMENT_ID) from PAYMENT_ALLOCATION pa,PAYMENT pymt where
+		pa.PAYMENT_ID = pymt.PAYMENT_ID
+		and
+		pymt.status_id = '63' and pymt.delete_flag = '0'
+	</select>
+	
+	<delete id="deletePendingApprovalPayments">
+		delete from
+		PAYMENT_ALLOCATION where PAYMENT_ID in ((select distinct(pa.PAYMENT_ID) from PAYMENT_ALLOCATION pa,PAYMENT pymt where
+		pa.PAYMENT_ID = pymt.PAYMENT_ID
+		and
+		pymt.status_id = '63' and pymt.delete_flag = '0'))
+	</delete>
+		
+	<!-- Queries added for Payment Batch - Updating Accounting Line - end-->	
+
+	<update id="updatePendingApprovalPayments" parameterType="java.lang.Integer">
+	update PAYMENT set FISCAL_YEAR_ID = #{aiCurrYear}, MODIFIED_DATE = systimestamp, MODIFIED_BY_USERID = 'system' where PAYMENT_ID in ((select distinct(pa.PAYMENT_ID) from PAYMENT_ALLOCATION pa,PAYMENT pymt where
+	pa.PAYMENT_ID = pymt.PAYMENT_ID
+	and
+	pymt.status_id = '63' and pymt.delete_flag = '0'))
+	</update>
+	
+<!-- Query added as a part of release 3.8.1 enhancement 6536 -->	
+	<insert id="insertIntoPAOutsideInterimForFYgreaterThanBFY" parameterType="map">
+	INSERT INTO PAYMENT_ALLOCATION
+	(
+	PAYMENT_ALLOCATION_ID,
+	PAYMENT_ID,
+	COMMODITY_LINE,
+	ACCOUNTING_LINE,
+	UNIT_OF_APPROPRIATION,
+	BUDGET_CODE,
+	OBJECT_CODE,
+	SUB_OBJECT_CODE,
+	REPORTING_CATEGORY,
+	LINE_AMOUNT,
+	ACTUALS,
+	REMAINING_AMOUNT,
+	PAYMENT_AMOUNT,
+	CREATED_DATE,
+	CREATED_BY_USERID,
+	MODIFIED_DATE,
+	MODIFIED_BY_USERID,
+	FUND_CD,
+	RFED_DOC_CD,
+	RFED_COMM_LN_NO,
+	RFED_DOC_DEPT_CD,
+	RFED_DOC_ID,
+	RFED_VEND_LN_NO,
+	RFED_ACTG_LN_NO,
+	CL_NUMBER,
+	CL_CODE,
+	Cl_Description,
+	LN_TYPE,
+    LN_DESCRIPTION,
+    BFY
+	)
+	WITH Ref_A AS (SELECT      A.*, MAX(Doc_Vers_No) Over (Partition BY (Doc_Cd ||Doc_Dept_Cd 	||Doc_Id)) Max_Doc_Vers_No
+				     FROM      Ref_Contracts_A A
+				    Where      doc_id =  ( select SUBSTR(CT_NUMBER,7,length(CT_NUMBER) ) from Payment where payment_id = #{paymentId} )
+				   ),
+	Curr_Ref_A AS  (SELECT     Ref_A.*, doc_cd ||doc_dept_cd ||doc_id AS ct_number 
+					  FROM     Ref_A
+	                 WHERE     Doc_Vers_No = Max_Doc_Vers_No
+	               ),
+	Ref_C AS      ( SELECT   C.*,	MAX(Doc_Vers_No) Over (Partition BY (Doc_Cd ||Doc_Dept_Cd 	||Doc_Id)) Max_Doc_Vers_No
+					FROM       Ref_Contracts_C C
+					 Where      doc_id =  ( select SUBSTR(CT_NUMBER,7,length(CT_NUMBER) ) from Payment where payment_id = #{paymentId} )
+	               ),
+	Curr_Ref_C AS  	 (SELECT   Ref_C.*, Doc_Cd ||Doc_Dept_Cd 	||Doc_Id AS Ct_Number
+	                    FROM   Ref_C
+	                   WHERE   Doc_Vers_No = Max_Doc_Vers_No
+	                  )
+	SELECT Seq_Payment_Allocation_Id.Nextval AS Payment_Allocation_Id,
+	pay.payment_id,
+	Curr_Ref_A.DOC_COMM_LN_NO AS COMMODITY_LINE ,
+	Curr_Ref_A.DOC_ACTG_LN_NO AS ACCOUNTING_LINE ,
+	Curr_Ref_A.APPR_CD AS UNIT_OF_APPROPRIATION ,
+	Curr_Ref_A.FUNC_CD AS BUDGET_CODE ,
+	Curr_Ref_A.OBJ_CD AS OBJECT_CODE ,
+	Curr_Ref_A.SOBJ_CD AS SUB_OBJECT_CODE ,
+	Curr_Ref_A.ACTV_CD AS REPORTING_CATEGORY ,
+	Curr_Ref_A.LN_OPEN_AM AS LINE_AMOUNT ,
+	Curr_Ref_A.LN_OPEN_AM AS ACTUALS ,
+	Curr_Ref_A.LN_OPEN_AM AS REMAINING_AMOUNT ,
+	0 AS PAYMENT_AMOUNT ,
+	SYSDATE AS CREATED_DATE ,
+	#{createdByUserId}, --/* CREATED_BY_USERID */,
+	SYSDATE, --/* MODIFIED_DATE */,
+	#{modifiedByUserId}, --/* MODIFIED_BY_USERID */,
+	Curr_Ref_A.FUND_CD AS FUND_CD ,
+	Curr_Ref_A.DOC_CD AS RFED_DOC_CD ,
+	Curr_Ref_A.RFED_COMM_LN_NO AS RFED_COMM_LN_NO ,
+	Curr_Ref_A.DOC_DEPT_CD AS RFED_DOC_DEPT_CD ,
+	Curr_Ref_A.DOC_ID AS RFED_DOC_ID ,
+	Curr_Ref_A.RFED_VEND_LN_NO AS RFED_VEND_LN_NO ,
+	NVL(Curr_Ref_A.RFED_ACTG_LN_NO,0) AS RFED_ACTG_LN_NO,
+	Curr_Ref_C.DOC_COMM_LN_NO AS CL_NUMBER ,
+	Curr_Ref_C. COMM_CD AS CL_CODE,
+	Curr_Ref_C.CL_DSCR AS CL_DESCRIPTION,
+	Curr_Ref_C.LN_TYP AS LN_TYPE,
+      (
+      CASE
+      WHEN Curr_Ref_C.LN_TYP = 1 THEN 'Item'
+      WHEN Curr_Ref_C.LN_TYP = 2 THEN 'Service'
+      WHEN Curr_Ref_C.LN_TYP = 3 THEN 'Discount'
+      ELSE ''
+      END
+      ) as LN_DESCRIPTION,
+    Curr_Ref_A.BFY AS BFY
+	FROM Payment Pay,
+	Curr_Ref_A,
+	Curr_Ref_C,
+	Budget
+	WHERE Pay.Payment_Id = #{paymentId}
+	AND Pay.Ct_Number =Curr_Ref_A.Ct_Number
+	AND Pay.Ct_Number =Curr_Ref_C.Ct_Number
+	AND Curr_Ref_A.Doc_Id = Curr_Ref_C.Doc_Id
+	AND Curr_Ref_A.doc_comm_ln_no = Curr_Ref_C.doc_comm_ln_no
+	AND pay.process_flag = 0
+	AND Pay.Status_Id IN (63,64)
+	AND Pay.Budget_Id =Budget.Budget_Id
+	AND Curr_Ref_A.FY_DC in ((select FISCAL_YEAR_ID from payment where PAYMENT_ID = #{paymentId}),
+	                          (select FISCAL_YEAR_ID-1 as FISCAL_YEAR_ID from payment where PAYMENT_ID =#{paymentId})
+	                         )
+	AND Curr_Ref_A.LN_OPEN_AM &gt; 0
+						
+	</insert>
+	
+  <!-- Query added as a part of release 3.12.0 enhancement 6578  start-->
+  <!-- Start changes on 8th Feb (error in logs) -->
+	<select id="fetchPendingApprovalPaymentsAtLevel1" parameterType="map" resultType="string">
+		select PAYMENT_ID from Payment where
+		status_id = '63' and delete_flag = '0'
+		<if test="(Invoice != null   and Invoice.size > 0) or( budgetAdvanceId != null  and budgetAdvanceId.size > 0)">
+		AND (
+		</if>
+		<if test="Invoice != null   and Invoice.size > 0">
+			invoice_id IN
+			<foreach item="items" index="index" collection="Invoice"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach>
+		</if>
+		<if test="(Invoice != null   and Invoice.size > 0) and ( budgetAdvanceId != null  and budgetAdvanceId.size > 0)">
+		OR
+		</if>
+		<if test="budgetAdvanceId != null  and budgetAdvanceId.size > 0">
+			 budget_advance_id IN
+			<foreach item="items" index="index" collection="budgetAdvanceId"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach> 
+		</if>
+		<if test="(Invoice != null   and Invoice.size > 0) or ( budgetAdvanceId != null  and budgetAdvanceId.size > 0)">
+		)
+		</if>
+		AND PAYMENT_ID in (	select payment_id from payment where ct_number in (SELECT distinct(doc_cd|| doc_dept_cd||doc_id) as ct_number FROM ref_contracts_a where modified_date > SYSDATE-1)
+                           and status_id='63' and delete_flag='0' )
+	</select>
+	  <!-- End changes on 8th Feb (error in logs) -->
+	<select id="fetchUpdatedAccountingLines" resultType="string">
+		select payment_id from payment where ct_number in (SELECT distinct(doc_cd|| doc_dept_cd||doc_id) as ct_number FROM ref_contracts_a where modified_date > SYSDATE-1)
+                           and status_id='63' and delete_flag='0'
+	</select>
+	
+	<delete id="deletePendingApprovalPaymentsAtLevel1" parameterType="map" >
+		delete from
+		PAYMENT_ALLOCATION where PAYMENT_ID in 
+		<foreach item="items" index="index" collection="deletePendingApprovalPaymentsAtLevel1"
+				open="(" separator="," close=")">
+				#{items}
+    	</foreach> 
+	</delete>
+	
+	<update id="updateBatchInProgressFlag" parameterType="map">
+		UPDATE PAYMENT SET BATCH_IN_PROGRESS_FLAG = #{batchInProgressFlag} WHERE PAYMENT_ID in 
+		<foreach item="items" index="index" collection="deletePendingApprovalPaymentsAtLevel1"
+				open="(" separator="," close=")">
+				#{items}
+    	</foreach> 
+	</update>
+	
+	<update id="updateBatchInProgressFlagForActiveRecords" parameterType="string">
+		UPDATE PAYMENT SET BATCH_IN_PROGRESS_FLAG = '0' WHERE BATCH_IN_PROGRESS_FLAG='1'
+	</update>
+ 	<!-- Query added as a part of release 3.12.0 enhancement 6578  end-->	
+	<!-- Added in R5 -->
+		<select id="fetchNegotiationsContractsDetails" parameterType="map"
+		resultMap="mapContractDetails">
+		select
+		co.organization_id,
+		co.contract_id,
+		co.ext_ct_number,
+		co.contract_title,
+		co.contract_title,
+		org.organization_legal_name
+		from contract co,organization org
+		where 
+			co.evaluation_pool_mapping_id = #{evaluationPoolMappingId} and co.organization_id= #{providerId}
+			and co.contract_type_id=1
+		and co.organization_id=org.organization_id and rownum=1		
+	</select>
+	<!-- Added in R5 -->
+	
+ <!--Added in R7-To Fix Defect #7211(delete payment Accounting lines while doing 'Return for Revision' apart from level 1) -->
+ <select id="fetchPendingApprovalPaymentsNotAtLevel1" parameterType="map" resultType="string">
+		select PAYMENT_ID from Payment where
+		status_id = '63' and delete_flag = '0'
+		<if test="(invoiceId != null  and invoiceId !='') or (budgetAdvanceId != null and budgetAdvanceId !='')">
+		AND (
+		</if>
+		<if test="invoiceId != null and invoiceId !=''">
+			invoice_id =  #{invoiceId}
+		</if>
+		<if test="(invoiceId != null and invoiceId !='') and (budgetAdvanceId != null and budgetAdvanceId !='')">
+		OR
+		</if>
+		<if test="budgetAdvanceId != null and budgetAdvanceId !=''">
+			 budget_advance_id = #{budgetAdvanceId}
+		</if>
+		<if test="(invoiceId != null and  budgetAdvanceId !='') or (budgetAdvanceId != null and budgetAdvanceId !='')">
+		)
+		</if>
+		AND PAYMENT_ID in (	select payment_id from payment where ct_number in (SELECT distinct(doc_cd|| doc_dept_cd||doc_id) as ct_number FROM ref_contracts_a where modified_date > SYSDATE-1)
+                           and status_id='63' and delete_flag='0' )
+	</select>
+</mapper>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.ContactUsMapper">
+
+	<insert id="insertContactUsInformation" parameterType="com.nyc.hhs.model.ContactUsBean">
+		INSERT INTO contact_us_details(CONTACT_US_ID,TOPIC_ID,USER_COMMENTS,MODE_OF_CONTACT,SUBMITTED_DATE,SUBMITTED_BY,STATUS,ORGANIZATION_ID) 
+		VALUES 
+		(#{msSequenceID},#{msTopicID},#{msQuestion},#{msContactMedium},#{msCreationDate},#{msCreationUser},#{msStatus},#{msOrganisationId})
+	</insert>
+		
+	  <resultMap id="TopicSummary" type="com.nyc.hhs.model.ContactUsBean">
+		<result property="msTopic" column="TOPIC_NAME" />
+		<result property="msTopicID" column="TOPIC_ID" />		
+	</resultMap>
+		
+		 <resultMap id="ContactUsID" type="com.nyc.hhs.model.ContactUsBean">
+		<result property="msTopic" column="TOPIC_NAME" />
+		<result property="msTopicID" column="TOPIC_ID" />
+		<result property="msProviderID" column="PROVIDER_ID" />
+		<result property="msProviderName" column="PROVIDER_NAME" />
+		<result property="msContactMedium" column="MODE_OF_CONTACT" />
+		<result property="msCreationUser" column="SUBMITTED_BY" />
+		<result property="msCreationDate" column="SUBMITTED_DATE" />
+		<result property="msQuestion" column="USER_COMMENTS" />
+	    <result property="msStatus" column="STATUS" />
+		 <result property="msSequenceID" column="CONTACT_US_ID" />		
+	</resultMap>
+	
+	<select id="getTopicList" resultMap="TopicSummary">
+  		SELECT * FROM TOPIC ORDER BY TOPIC_NAME
+    </select>
+    
+    	<select id="getContactIDList" resultMap="ContactUsID" parameterType="java.lang.Integer">
+  		SELECT a.TOPIC_NAME, b.* FROM TOPIC a ,contact_us_details b where a.topic_id = b.topic_id 
+  		and b.CONTACT_US_ID = #{msSequenceID}
+        </select>
+    
+      <resultMap id="SequeneceID" type="java.lang.Integer">
+		<result property="msSequenceID" column="NEXTVAL" />
+		</resultMap>
+		
+    	<select id="getSequenceFromTable" resultMap="SequeneceID" >
+  		select SEQ_CONTACT_US_TOPIC_ID.nextval NEXTVAL from dual		
+    </select>
+    
+</mapper>
+

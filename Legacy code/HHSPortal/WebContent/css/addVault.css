@@ -1,0 +1,25 @@
+.tWForLink {
+	float: right;
+	width: 79%;
+	height: 392px;
+	padding-top: 21px;
+	overflow: auto;
+}
+.leftTreeForLink {
+	float: left;
+	width: 20.65%;
+	overflow: scroll;
+	border: 1px;
+	background-color: #E4E4E4;
+	height:392px;
+}
+.tWForLinkDocView {
+	/*  width: 90%;*/
+	height: 400px;
+	padding-top: 21px;
+	overflow: auto;
+	
+}
+#selectVault{
+	background:url(../framework/skins/hhsa/images/upload_icon.png) no-repeat 10% 50%;
+}

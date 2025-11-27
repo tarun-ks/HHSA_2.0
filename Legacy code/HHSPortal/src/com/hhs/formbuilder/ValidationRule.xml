@@ -1,0 +1,402 @@
+<form-rules>
+	<!-- for pattern T → [a-zA-Z] N → [0-9] A → [0-9a-zA-Z] -->
+	<!-- for allowed special char ./-(A → allows alphanum with ./-( -->
+	<form-rule formname="Basic" version="0" formid="">
+		<mandatory type="atleast1"
+			errorMessage="! Please select at least one type of Social Media" name="twittersm"
+			value="">
+			<element name="twittersm" />
+			<element name="facebooksm" />
+			<element name="othersm" />
+			<element name="nonesm" />
+		</mandatory>
+		<element name="ein">
+			<pattern value="NN-NNNNNNN" errorMessage="! Please enter EIN in XX-XXXXXXX format" />
+		</element>
+		<element name="OLN">
+			<minLength value="3"
+				errorMessage="! Organization Legal Name should be minimum 3 character long" />
+			<maxLength value="100"
+				errorMessage="! Organization Legal Name should be maximum 100 character long" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§ -'
+				errorMessage="! Please enter valid text" />
+		</element>
+		<element name="otherPleaseSpecify">
+			<maxLength value="150"
+				errorMessage="! Others reason should be maximum 150 character long" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§ \n\r\t -'
+				errorMessage="! Your response contains invalid characters. Please re-type your response or visit Online Help for instructions on how to Copy and Paste as plain text." />
+		</element>
+		<element name="DUNS">
+			<maxLength value="9" errorMessage="! DUNS# should be maximum 9 character long" />
+			<minLength value="9" errorMessage="! If filled out, this field must contain 9 numbers" />
+			<allowedSpecialChar value='N'
+				errorMessage="! Please enter valid text" />
+		</element>
+		<element name="DBA">
+			<maxLength value="100" errorMessage="! DBA should be maximum 100 character long" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§ -'
+				errorMessage="! Please enter valid text" />
+		</element>
+		<element name="Ministatement">
+			<maxLength value="1000"
+				errorMessage="! Mission Statement should be maximum 1000 character long" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§\n\r\t -'
+				errorMessage="! Your response contains invalid characters. Please re-type your response or visit Online Help for instructions on how to Copy and Paste as plain text." />
+		</element>
+		<element name="Address1">
+			<maxLength value="60"
+				errorMessage="! Address Line 1 should be maximum 60 character long" />
+			<allowedSpecialChar value='A&quot;&apos;.#, -'
+				errorMessage="! Please enter valid text" />
+		</element>
+		<element name="Address2">
+			<maxLength value="60"
+				errorMessage="! Address Line 2 should be maximum 60 character long" />
+			<allowedSpecialChar value='A&quot;&apos;.#, -'
+				errorMessage="! Please enter valid text" />
+		</element>
+		<element name="city">
+			<maxLength value="40" errorMessage="! City should be maximum 40 character long" />
+			<allowedSpecialChar value='A&quot;&apos;.#, -'
+				errorMessage="! Please enter valid text" />
+		</element>
+		<element name="Zipcode">
+			<maxLength value="5"
+				errorMessage="! Zip code should be maximum 5 character long" />
+			<allowedSpecialChar value='N'
+				errorMessage="! Please enter valid text" />
+			<minLength value="5"
+				errorMessage="! Zip code should be minimum 5 character long" />
+		</element>
+		<element name="phoneno">
+			<pattern value="NNN-NNN-NNNN"
+				errorMessage="! Please enter Phone number in XXX-XXX-XXXX format" />
+		</element>
+		<element name="twitter">
+			<maxLength value="15"
+				errorMessage="! Twitter should be maximum 15 character long" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§ -'
+				errorMessage="! Please enter valid text" />
+		</element>
+		<element name="facebookpage">
+			<maxLength value="150"
+				errorMessage="! Facebook should be maximum 150 character long" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§ -'
+				errorMessage="! Please enter valid text" />
+		</element>
+		<element name="ifOther">
+			<maxLength value="150"
+				errorMessage="! Other social media should be maximum 150 character long" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§ -'
+				errorMessage="! Please enter valid text" />
+		</element>
+		<element name="websiteaddress">
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§ -'
+				errorMessage="! Please enter valid text" />
+		</element>
+	</form-rule>
+
+	<form-rule formname="Filings" version="0" formid="">
+		<mandatory type="atleast1"
+			errorMessage="! This field is required." name="Religious_Organization"
+			value="">
+			<element name="Religious_Organization" />
+			<element name="Educational_Institute" />
+			<element name="Patriotic" />
+			<element name="Historical_Societies" />
+			<element name="Relief" />
+			<element name="other_exempt" />
+		</mandatory>
+		<mandatory type="atleast1"
+			errorMessage="! This field is required." name="org_reg_with_char"
+			value="">
+			<element name="org_reg_with_char" />
+		</mandatory>
+		<element name="other_exempt_explain">
+			<maxLength value="250" errorMessage="! Please enter 250 characters only" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§\n\r\t -'
+				errorMessage="! Your response contains invalid characters. Please re-type your response or visit Online Help for instructions on how to Copy and Paste as plain text." />
+		</element>
+		<element name="org_reg_id">
+			<pattern value="NN-NN-NN"
+				errorMessage="! Please enter organization’s Registration ID in XX-XX-XX format" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§ -'
+				errorMessage="! Please enter valid text" />
+		</element>
+		<element name="curr_tax_explain">
+			<maxLength value="150" errorMessage="! Please enter 150 characters only" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§\n\r\t -'
+				errorMessage="! Your response contains invalid characters. Please re-type your response or visit Online Help for instructions on how to Copy and Paste as plain text." />
+		</element>
+		<element name="material_findings">
+			<maxLength value="150" errorMessage="! Please enter 150 characters only" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§\n\r\t -'
+				errorMessage="! Your response contains invalid characters. Please re-type your response or visit Online Help for instructions on how to Copy and Paste as plain text." />
+		</element>
+		<element name="other_material_findings">
+			<maxLength value="150" errorMessage="! Please enter 150 characters only" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§\n\r\t -'
+				errorMessage="! Your response contains invalid characters. Please re-type your response or visit Online Help for instructions on how to Copy and Paste as plain text." />
+		</element>
+		<element name="yes_a133_material_findings">
+			<maxLength value="150" errorMessage="! Please enter 150 characters only" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§\n\r\t -'
+				errorMessage="! Your response contains invalid characters. Please re-type your response or visit Online Help for instructions on how to Copy and Paste as plain text." />
+		</element>
+	</form-rule>
+
+	 <!-- element added for Release 3.10.0 . Enhancement 6572 -->
+	<form-rule formname="Board" version="0" formid="">
+		<mandatory type="atleast1"
+			errorMessage="! This field is required."
+			name="bc_executive" value="">
+			<element name="bc_executive" />
+			<element name="bc_finance" />
+			<element name="bc_audit" />
+			<element name="bc_na" />
+		</mandatory>
+		<mandatory type="atleast1"
+			errorMessage="! This field is required."
+			name="annual_budget" value="">
+			<element name="annual_budget" />
+			<element name="policise_procedure" />
+			<element name="exec_performance" />
+			<element name="fund_raising" />
+			<element name="internal_controls" />
+			<element name="ann_ind_audit" />
+			<element name="form_irs_990" />
+			<element name="prog_opp_outcomes" />
+			<element name="bank_acc" />
+			<element name="buy_sell" />
+			<element name="non_of_above" />
+		</mandatory>
+		<element name="other_rev_finance">
+			<maxLength value="150" errorMessage="! Please enter 150 characters only" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§\n\r\t -'
+				errorMessage="! Your response contains invalid characters. Please re-type your response or visit Online Help for instructions on how to Copy and Paste as plain text." />
+		</element>
+		<element name="cash_budget_other">
+			<maxLength value="150" errorMessage="! Please enter 150 characters only" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§\n\r\t -'
+				errorMessage="! Your response contains invalid characters. Please re-type your response or visit Online Help for instructions on how to Copy and Paste as plain text." />
+		</element>
+	</form-rule>
+
+	<form-rule formname="Policies" version="0" formid="">
+		<mandatory type="atleast1"
+			errorMessage="! This field is required."
+			name="ceo_policy" value="">
+			<element name="ceo_policy" />
+			<element name="emp_policy" />
+			<element name="anti_nepo" />
+			<element name="staff_code_conduct" />
+			<element name="doc_retemp_policy" />
+			<element name="director_conflict" />
+			<element name="conflict_interest" />
+			<element name="conti_opp" />
+			<element name="diversity" />
+			<element name="emergency_pol" />
+			<element name="whistle_blower" />
+			<element name="record_rettention" />
+			<element name="security_pol" />
+			<element name="transition" />
+			<element name="policy_none" />
+		</mandatory>
+		<element name="enter_amount">
+			<maxLength value="6" errorMessage="! Amount should be maximum 6 digit long" />
+			<allowedSpecialChar
+				value='N'
+				errorMessage="! Please enter Number only" />
+		</element>
+		<element name="explain_amount">
+			<maxLength value="150" errorMessage="! Please enter 150 characters only" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§\n\r\t -'
+				errorMessage="! Your response contains invalid characters. Please re-type your response or visit Online Help for instructions on how to Copy and Paste as plain text." />
+		</element>
+		<element name="financial_explain">
+			<maxLength value="150" errorMessage="! Please enter 150 characters only" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§\n\r\t -'
+				errorMessage="! Your response contains invalid characters. Please re-type your response or visit Online Help for instructions on how to Copy and Paste as plain text." />
+		</element>
+		<element name="explain_profe_dev">
+			<maxLength value="150" errorMessage="! Please enter 150 characters only" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§\n\r\t -'
+				errorMessage="! Your response contains invalid characters. Please re-type your response or visit Online Help for instructions on how to Copy and Paste as plain text." />
+		</element>
+		<element name="eval_explain">
+			<maxLength value="150" errorMessage="! Please enter 150 characters only" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§\n\r\t -'
+				errorMessage="! Your response contains invalid characters. Please re-type your response or visit Online Help for instructions on how to Copy and Paste as plain text." />
+		</element>
+		<element name="annual_per_explain">
+			<maxLength value="150" errorMessage="! Please enter 150 characters only" />
+			<allowedSpecialChar
+				value='A!@#$%^&amp;*()_+=|\{}\[\];:&quot;&apos;&lt;&gt;,.?/`~§\n\r\t -'
+				errorMessage="! Your response contains invalid characters. Please re-type your response or visit Online Help for instructions on how to Copy and Paste as plain text." />
+		</element>
+	</form-rule>
+	<!--<form-rule formname="myformContract" version="0" formid="">
+		<element name="contractType">
+			<mandatory type="mandatory" errorMessage="! This field is required"
+				value="">
+			</mandatory>
+		</element>
+		<element name="contractNYCAgency">
+			<mandatory type="mandatory" errorMessage="! This field is required"
+				value="">
+			</mandatory>
+		</element>
+		<element name="contractFunderName">
+			<mandatory type="mandatory" errorMessage="! This field is required"
+				value="">
+			</mandatory>
+		</element>
+		<element name="contractRefFirstName">
+			<mandatory type="mandatory" errorMessage="! This field is required"
+				value="">
+			</mandatory>
+		</element>
+		<element name="contractRefLastName">
+			<mandatory type="mandatory" errorMessage="! This field is required"
+				value="">
+			</mandatory>
+		</element>
+		<element name="contractRefTitle">
+			<mandatory type="mandatory" errorMessage="! This field is required"
+				value="">
+			</mandatory>
+		</element>
+		<element name="contractRefEmail">
+			<mandatory type="mandatory" errorMessage="! This field is required"
+				value="">
+			</mandatory>
+		</element>
+		<element name="msContractId">
+			<mandatory type="mandatory" errorMessage="! This field is required"
+				value="">
+			</mandatory>
+		</element>
+		<element name="contractDescription">
+			<mandatory type="mandatory" errorMessage="! This field is required"
+				value="">
+			</mandatory>
+		</element>
+		<element name="contractStartDate">
+			<mandatory type="mandatory" errorMessage="! This field is required"
+				value="">
+			</mandatory>
+		</element>
+		<element name="contractEndDate">
+			<mandatory type="mandatory" errorMessage="! This field is required"
+				value="">
+			</mandatory>
+		</element>
+		<element name="contractBudget">
+			<mandatory type="mandatory" errorMessage="! This field is required"
+				value="">
+			</mandatory>
+		</element>
+		<element name="contractRefFirstName">
+			<maxLength value="32"
+				errorMessage="! First Name should be maximum 32 characters long" />
+		</element>
+		<element name="contractRefMidName">
+			<maxLength value="1"
+				errorMessage="! Middle Initial should be maximum 1 character long" />
+		</element>
+		<element name="contractRefLastName">
+			<maxLength value="64"
+				errorMessage="! Last Name should be maximum 64 characters long" />
+		</element>
+		<element name="contractRefTitle">
+			<maxLength value="64"
+				errorMessage="! Title should be maximum 64 character long" />
+		</element>
+		<element name="contractRefEmail">
+			<maxLength value="128"
+				errorMessage="! Email Address should be maximum 64 characters long" />
+		</element>
+		<element name="msContractId">
+			<maxLength value="30"
+				errorMessage="! Contract/Grant Id should be maximum 64 character long" />
+		</element>
+		<element name="contractRefPhone">
+			<pattern value="NNN-NNN-NNNN"
+				errorMessage="! Please enter Phone number in XXX-XXX-XXXX format" />
+		</element>
+	</form-rule>
+
+	<form-rule formname="myformStaff" version="0" formid="">
+		<element name="staffFirstName">
+			<mandatory type="mandatory" errorMessage="! This field is required"
+				value="">
+			</mandatory>
+		</element>
+		<element name="staffLastName">
+			<mandatory type="mandatory" errorMessage="! This field is required"
+				value="">
+			</mandatory>
+		</element>
+		<element name="staffTitle">
+			<mandatory type="mandatory" errorMessage="! This field is required"
+				value="">
+			</mandatory>
+		</element>
+		<element name="staffPhone">
+			<mandatory type="mandatory" errorMessage="! This field is required"
+				value="">
+			</mandatory>
+		</element>
+		<element name="staffEmail">
+			<mandatory type="mandatory" errorMessage="! This field is required"
+				value="">
+			</mandatory>
+		</element>
+		<element name="staffFirstName">
+			<maxLength value="32"
+				errorMessage="! First Name should be maximum 32 characters long" />
+		</element>
+		<element name="contractRefMidName">
+			<maxLength value="1"
+				errorMessage="! Middle Initial should be maximum 1 character long" />
+		</element>
+		<element name="staffLastName">
+			<maxLength value="64"
+				errorMessage="! Last Name should be maximum 64 characters long" />
+		</element>
+		<element name="staffTitle">
+			<maxLength value="64"
+				errorMessage="! Title should be maximum 64 character long" />
+		</element>
+		<element name="staffEmail">
+			<maxLength value="128"
+				errorMessage="! Email Address should be maximum 64 characters long" />
+		</element>
+		<element name="staffPhone">
+			<pattern value="NNN-NNN-NNNN"
+				errorMessage="! Please enter Phone number in XXX-XXX-XXXX format" />
+		</element>
+	</form-rule>
+
+--></form-rules>

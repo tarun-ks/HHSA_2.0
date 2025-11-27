@@ -1,0 +1,2321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- comp_pool.COMPETITION_POOL_TITLE, eval_group.EVALUATION_GROUP_TITLE 
+	and procurement.IS_OPEN_ENDED_RFP are fetched as a part of R4 Open procurement 
+	change 
+	PROPOSAL_ID has been added as part of BAFO Upload document change-->
+<mapper namespace="com.nyc.hhs.service.db.services.application.ProposalMapper">
+	<resultMap id="proposalDetails" type="com.nyc.hhs.model.ProposalDetailsBean">
+		<result property="proposalId" column="PROPOSAL_ID" />
+		<result property="proposalTitle" column="PROPOSAL_TITLE" />
+		<result property="providerContactId" column="STAFF_ID" />
+		<result property="organizationLegalName" column="ORGANIZATION_LEGAL_NAME" />
+		<result property="organizationId" column="ORGANIZATION_ID" />
+		<result property="proposalStatus" column="PROPOSAL_STATUS_ID" />
+		<result property="proposalStatusName" column="STATUS" />
+		<result property="totalNumberOfService" column="TOTAL_NUM_OF_SERVICE_REQUEST" />
+		<result property="totalFundingRequest" column="TOTAL_FUNDING_REQUEST" />
+		<result property="providerName" column="USER_NAME" />
+		<result property="providerOfficeTitle" column="MEMBER_NAME" />
+		<result property="providerPhone" column="PHONE" />
+		<result property="providerEmailId" column="EMAIL" />
+		<result property="procReviewStatusId" column="PROC_REVIEW_STATUS_ID" />
+		<result property="procurementStatus" column="STATUS_ID" />
+		<result property="competitionPool" column="COMPETITION_POOL_ID" />
+		<result property="competitionPoolTitle" column="COMPETITION_POOL_TITLE" />
+		<result property="evaluationGroupTitle" column="EVALUATION_GROUP_TITLE" />
+		<result property="isOpenEndedRFP" column="IS_OPEN_ENDED_RFP" />
+	</resultMap>
+	<select id="fetchProposalDetails" parameterType="String"
+		resultMap="proposalDetails">
+		Select details.PROPOSAL_ID, details.PROPOSAL_TITLE,
+		details.ORGANIZATION_ID,
+		org.ORGANIZATION_LEGAL_NAME, details.STAFF_ID,
+		details.PROPOSAL_STATUS_ID,details.PROC_REVIEW_STATUS_ID, sm.STATUS,
+		details.TOTAL_NUM_OF_SERVICE_REQUEST, details.TOTAL_FUNDING_REQUEST,
+		comp_pool.COMPETITION_POOL_TITLE, eval_group.EVALUATION_GROUP_TITLE,
+		p.IS_OPEN_ENDED_RFP, (s.FIRST_NAME||' '||s.MIDDLE_INITIAL||' '||s.LAST_NAME) USER_NAME,
+		m.MEMBER_NAME, s.EMAIL, s.PHONE, p.STATUS_ID, details.TEMP_COMPETITION_POOL_ID COMPETITION_POOL_ID
+		from PROPOSAL_CONFIG details, PROCUREMENT p,
+		STAFF_DETAILS s, STAFF_ORGANIZATION som,
+		MEMBER_TITLE m, STATUS_MASTER_R2_R3 sm, organization org,
+		COMPETITION_POOL comp_pool, EVALUATION_GROUP eval_group
+		where
+		details.PROPOSAL_ID = #{asProposalId} AND
+		s.STAFF_ID = details.STAFF_ID AND
+		s.STAFF_ID = som.STAFF_ID AND
+		details.ORGANIZATION_ID = org.ORGANIZATION_ID AND
+		details.TEMP_COMPETITION_POOL_ID = comp_pool.COMPETITION_POOL_ID AND
+		details.EVALUATION_GROUP_ID = eval_group.EVALUATION_GROUP_ID(+) AND
+		som.TITLE = m.MEMBER_ID AND
+		sm.STATUS_ID = details.PROPOSAL_STATUS_ID and
+		p.PROCUREMENT_ID = details.PROCUREMENT_ID
+		and som.ORGANIZATION_ID = details.ORGANIZATION_ID
+	</select>
+
+	<select id="fetchProposalStaffId" parameterType="String"
+		resultType="String">
+		Select STAFF_ID
+		from PROPOSAL_CONFIG
+		where
+		PROPOSAL_ID = #{asProposalId}
+	</select>
+
+	<!-- comp_pool.COMPETITION_POOL_TITLE, eval_group.EVALUATION_GROUP_TITLE 
+		and procurement.IS_OPEN_ENDED_RFP are fetched as a part of R4 Open procurement 
+		change 
+		PROPOSAL_ID has been added as part of BAFO Upload document change-->
+	<select id="fetchNewProposalDetails" parameterType="String"
+		resultMap="proposalDetails">
+		Select details.PROPOSAL_ID, details.PROPOSAL_TITLE,
+		details.ORGANIZATION_ID,
+		org.ORGANIZATION_LEGAL_NAME,
+		details.PROPOSAL_STATUS_ID, sm.STATUS, p.status_id,
+		details.TOTAL_NUM_OF_SERVICE_REQUEST, details.TOTAL_FUNDING_REQUEST
+		from PROPOSAL_CONFIG details, STATUS_MASTER_R2_R3 sm, organization
+		org,
+		procurement p
+		where
+		details.PROPOSAL_ID = #{asProposalId}
+		AND
+		sm.STATUS_ID = details.PROPOSAL_STATUS_ID
+		AND details.ORGANIZATION_ID =
+		org.ORGANIZATION_ID
+		and details.procurement_id = p.procurement_id
+	</select>
+	
+	<!--Release 3.6.0 Enhancement id 6484 -->
+	<resultMap id="proposalSiteDetails" type="com.nyc.hhs.model.SiteDetailsBean">
+		<result property="proposalSiteId" column="PROPOSAL_SITE_ID" />
+		<result property="siteName" column="SITE_NAME" />
+		<result property="address1" column="ADDRESS1" />
+		<result property="address2" column="ADDRESS2" />
+		<result property="city" column="CITY" />
+		<result property="state" column="STATE" />
+		<result property="zipCode" column="ZIP_CODE" />
+		<result property="actionTaken" column="ACTION_TAKEN" />
+		<result property="subBudgetSiteId" column="SUB_BUDGET_SITE_ID" />
+		<result property="contractId" column="CONTRACT_ID" />
+		<result property="budgetId" column="BUDGET_ID" />
+		<result property="subBudgetId" column="SUB_BUDGET_ID" />
+		<result property="statusId" column="STATUS_ID" />
+	</resultMap>
+	<select id="fetchProposalSiteDetails" parameterType="map"
+		resultMap="proposalSiteDetails">
+		Select PROPOSAL_SITE_ID, SITE_NAME, ADDRESS1, ADDRESS2,
+		CITY, STATE,
+		ZIP_CODE, 'none' ACTION_TAKEN
+		from PROPOSAL_SITE
+		where
+		PROPOSAL_ID =
+		#{asProposalId}
+		<if test="asSortSiteTable != null">
+			ORDER BY SITE_NAME ASC
+		</if>
+	</select>
+	<!--Release 3.6.0 Enhancement id 6484 -->
+	<select id="fetchSubBudgetSiteDetails" parameterType="map"
+		resultMap="proposalSiteDetails">
+		Select SUB_BUDGET_ID,SUB_BUDGET_SITE_ID, SITE_NAME, ADDRESS1, ADDRESS2,
+		CITY, STATE,
+		ZIP_CODE, 'none' ACTION_TAKEN
+		from SUB_BUDGET_SITE
+		where
+		SUB_BUDGET_ID =
+		#{asSubBudgetId}
+		and ACTIVE_FLAG = '1' 
+		<if test="asSortSiteTable != null">
+			ORDER BY SITE_NAME ASC
+		</if>
+	</select>
+	<!--Release 3.6.0 Enhancement id 6484 -->
+	<select id="recordBeforeRelease" parameterType="map"
+		resultType="Integer">
+	SELECT count(1) FROM BUDGET WHERE  BUDGET_ID = (SELECT PARENT_ID FROM budget WHERE budget_id = #{asBudgetId}) and fiscal_year_id  &gt;= #{FISCAL_YEAR_ID_ADD_SITE, jdbcType=VARCHAR}
+	</select>
+	<!--Release 3.6.0 Enhancement id 6484 -->
+	<select id="fetchSubBudgetStatusId" parameterType="map"
+		resultType="String">
+	select status_id from budget where  budget_id = #{asBudgetId}
+	</select>
+	
+	<select id="fetchAllOrganizationMembers" parameterType="string"
+		resultType="map">
+		Select Staff.STAFF_ID, (Staff.FIRST_NAME||' '||Staff.MIDDLE_INITIAL||' '||Staff.LAST_NAME) USER_NAME,
+		som.MEMBER_STATUS, som.USER_STATUS, som.ACTIVE_FLAG
+		from
+		STAFF_DETAILS Staff, STAFF_ORGANIZATION som
+		where
+		som.ORGANIZATION_ID = #{asOrganizationId} and
+		Staff.STAFF_ID =
+		som.STAFF_ID
+		ORDER BY LOWER (USER_NAME) ASC
+	</select>
+
+	<select id="fetchMemberDetails" parameterType="map" resultType="map">
+		Select (s.FIRST_NAME||' '||s.MIDDLE_INITIAL||' '||s.LAST_NAME)
+		USER_NAME, m.MEMBER_NAME, s.EMAIL, s.PHONE
+		from
+		STAFF_DETAILS s,
+		MEMBER_TITLE m, STAFF_ORGANIZATION som
+		where S.STAFF_ID =
+		#{asUserId} AND
+		som.staff_id = s.staff_id AND
+		som.organization_id =
+		#{asOrganizationId} AND
+		som.TITLE = m.MEMBER_ID
+	</select>
+
+	<select id="fetchEvaluatorDetails" parameterType="string"
+		resultType="String">
+		select EXT_EVALUATOR_NAME from EVALUATION_SETTINGS_EXTERNAL
+		WHERE EVAL_SETTINGS_EXT_ID = (select EVAL_SETTINGS_EXT_ID from
+		evaluation_Status where evaluation_Status_id =#{asEvaluationStatusId})
+	</select>
+
+	<select id="getDueDate" parameterType="string" resultType="Date">
+		Select UPD_PRE_PROPOSAL_CONF_DATE from Procurement where
+		PROCUREMENT_ID =#{asProcurementId}
+	</select>
+	
+	<!-- Below Query modified for enhancement 3.1.0 :6204 -->
+	<update id="updateProposalStatus" parameterType="hashmap">
+		update  PROPOSAL_CONFIG 
+		set PROPOSAL_STATUS_ID = #{statusId}
+			, MODIFIED_BY_USERID = #{userId}
+			, MODIFIED_DATE = systimestamp
+			, LAST_UPDATE_DATE = systimestamp
+			, SUBMITTED_DATE = systimestamp
+		where 	PROPOSAL_ID = #{proposalId}
+	</update>
+
+	<resultMap id="checkProposalProcurementDetails" type="com.nyc.hhs.model.ProposalDetailsBean">
+		<result property="proposalStatus" column="proposal_status_id" />
+		<result property="procurementStatus" column="status_id" />
+		<result property="evaluationGroupStatus" column="eg_status" />
+	</resultMap>
+
+	<select id="checkProcurementProposalStatus" parameterType="string"
+		resultMap="checkProposalProcurementDetails">
+		SELECT pc.proposal_status_id, pr.status_id, eg.status_id eg_status from
+		PROPOSAL_CONFIG pc, procurement pr, evaluation_group eg WHERE
+		pc.procurement_id = pr.procurement_id 
+		and pc.evaluation_group_id = eg.evaluation_group_id
+		and pc.PROPOSAL_ID = #{asProposalId}
+	</select>
+
+	<resultMap id="checkProposalDetails" type="com.nyc.hhs.model.ProposalDetailsBean">
+		<result property="proposalStatus" column="proposal_status_id" />
+	</resultMap>
+
+	<select id="checkProposalStatus" parameterType="java.lang.String"
+		resultMap="checkProposalDetails">
+		SELECT proposal_status_id from PROPOSAL_CONFIG WHERE
+		PROPOSAL_ID=#{asProposalId}
+	</select>
+
+	<select id="fetchProposalTitle" parameterType="java.lang.String"
+		resultType="String">
+		SELECT proposal_title from PROPOSAL_CONFIG WHERE
+		PROPOSAL_ID=#{asProposalId}
+	</select>
+
+	<select id="fetchProcurementStatusId" parameterType="string"
+		resultType="String">
+
+		SELECT pr.status_id from
+		PROPOSAL_CONFIG pc , procurement pr
+		WHERE
+		pc.procurement_id=pr.procurement_id and
+		PROPOSAL_ID=#{asProposalId}
+	</select>
+
+	<select id="fetchProposalStatusId" parameterType="java.lang.String"
+		resultType="String">
+		SELECT proposal_status_id from PROPOSAL_CONFIG WHERE
+		PROPOSAL_ID=#{asProposalId}
+	</select>
+
+	<!-- Below Query modified for enhancement 3.1.0 :6204 -->
+	<update id="retractProposal" parameterType="java.lang.String">
+		UPDATE
+		PROPOSAL_CONFIG SET PROPOSAL_STATUS_ID =17, EVALUATION_GROUP_ID = '',
+		LAST_UPDATE_DATE = systimestamp
+    	WHERE
+		PROPOSAL_ID=#{asProposalId}
+	</update>
+
+	<select id="fetchProposalDocumentId" parameterType="string"
+		resultType="String">
+		SELECT document_identifier_id from proposal_document WHERE
+		PROPOSAL_ID=#{asProposalId}
+	</select>
+	<delete id="cancelProposal" parameterType="java.lang.String">
+		DELETE FROM
+		PROPOSAL_CONFIG WHERE PROPOSAL_ID=#{asProposalId}
+	</delete>
+	<delete id="deleteProposalDocument" parameterType="java.lang.String">
+		DELETE FROM
+		PROPOSAL_DOCUMENT WHERE PROPOSAL_ID=#{asProposalId}
+	</delete>
+
+	<delete id="deleteProposalSite" parameterType="java.lang.String">
+		DELETE FROM
+		PROPOSAL_SITE WHERE PROPOSAL_ID=#{asProposalId}
+	</delete>
+
+	<delete id="deleteProposalQuestionResponse" parameterType="java.lang.String">
+		DELETE FROM
+		PROPOSAL_QUESTION_RESPONSE WHERE
+		PROPOSAL_ID=#{asProposalId}
+	</delete><!--
+
+	Modified as a part of release 3.1.0 for enhancement request 6024
+	<select id="getProposalDetailsCount" parameterType="int"
+		resultType="int">
+		select count(1) from proposal_config conf, staff_organization som where
+		conf.proposal_title is not null and conf.organization_id is not null
+		and conf.total_num_of_service_request is not null and
+		conf.total_funding_request is not null
+		and conf.TEMP_COMPETITION_POOL_ID is not null
+		and som.organization_id = conf.organization_id
+		and som.MEMBER_STATUS = 'Active'
+		and som.USER_STATUS = 'Yes'
+		and som.ACTIVE_FLAG = 'Yes'
+		and conf.PROPOSAL_ID = #{proposalId}
+	</select>
+	-->
+	<select id="getProposalDetailsCount" parameterType="int"
+		resultType="int">
+		select count(1) from proposal_config conf 
+		where
+		conf.proposal_title is not null 
+		and conf.organization_id is not null
+		and conf.total_num_of_service_request is not null 
+		and conf.total_funding_request is not null
+		and conf.TEMP_COMPETITION_POOL_ID is not null
+		and conf.PROPOSAL_ID = #{proposalId}
+	</select>
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<select id="getProposalQuesResponseCount" parameterType="hashmap"
+		resultType="int">
+		      select count(*)
+            from (select * from PROCUREMENT_QUESTION_CONFIG where procurement_id = #{procurementId}) PQC, 
+                  (select * from PRCRMNT_QUESTION_MAPPING where procurement_id = #{procurementId}) PQM, 
+              (select * from PROPOSAL_QUESTION_RESPONSE where proposal_id = #{proposalId}) PQR, 
+              (select eg.status_id EG_STATUS_ID, pc.proposal_status_id, pc.proposal_id, eg.version_number_pqc, pc.version_number_qc, 
+                  (select max(version_number) from PRCRMNT_QUESTION_MAPPING where procurement_id = #{procurementId}) max_version
+                from Evaluation_group EG, proposal_config pc
+                where pc.proposal_id = #{proposalId}
+                and pc.evaluation_group_id = eg.evaluation_group_id(+)) status
+            where
+              status.proposal_id = #{proposalId}
+              and pqm.PROCUREMENT_QN_ID = pqc.PROCUREMENT_QN_ID
+              and pqm.PROCUREMENT_QN_ID = pqr.PROCUREMENT_QN_ID(+)
+              and ((status.proposal_status_id = 17 and pqm.version_number = status.max_version)
+                  or (status.proposal_status_id != 17 and status.proposal_status_id != 19 and pqm.version_number = status.version_number_qc)
+                  or (status.proposal_status_id = 19 and pqm.version_number = status.version_number_pqc)
+                  )
+			  and PQR.CUSTOM_ANSWER is null
+	</select>
+	<select id="getProposalSiteCount" parameterType="hashmap"
+		resultType="int">
+		select count(1) from proposal_site where procurement_id =
+		#{procurementId} and proposal_Id=#{proposalId}
+	</select>
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<select id="getProposalDocumentCount" parameterType="hashmap"
+		resultType="int">
+		      select count(*)
+            from (select * from PROCUREMENT_DOCUMENT_CONFIG where procurement_id = #{procurementId}) PdC, 
+                  (select * from PRCRMNT_DOCUMENT_MAPPING where procurement_id = #{procurementId}) PdM, 
+              (select * from PROPOSAL_DOCUMENT where proposal_id = #{proposalId} and DOCUMENT_IDENTIFIER_ID is not null) PdR, 
+              (select eg.status_id EG_STATUS_ID, pc.proposal_status_id, pc.proposal_id, eg.version_number_pdc, pc.version_number_dc, 
+                  (select max(version_number) from PRCRMNT_DOCUMENT_MAPPING where procurement_id = #{procurementId}) max_version
+                from Evaluation_group EG, proposal_config pc
+                where pc.proposal_id = #{proposalId}
+                and pc.evaluation_group_id = eg.evaluation_group_id(+)) status
+            where
+              status.proposal_id = #{proposalId}
+              and pdm.procurement_document_id = pdc.procurement_document_id
+              and pdm.procurement_document_id = pdr.procurement_document_id(+)
+              and ((status.proposal_status_id = 17 and pdm.version_number = status.max_version)
+                  or (status.proposal_status_id != 17 and status.proposal_status_id != 19 and pdm.version_number = status.version_number_dc)
+                  or (status.proposal_status_id = 19 and pdm.version_number = status.version_number_pdc)
+                  )
+			  and PdR.procurement_document_id is null
+			  and pdc.required_flag = '1' 
+	</select>
+
+	<resultMap id="AwardDocuments" type="com.nyc.hhs.model.ExtendedDocument">
+		<result property="documentType" column="AWARD_DOCUMENT_TYPE" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+		<result property="lastModifiedById" column="LAST_MODIFIED_BY" />
+		<result property="isRequiredDoc" column="REQUIRED_FLAG" />
+		<result property="documentStatus" column="DOC_STATUS" />
+		<result property="statusId" column="AWARD_DOC_STATUS_ID" />
+		<result property="referenceDocSeqNo" column="AWARD_DOCUMENT_CONFIG_ID" />
+		<result property="documentId" column="AWD_DOC_ID" />
+		<result property="userRole" column="USER_ROLE" />
+		<result property="procurementStatusId" column="PROC_STATUS_ID" />
+	</resultMap>
+
+	<select id="fetchRequiredOptionalDocuments" parameterType="map"
+		resultMap="AwardDocuments">
+		SELECT
+		AWDCONF.AWARD_DOC_SEQ_NUM,AWDCONF.REQUIRED_FLAG,AWDCONF.AWARD_ID,AWDCONF.AWARD_DOCUMENT_CONFIG_ID,
+		AWARDDOC.AWD_DOC_ID,DECODE(NVL(AWARDDOC.AWARD_DOC_STATUS_ID,00),31,29,29,29,30,30,28,28,27)
+		AS AWARD_DOC_STATUS_ID ,AWARDDOC.AWD_DOC_ID,
+		DECODE(NVL(AWARDDOC.DOC_STATUS,'NOT'),'Verified','Submitted','Submitted','Submitted','Returned','Returned','Complete','Complete','Not Started')
+		AS DOC_STATUS, AWDCONF.AWARD_DOCUMENT_TYPE,#{userRole} as
+		USER_ROLE,#{PROC_STATUS_ID} as
+		PROC_STATUS_ID FROM
+		AWARD_DOCUMENT_CONFIG
+		AWDCONF,(SELECT
+		AWDDOC.DOCUMENT_IDENTIFIER_ID AS
+		AWD_DOC_ID,AWDDOC.AWARD_ID,
+		AWDDOC.AWARD_DOC_STATUS_ID,AWDDOC.AWARD_DOCUMENT_CONFIG_ID,ST.STATUS
+		AS DOC_STATUS
+		FROM AWARD_DOCUMENT AWDDOC, STATUS_MASTER_R2_R3 ST WHERE
+		AWDDOC.AWARD_ID=#{awardId}
+		AND ST.STATUS_ID =
+		AWDDOC.AWARD_DOC_STATUS_ID AND AWDDOC.ORGANIZATION_ID=#{userOrgId})
+		AWARDDOC WHERE
+		AWDCONF.AWARD_DOCUMENT_CONFIG_ID=AWARDDOC.AWARD_DOCUMENT_CONFIG_ID(+)
+		AND
+		AWDCONF.AWARD_ID=#{awardId} ORDER BY AWDCONF.AWARD_DOCUMENT_TYPE
+		ASC
+	</select>
+
+	<resultMap id="proposalSummary" type="com.nyc.hhs.model.ProposalDetailsBean">
+            <result property="proposalTitle" column="PROPOSAL_TITLE" />
+            <result property="procurementId" column="procurement_id" />
+            <result property="proposalStatus" column="STATUS" />
+            <result property="proposalStatusId" column="PROPOSAL_STATUS_ID" />
+            <result property="proposalDueDate" column="upd_proposal_due_date" />
+            <result property="proposalId" column="PROPOSAL_ID" />
+            <result property="modifiedBy" column="MODIFIED_BY_USERID" />
+            <result property="modifiedDate" column="MODIFIED_DATE" />
+            <result property="organizationId" column="ORGANIZATION_ID" />
+            <result property="evaluationScore" column="EVALUATION_SCORE" />
+            <result property="procurementStatus" column="STATUS_ID" />
+            <result property="rank" column="rank" />
+            <result property="competitionPoolTitle" column="COMPETITION_POOL_TITLE" />
+            <result property="evaluationGroupStatus" column="evaluation_group_status_id" />
+            <result property="evaluationPoolMappingId" column="evaluation_pool_mapping_id" />
+            <result property="isOpenEndedRFP" column="is_open_ended_rfp" />
+            <result property="restrictSubmit" column="restrict_submit" />
+            <result property="quesVersion" column="VERSION_NUMBER_QC" />
+            <result property="docVersion" column="VERSION_NUMBER_DC" />
+            <result property="latestVersionQues" column="max_proc_version_ques" />
+            <result property="latestVersionDoc" column="max_proc_version_doc" />
+            <result property="evalGrpQuesVersion" column="VERSION_NUMBER_PQC" />
+            <result property="evalGrpDocVersion" column="VERSION_NUMBER_PDC" />
+      </resultMap>
+
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<!-- Further modified to solve Release Addendum Issue in Emergency Build 3.1.1-->
+	<select id="getProposalSummary" parameterType="com.nyc.hhs.model.ProposalDetailsBean"
+            resultMap="proposalSummary">
+            SELECT rn, PROPOSAL_ID, PROPOSAL_TITLE, PROPOSAL_STATUS_ID,
+            procurement_id,
+            MODIFIED_BY_USERID, EVALUATION_SCORE, STATUS_ID,
+            upd_proposal_due_date,
+            STATUS, trunc(MODIFIED_DATE1) as MODIFIED_DATE,
+            ORGANIZATION_ID, rank,
+            nvl(COMPETITION_POOL_TITLE, '--')
+            COMPETITION_POOL_TITLE,
+            evaluation_group_status_id,
+            evaluation_pool_mapping_id, is_open_ended_rfp, restrict_submit, VERSION_NUMBER_QC, max_proc_version_ques,
+            VERSION_NUMBER_DC, max_proc_version_doc
+            from
+            (SELECT
+            rownum as rn, a.PROPOSAL_ID,
+            a.PROPOSAL_TITLE, a.PROPOSAL_STATUS_ID,
+            a.procurement_id,
+            a.MODIFIED_BY_USERID, a.EVALUATION_SCORE, p.STATUS_ID,
+            p.upd_proposal_due_date,trunc(a.MODIFIED_DATE) as
+            MODIFIED_DATE1, a.ORGANIZATION_ID,
+            a.rank, cc.COMPETITION_POOL_TITLE,
+            a.status_id
+            evaluation_group_status_id, epm.evaluation_pool_mapping_id,
+            st.status, p.is_open_ended_rfp,
+            a.restrict_submit,a.VERSION_NUMBER_QC,a.max_proc_version_ques,
+            a.VERSION_NUMBER_DC,a.max_proc_version_doc
+            from (
+            SELECT pc.TEMP_COMPETITION_POOL_id , pc.PROPOSAL_ID,
+            pc.PROPOSAL_TITLE,
+            decode(pc.PROPOSAL_STATUS_ID, 141, pc.proc_review_status_id, pc.proposal_status_id) as PROPOSAL_STATUS_ID, pc.procurement_id,
+            sd.FIRST_NAME | |' ' | |
+            sd.LAST_NAME as MODIFIED_BY_USERID,
+            nvl(er.EVALUATION_SCORE, 0) EVALUATION_SCORE, greatest
+            (nvl(pd.modified_date,
+            pc.MODIFIED_DATE),pc.MODIFIED_DATE) as
+            MODIFIED_DATE,
+            pc.ORGANIZATION_ID,
+            decode(er.EVALUATION_SCORE, null,
+            99999999 ,rank() OVER (ORDER BY nvl(er.Evaluation_score, 0)
+            desc))
+            rank, eg.status_id, eg.evaluation_group_ID, pc.VERSION_NUMBER_QC, 
+            procprov.restrict_submit,
+            (select nvl(max(version_number),0) from prcrmnt_question_mapping 
+      			where PROCUREMENT_ID = #{procurementId}) as max_proc_version_ques, 
+      		pc.VERSION_NUMBER_DC,
+            (select max(VERSION_NUMBER) from prcrmnt_document_mapping 
+      			where PROCUREMENT_ID = #{procurementId}) as max_proc_version_doc
+            FROM
+            PROPOSAL_CONFIG pc,
+            EVALUATION_RESULTS er, STAFF_DETAILS
+            sd, (select proposal_id,
+            max(modified_date) as modified_date from
+            PROPOSAL_DOCUMENT PROPOSAL_ID
+            group by proposal_id) pd,
+            evaluation_group eg,
+            procurement_provider procprov
+            WHERE
+            pc.procurement_id = #{procurementId}
+            and pc.PROPOSAL_ID = er.proposal_id(+)
+            and pc.MODIFIED_BY_USERID = sd.STAFF_ID
+            and pc.PROPOSAL_ID = pd.PROPOSAL_ID(+)
+            AND pc.evaluation_group_ID = eg.evaluation_group_ID(+)
+            and pc.procurement_id = procprov.procurement_id
+    		and pc.organization_id = procprov.organization_id
+            ) a, procurement p, COMPETITION_POOL cc,
+            evaluation_pool_mapping epm, STATUS_MASTER_R2_R3 st
+            where a.procurement_id(+) = p.procurement_id
+            and p.procurement_id = #{procurementId}
+            and a.ORGANIZATION_ID = #{organizationId}
+            and cc.COMPETITION_POOL_id(+) = a.TEMP_COMPETITION_POOL_id
+            and epm.COMPETITION_POOL_id(+) = a.TEMP_COMPETITION_POOL_id
+            and epm.evaluation_group_ID(+) = a.evaluation_group_ID
+            and a.PROPOSAL_STATUS_ID = st.STATUS_ID
+            order by
+            <choose>
+                  <when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+                  <otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+            </choose>
+            <if test="secondSort != null">
+                  <choose>
+                        <when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+                        <otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+                  </choose>
+            </if>
+            )
+            where rn BETWEEN #{startNode} AND #{endNode}
+     </select>
+
+	<select id="getProposalCount" parameterType="com.nyc.hhs.model.ProposalDetailsBean"
+		resultType="Integer">
+		SELECT count(1) from
+		(SELECT a.PROPOSAL_ID,
+		a.PROPOSAL_TITLE, a.PROPOSAL_STATUS_ID, a.procurement_id,
+		a.MODIFIED_BY_STAFFID, a.EVALUATION_SCORE, p.STATUS_ID,
+		p.upd_proposal_due_date,
+		a.STATUS, trunc(a.MODIFIED_DATE) as
+		MODIFIED_DATE, a.ORGANIZATION_ID, a.rank
+		from (
+		SELECT pc.PROPOSAL_ID,
+		pc.PROPOSAL_TITLE, pc.PROPOSAL_STATUS_ID,
+		pc.procurement_id,
+		sd.FIRST_NAME | |' ' | | sd.LAST_NAME as
+		MODIFIED_BY_STAFFID,
+		nvl(er.EVALUATION_SCORE, 0) EVALUATION_SCORE, st.STATUS,
+		nvl(pd.modified_date,
+		pc.MODIFIED_DATE) as MODIFIED_DATE,
+		pc.ORGANIZATION_ID,
+		decode(er.EVALUATION_SCORE, null, 99999999 ,rank()
+		OVER (ORDER BY
+		nvl(er.Evaluation_score, 0) desc)) rank
+		FROM
+		PROPOSAL_CONFIG pc, EVALUATION_RESULTS er, STAFF_DETAILS
+		sd, (select
+		proposal_id, max(modified_date) as modified_date from
+		PROPOSAL_DOCUMENT PROPOSAL_ID group by proposal_id) pd,
+		STATUS_MASTER_R2_R3 st
+		WHERE
+		pc.procurement_id = #{procurementId}
+		and
+		pc.PROPOSAL_ID = er.proposal_id(+)
+		and pc.MODIFIED_BY_USERID =
+		sd.STAFF_ID
+		and pc.PROPOSAL_STATUS_ID = st.STATUS_ID
+		and pc.PROPOSAL_ID
+		= pd.PROPOSAL_ID(+)
+		) a, procurement p
+		where a.procurement_id(+) =
+		p.procurement_id
+		and p.procurement_id = #{procurementId}
+		and
+		a.ORGANIZATION_ID = #{organizationId}
+		)
+	</select>
+
+	<select id="getProposalSummaryProposalDueDate" parameterType="com.nyc.hhs.model.ProposalDetailsBean"
+		resultMap="proposalSummary">
+		SELECT upd_proposal_due_date FROM procurement WHERE
+		procurement_id =
+		#{procurementId}
+	</select>
+
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<insert id="insertNewProposalDetails" parameterType="map">
+		insert into
+		proposal_config (PROPOSAL_ID, PROCUREMENT_ID,
+		ORGANIZATION_ID,
+		STAFF_ID,
+		PROPOSAL_TITLE, PROPOSAL_STATUS_ID,
+		LAST_UPDATE_DATE,
+		ACTIVE_FLAG,
+		CREATED_DATE,
+		CREATED_BY_USERID,
+		MODIFIED_DATE,
+		MODIFIED_BY_USERID,
+		VERSION_NUMBER_QC,
+		VERSION_NUMBER_DC)
+		values
+		(SEQ_PROPOSAL_CONFIG_ID.NEXTVAL,
+		#{procurementId, jdbcType=VARCHAR},
+		#{providerId, jdbcType=VARCHAR},
+		#{staffId,
+		jdbcType=VARCHAR},
+		#{proposalTitle, jdbcType=VARCHAR},
+		#{proposalStatusId,
+		jdbcType=VARCHAR},
+		SYSTIMESTAMP,
+		#{activeFlag,
+		jdbcType=CHAR},
+		SYSTIMESTAMP,
+		#{createdBy,
+		jdbcType=VARCHAR},
+		SYSTIMESTAMP,
+		#{createdBy, jdbcType=VARCHAR},
+		(select max(version_number) from PRCRMNT_QUESTION_MAPPING
+      	where procurement_id = #{procurementId,jdbcType=VARCHAR}),
+      	(select max(version_number) from PRCRMNT_DOCUMENT_MAPPING
+      	where procurement_id = #{procurementId,jdbcType=VARCHAR})
+		)
+	</insert>
+
+	<select id="getProposalDocInfo" parameterType="String"
+		resultType="map">
+		select PROCUREMENT_DOCUMENT_TYPE, REQUIRED_FLAG
+		from
+		PROCUREMENT_DOCUMENT_CONFIG
+		where procurement_id = #{asProcurementId,
+		jdbcType=VARCHAR}
+	</select>
+
+	<select id="getProposalId" parameterType="String" resultType="String">
+		SELECT SEQ_PROPOSAL_CONFIG_ID.currval PROPOSAL_ID FROM DUAL
+	</select>
+
+    <!--Modified as a part of release 3.10.0 for enhancement request 6577-->
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<select id="getVersionNoForProposalDocuments" parameterType="Map"
+	resultType="int">
+        select distinct decode(status.proposal_status_id, 17, status.max_version,
+        	18, decode(status.EG_STATUS_ID, 131, status.max_version, status.version_number_pdc), 
+          166, decode(status.version_number_pdc, null, status.max_version, status.version_number_pdc),
+        	19, status.version_number_pdc, status.version_number_pdc) used_version 
+		from 
+          (select * from PRCRMNT_DOCUMENT_MAPPING where procurement_id = #{procurementId}) pdm, 
+          (select eg.status_id EG_STATUS_ID, pc.proposal_id, pc.proposal_status_id, eg.version_number_pdc, pc.version_number_dc, 
+           (select max(version_number) from PRCRMNT_DOCUMENT_MAPPING where procurement_id = #{procurementId}) max_version
+          from Evaluation_group EG, proposal_config pc
+          where pc.proposal_id = #{proposalId}
+          and pc.evaluation_group_id = eg.evaluation_group_id(+)) status
+		where status.proposal_id = #{proposalId}
+		and pdm.procurement_id = #{procurementId}
+		and ((status.proposal_status_id = 17 and pdm.version_number = status.max_version)
+		  	  or (status.proposal_status_id = 18 and status.EG_STATUS_ID = 131 and pdm.version_number = status.max_version)
+		  	  or (status.proposal_status_id = 18 and status.EG_STATUS_ID != 131 and pdm.version_number = status.version_number_pdc) 
+          or (status.proposal_status_id = 166 and status.version_number_pdc is null and pdm.version_number = status.max_version) or 
+          (status.proposal_status_id = 166 and status.version_number_pdc is not null
+          and pdm.version_number = status.version_number_pdc)
+		      or (status.proposal_status_id not in (17,18) and pdm.version_number = status.version_number_pdc)
+		      )				  			
+	</select>
+	
+	<resultMap id="proposalDocSummary" type="com.nyc.hhs.model.ExtendedDocument">
+		<result property="documentId" column="PRO_DOC_ID" />
+		<result property="documentType" column="PROCUREMENT_DOCUMENT_TYPE" />
+		<result property="lastModifiedByName" column="LAST_MODIFIED_BY" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+		<result property="documentStatus" column="DOC_STATUS" />
+		<result property="isRequiredDoc" column="REQUIRED_FLAG" />
+		<result property="statusId" column="PROPOSAL_DOCUMENT_STATUS_ID" />
+		<result property="referenceDocSeqNo" column="PROCUREMENT_DOCUMENT_ID" />
+		<result property="customLabelName" column="DOCUMENT_TYPE_LABEL" />
+	</resultMap>
+	<!-- Query has been updated as part of BAFO Upload document change 
+	so as to accomodate BAFO document in the document list-->
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	   <!--Modified as a part of release 3.6.0 for enhancement request 6485-->
+	<!--Fix for Defect 8229 -->
+	<select id="getProposalDocumentList" parameterType="Map"
+		resultMap="proposalDocSummary">
+		SELECT PROCUREMENT_DOCUMENT_ID,
+		(case when PROCUREMENT_DOCUMENT_TYPE = 'Solicitation - Other' then CUSTOM_LABEL
+		else PROCUREMENT_DOCUMENT_TYPE
+		end) AS DOCUMENT_TYPE_LABEL,
+		PROCUREMENT_DOCUMENT_TYPE,
+		REQUIRED_FLAG,
+		PRO_DOC_ID,
+		DECODE(NVL(PROPOSAL_DOCUMENT_STATUS_ID,00),31,29,29,29,30,30,28,28,32,32,27)
+		AS PROPOSAL_DOCUMENT_STATUS_ID,
+		PROC_USER,
+		TO_CHAR(MODIFIED_DATE,'MM/DD/YYYY') AS MODIFIED_DATE,
+		LAST_MODIFIED_BY,	DECODE(NVL(DOC_STATUS,'NOT'),'Verified','Submitted','Submitted','Submitted','Returned','Returned','Complete','Complete','Non-Responsive','Non-Responsive','Not Started') AS DOC_STATUS
+		from (
+		select DOCCONF.PROCUREMENT_DOCUMENT_ID,
+		DOCCONF.PROCUREMENT_DOCUMENT_TYPE,
+		DOCCONF.CUSTOM_LABEL,
+		DOCCONF.REQUIRED_FLAG,
+		PROPOSAL.PRO_DOC_ID,
+		PROPOSAL.PROPOSAL_DOCUMENT_STATUS_ID,
+		PROPOSAL.PROC_USER,
+		PROPOSAL.MODIFIED_DATE,
+		PROPOSAL.LAST_MODIFIED_BY,
+		PROPOSAL.DOC_STATUS,
+		sortorder
+		FROM
+		(
+			SELECT DOCCONF.PROCUREMENT_DOCUMENT_ID,
+			DOCCONF.PROCUREMENT_DOCUMENT_TYPE,
+			DOCCONF.CUSTOM_LABEL,
+			DOCCONF.REQUIRED_FLAG,
+			DOCCONF.PROCUREMENT_ID,
+			DECODE(DOCCONF.PROCUREMENT_DOCUMENT_TYPE,'Proposal','1','Budget','2','3')
+			sortorder
+			FROM PROCUREMENT_DOCUMENT_CONFIG DOCCONF
+		) DOCCONF, PRCRMNT_DOCUMENT_MAPPING PDM,
+		(SELECT PROCUREMENT_DOCUMENT_ID,
+		PRO_DOC_ID,
+		PROPOSAL_DOCUMENT_STATUS_ID,
+		PROC_USER,
+		MODIFIED_DATE,
+		PROCUREMENT_DOCUMENT_TYPE,
+		LAST_MODIFIED_BY,
+		CUSTOM_LABEL,
+		DOC_STATUS
+		FROM
+		
+		(
+		
+		SELECT PD.PROCUREMENT_DOCUMENT_ID,
+		PD.DOCUMENT_IDENTIFIER_ID AS PRO_DOC_ID,
+		PD.PROPOSAL_DOCUMENT_STATUS_ID,
+		PD.PROC_USER,
+		PD.MODIFIED_DATE,
+		DOCCONF.PROCUREMENT_DOCUMENT_TYPE,
+		DOCCONF.CUSTOM_LABEL,
+		(SD.FIRST_NAME
+		||' '
+		||SD.MIDDLE_INITIAL
+		||' '
+		||SD.LAST_NAME) AS LAST_MODIFIED_BY,
+		ST.STATUS AS DOC_STATUS
+		FROM PROPOSAL_DOCUMENT PD,
+		STAFF_DETAILS SD,
+		STATUS_MASTER_R2_R3 ST,
+		PROCUREMENT_DOCUMENT_CONFIG DOCCONF, PRCRMNT_DOCUMENT_MAPPING PDM
+		WHERE PD.MODIFIED_BY_STAFFID = SD.STAFF_ID
+		AND PD.PROPOSAL_ID = #{proposalId}
+		AND ST.STATUS_ID = PD.PROPOSAL_DOCUMENT_STATUS_ID
+		AND DOCCONF.PROCUREMENT_DOCUMENT_TYPE='Proposal'
+		AND DOCCONF.PROCUREMENT_DOCUMENT_ID = PD.PROCUREMENT_DOCUMENT_ID(+)
+		AND DOCCONF.PROCUREMENT_ID = PDM.PROCUREMENT_ID
+		AND DOCCONF.PROCUREMENT_DOCUMENT_ID = PDM.PROCUREMENT_DOCUMENT_ID
+		AND PDM.VERSION_NUMBER = #{docVersionNo}
+		
+		UNION ALL
+		
+		SELECT PD.PROCUREMENT_DOCUMENT_ID,
+		PD.DOCUMENT_IDENTIFIER_ID AS PRO_DOC_ID,
+		PD.PROPOSAL_DOCUMENT_STATUS_ID,
+		PD.PROC_USER,
+		PD.MODIFIED_DATE,
+		DOCCONF.PROCUREMENT_DOCUMENT_TYPE,
+		 DOCCONF.CUSTOM_LABEL,
+		(SD.FIRST_NAME
+		||' '
+		||SD.MIDDLE_INITIAL
+		||' '
+		||SD.LAST_NAME) AS LAST_MODIFIED_BY,
+		ST.STATUS AS DOC_STATUS
+		FROM PROPOSAL_DOCUMENT PD,
+		STAFF_DETAILS SD,
+		STATUS_MASTER_R2_R3 ST,
+		PROCUREMENT_DOCUMENT_CONFIG DOCCONF, PRCRMNT_DOCUMENT_MAPPING PDM
+		WHERE PD.MODIFIED_BY_STAFFID = SD.STAFF_ID
+		AND PD.PROPOSAL_ID = #{proposalId}
+		AND ST.STATUS_ID = PD.PROPOSAL_DOCUMENT_STATUS_ID
+		AND DOCCONF.PROCUREMENT_DOCUMENT_TYPE='Budget'
+		AND DOCCONF.PROCUREMENT_DOCUMENT_ID = PD.PROCUREMENT_DOCUMENT_ID(+)
+		AND DOCCONF.PROCUREMENT_ID = PDM.PROCUREMENT_ID
+		AND DOCCONF.PROCUREMENT_DOCUMENT_ID = PDM.PROCUREMENT_DOCUMENT_ID
+		AND PDM.VERSION_NUMBER = #{docVersionNo}
+
+		UNION ALL
+		
+		SELECT PD.PROCUREMENT_DOCUMENT_ID,
+		PD.DOCUMENT_IDENTIFIER_ID AS PRO_DOC_ID,
+		PD.PROPOSAL_DOCUMENT_STATUS_ID,
+		PD.PROC_USER,
+		PD.MODIFIED_DATE,
+		DOCCONF.PROCUREMENT_DOCUMENT_TYPE,
+		DOCCONF.CUSTOM_LABEL,
+		(SD.FIRST_NAME
+		||' '
+		||SD.MIDDLE_INITIAL
+		||' '
+		||SD.LAST_NAME) AS LAST_MODIFIED_BY,
+		ST.STATUS AS DOC_STATUS
+		FROM PROPOSAL_DOCUMENT PD,
+		STAFF_DETAILS SD,
+		STATUS_MASTER_R2_R3 ST,
+		PROCUREMENT_DOCUMENT_CONFIG DOCCONF, PRCRMNT_DOCUMENT_MAPPING PDM
+		WHERE PD.MODIFIED_BY_STAFFID = SD.STAFF_ID
+		AND PD.PROPOSAL_ID = #{proposalId}
+		AND ST.STATUS_ID = PD.PROPOSAL_DOCUMENT_STATUS_ID
+		AND DOCCONF.PROCUREMENT_DOCUMENT_TYPE NOT IN ('Proposal','Budget')
+		AND DOCCONF.PROCUREMENT_DOCUMENT_ID = PD.PROCUREMENT_DOCUMENT_ID(+)
+		AND DOCCONF.PROCUREMENT_ID = PDM.PROCUREMENT_ID
+		AND DOCCONF.PROCUREMENT_DOCUMENT_ID = PDM.PROCUREMENT_DOCUMENT_ID
+		AND PDM.VERSION_NUMBER = #{docVersionNo}
+		) A
+		) PROPOSAL
+		WHERE DOCCONF.PROCUREMENT_DOCUMENT_ID = PROPOSAL.PROCUREMENT_DOCUMENT_ID(+)
+		AND DOCCONF.PROCUREMENT_ID = PDM.PROCUREMENT_ID
+		AND DOCCONF.PROCUREMENT_DOCUMENT_ID = PDM.PROCUREMENT_DOCUMENT_ID
+		AND PDM.VERSION_NUMBER = #{docVersionNo}
+		AND DOCCONF.PROCUREMENT_ID =#{procurementId}
+		
+		UNION ALL
+		
+		SELECT NULL PROCUREMENT_DOCUMENT_ID,
+		'Best and Final Offer (BAFO)' PROCUREMENT_DOCUMENT_TYPE,
+		null CUSTOM_LABEL,
+		'0' REQUIRED_FLAG,
+		bd.DOCUMENT_IDENTIFIER_ID PRO_DOC_ID,
+		bd.BAFO_DOCUMENT_STATUS_ID,
+		NULL PROC_USER,
+		bd.MODIFIED_DATE,
+		cud.first_name last_modified_by,
+		'Verified' DOC_STATUS, '3' sortorder
+		FROM bafo_document bd, city_user_details cud
+		WHERE bd.proposal_Id=#{proposalId} and cud.user_id = bd.MODIFIED_BY_USERID)
+		ORDER BY
+		sortorder asc, DOCUMENT_TYPE_LABEL asc
+	</select>
+	<insert id="insertProposalDocumentDetails" parameterType="Map">
+		INSERT
+		INTO PROPOSAL_DOCUMENT
+		(PROPOSAL_DOCUMENT_ID,PROCUREMENT_ID,PROPOSAL_ID,PROCUREMENT_DOCUMENT_ID,DOCUMENT_IDENTIFIER_ID,UPLOADED_DATE,
+		PROPOSAL_DOCUMENT_STATUS_ID,PROC_USER,CREATED_DATE,CREATED_BY_STAFFID,MODIFIED_DATE,MODIFIED_BY_STAFFID)
+		VALUES(SEQ_PROPOSAL_DOCUMENT_ID.NEXTVAL,#{procurementId},#{proposalId},#{docReferenceNo},#{documentId},#{docCreatedDate},
+		#{statusId},#{userId},SYSDATE,#{userId},SYSDATE,#{userId})
+	</insert>
+	<update id="removeProposalDocs" parameterType="Map">
+		UPDATE
+		PROPOSAL_DOCUMENT SET
+		DOCUMENT_IDENTIFIER_ID=#{documentId,jdbcType=VARCHAR},MODIFIED_DATE=SYSDATE,MODIFIED_BY_STAFFID=#{userId},
+		PROPOSAL_DOCUMENT_STATUS_ID = #{statusId}
+		WHERE
+		PROCUREMENT_DOCUMENT_ID=#{procurementDocId} AND
+		PROPOSAL_ID=#{proposalId} AND PROCUREMENT_ID=#{procurementId}
+	</update>
+	
+	<!-- Below Query modified for enhancement 3.1.0 :6204 -->
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<update id="updateProposalDetails" parameterType="com.nyc.hhs.model.ProposalDetailsBean">
+		UPDATE
+		PROPOSAL_CONFIG SET
+		PROPOSAL_TITLE = #{proposalTitle},
+		STAFF_ID = #{providerContactId},
+		TOTAL_FUNDING_REQUEST = #{totalFundingRequestBigDec},
+		TOTAL_NUM_OF_SERVICE_REQUEST = #{totalNumberOfServiceLong},
+		TEMP_COMPETITION_POOL_ID = #{competitionPool},
+		MODIFIED_DATE = systimestamp,
+		MODIFIED_BY_USERID = #{modifiedBy},
+		version_number_qc = #{versionNoQuestion},
+		LAST_UPDATE_DATE = systimestamp
+		WHERE
+		PROCUREMENT_ID = #{procurementId} AND
+		PROPOSAL_ID = #{proposalId}
+	</update>
+
+	<update id="updateProposalAnswers" parameterType="com.nyc.hhs.model.ProposalQuestionAnswerBean">
+		UPDATE
+		PROPOSAL_QUESTION_RESPONSE SET
+		CUSTOM_ANSWER = #{answerText},
+		MODIFIED_BY_USERID =
+		#{modifiedBy},
+		MODIFIED_DATE = systimestamp
+		WHERE
+		PROPOSAL_ID =
+		#{proposalId} AND
+		PROCUREMENT_QN_ID = #{procurementQnId}
+	</update>
+
+	<insert id="insertProposalAnswers" parameterType="com.nyc.hhs.model.ProposalQuestionAnswerBean">
+		INSERT into
+		PROPOSAL_QUESTION_RESPONSE (CREATED_BY_USERID, CREATED_DATE,
+		CUSTOM_ANSWER,
+		MODIFIED_BY_USERID,
+		MODIFIED_DATE, PROCUREMENT_QN_ID,
+		PROPOSAL_ID,
+		PROPOSAL_QN_RESPONSE_ID)
+		VALUES (#{modifiedBy},
+		systimestamp,
+		#{answerText},
+		#{modifiedBy}, systimestamp,
+		#{procurementQnId}, #{proposalId},
+		SEQ_PROPOSAL_QUE_RESPONSE_ID.NEXTVAL)
+	</insert>
+
+	<delete id="deleteProposalSiteDetails" parameterType="com.nyc.hhs.model.SiteDetailsBean">
+		DELETE FROM
+		PROPOSAL_SITE
+		WHERE
+		PROPOSAL_ID=#{proposalId} and
+		PROCUREMENT_ID =
+		#{procurementId} and
+		PROPOSAL_SITE_ID = #{proposalSiteId} 
+	</delete>
+	<!--Release 3.6.0 Enhancement id 6484 -->
+	<update id="deleteSubBudgetSiteDetails" parameterType="com.nyc.hhs.model.SiteDetailsBean">
+		DELETE FROM
+		SUB_BUDGET_SITE
+		WHERE
+		SUB_BUDGET_ID=#{subBudgetId} 
+	</update>
+
+	<insert id="insertProposalSiteDetails" parameterType="com.nyc.hhs.model.SiteDetailsBean">
+		INSERT into
+		PROPOSAL_SITE (CREATED_BY_USERID, CREATED_DATE, ADDRESS1, ADDRESS2,
+		MODIFIED_BY_USERID, MODIFIED_DATE, PROCUREMENT_ID, PROPOSAL_ID,
+		PROPOSAL_SITE_ID,
+		CITY, SITE_NAME, STATE, ZIP_CODE,
+		VAL_ASSEMBLY_DISTRICT, VAL_BOROUGH, VAL_BUILDING_ID_NUMBER,
+		VAL_CITY,
+		VAL_CIVIAL_COURT_DISTRICT, VAL_COMMUNITY_DISTRICT,
+		VAL_CONGRESS_DISTRICT, VAL_COUNCIL_DISTRICT, VAL_HEALTH_AREA,
+		VAL_HIGH_END_CROSS_STREET_NAME, VAL_HIGH_END_CROSS_STREET_NO,
+		VAL_LATITUDE,
+		VAL_LONGITUDE, VAL_LOW_END_CROSS_STREET_NAME,
+		VAL_LOW_END_CROSS_STREET_NO,
+		VAL_NORM_HOUSE_NUMBER,
+		VAL_NORM_STREET_NAME, VAL_SCHOOL_DISTR_NAME,
+		VAL_SENATOR_DISTRICT,
+		VAL_STATE, VAL_STATUS_DECSCRIPTION,
+		VAL_STATUS_REASON_TEXT,
+		VAL_TAX_BLOCK, VAL_TAX_LOT,
+		VAL_X_COORDINATE, VAL_Y_COORDINATE,
+		VAL_ZIP_CODE)
+		VALUES (#{modifiedBy}, systimestamp,
+		#{address1},
+		#{address2},
+		#{modifiedBy}, systimestamp, #{procurementId},
+		#{proposalId},
+		SEQ_PROPOSAL_SITE_ID.NEXTVAL,
+		#{city}, #{siteName},
+		#{state}, #{zipCode},
+		#{valAssemblyDistrict}, #{valBorough},
+		#{valBuildingIdNumber},
+		#{valCity}, #{valCivialCourtDistrict},
+		#{valCommunityDistrict},
+		#{valCongressDistrict}, #{valCouncilDistrict},
+		#{valHealthArea},
+		#{valHighEndCrossStreetName},
+		#{valHighEndCrossStreetNo},
+		#{valLatitude},
+		#{valLongitude},
+		#{valLowEndCrossStreetName}, #{valLowEndCrossStreetNo},
+		#{valNormHouseNumber}, #{valNormStreetName}, #{valSchoolDistrName},
+		#{valSenatorDistrict}, #{valState}, #{valStatusDescription},
+		#{valStatusReasonText}, #{valTaxBlock}, #{valTaxLot},
+		#{valXCoordinate}, #{valYCoordinate}, #{valZipCode})
+	</insert>
+
+	<!-- Made changes for Release 3.6.0 for Enhancement id 6484     -->
+	<insert id="insertSubBudgetSiteDetails" parameterType="com.nyc.hhs.model.SiteDetailsBean">
+		INSERT into
+		SUB_BUDGET_SITE (CREATED_BY_USERID, CREATED_DATE, ADDRESS1, ADDRESS2,
+		MODIFIED_BY_USERID, MODIFIED_DATE,CREATED_BY_STAFFID,MODIFIED_BY_STAFFID,
+		SUB_BUDGET_SITE_ID,SUB_BUDGET_ID,ACTIVE_FLAG,
+		CITY, SITE_NAME, STATE, ZIP_CODE,
+		VAL_ASSEMBLY_DISTRICT, VAL_BOROUGH, VAL_BUILDING_ID_NUMBER,
+		VAL_CITY,
+		VAL_CIVIAL_COURT_DISTRICT, VAL_COMMUNITY_DISTRICT,
+		VAL_CONGRESS_DISTRICT, VAL_COUNCIL_DISTRICT, VAL_HEALTH_AREA,
+		VAL_HIGH_END_CROSS_STREET_NAME, VAL_HIGH_END_CROSS_STREET_NO,
+		VAL_LATITUDE,
+		VAL_LONGITUDE, VAL_LOW_END_CROSS_STREET_NAME,
+		VAL_LOW_END_CROSS_STREET_NO,
+		VAL_NORM_HOUSE_NUMBER,
+		VAL_NORM_STREET_NAME, VAL_SCHOOL_DISTR_NAME,
+		VAL_SENATOR_DISTRICT,
+		VAL_STATE, VAL_STATUS_DECSCRIPTION,
+		VAL_STATUS_REASON_TEXT,
+		VAL_TAX_BLOCK, VAL_TAX_LOT,
+		VAL_X_COORDINATE, VAL_Y_COORDINATE,
+		VAL_ZIP_CODE)
+		VALUES (null, systimestamp,
+		#{address1},
+		#{address2},
+		null, systimestamp,#{modifiedBy},#{modifiedBy},
+		SEQ_SUB_BUDGET_SITE_ID.NEXTVAL,#{subBudgetId},'1',
+		#{city}, #{siteName},
+		#{state}, #{zipCode},
+		#{valAssemblyDistrict}, #{valBorough},
+		#{valBuildingIdNumber},
+		#{valCity}, #{valCivialCourtDistrict},
+		#{valCommunityDistrict},
+		#{valCongressDistrict}, #{valCouncilDistrict},
+		#{valHealthArea},
+		#{valHighEndCrossStreetName},
+		#{valHighEndCrossStreetNo},
+		#{valLatitude},
+		#{valLongitude},
+		#{valLowEndCrossStreetName}, #{valLowEndCrossStreetNo},
+		#{valNormHouseNumber}, #{valNormStreetName}, #{valSchoolDistrName},
+		#{valSenatorDistrict}, #{valState}, #{valStatusDescription},
+		#{valStatusReasonText}, #{valTaxBlock}, #{valTaxLot},
+		#{valXCoordinate}, #{valYCoordinate}, #{valZipCode})
+	</insert>
+
+
+	<update id="updateProposalSiteDetails" parameterType="com.nyc.hhs.model.SiteDetailsBean">
+		UPDATE
+		PROPOSAL_SITE SET
+		ADDRESS1 = #{address1},
+		ADDRESS2 = #{address2},
+		CITY =
+		#{city},
+		SITE_NAME = #{siteName},
+		STATE = #{state},
+		ZIP_CODE =
+		#{zipCode},
+		MODIFIED_BY_USERID = #{modifiedBy},
+		MODIFIED_DATE =
+		systimestamp,
+		VAL_ASSEMBLY_DISTRICT = #{valAssemblyDistrict},
+		VAL_BOROUGH = #{valBorough},
+		VAL_BUILDING_ID_NUMBER =
+		#{valBuildingIdNumber},
+		VAL_CITY = #{valCity},
+		VAL_CIVIAL_COURT_DISTRICT = #{valCivialCourtDistrict},
+		VAL_COMMUNITY_DISTRICT = #{valCommunityDistrict},
+		VAL_CONGRESS_DISTRICT = #{valCongressDistrict},
+		VAL_COUNCIL_DISTRICT =
+		#{valCouncilDistrict},
+		VAL_HEALTH_AREA = #{valHealthArea},
+		VAL_HIGH_END_CROSS_STREET_NAME = #{valHighEndCrossStreetName},
+		VAL_HIGH_END_CROSS_STREET_NO = #{valHighEndCrossStreetNo},
+		VAL_LATITUDE = #{valLatitude},
+		VAL_LONGITUDE = #{valLongitude},
+		VAL_LOW_END_CROSS_STREET_NAME = #{valLowEndCrossStreetName},
+		VAL_LOW_END_CROSS_STREET_NO = #{valLowEndCrossStreetNo},
+		VAL_NORM_HOUSE_NUMBER = #{valNormHouseNumber},
+		VAL_NORM_STREET_NAME =
+		#{valNormStreetName},
+		VAL_SCHOOL_DISTR_NAME = #{valSchoolDistrName},
+		VAL_SENATOR_DISTRICT = #{valSenatorDistrict},
+		VAL_STATE = #{valState},
+		VAL_STATUS_DECSCRIPTION = #{valStatusDescription},
+		VAL_STATUS_REASON_TEXT = #{valStatusReasonText},
+		VAL_TAX_BLOCK =
+		#{valTaxBlock},
+		VAL_TAX_LOT = #{valTaxLot},
+		VAL_X_COORDINATE =
+		#{valXCoordinate},
+		VAL_Y_COORDINATE = #{valYCoordinate},
+		VAL_ZIP_CODE =
+		#{valZipCode}
+		WHERE
+		PROCUREMENT_ID = #{procurementId} AND
+		PROPOSAL_ID =
+		#{proposalId} AND
+		PROPOSAL_SITE_ID = #{proposalSiteId}
+	</update>
+	<!--Release 3.6.0 Enhancement id 6484 -->
+	<update id="updateSubBudgetSiteDetails" parameterType="com.nyc.hhs.model.SiteDetailsBean">
+		UPDATE
+		SUB_BUDGET_SITE SET
+		ADDRESS1 = #{address1},
+		ADDRESS2 = #{address2},
+		CITY =
+		#{city},
+		SITE_NAME = #{siteName},
+		STATE = #{state},
+		ZIP_CODE =
+		#{zipCode},
+		MODIFIED_BY_STAFFID = #{modifiedBy},
+		MODIFIED_DATE =
+		systimestamp,
+		VAL_ASSEMBLY_DISTRICT = #{valAssemblyDistrict},
+		VAL_BOROUGH = #{valBorough},
+		VAL_BUILDING_ID_NUMBER =
+		#{valBuildingIdNumber},
+		VAL_CITY = #{valCity},
+		VAL_CIVIAL_COURT_DISTRICT = #{valCivialCourtDistrict},
+		VAL_COMMUNITY_DISTRICT = #{valCommunityDistrict},
+		VAL_CONGRESS_DISTRICT = #{valCongressDistrict},
+		VAL_COUNCIL_DISTRICT =
+		#{valCouncilDistrict},
+		VAL_HEALTH_AREA = #{valHealthArea},
+		VAL_HIGH_END_CROSS_STREET_NAME = #{valHighEndCrossStreetName},
+		VAL_HIGH_END_CROSS_STREET_NO = #{valHighEndCrossStreetNo},
+		VAL_LATITUDE = #{valLatitude},
+		VAL_LONGITUDE = #{valLongitude},
+		VAL_LOW_END_CROSS_STREET_NAME = #{valLowEndCrossStreetName},
+		VAL_LOW_END_CROSS_STREET_NO = #{valLowEndCrossStreetNo},
+		VAL_NORM_HOUSE_NUMBER = #{valNormHouseNumber},
+		VAL_NORM_STREET_NAME =
+		#{valNormStreetName},
+		VAL_SCHOOL_DISTR_NAME = #{valSchoolDistrName},
+		VAL_SENATOR_DISTRICT = #{valSenatorDistrict},
+		VAL_STATE = #{valState},
+		VAL_STATUS_DECSCRIPTION = #{valStatusDescription},
+		VAL_STATUS_REASON_TEXT = #{valStatusReasonText},
+		VAL_TAX_BLOCK =
+		#{valTaxBlock},
+		VAL_TAX_LOT = #{valTaxLot},
+		VAL_X_COORDINATE =
+		#{valXCoordinate},
+		VAL_Y_COORDINATE = #{valYCoordinate},
+		VAL_ZIP_CODE =
+		#{valZipCode}
+		WHERE
+		SUB_BUDGET_ID=#{subBudgetId,jdbcType=NUMERIC}
+		and ACTIVE_FLAG='1'
+	</update>
+
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<select id="getProposalTitle" parameterType="string" resultType="map">
+		SELECT PROCONF.PROPOSAL_TITLE, St.Status, PROCONF.PROPOSAL_STATUS_ID,
+		proconf.PROC_REVIEW_STATUS_ID, pro.procurement_title,
+		pro.status_id as
+		PROC_STATUS_ID, AGN.AGENCY_NAME, AGN.AGENCY_ID,
+		TO_CHAR(PROCONF.MODIFIED_DATE,'MM/DD/yyyy') as MODIFIED_DATE,
+		TO_CHAR(PROCONF.MODIFIED_DATE,'MM/DD/YYYY') || ' @ '
+		||to_char(PROCONF.MODIFIED_DATE,'HH:MI AM') || '
+		'||EXTRACT(timezone_abbr FROM current_timestamp) as PROP_MOD_DATE,
+		ORG.ORGANIZATION_LEGAL_NAME,
+		ORG.ORGANIZATION_ID,
+		CP.COMPETITION_POOL_TITLE,
+		PRO.IS_OPEN_ENDED_RFP,
+		PROCONF.EVALUATION_GROUP_ID 
+		from PROPOSAL_CONFIG PROCONF,
+		Status_master_r2_r3 st, Procurement PRO, nyc_agency_details AGN,
+		ORGANIZATION ORG, COMPETITION_POOL CP
+		WHERE
+		PROCONF.PROPOSAL_STATUS_ID =
+		St.Status_id
+		and proconf.procurement_id = pro.procurement_id
+		AND
+		AGN.AGENCY_ID = PRO.AGENCY_ID
+		AND PROCONF.ORGANIZATION_ID =
+		ORG.ORGANIZATION_ID
+		and PROCONF.COMPETITION_POOL_ID =
+		CP.COMPETITION_POOL_ID(+)
+		and PROCONF.PROPOSAL_ID = #{proposalId}
+	</select>
+
+	<select id="getProposalSubmittedDate" parameterType="string" resultType="string">
+        SELECT 
+        TO_CHAR(PROCONF.MODIFIED_DATE,'MM/DD/YYYY') || ' at ' ||to_char(PROCONF.MODIFIED_DATE,'HH:MI AM') as PROP_MOD_DATE
+        from PROPOSAL_CONFIG PROCONF
+        WHERE
+		PROCONF.PROPOSAL_ID = #{proposalId}
+    </select>
+	<!-- <update id="updateProposalDocumentProperties" parameterType="Map">
+		UPDATE PROPOSAL_DOCUMENT SET
+		DOCUMENT_TITLE=#{DocumentTitle},MODIFIED_DATE=SYSDATE,MODIFIED_BY_USERID=#{modifiedBy}
+		where PROCUREMENT_DOCUMENT_ID=#{procurementDocId}
+	</update>-->
+
+	<resultMap id="proposalDocumentDetails" type="com.nyc.hhs.model.ExtendedDocument">
+		<result property="documentId" column="DOCUMENT_IDENTIFIER_ID" />
+		<result property="documentType" column="PROCUREMENT_DOCUMENT_TYPE" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+		<result property="documentStatus" column="PREV_DOC_STATUS" />
+		<result property="isRequiredDoc" column="REQUIRED_FLAG" />
+		<result property="assignStatus" column="CURR_DOC_STATUS" />
+		<result property="procurementDocumentId" column="procurement_document_id" />
+		<result property="customLabelName" column="DOCUMENT_TYPE_LABEL" />
+		<!-- 	modified for R5 starts -->
+		<result property="visibility" column="VISIBILITY_FLAG" />
+		<!-- 	modified for R5 ends -->
+	</resultMap>
+	<!-- Query has been updated as part of BAFO Upload document change 
+	so as to accomodate BAFO document in the document list-->
+	<!--Modified as a part of release 3.6.0 for enhancement request 6485-->
+	<!-- 	modified for R5 starts -->
+	<!--Fix for Defect 8229 -->
+	<select id="fetchProposalDocuments" parameterType="hashmap"
+		resultMap="proposalDocumentDetails">
+		select doc_details.DOCUMENT_IDENTIFIER_ID,
+		NVL(doc_details.MODIFIED_DATE, 'N/A') as MODIFIED_DATE,
+		(case when doc_details.PROCUREMENT_DOCUMENT_TYPE = 'Solicitation - Other' then doc_details.CUSTOM_LABEL
+		else doc_details.PROCUREMENT_DOCUMENT_TYPE
+		end) AS DOCUMENT_TYPE_LABEL,
+		doc_details.PROCUREMENT_DOCUMENT_TYPE,
+		doc_details.Required_flag,
+		NVL(st.status, 'Not Started') as PREV_DOC_STATUS,
+		st1.status as
+		CURR_DOC_STATUS, doc_details.procurement_document_id from
+		(select
+		PRODOC.DOCUMENT_IDENTIFIER_ID DOCUMENT_IDENTIFIER_ID,
+		TO_CHAR(PRODOC.MODIFIED_DATE,'MM/DD/yyyy') as MODIFIED_DATE,
+		docconf.procurement_document_type procurement_document_type,
+		docconf.CUSTOM_LABEL,
+		decode(docconf.required_flag,'1','Required','0','Optional') as
+		Required_flag,
+		prodoc.proposal_document_status_id,
+		prodoc.PROC_STATUS_ID,
+		DOCCONF.procurement_document_id
+		from
+		(select *
+		from proposal_document where proposal_id = #{proposalId,
+		jdbcType=VARCHAR}) PRODOC, procurement_document_config DOCCONF
+		, PRCRMNT_DOCUMENT_MAPPING PDM where
+		prodoc.procurement_document_id(+) = docconf.procurement_document_id
+		AND DOCCONF.PROCUREMENT_ID = PDM.PROCUREMENT_ID
+		AND DOCCONF.PROCUREMENT_DOCUMENT_ID = PDM.PROCUREMENT_DOCUMENT_ID
+		AND PDM.VERSION_NUMBER = #{docVersionNo}
+		and
+		docconf.Procurement_Id = #{procurementId, jdbcType=VARCHAR} and
+		(docconf.required_flag = 1 or PRODOC.DOCUMENT_IDENTIFIER_ID is not
+		null)) doc_details,
+		Status_master_r2_r3 st, Status_master_r2_r3 st1
+		where doc_details.proposal_document_status_id = st.status_id(+) and
+		((doc_details.PROC_STATUS_ID is not null and
+		doc_details.PROC_STATUS_ID = st1.status_id)
+		or
+		(doc_details.PROC_STATUS_ID is null and st1.status_id = 29))
+		UNION ALL
+		select bd.DOCUMENT_IDENTIFIER_ID,
+		NVL(TO_CHAR(bd.MODIFIED_DATE,'MM/DD/yyyy'),'N/A') as
+		MODIFIED_DATE,'Best and Final Offer (BAFO)' PROCUREMENT_DOCUMENT_TYPE,
+		null CUSTOM_LABEL,
+		'Optional' REQUIRED_FLAG, null PREV_DOC_STATUS, 'Verified'
+		CURR_DOC_STATUS , null PROCUREMENT_DOCUMENT_ID
+		from bafo_document bd
+		where bd.proposal_Id=#{proposalId,
+		jdbcType=VARCHAR}
+		order by
+		Required_flag desc,
+		DOCUMENT_TYPE_LABEL asc
+	</select>
+	<!-- 	modified for R5 ends -->
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<select id="fetchProposalDetailsForTask" parameterType="string"
+		resultType="map">
+		SELECT TO_CHAR(PROCONF.MODIFIED_DATE,'MM/DD/yyyy') AS
+		MODIFIED_DATE,
+		TO_CHAR(PROCONF.MODIFIED_DATE,'MM/DD/yyyy') || ' at ' ||
+		to_char(PROCONF.MODIFIED_DATE, 'hh:mi AM') as
+		PROP_SUBMIT_DATE,
+		decode(ST1.STATUS, 'Accepted for Evaluation','Verified', 'Returned for Revision','Returned',
+		'Non-Responsive', 'Non-Responsive','Submitted')
+		as
+		CURR_PROC_STATUS,decode(ST2.STATUS, 'Accepted for
+		Evaluation','Verified', 'Returned for Revision','Returned',
+		'Non-Responsive', 'Submitted',
+		'Submitted') as PREV_PROC_STATUS, 
+		to_char(PROCONF.VERSION_NUMBER_QC) VERSION_NUMBER_QC, 
+		to_char(PROCONF.VERSION_NUMBER_DC) VERSION_NUMBER_DC,
+		to_char(eg.VERSION_NUMBER_PQC) VERSION_NUMBER_PQC,
+		to_char(eg.VERSION_NUMBER_PDC) VERSION_NUMBER_PDC
+		FROM
+		PROPOSAL_CONFIG PROCONF, status_master_r2_r3 ST1,
+		status_master_r2_r3 ST2, evaluation_group eg  
+		WHERE ((proconf.proc_status_id is not null and st1.status_id =
+		proconf.proc_status_id) or
+		(proconf.proc_status_id is null and
+		st1.status_id = proconf.proposal_status_id))
+		and
+		((proconf.proc_review_status_id is not null and st2.status_id =
+		proconf.proc_review_status_id) or
+		(proconf.proc_review_status_id is
+		null and st2.status_id = proconf.proposal_status_id))
+		and PROCONF.evaluation_group_id = eg.evaluation_group_id(+)
+		and PROCONF.PROPOSAL_ID = #{proposalId, jdbcType=VARCHAR}
+	</select>
+
+		<!-- Made changes for enhancement 6467 release 3.4.0 -->
+		<select id="fetchRequiredQuestionDocumentCount" parameterType="string"
+		resultType="Integer">
+			SELECT COUNT(quesDocCount)
+			   FROM
+			  (SELECT procurement_id as quesDocCount
+			     FROM procurement_document_config
+			    WHERE procurement_document_id IN
+			    (SELECT pdm.procurement_document_id
+			       FROM PROPOSAL_CONFIG PROCONF ,
+			      evaluation_group eg           ,
+			      prcrmnt_document_mapping pdm
+			      WHERE PROCONF.evaluation_group_id = eg.evaluation_group_id
+			    AND PROCONF.PROPOSAL_ID             = #{proposalId, jdbcType=VARCHAR}
+			    AND PROCONF.PROCUREMENT_ID          = pdm.procurement_id
+			    AND eg.version_number_pdc           = pdm.version_number minus
+			     SELECT pdm.procurement_document_id
+			       FROM PROPOSAL_CONFIG PROCONF ,
+			      evaluation_group eg           ,
+			      prcrmnt_document_mapping pdm
+			      WHERE PROCONF.evaluation_group_id = eg.evaluation_group_id
+			    AND PROCONF.PROPOSAL_ID             = #{proposalId, jdbcType=VARCHAR}
+			    AND PROCONF.PROCUREMENT_ID          = pdm.procurement_id
+			    AND PROCONF.version_number_dc       = pdm.version_number
+			    )
+			  AND required_flag! =0
+			
+			UNION ALL
+			    (SELECT pqm.PROCUREMENT_QN_ID as quesDocCount
+			       FROM PROPOSAL_CONFIG PROCONF ,
+			      evaluation_group eg           ,
+			      prcrmnt_question_mapping pqm
+			      WHERE PROCONF.evaluation_group_id = eg.evaluation_group_id
+			    AND PROCONF.PROPOSAL_ID             = #{proposalId, jdbcType=VARCHAR}
+			    AND PROCONF.PROCUREMENT_ID          = pqm.procurement_id
+			    AND eg.version_number_pqc           = pqm.version_number minus
+			     SELECT pqm.PROCUREMENT_QN_ID as quesDocCount
+			       FROM PROPOSAL_CONFIG PROCONF ,
+			      evaluation_group eg           ,
+			      prcrmnt_question_mapping pqm
+			      WHERE PROCONF.evaluation_group_id = eg.evaluation_group_id
+			    AND PROCONF.PROPOSAL_ID             = #{proposalId, jdbcType=VARCHAR}
+			    AND PROCONF.PROCUREMENT_ID          = pqm.procurement_id
+			    AND PROCONF.version_number_qc       = pqm.version_number
+			    )
+			  )
+		</select>
+  
+	<update id="updateProposalDocumentStatus" parameterType="com.nyc.hhs.model.ExtendedDocument">
+		UPDATE
+		PROPOSAL_DOCUMENT SET PROC_STATUS_ID = #{documentStatus},
+		MODIFIED_BY_USERID = #{lastModifiedById} WHERE
+		PROPOSAL_ID =
+		#{proposalId} AND PROCUREMENT_DOCUMENT_ID =
+		#{procurementDocumentId}
+	</update>
+
+	<update id="updateDocumentStatusSubmitted" parameterType="hashmap">
+		UPDATE
+		PROPOSAL_DOCUMENT SET PROPOSAL_DOCUMENT_STATUS_ID = 29
+		WHERE
+		PROPOSAL_ID = #{proposalId} AND PROPOSAL_DOCUMENT_STATUS_ID = 28
+	</update>
+
+	<update id="resetDocumentStatusCompleted" parameterType="String">
+		UPDATE
+		PROPOSAL_DOCUMENT SET PROPOSAL_DOCUMENT_STATUS_ID = 28
+		WHERE
+		PROPOSAL_ID = #{asProposalId} 
+	</update>
+
+	<resultMap type="com.nyc.hhs.model.UserBean" id="permittedUserMap">
+		<result property="msUserName" column="UserName" />
+		<result property="msUserId" column="USER_ID" />
+	</resultMap>
+
+	<!-- Query Change made as a part of Enhancement #6280 for Release 3.3.0  -->
+	<select id="fetchPermittedUsers" parameterType="hashmap"
+		resultMap="permittedUserMap">
+		select first_name||' '||last_name as UserName, USER_ID from
+		city_user_details where
+		user_role IN
+		<foreach item="items" index="index" collection="userRoleList"
+			open="(" separator="," close=")">
+			#{items}
+    	</foreach>
+		<if test="userId != null">
+			and user_id != #{userId}
+		</if>
+		and ORGANIZATION_NAME = #{orgId}
+		AND active_flag = 1 order by UserName asc
+	</select>
+
+   <!--Modified as a part of release 3.6.0 for enhancement request 6485-->
+	<resultMap id="proposalDocument" type="com.nyc.hhs.model.ExtendedDocument">
+		<result property="documentId" column="DOCUMENT_IDENTIFIER_ID" />
+		<result property="documentType" column="PROCUREMENT_DOCUMENT_TYPE" />
+		<result property="documentStatus" column="DOC_STATUS" />
+		<result property="isRequiredDoc" column="REQUIRED_FLAG" />
+		<result property="customLabelName" column="DOCUMENT_TYPE_LABEL" />
+	</resultMap>
+	<!-- Query has been updated as part of BAFO Upload document change 
+	so as to accomodate BAFO document in the document list-->
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<!--Modified as a part of release 3.6.0 for enhancement request 6485-->
+	<select id="getProposalDocuments" parameterType="Map"
+		resultMap="proposalDocument">
+		Select procurement_document_id, doc_status,
+		PROCUREMENT_DOCUMENT_TYPE,
+		(case when PROCUREMENT_DOCUMENT_TYPE = 'Other' 
+    	then CUSTOM_LABEL
+		else PROCUREMENT_DOCUMENT_TYPE
+		end) AS DOCUMENT_TYPE_LABEL,
+		DECODE(REQUIRED_FLAG,'1','Required','0','Optional') AS REQUIRED_FLAG,
+		DOCUMENT_IDENTIFIER_ID
+		from (
+		
+		SELECT
+		DOCCONF.PROCUREMENT_DOCUMENT_ID,PROPOSAL.DOC_STATUS,
+		DOCCONF.PROCUREMENT_DOCUMENT_TYPE,
+		DOCCONF.CUSTOM_LABEL,
+		DOCCONF.REQUIRED_FLAG,PROPOSAL.PRO_DOC_ID AS DOCUMENT_IDENTIFIER_ID,
+		proposal.SORTORDER
+		FROM PROCUREMENT_DOCUMENT_CONFIG DOCCONF, PRCRMNT_DOCUMENT_MAPPING PDM, 
+		(SELECT
+		PROCUREMENT_DOCUMENT_ID,PRO_DOC_ID,PROCUREMENT_DOCUMENT_TYPE,DOC_STATUS,SORTORDER
+		FROM(
+		SELECT PD.PROCUREMENT_DOCUMENT_ID,PD.DOCUMENT_IDENTIFIER_ID AS
+		PRO_DOC_ID,DOCCONF.PROCUREMENT_DOCUMENT_TYPE,ST.STATUS AS
+		DOC_STATUS,'1' AS SORTORDER FROM PROPOSAL_DOCUMENT PD,
+		STATUS_MASTER_R2_R3 ST,PROCUREMENT_DOCUMENT_CONFIG DOCCONF, PRCRMNT_DOCUMENT_MAPPING PDM 
+		WHERE
+		PD.PROPOSAL_ID=#{proposalId} AND ST.STATUS_ID =
+		PD.PROPOSAL_DOCUMENT_STATUS_ID AND
+		DOCCONF.PROCUREMENT_DOCUMENT_TYPE='Proposal'
+		AND
+		DOCCONF.PROCUREMENT_DOCUMENT_ID = PD.PROCUREMENT_DOCUMENT_ID(+)
+		AND DOCCONF.PROCUREMENT_ID = PDM.PROCUREMENT_ID
+		AND DOCCONF.PROCUREMENT_DOCUMENT_ID = PDM.PROCUREMENT_DOCUMENT_ID
+		AND PDM.VERSION_NUMBER = #{docVersionNo})
+
+		UNION ALL
+		
+		SELECT
+		PROCUREMENT_DOCUMENT_ID,PRO_DOC_ID,PROCUREMENT_DOCUMENT_TYPE,DOC_STATUS,SORTORDER
+		FROM(
+		SELECT PD.PROCUREMENT_DOCUMENT_ID,PD.DOCUMENT_IDENTIFIER_ID AS
+		PRO_DOC_ID,DOCCONF.PROCUREMENT_DOCUMENT_TYPE,
+		DOCCONF.CUSTOM_LABEL,
+		ST.STATUS AS
+		DOC_STATUS,'2' AS SORTORDER FROM PROPOSAL_DOCUMENT PD,
+		STATUS_MASTER_R2_R3 ST,PROCUREMENT_DOCUMENT_CONFIG DOCCONF, PRCRMNT_DOCUMENT_MAPPING PDM 
+		WHERE
+		PD.PROPOSAL_ID=#{proposalId} AND ST.STATUS_ID =
+		PD.PROPOSAL_DOCUMENT_STATUS_ID AND
+		DOCCONF.PROCUREMENT_DOCUMENT_TYPE='Budget'
+		AND
+		DOCCONF.PROCUREMENT_DOCUMENT_ID = PD.PROCUREMENT_DOCUMENT_ID(+)
+		AND DOCCONF.PROCUREMENT_ID = PDM.PROCUREMENT_ID
+		AND DOCCONF.PROCUREMENT_DOCUMENT_ID = PDM.PROCUREMENT_DOCUMENT_ID
+		AND PDM.VERSION_NUMBER = #{docVersionNo})
+		
+		UNION ALL
+		
+		SELECT
+		PROCUREMENT_DOCUMENT_ID,PRO_DOC_ID,PROCUREMENT_DOCUMENT_TYPE,DOC_STATUS,SORTORDER
+		FROM(
+		SELECT PD.PROCUREMENT_DOCUMENT_ID,PD.DOCUMENT_IDENTIFIER_ID AS
+		PRO_DOC_ID,DOCCONF.PROCUREMENT_DOCUMENT_TYPE,
+		DOCCONF.CUSTOM_LABEL,
+		ST.STATUS AS
+		DOC_STATUS,'3' AS SORTORDER FROM PROPOSAL_DOCUMENT PD,
+		STATUS_MASTER_R2_R3 ST,PROCUREMENT_DOCUMENT_CONFIG DOCCONF, PRCRMNT_DOCUMENT_MAPPING PDM 
+		WHERE
+		PD.PROPOSAL_ID=#{proposalId} AND ST.STATUS_ID =
+		PD.PROPOSAL_DOCUMENT_STATUS_ID AND
+		DOCCONF.PROCUREMENT_DOCUMENT_TYPE!='Proposal'
+		AND
+		DOCCONF.PROCUREMENT_DOCUMENT_TYPE!='Budget' AND
+		DOCCONF.PROCUREMENT_DOCUMENT_ID = PD.PROCUREMENT_DOCUMENT_ID(+)
+		AND DOCCONF.PROCUREMENT_ID = PDM.PROCUREMENT_ID
+		AND DOCCONF.PROCUREMENT_DOCUMENT_ID = PDM.PROCUREMENT_DOCUMENT_ID
+		AND PDM.VERSION_NUMBER = #{docVersionNo})
+		) PROPOSAL
+		
+		WHERE
+		DOCCONF.PROCUREMENT_DOCUMENT_ID =
+		PROPOSAL.PROCUREMENT_DOCUMENT_ID(+) 
+		AND DOCCONF.PROCUREMENT_ID = PDM.PROCUREMENT_ID
+		AND DOCCONF.PROCUREMENT_DOCUMENT_ID = PDM.PROCUREMENT_DOCUMENT_ID
+		AND PDM.VERSION_NUMBER = #{docVersionNo}
+		AND DOCCONF.PROCUREMENT_ID=#{procurementId}
+		AND (DOCCONF.REQUIRED_FLAG = 1 OR PROPOSAL.PRO_DOC_ID IS NOT NULL)
+		
+		Union all
+		
+		select null PROCUREMENT_DOCUMENT_ID, 'Verified' DOC_STATUS ,'Best and Final Offer (BAFO)' PROCUREMENT_DOCUMENT_TYPE,
+		null CUSTOM_LABEL,
+		'0' REQUIRED_FLAG_LOCAl,
+		bd.DOCUMENT_IDENTIFIER_ID, '3' AS SORTORDER
+		from bafo_document bd
+		where
+		bd.proposal_Id=#{proposalId})
+		ORDER BY REQUIRED_FLAG DESC, SORTORDER ASC, DOCUMENT_TYPE_LABEL ASC		
+		
+	</select>
+
+	<select id="fetchProcurementTitle" parameterType="String"
+		resultType="String">
+		SELECT PROCUREMENT_TITLE
+		FROM PROCUREMENT
+		WHERE
+		PROCUREMENT_ID = #{asProcurementId}
+	</select>
+	
+	<!-- Below Query modified for enhancement 3.1.0 :6204 -->
+	<update id="updateProposalTaskStatus" parameterType="map">
+		UPDATE
+		PROPOSAL_CONFIG SET proc_status_id = #{processStatusId},LAST_UPDATE_DATE = systimestamp WHERE
+		proposal_id = #{proposalId}
+	</update>
+
+	<update id="updateProposalDocumentStatusForTask" parameterType="hashmap">
+		update PROPOSAL_DOCUMENT prodoc set PROPOSAL_DOCUMENT_STATUS_ID = (
+		select PROC_STATUS_ID from proposal_Document PD where
+		PD.proposal_id =
+		#{proposalId} and PD.PROC_STATUS_ID is not null and
+		pd.proposal_document_id=prodoc.proposal_document_id)
+		where
+		prodoc.proposal_id = #{proposalId} and prodoc.PROC_STATUS_ID is not
+		null 
+	</update>
+
+	<select id="fetchProcTitleAndOrgId" parameterType="string"
+		resultType="map">
+		select pro.procurement_title, proconf.organization_id from
+		procurement pro, proposal_config proconf
+		where
+		proconf.procurement_id=pro.procurement_id and proconf.proposal_id =
+		#{proposalId}
+	</select>
+
+	<update id="updateApprovedProviderStatus" parameterType="map">
+		update
+		PROCUREMENT_PROVIDER set
+		MODIFIED_DATE = SYSDATE,
+		PROVIDER_STATUS_ID =
+		case when #{STATUS_ID} = 3 and #{DRAFT} = 0 and #{SUBMIT} = 0 then 9
+		when #{STATUS_ID} = 3 and #{SUBMIT} > 0 then 12
+		when #{STATUS_ID} = 3
+		and #{DRAFT} > 0 and #{SUBMIT} = 0 then 11
+		when (#{STATUS_ID} = 4 or
+		#{STATUS_ID} = 5) and #{SUBMIT} > 0 then 12
+		when (#{STATUS_ID} = 4 or
+		#{STATUS_ID} = 5) and #{SUBMIT} = 0 then 15
+		end
+		where ORGANIZATION_ID =
+		#{organizationId} and
+		PROCUREMENT_ID = #{procurementId}
+	</update>
+
+	<select id="getApprovedProviderDetailForProposal" parameterType="map"
+		resultType="map">
+		select (select count(1) from proposal_config where
+		procurement_id = #{procurementId} and proposal_status_id =
+		#{PROPOSAL_DRAFT}) draft,
+		(select count(1) from proposal_config where
+		procurement_id = #{procurementId}
+		and proposal_status_id =
+		#{PROPOSAL_SUBMITTED}) submit,
+		Status_id
+		from procurement
+		where
+		procurement_id = #{procurementId} and rownum = 1
+	</select>
+
+	<select id="getProposalDocumentStatus" parameterType="Map"
+		resultType="String">
+		select PROPOSAL_DOCUMENT_STATUS_ID from proposal_document
+		where document_identifier_id=#{documentId} and PROPOSAL_ID =
+		#{proposalId}
+	</select>
+
+	<update id="setDocumentStatusCompleted" parameterType="Map">
+		UPDATE
+		PROPOSAL_DOCUMENT SET PROPOSAL_DOCUMENT_STATUS_ID = 28
+		WHERE
+		document_identifier_id = #{documentId} and PROPOSAL_ID = #{proposalId}
+	</update>
+
+	<select id="getOrgIdsForSelectedProposals" parameterType="hashmap"
+		resultType="string">
+		select distinct organization_id from proposal_config
+		proconf, evaluation_results evalres where
+		proconf.proposal_id =
+		evalres.proposal_id and proconf.proposal_status_id =
+		#{proposalStatusId}
+		and evalres.modified_flag = #{modifiedFlag} and
+		proconf.procurement_id =
+		#{procurementId}
+	</select>
+	
+	<!-- Below Query modified for enhancement 3.1.0 :6204 -->
+	<update id="updateProposalStatusFromTask" parameterType="string">
+		update
+		proposal_config set proposal_status_id = proc_review_status_id,LAST_UPDATE_DATE = systimestamp
+		where
+		procurement_id = #{procurementId} and proc_review_status_id is not
+		null
+		and proc_review_status_id != 20
+	</update>
+	
+	<!-- Below Query modified for enhancement 3.1.0 :6204 -->
+	<update id="updateProposalPreviousStatus" parameterType="hashmap">
+		update PROPOSAL_CONFIG set (PROPOSAL_STATUS_ID, PROC_REVIEW_STATUS_ID, LAST_UPDATE_DATE) = 
+		(Select #{statusId}, PROC_STATUS_ID, systimestamp from  PROPOSAL_CONFIG 
+		where PROPOSAL_ID = #{proposalId}) where PROPOSAL_ID = #{proposalId}
+	</update>
+
+	<select id="getProposalReviewStatusId" parameterType="string"
+		resultType="string">
+		select proc_review_status_id from proposal_config where
+		proposal_id = #{proposalId}
+	</select>
+
+	<update id="updateProposalDocDetails" parameterType="Map">
+		UPDATE
+		PROPOSAL_DOCUMENT SET
+		DOCUMENT_IDENTIFIER_ID=#{documentId},MODIFIED_DATE=SYSDATE,MODIFIED_BY_STAFFID=#{userId},
+		PROPOSAL_DOCUMENT_STATUS_ID = #{statusId}
+		WHERE
+		PROCUREMENT_DOCUMENT_ID=#{docReferenceNo} and
+		PROPOSAL_ID=#{proposalId}
+	</update>
+
+	<delete id="removeProposalDocsFromVault" parameterType="Map">
+		DELETE
+		FROM
+		PROPOSAL_DOCUMENT WHERE DOCUMENT_IDENTIFIER_ID=#{asDocumentId}
+	</delete>
+
+	<select id="fetchCountofSelectedProposals" parameterType="hashmap"
+		resultType="Integer">
+		Select count(1) as found_proposals
+		from proposal_config pc
+		<if test="evaluationPoolMappingId != null">
+			, evaluation_pool_mapping epm
+    	</if>
+		where
+		<if test="evaluationPoolMappingId != null">
+			epm.evaluation_group_id = pc.evaluation_group_id
+			and
+			epm.competition_pool_id = pc.competition_pool_id
+			and
+			epm.evaluation_pool_mapping_id = #{evaluationPoolMappingId}
+			and 
+		</if>
+		pc.procurement_id=#{procurementId}
+		and pc.proc_review_status_id = 23
+	</select>
+
+	<update id="updateModifiedFlagFromAward" parameterType="hashmap">
+		update evaluation_results set modified_flag = 0 where proposal_id in
+		(select proposal_id from
+		proposal_config where procurement_id =
+		#{procurementId}
+		<if test="evaluationPoolMappingId != null">
+			and evaluation_pool_mapping_id =
+			#{evaluationPoolMappingId}
+		</if>
+		)
+	</update>
+
+	<select id="fetchProviderIdFirstRound" parameterType="hashmap"
+		resultMap="providerSelectionDetails">
+		select distinct ORGANIZATION_ID, case when pc.PROC_REVIEW_STATUS_ID =
+		23 then
+		'SELECTED'
+		when pc.PROC_REVIEW_STATUS_ID = 24 then 'NOT SELECTED' end as SELECTED_STATUS
+		from evaluation_results er
+		inner join
+		proposal_config pc on
+		pc.PROPOSAL_ID = er.PROPOSAL_ID
+		where
+		pc.PROCUREMENT_ID = #{procurementId}
+		<if test="evaluationPoolMappingId != null">
+			and er.evaluation_pool_mapping_id =
+			#{evaluationPoolMappingId}
+		</if>
+	</select>
+
+	<select id="fetchProviderIdSecondRound" parameterType="hashmap"
+		resultMap="providerSelectionDetails">
+		select distinct ORGANIZATION_ID, case when pc.PROC_REVIEW_STATUS_ID =
+		23 then
+		'SELECTED'
+		when pc.PROC_REVIEW_STATUS_ID = 24 then 'NOT SELECTED' end as SELECTED_STATUS
+		from evaluation_results er
+		inner join
+		proposal_config pc on
+		pc.PROPOSAL_ID = er.PROPOSAL_ID
+		where
+		pc.PROCUREMENT_ID = #{procurementId} and
+		er.MODIFIED_FLAG = 1
+		<if test="evaluationPoolMappingId != null">
+			and er.evaluation_pool_mapping_id =
+			#{evaluationPoolMappingId}
+		</if>
+	</select>
+
+	<resultMap id="providerSelectionDetails" type="com.nyc.hhs.model.ProviderSelectionBean">
+		<result property="miProviderId" column="ORGANIZATION_ID" />
+		<result property="miSelectionStatus" column="SELECTED_STATUS" />
+	</resultMap>
+
+	<insert id="insertProposalDocForSubmittedProposal"
+		parameterType="com.nyc.hhs.model.ExtendedDocument">
+		insert into proposal_document (PROPOSAL_DOCUMENT_ID,
+		PROCUREMENT_ID, PROPOSAL_ID, PROCUREMENT_DOCUMENT_ID, UPLOADED_DATE,
+		PROPOSAL_DOCUMENT_STATUS_ID,PROC_STATUS_ID, CREATED_DATE,
+		CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID) values
+		(SEQ_PROPOSAL_DOCUMENT_ID.NEXTVAL, #{procurementId}, #{proposalId},
+		#{procurementDocumentId}, sysdate, 27, #{documentStatus},
+		sysdate,
+		'system', sysdate, 'system')
+	</insert><!--
+
+	 Start || Changes done for Enhancement #6577 for Release 3.10.0 
+	<select id="fetchAllCompetitionPool" parameterType="string"
+		resultType="map">
+		select distinct cmp.COMPETITION_POOL_ID, cmp.COMPETITION_POOL_TITLE from
+		COMPETITION_POOL cmp, evaluation_pool_mapping eval
+		where cmp.procurement_id = eval.procurement_id
+    	and cmp.procurement_id = #{asProcurementId} 
+    	and eval.status_id != '167'
+	</select>
+	 End || Changes done for Enhancement #6577 for Release 3.10.0 
+	
+	-->
+	<!-- [Start] R6.3 QC 6627  	 
+	<select id="fetchAllCompetitionPool" parameterType="string"
+		resultType="map">
+		select COMPETITION_POOL_ID, COMPETITION_POOL_TITLE from
+		COMPETITION_POOL
+		where procurement_id = #{asProcurementId}
+	</select>
+
+	-->
+  	 
+	<select id="fetchAllCompetitionPool" parameterType="string" resultType="map">
+		select  comp.COMPETITION_POOL_ID as COMPETITION_POOL_ID, comp.COMPETITION_POOL_TITLE as COMPETITION_POOL_TITLE
+		from COMPETITION_POOL comp, evaluation_group evgrp, EVALUATION_POOL_MAPPING grpcomp, status_master_r2_r3 sm 
+		WHERE   comp.procurement_id = evgrp.procurement_id 
+		  AND   grpcomp.status_id = sm.status_id 
+		  AND   grpcomp.evaluation_group_id = evgrp.evaluation_group_id 
+		  AND   grpcomp.COMPETITION_POOL_ID = comp.COMPETITION_POOL_ID 
+		  AND   grpcomp.procurement_id = evgrp.procurement_id 
+		  AND   evgrp.procurement_id = #{asProcurementId}
+		  and   evgrp.SUBMISSION_CLOSE_DATE   is null
+    </select>
+
+   <!-- [END] R6.3 QC 6627  -->
+   <!--        [Start] R7.6 QC 8899 -->
+	<select id="fetchAllCompetitionPoolWithProposalId" parameterType="hashmap" resultType="map">
+		SELECT comp.COMPETITION_POOL_ID as COMPETITION_POOL_ID, comp.COMPETITION_POOL_TITLE as COMPETITION_POOL_TITLE , DECODE( PROP.PROPOSAL_ID, NULL, 'false', 'true' )
+		FROM (select distinct comp.COMPETITION_POOL_ID as COMPETITION_POOL_ID, comp.COMPETITION_POOL_TITLE as COMPETITION_POOL_TITLE 
+		        from COMPETITION_POOL comp, evaluation_group evgrp, EVALUATION_POOL_MAPPING grpcomp, status_master_r2_r3 sm 
+		        WHERE comp.procurement_id = evgrp.procurement_id 
+		        AND grpcomp.status_id = sm.status_id 
+		        AND grpcomp.evaluation_group_id = evgrp.evaluation_group_id 
+		        AND grpcomp.COMPETITION_POOL_ID = comp.COMPETITION_POOL_ID 
+		        AND grpcomp.procurement_id = evgrp.procurement_id 
+		        AND evgrp.procurement_id = #{asProcurementId}
+		        ) COMP ,
+		        (select COMPETITION_POOL_ID, PROPOSAL_ID from PROPOSAL_CONFIG
+		          where PROPOSAL_ID =  #{asProposalId}
+		           and   procurement_id = #{asProcurementId}
+		        ) PROP
+		WHERE COMP.COMPETITION_POOL_ID = PROP.COMPETITION_POOL_ID (+)
+    </select>
+    <!-- [END] R7.6 QC 8899  -->
+
+	<!-- Below Query modified for enhancement 3.1.0 :6204 -->
+	<update id="updateEvaluationGroupForProposal" parameterType="string">
+		update proposal_config set EVALUATION_GROUP_ID = (select
+		EVALUATION_GROUP_ID from
+		(select EVALUATION_GROUP_ID from
+		EVALUATION_GROUP
+		where procurement_id = #{asProcurementId} order by
+		CREATED_DATE desc)
+		where rownum = 1),
+		LAST_UPDATE_DATE = systimestamp
+		where proposal_id = #{asProposalId}
+		and EVALUATION_GROUP_ID is null
+	</update>
+
+	<select id="getProposalAndPoolStatus" parameterType="string"
+		resultType="map">
+		select pc.PROPOSAL_STATUS_ID, p.STATUS_ID, epm.STATUS_ID AS
+		EVALUATION_POOL_STATUS_ID
+		from Procurement p, proposal_config pc,
+		evaluation_pool_mapping epm
+		where
+		pc.proposal_id = #{asProposalId}
+		and
+		p.procurement_id =
+		pc.procurement_id
+		and epm.competition_pool_id =
+		pc.temp_competition_pool_id
+		and epm.evaluation_group_id =
+		nvl(pc.evaluation_group_id, (select
+		EVALUATION_GROUP_ID from
+		(select
+		eg.EVALUATION_GROUP_ID from EVALUATION_GROUP eg, Procurement p,
+		proposal_config pc
+		where eg.procurement_id = pc.procurement_id
+		and
+		pc.proposal_id = #{asProposalId}
+		and p.procurement_id =
+		pc.procurement_id
+		order by eg.CREATED_DATE desc)
+		where rownum = 1))
+	</select>
+
+	<select id="getProposalStatus" parameterType="map" resultType="int">
+		SELECT proposal_status_id from PROPOSAL_CONFIG WHERE
+		PROPOSAL_ID=#{proposalId}
+	</select>
+
+	<select id="fetchEvaluationSentFlag" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		select epm.EVALUATION_SENT from PROPOSAL_CONFIG pc,
+		EVALUATION_POOL_MAPPING epm
+		where pc.EVALUATION_GROUP_ID =
+		epm.EVALUATION_GROUP_ID
+		and pc.TEMP_COMPETITION_POOL_ID =
+		epm.COMPETITION_POOL_ID
+		and pc.PROPOSAL_ID =
+		#{proposalId}
+	</select>
+	
+	<!-- Below Query modified for enhancement 3.1.0 :6204 -->
+	<update id="updatePropStatFromTaskForPoolId" parameterType="string">
+		update proposal_config set proposal_status_id = proc_review_status_id,
+		LAST_UPDATE_DATE = systimestamp
+		where proposal_id in
+		(select proposal_id from proposal_config pc,
+		evaluation_pool_mapping epm
+		where epm.evaluation_group_id =
+		pc.evaluation_group_id
+		and epm.competition_pool_id =
+		pc.competition_pool_id
+		and epm.evaluation_pool_mapping_id =
+		#{evaluationPoolMappingId}
+		and proc_review_status_id is not null
+		and
+		proc_review_status_id != 20)
+	</update>
+
+	<!-- Query has been added as part of BAFO Upload document change 
+	so as to insert BAFO document in BAFO_DOCUMENT table-->
+	<insert id="insertBAFODocumentDetails" parameterType="Map">
+		INSERT
+		INTO
+		BAFO_DOCUMENT
+		(BAFO_DOCUMENT_ID,PROPOSAL_ID,DOCUMENT_IDENTIFIER_ID,UPLOADED_DATE,
+		BAFO_DOCUMENT_STATUS_ID,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,MODIFIED_BY_USERID)
+		VALUES(SEQ_BAFO_DOCUMENT_ID.NEXTVAL,#{proposalId},#{documentId},#{docCreatedDate},
+		#{statusId},SYSDATE,#{userId},SYSDATE,#{userId})
+	</insert>
+	
+	<!-- Below Query modified for enhancement 3.1.0 :6204 -->
+	<update id="moveCompetitionPoolIdFromTemp" parameterType="string">
+		update proposal_config set COMPETITION_POOL_ID = TEMP_COMPETITION_POOL_ID,
+		LAST_UPDATE_DATE = systimestamp
+		where proposal_id = #{asProposalId}
+	</update>
+	
+	<!-- Start of queries added for enhancement 3.1.0 :6025 -->
+	
+	<resultMap id="awardDocDetails" type="com.nyc.hhs.model.ExtendedDocument">
+		<result property="documentTitle" column="FILE_NAME" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+		<result property="status" column="STATUS" />
+		<result property="statusId" column="STATUS_ID" />
+	</resultMap>
+	
+	<select id="fetchAwardDocDetails" parameterType="map" resultMap="awardDocDetails">
+		SELECT
+		DOCDWNLOAD.FILE_NAME AS FILE_NAME, NVL(TO_CHAR(DOCDWNLOAD.DOC_ZIP_CREATED_DATE,'MM/DD/yyyy'), '----') AS MODIFIED_DATE,DOCDWNLOAD.DOCUMENT_STATUS_ID AS STATUS_ID, 
+        ST.STATUS AS STATUS		
+		FROM DOCUMENT_DOWNLOAD_REQUEST DOCDWNLOAD, STATUS_MASTER_R2_R3 ST WHERE
+		DOCDWNLOAD.ORGANIZATION_ID=#{asProviderOrgID}
+		AND ST.STATUS_ID = DOCDWNLOAD.DOCUMENT_STATUS_ID
+		AND DOCDWNLOAD.PROCUREMENT_ID = #{asProcurementId}	
+		AND DOCDWNLOAD.EVALUATION_POOL_MAPPING_ID = #{asEvaluationPoolMappingId}
+	</select>
+
+	<select id="fetchProposalId" parameterType="java.util.Map" resultType="String">
+		select PROPOSAL_ID from PROPOSAL_CONFIG where
+		PROCUREMENT_ID = #{procurementId}
+		and
+		EVALUATION_GROUP_ID = (Select EVALUATION_GROUP_ID from EVALUATION_POOL_MAPPING where
+		EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId})
+		and
+		COMPETITION_POOL_ID = (Select COMPETITION_POOL_ID from EVALUATION_POOL_MAPPING where
+		EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId})
+		and
+		ORGANIZATION_ID = #{userOrgId}
+	</select>
+	
+	 <select id="fetchProposalDocumentsForZip" parameterType="HashMap"
+		resultType="String">
+		SELECT DISTINCT(DOCUMENT_IDENTIFIER_ID) FROM PROPOSAL_DOCUMENT WHERE PROPOSAL_ID IN
+		<foreach item="items" index="index" collection="proposalId"
+			open="(" separator="," close=")">
+			#{items}
+    	</foreach> AND PROCUREMENT_ID =#{procumentID} 
+	</select>
+	
+	 <!-- End of queries added for enhancement 3.1.0 :6025 -->
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<!-- Further modified to solve Release Addendum Issue in Emergency Build 3.1.1-->
+	<select id="fetchVersionInformation" parameterType="map" resultMap="proposalSummary">
+	select pc.VERSION_NUMBER_QC, 
+	pc.VERSION_NUMBER_DC,
+	(select nvl(max(version_number),0) from prcrmnt_question_mapping 
+	where PROCUREMENT_ID = #{asProcurementId}) as max_proc_version_ques,
+	(select max(VERSION_NUMBER) from prcrmnt_document_mapping 
+	where PROCUREMENT_ID = #{asProcurementId}) as max_proc_version_doc, 
+	eg.VERSION_NUMBER_PQC,
+	eg.VERSION_NUMBER_PDC,
+	pc.proposal_status_id, 
+	eg.status_id as evaluation_group_status_id
+	from PROPOSAL_CONFIG pc, evaluation_group eg 
+	where pc.PROPOSAL_ID = #{asProposalId}
+	and pc.PROCUREMENT_ID = #{asProcurementId}
+	and pc.evaluation_group_id = eg.evaluation_group_id(+)
+	</select>
+	
+	<!-- Below Query modified for enhancement 3.1.0 :6204 -->
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<update id="updateDocVersionNo" parameterType="map">
+		update PROPOSAL_CONFIG set VERSION_NUMBER_DC = #{docVersionNo}, LAST_UPDATE_DATE = systimestamp
+		where PROPOSAL_ID = #{proposalId} 
+		and PROCUREMENT_ID =#{procurementId} 
+		and PROPOSAL_STATUS_ID in (17,19)
+	</update>
+	
+	<!-- Start || Changes done for Enhancement #6577 for Release 3.10.0 -->
+	
+	<update id="updateProposalStatusForCancelComp" parameterType="hashmap">
+		update
+		PROPOSAL_CONFIG set PROPOSAL_STATUS_ID = #{proposalStatusId},
+		CANCELLED_BY = #{userId},
+		MODIFIED_DATE = systimestamp,
+		LAST_UPDATE_DATE = systimestamp
+		where
+		PROCUREMENT_ID = #{procurementId} 
+		and EVALUATION_GROUP_ID = #{evaluationGroupId} 
+		and COMPETITION_POOL_ID = #{competitionPoolId}
+	</update>
+	
+	<select id="fetchProposalForCancelComp" parameterType="hashmap" resultType="String">
+		select proposal_id from
+		PROPOSAL_CONFIG 
+		where
+		PROCUREMENT_ID = #{procurementId} 
+		and EVALUATION_GROUP_ID = #{evaluationGroupId} 
+		and COMPETITION_POOL_ID = #{competitionPoolId}
+	</select>
+	
+	<update id="updateCompetitionPoolCancelled" parameterType="hashmap">
+		update
+		EVALUATION_POOL_MAPPING set STATUS_ID = #{compPoolStatusId},
+		MODIFIED_BY_USERID = #{userId},
+		MODIFIED_DATE = sysdate,
+		COMMENTS = #{comments}
+		where
+		EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId} 
+	</update>
+
+	<update id="updateCancelledContract" parameterType="hashmap">
+		update
+		CONTRACT set STATUS_ID = #{contractStatus},
+		MODIFIED_BY_USERID = #{userId},
+		MODIFIED_DATE = sysdate where
+		EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId} and STATUS_ID not in (62,68) 
+	</update>
+
+	<update id="updateCancelledBudget" parameterType="hashmap">
+		update
+		BUDGET set STATUS_ID = #{budgetStatus},
+		MODIFIED_BY_USERID = #{userId},
+		MODIFIED_DATE = sysdate where
+		CONTRACT_ID in (select distinct(CONTRACT_ID) from contract where EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId} and STATUS_ID not in (62,67,68))
+	</update>
+	
+	<update id="updateEvalGroupCancelled" parameterType="hashmap">
+		update
+		EVALUATION_GROUP set STATUS_ID = #{evalGroupStatusId},
+		MODIFIED_BY_USERID = #{userId},
+		MODIFIED_DATE = systimestamp
+		where
+		PROCUREMENT_ID = #{procurementId} 
+		and EVALUATION_GROUP_ID = #{evaluationGroupId} 
+		and status_id != 131
+	</update><!--
+	
+	<update id="updateProcCancelled" parameterType="hashmap">
+		update
+		PROCUREMENT set STATUS_ID = #{procStatusId},
+		MODIFIED_BY_USERID = #{userId},
+		MODIFIED_DATE = systimestamp
+		where
+		PROCUREMENT_ID = #{procurementId}
+	</update>
+	
+	--><select id="fetchCompPoolInfo" parameterType="hashmap" resultType="hashmap">
+	 select cancelled_comp_result.cancelled_comps, canc_noproposals_comp_result.canc_noproposals_comps, total_comp_result.total_comps from
+    (select resultA.cancelled_comps from
+    (select count(1) as cancelled_comps from evaluation_pool_mapping where procurement_id=#{procurementId} and EVALUATION_GROUP_ID = #{evaluationGroupId} and status_id=167)resultA)cancelled_comp_result,
+    (select resultC.canc_noproposals_comps from
+    (select count(1) as canc_noproposals_comps from evaluation_pool_mapping where procurement_id=#{procurementId} and EVALUATION_GROUP_ID = #{evaluationGroupId} and status_id in (167,140))resultC)canc_noproposals_comp_result,
+    (select resultB.total_comps from 
+    (select count(1) as total_comps from evaluation_pool_mapping where procurement_id=#{procurementId} and EVALUATION_GROUP_ID = #{evaluationGroupId})resultB)total_comp_result
+	</select><!--
+	
+	<select id="fetchEvalGroupInfo" parameterType="hashmap" resultType="hashmap">
+	 select cancelled_eval_result.cancelled_evals, total_eval_result.total_evals from
+    (select resultA.cancelled_evals from
+    (select count(1) as cancelled_evals from evaluation_group where procurement_id=#{procurementId} and status_id=168)resultA)cancelled_eval_result,
+    (select resultB.total_evals from 
+    (select count(1) as total_evals from evaluation_group where procurement_id=#{procurementId})resultB)total_eval_result
+	</select>
+	
+	--><!--<select id="checkCompPoolStatus" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		select epm.STATUS_ID from PROPOSAL_CONFIG pc,
+		EVALUATION_POOL_MAPPING epm 
+		where pc.EVALUATION_GROUP_ID = 
+		epm.EVALUATION_GROUP_ID 
+		and pc.PROCUREMENT_ID = 
+		epm.PROCUREMENT_ID 
+		and pc.TEMP_COMPETITION_POOL_ID = 
+		epm.COMPETITION_POOL_ID 
+		and pc.PROPOSAL_ID = #{proposalId}
+	</select>
+	
+	--><select id="checkCompPoolStatus" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		select STATUS_ID from 
+		EVALUATION_POOL_MAPPING  
+		where EVALUATION_POOL_MAPPING_ID = 
+	    (select max(epm.EVALUATION_POOL_MAPPING_ID) 
+	    from PROPOSAL_CONFIG pc,
+		EVALUATION_POOL_MAPPING epm 
+		where pc.PROCUREMENT_ID = 
+		epm.PROCUREMENT_ID 
+		and pc.TEMP_COMPETITION_POOL_ID = 
+		epm.COMPETITION_POOL_ID 
+		and pc.PROPOSAL_ID = #{proposalId})	</select>
+	<!-- End || Changes done for Enhancement #6577 for Release 3.10.0 -->
+	<!-- R5 code starts here -->
+	
+	<resultMap id="proposalForProvider" type="com.nyc.hhs.model.ProposalDetailsBean">
+		<result property="agencyId" column="AGENCY_ID" />
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<result property="procurementtitle" column="PROCUREMENT_TITLE" />
+		<result property="competitionPoolTitle" column="COMPETITION_POOL_TITLE" />
+		<result property="competitionpoolid" column="COMPETITION_POOL_ID" />
+		<result property="proposalStatus" column="PROPOSAL_STATUS" />
+		<result property="proposalId" column="PROPOSAL_ID" />
+		<result property="proposalTitle" column="PROPOSAL_TITLE" />
+		<result property="proposalStatusId" column="PROPOSAL_STATUS_ID" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+		<result property="evaluationGroupId" column="EVALUATION_GROUP_ID" />
+		<result property="evaluationPoolMappingId" column="EVALUATION_POOL_MAPPING_ID" />
+		<result property="evaluationPoolMappingStatus" column="EVALUATION_POOL_MAPPING_STATUS" />
+		<result property="procurementStatus" column="PROCUREMENT_STATUS_ID" />
+		
+	</resultMap>
+	<select id="fetchProposalDetailForCity" parameterType="com.nyc.hhs.model.ProposalDetailsBean"
+		resultMap="proposalForProvider">
+	SElECT <if test="userRole == 'city_org'">
+			AGENCY_ID,
+			</if>
+			<!-- Begin R 7.2.0 QC 8914 For Observer role, retrieve ProcurementStatus -->
+			<if test="roleCurrent != null and roleCurrent == 'OBSERVER'">
+				PROCUREMENT_STATUS_ID,
+			</if>
+			<!-- End R 7.2.0 QC 8914 For Observer role, retrieve ProcurementStatus -->
+			EVALUATION_POOL_MAPPING_ID,
+            PROCUREMENT_ID,
+            PROCUREMENT_TITLE,
+            COMPETITION_POOL_TITLE,
+            COMPETITION_POOL_ID,
+            PROPOSAL_ID,
+            PROPOSAL_TITLE,
+            PROPOSAL_STATUS,
+            MODIFIED_DATE,
+            EVALUATION_GROUP_ID,
+            EVALUATION_POOL_MAPPING_STATUS
+		 FROM (
+	SELECT      <if test="userRole == 'city_org'">
+					P.AGENCY_ID,
+				</if>
+				<!-- Begin R 7.2.0 QC 8914 For Observer role, retrieve ProcurementStatus -->
+				<if test="roleCurrent != null and roleCurrent == 'OBSERVER'">
+					P.STATUS_ID as PROCUREMENT_STATUS_ID,
+				</if>
+				<!-- End R 7.2.0 QC 8914 For Observer role, retrieve ProcurementStatus -->
+				EPM.EVALUATION_POOL_MAPPING_ID,
+                P.PROCUREMENT_ID,
+                P.PROCUREMENT_TITLE,
+                CP.COMPETITION_POOL_TITLE,
+                CP.COMPETITION_POOL_ID,
+                PC.PROPOSAL_ID,
+                PC.PROPOSAL_TITLE,
+                SM1.STATUS AS PROPOSAL_STATUS,
+                TRUNC(PC.MODIFIED_DATE) AS MODIFIED_DATE,
+                PC.EVALUATION_GROUP_ID,
+                SM2.STATUS AS EVALUATION_POOL_MAPPING_STATUS,
+                ROWNUM as rn
+            FROM PROCUREMENT P,
+                PROPOSAL_CONFIG PC,
+                COMPETITION_POOL CP,
+                STATUS_MASTER_R2_R3 SM1,
+                STATUS_MASTER_R2_R3 SM2,
+                EVALUATION_POOL_MAPPING EPM
+            WHERE P.PROCUREMENT_ID = PC.PROCUREMENT_ID
+            AND P.PROCUREMENT_ID = CP.PROCUREMENT_ID
+            AND PC.COMPETITION_POOL_ID= CP.COMPETITION_POOL_ID
+            AND SM1.STATUS_ID = PC.PROPOSAL_STATUS_ID
+            AND EPM.COMPETITION_POOL_ID = PC.COMPETITION_POOL_ID
+            AND EPM.EVALUATION_GROUP_ID = PC.EVALUATION_GROUP_ID
+            AND EPM.PROCUREMENT_ID = PC.PROCUREMENT_ID
+            AND SM2.STATUS_ID      = EPM.STATUS_ID
+			AND PC.ORGANIZATION_ID = #{organizationId}
+			<if test="procurementtitle != null and procurementtitle !=''">
+				AND (lower(P.PROCUREMENT_TITLE) LIKE lower(#{procurementtitle}))
+			</if> 
+			<!-- Begin R 7.2.0 QC 8914 For Observer role, exclude DRAFT -->
+			<if test="roleCurrent != null and roleCurrent == 'OBSERVER'">
+				AND P.STATUS_ID != 1
+			</if>
+			<!-- End R 7.2.0 QC 8914 For Observer role, exclude DRAFT -->
+            <if test="competitionPoolTitle != null and competitionPoolTitle !=''">
+				AND (lower(CP.COMPETITION_POOL_TITLE) LIKE lower(#{competitionPoolTitle}))
+			</if> 
+			<if test="proposalTitle != null and proposalTitle !=''">
+				AND (lower(PC.PROPOSAL_TITLE) LIKE lower(#{proposalTitle}))
+			</if>
+			<if test="agencyId != null and agencyId !=''">
+				AND P.AGENCY_ID = #{agencyId}
+			</if>
+			<if test="modifiedDateFrom != null and modifiedDateFrom !=''">
+				AND PC.MODIFIED_DATE &gt; #{modifiedDateFrom,jdbcType=DATE} 
+			</if>
+			<if test="modifiedDateTo != null and modifiedDateTo !=''">
+				AND PC.MODIFIED_DATE &lt; #{modifiedDateTo,jdbcType=DATE} 
+			</if>
+			<!-- Start : R5 Added Removed string comparision on the list-->
+			<if test="proposalStatusList != null">
+			<!-- End : R5 Added Removed string comparision on the list-->
+				AND PC.PROPOSAL_STATUS_ID IN
+				<foreach item="items" index="index" collection="proposalStatusList"
+					open="(" separator="," close=")">
+					#{items}
+	    		</foreach>
+			</if>
+			ORDER BY
+				<choose>
+					<when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+					<otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+				</choose>
+				<choose>
+					<when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+					<otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+				</choose>
+			)
+		WHERE rn
+		BETWEEN  #{startNode} AND #{endNode}
+	</select>
+	
+	<select id="fetchProposalCount" resultType="java.lang.String" parameterType="com.nyc.hhs.model.ProposalDetailsBean">
+	SELECT  COUNT(1)
+            FROM PROCUREMENT P,
+                PROPOSAL_CONFIG PC,
+                COMPETITION_POOL CP,
+                STATUS_MASTER_R2_R3 SM
+            WHERE P.PROCUREMENT_ID = PC.PROCUREMENT_ID
+            AND P.PROCUREMENT_ID = CP.PROCUREMENT_ID
+            AND PC.COMPETITION_POOL_ID= CP.COMPETITION_POOL_ID
+            AND SM.STATUS_ID = PC.PROPOSAL_STATUS_ID
+			AND PC.ORGANIZATION_ID = #{organizationId}
+			<if test="procurementtitle != null and procurementtitle !=''">
+				AND (lower(P.PROCUREMENT_TITLE) LIKE lower(#{procurementtitle}))
+			</if> 
+            <if test="competitionPoolTitle != null and competitionPoolTitle !=''">
+				AND (lower(CP.COMPETITION_POOL_TITLE) LIKE lower(#{competitionPoolTitle}))
+			</if> 
+			<if test="proposalTitle != null and proposalTitle !=''">
+				AND (lower(PC.PROPOSAL_TITLE) LIKE lower(#{proposalTitle}))
+			</if>
+			<if test="agencyId != null and agencyId !=''">
+				AND P.AGENCY_ID = #{agencyId}
+			</if>
+			<if test="modifiedDateFrom != null and modifiedDateFrom !=''">
+				AND PC.MODIFIED_DATE &gt; #{modifiedDateFrom,jdbcType=DATE} 
+			</if>
+			<if test="modifiedDateTo != null and modifiedDateTo !=''">
+				AND PC.MODIFIED_DATE &lt; #{modifiedDateTo,jdbcType=DATE} 
+			</if>
+			<!-- Start : R5 Added Removed string comparision on the list-->
+			<if test="proposalStatusList != null">
+			<!-- End : R5 Added Removed string comparision on the list-->
+				AND PC.PROPOSAL_STATUS_ID IN
+				<foreach item="items" index="index" collection="proposalStatusList"
+					open="(" separator="," close=")">
+					#{items}
+	    		</foreach>
+			</if>
+	</select>
+	
+	<resultMap id="fetchProcurementList" type="com.nyc.hhs.model.AutoCompleteBean">
+		<result property="displayName" column="PROCUREMENT_TITLE" />
+		<result property="hiddenId" column="PROCUREMENT_ID" />
+	</resultMap>
+	
+	<select id="fetchProcurmentTitle" parameterType="map" resultMap="fetchProcurementList">
+		SELECT PROCUREMENT_TITLE, PROCUREMENT_ID FROM PROCUREMENT WHERE LOWER(PROCUREMENT_TITLE) LIKE #{toSearch}
+	</select>
+	
+	<resultMap id="fetchCompetitionList" type="com.nyc.hhs.model.AutoCompleteBean">
+		<result property="displayName" column="COMPETITION_POOL_TITLE" />
+		<result property="hiddenId" column="COMPETITION_POOL_ID" />
+	</resultMap>
+	<select id="fetchCompetitionPool" parameterType="map" resultMap="fetchCompetitionList" >
+		SELECT COMPETITION_POOL_TITLE, COMPETITION_POOL_ID FROM COMPETITION_POOL WHERE LOWER(COMPETITION_POOL_TITLE) LIKE #{toSearch,jdbcType=VARCHAR} AND PROCUREMENT_ID = #{asProcurementId,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="fetchFinalizeAwardScores" parameterType="hashmap" resultMap="proposalResultsScores">
+		SELECT  CT.CONTRACT_ID, CT.contract_type_id, 
+		PRO.PROPOSAL_ID, PRO.PROPOSAL_TITLE, ORG.ORGANIZATION_LEGAL_NAME, NEGOTIATED_AWARD_AMOUNT, NVL(UC.INTERNAL_COMMENT,'--') as INTERNAL_COMMENT,
+    	to_char(EVAL.EVALUATION_SCORE, 'fm999.00') EVALUATION_SCORE, 
+		ST.STATUS, decode(ST.STATUS,'Not Selected','--',EVAL.PRESERVED_AMOUNT) AWARD_AMOUNT, PRO.PROPOSAL_STATUS_ID
+		FROM EVALUATION_RESULTS EVAL, PROPOSAL_CONFIG PRO, ORGANIZATION ORG, STATUS_MASTER_R2_R3 ST, USER_COMMENT UC
+		,EVALUATION_POOL_MAPPING EPM, contract CT
+		WHERE EVAL.PROPOSAL_ID = PRO.PROPOSAL_ID AND PRO.ORGANIZATION_ID = ORG.ORGANIZATION_ID AND 
+		PRO.PROC_REVIEW_STATUS_ID =  ST.STATUS_ID
+		AND PRO.PROCUREMENT_ID = #{ProcurementID} AND PRO.PROC_REVIEW_STATUS_ID = 23
+		AND  UC.ENTITY_ID = PRO.PROPOSAL_ID
+		AND  UC.ENTITY_TYPE = 'Selection Comments'
+		AND PRO.EVALUATION_GROUP_ID = EPM.EVALUATION_GROUP_ID
+		AND PRO.COMPETITION_POOL_ID = EPM.COMPETITION_POOL_ID
+		AND EPM.EVALUATION_POOL_MAPPING_ID = #{EvaluationPoolMappingId}
+		AND CT.EVALUATION_POOL_MAPPING_ID= EVAL.EVALUATION_POOL_MAPPING_ID AND CT.DELETE_FLAG=0
+		and CT.status_id != 69
+		and org.organization_id = #{ProviderID} and CT.organization_id=org.organization_id
+	    ORDER BY EVAL.EVALUATION_SCORE DESC
+	</select>
+	
+	<select id="fetchFinalizeAwardOtherScores" parameterType="hashmap" resultMap="proposalResultsScores">
+		SELECT PRO.PROPOSAL_ID, PRO.PROPOSAL_TITLE, ORG.ORGANIZATION_LEGAL_NAME,  decode(EVAL.NEGOTIATION_STATUS,177,EVAL.NEGOTIATION_STATUS,178,EVAL.NEGOTIATED_AWARD_AMOUNT,null) NEGOTIATED_AWARD_AMOUNT,
+		UC.INTERNAL_COMMENT,
+    	to_char(EVAL.EVALUATION_SCORE, 'fm999.00') EVALUATION_SCORE, 
+		ST.STATUS, decode(ST.STATUS,'Not Selected','--',EVAL.PRESERVED_AMOUNT) AWARD_AMOUNT, PRO.PROPOSAL_STATUS_ID,c.ext_ct_number,c.ext_epin
+		FROM EVALUATION_RESULTS EVAL, PROPOSAL_CONFIG PRO, ORGANIZATION ORG, STATUS_MASTER_R2_R3 ST, USER_COMMENT UC ,
+		  EVALUATION_POOL_MAPPING EPM, contract c
+		WHERE EVAL.PROPOSAL_ID             = PRO.PROPOSAL_ID
+		AND PRO.ORGANIZATION_ID            = ORG.ORGANIZATION_ID
+		AND PRO.PROC_REVIEW_STATUS_ID      = ST.STATUS_ID
+		AND PRO.PROCUREMENT_ID             = #{ProcurementID}
+		AND PRO.PROC_REVIEW_STATUS_ID     = 23
+		AND UC.ENTITY_ID                   = PRO.PROPOSAL_ID
+		AND UC.ENTITY_TYPE                 = 'Selection Comments'
+		AND PRO.EVALUATION_GROUP_ID        = EPM.EVALUATION_GROUP_ID
+		AND PRO.COMPETITION_POOL_ID        = EPM.COMPETITION_POOL_ID
+		AND EPM.EVALUATION_POOL_MAPPING_ID =  #{EvaluationPoolMappingId}
+		AND org.organization_id           != #{ProviderID}
+		and c.EVALUATION_POOL_MAPPING_ID = epm.EVALUATION_POOL_MAPPING_ID
+		and c.organization_id = org.organization_id
+		and c.status_id != 69
+		and c.procurement_id = pro.procurement_id
+		ORDER BY EVAL.EVALUATION_SCORE DESC
+		</select>
+	<resultMap type="com.nyc.hhs.model.EvaluationBean" id="proposalResultsScores">
+		<result property="proposalId" column="PROPOSAL_ID" />
+		<result property="proposalTitle" column="PROPOSAL_TITLE" />
+		<result property="organizationName" column="ORGANIZATION_LEGAL_NAME" />
+		<result property="evaluationScore" column="EVALUATION_SCORE" />
+		<result property="proposalStatus" column="STATUS" />
+		<result property="awardAmount" column="AWARD_AMOUNT" />
+		<result property="proposalStatusId" column="PROPOSAL_STATUS_ID" />
+		<result property="negotiatedAmount" column="NEGOTIATED_AWARD_AMOUNT" />
+		<result property="extCtNumber" column="EXT_CT_NUMBER" />
+		<result property="extEpin" column="EXT_EPIN" />
+		<result property="comments" column="INTERNAL_COMMENT" />
+		<result property="statusId" column="contract_id" />
+		<result property="awardReviewStatus" column="contract_type_id" />
+	</resultMap>
+	<!-- Change Starts : Added for 8375 -->
+	<select id="fetchProposalDocumentsForEvaluation" parameterType="hashmap"
+		resultMap="proposalDocumentDetails">
+		select doc_details.DOCUMENT_IDENTIFIER_ID,
+		NVL(doc_details.MODIFIED_DATE, 'N/A') as MODIFIED_DATE,
+		(case when doc_details.PROCUREMENT_DOCUMENT_TYPE = 'Solicitation - Other' then doc_details.CUSTOM_LABEL
+		else doc_details.PROCUREMENT_DOCUMENT_TYPE
+		end) AS DOCUMENT_TYPE_LABEL,
+		doc_details.PROCUREMENT_DOCUMENT_TYPE,
+		doc_details.Required_flag,
+		NVL(st.status, 'Not Started') as PREV_DOC_STATUS,
+		st1.status as
+		CURR_DOC_STATUS, doc_details.procurement_document_id, doc_details.VISIBILITY_FLAG from
+		(select
+		PRODOC.DOCUMENT_IDENTIFIER_ID DOCUMENT_IDENTIFIER_ID,
+		TO_CHAR(PRODOC.MODIFIED_DATE,'MM/DD/yyyy') as MODIFIED_DATE,
+		docconf.procurement_document_type procurement_document_type,
+		docconf.CUSTOM_LABEL,
+		decode(docconf.required_flag,'1','Required','0','Optional') as
+		Required_flag,
+		prodoc.proposal_document_status_id,
+		prodoc.PROC_STATUS_ID,
+		DOCCONF.procurement_document_id,
+		edv.VISIBILITY_FLAG
+		from
+		(select *
+		from proposal_document where proposal_id = #{proposalId,
+		jdbcType=VARCHAR}) PRODOC, procurement_document_config DOCCONF
+		, PRCRMNT_DOCUMENT_MAPPING PDM, EV_DOCUMENT_VISIBILITY edv where
+		prodoc.procurement_document_id(+) = docconf.procurement_document_id
+		AND DOCCONF.PROCUREMENT_DOCUMENT_ID              = edv.PROCUREMENT_DOCUMENT_ID
+		AND edv.evaluation_pool_mapping_id = #{evaluationPoolMappingId}
+		AND DOCCONF.PROCUREMENT_ID = PDM.PROCUREMENT_ID
+		AND DOCCONF.PROCUREMENT_DOCUMENT_ID = PDM.PROCUREMENT_DOCUMENT_ID
+		AND PDM.VERSION_NUMBER = #{docVersionNo}
+		and
+		docconf.Procurement_Id = #{procurementId, jdbcType=VARCHAR} and
+		(docconf.required_flag = 1 or PRODOC.DOCUMENT_IDENTIFIER_ID is not
+		null)  AND VISIBILITY_FLAG = 1 ) doc_details,
+		Status_master_r2_r3 st, Status_master_r2_r3 st1
+		where doc_details.proposal_document_status_id = st.status_id(+) and
+		((doc_details.PROC_STATUS_ID is not null and
+		doc_details.PROC_STATUS_ID = st1.status_id)
+		or
+		(doc_details.PROC_STATUS_ID is null and st1.status_id = 29))
+		UNION ALL
+		select bd.DOCUMENT_IDENTIFIER_ID,
+		NVL(TO_CHAR(bd.MODIFIED_DATE,'MM/DD/yyyy'),'N/A') as
+		MODIFIED_DATE,'Best and Final Offer (BAFO)' PROCUREMENT_DOCUMENT_TYPE,
+		null CUSTOM_LABEL,
+		'Optional' REQUIRED_FLAG, null PREV_DOC_STATUS, 'Verified'
+		CURR_DOC_STATUS , null PROCUREMENT_DOCUMENT_ID,
+		 '1' VISIBILITY_FLAG
+		from bafo_document bd
+		where bd.proposal_Id=#{proposalId,
+		jdbcType=VARCHAR}
+		order by
+		Required_flag desc,
+		DOCUMENT_TYPE_LABEL asc
+	</select>
+	<!-- Change Ends : Added for 8375 -->
+	<!-- R5 code Ends here -->
+	
+	
+</mapper>

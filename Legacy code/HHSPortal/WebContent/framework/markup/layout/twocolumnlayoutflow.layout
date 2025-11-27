@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<netuix:markupDefinition xmlns:netuix="http://www.bea.com/servers/netuix/xsd/controls/netuix/1.0.0" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.bea.com/servers/netuix/xsd/controls/netuix/1.0.0 markup-netuix-1_0_0.xsd">
+    <netuix:locale language="en"/>
+    <netuix:markup>
+        	<netuix:layout type="custom" markupType="Layout"  title="Agency R1 Home Page Layout" description="This layout uses the flowLayout control to create two columns in which placeables flow vertically."
+                            iconUri="/framework/markup/layout/twocolumn.gif"  markupName="agencyR1Layout"
+                           skeletonUri="/framework/skeletons/hhsa/agencyhomelayout.jsp"  htmlLayoutUri="/framework/markup/layout/twocolumnlayout.html.txt"
+                            id="agencyR1Layout">
+            <netuix:placeholder title="left" description="The left most placeholder in this layout."
+                                usingFlow="true" width="49%"  
+                                markupType="Placeholder" markupName="agencyR1Layout_first">
+            </netuix:placeholder>
+            <netuix:placeholder title="right" description="The right most placeholder in this layout." 
+                                usingFlow="true" width="49%" 
+                                markupType="Placeholder" markupName="agencyR1Layout_second">
+            </netuix:placeholder>
+        </netuix:layout>
+    </netuix:markup>
+</netuix:markupDefinition>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapping>
+	<!--Start : updated Page name in R5 -->
+	<page name="contractListAgencyOrCity">
+	<!--End : updated Page name in R5 -->
+		<status name="61">
+			<action>View CoF</action>
+			<action>Download for registration</action>
+			<action>Cancel Amendment</action>
+			<!--Start : Added in R5 -->
+			<action>View Contract</action>
+			<action>View Budget</action>
+			<!--End : Added in R5 -->
+		</status>
+		<!-- Begin Release 6.3 QC5690 - add new contract status Pending Notification
+		<status name="194">
+			<action>View CoF</action>
+			<action>Download for registration</action>
+			<action>Cancel Amendment</action>
+			<action>View Contract</action>
+			<action>View Budget</action>
+		</status>
+		-->
+		<!-- End Release 6.3 QC5690 - add new contract status Pending Notification -->
+		<status name="62">
+			<action>View CoF</action>
+			<!--Start : Added in R5 -->
+			<action>View Contract</action>
+			<action>View Budget</action>
+			<!--End : Added in R5 -->
+		</status>
+		<status name="59">
+			<action>Cancel Amendment</action>
+			<!--Start : Added in R5 -->
+			<action>View Contract</action>
+			<!--End : Added in R5 -->
+		</status>
+		<status name="60">
+			<action>Cancel Amendment</action>
+			<!--Start : Added in R5 -->
+			<action>View Contract</action>
+			<!--End : Added in R5 -->
+		</status>
+		
+		<status name="128">
+			<action>View CoF</action>
+			<action>Cancel Amendment</action>
+			<!--Start : Added in R5 -->
+			<action>View Contract</action>
+			<action>View Budget</action>
+			<!--End : Added in R5 -->
+		</status>
+		<status name="129">
+			<action>View CoF</action>
+			<action>Cancel Amendment</action>
+			<!--Start : Added in R5 -->
+			<action>View Contract</action>
+			<action>View Budget</action>
+			<!--End : Added in R5 -->
+		</status>
+		<status name="130">
+			<action>View CoF</action>
+			<action>Cancel Amendment</action>
+			<action>Download for registration</action>
+			<!--Start : Added in R5 -->
+			<action>View Contract</action>
+			<action>View Budget</action>
+			<!--End : Added in R5 -->
+		</status>
+		<status name="69">
+			<action>View CoF</action>
+			<!--Start : Added in R5 -->
+			<action>View Contract</action>
+			<action>View Budget</action>
+			<!--End : Added in R5 -->
+		</status>
+		<status name="67">
+			<action>View CoF</action>
+			<!--Start : Added in R5 -->
+			<action>View Contract</action>
+			<action>View Budget</action>
+			<!--End : Added in R5 -->
+		</status>
+	</page>
+	<!--Start : Added in R5 -->
+	<page name="contractListProvider">
+		<status name="59">
+			<action>View Contract</action>
+		</status>
+		<status name="60">
+			<action>View Contract</action>
+		</status>
+		<status name="61">
+			<action>View Contract</action>
+			<action>View Budget</action>
+		</status>
+		<!-- R6.3 QC5690 
+		<status name="194">
+			<action>View Contract</action>
+			<action>View Budget</action>
+		</status>
+		-->
+		<status name="62">
+			<action>View Contract</action>
+			<action>View Budget</action>
+		</status>
+		<status name="67">
+			<action>View Contract</action>
+			<action>View Budget</action>
+		</status>
+		<status name="69">
+			<action>View Contract</action>
+			<action>View Budget</action>
+		</status>
+		<status name="128">
+			<action>View Contract</action>
+			<action>View Budget</action>
+		</status>
+		<status name="129">
+			<action>View Contract</action>
+			<action>View Budget</action>
+		</status>
+		<status name="130">
+			<action>View Contract</action>
+			<action>View Budget</action>
+		</status>
+	</page>
+	<!--End : Added in R5 -->
+</mapping>

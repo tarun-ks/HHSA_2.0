@@ -1,0 +1,689 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.nyc.hhs.service.db.services.application.BatchNotificationMapper">
+
+	<resultMap id="result" type="com.nyc.hhs.model.DocLapsingRuleBean">
+		<result property="msProviderId" column="PROVIDER_ID" />
+		<result property="msDocType" column="DOCUMENT_TYPE" />
+		<result property="mdDueDate" column="DUE_DATE" />
+		<result property="miNumDays" column="NUM_DAYS" />
+	</resultMap>
+
+	<resultMap id="beanresult" type="com.nyc.hhs.model.NotificationSettingsBean">
+		<result property="msSettingName" column="SETTINGS_NAME" />
+		<result property="msSettingValue" column="SETTINGS_VALUE" />
+	</resultMap>
+
+
+	<select id="fetchDocLapsingRule" resultMap="result">
+
+		SELECT ORGANIZATION_ID as PROVIDER_ID , DOCUMENT_TYPE,
+		DUE_DATE,ceil(DUE_DATE - SYSDATE) AS NUM_DAYS FROM
+		DOC_LAPSING_RULES_MASTER WHERE UPLOAD_ORDER = 1 AND DUE_DATE &lt;=
+		(sysdate+#{NT022})
+		
+	</select>
+
+
+	<select id="fetchNotificationSettings" resultMap="beanresult">
+		select SETTINGS_NAME, SETTINGS_VALUE from application_settings where
+		component_name='NotificationAlert'	or component_name='ProviderExpiration'
+	</select>
+
+
+	<select id="fetchDueDateReminderCount" parameterType="hashmap"
+		resultType="string">
+		SELECT count(1) AS COUNT FROM DUE_DATE_REMINDER WHERE
+		ORGANIZATION_ID=#{ProviderId} and ENTITY_ID=#{lsEntityId} and
+		NOTIFICATION_EVENT_ID=#{NotificationName}
+	</select>
+
+
+	<insert id="insertIntoDueDateReminder" parameterType="hashmap">
+		INSERT INTO DUE_DATE_REMINDER
+		(ORGANIZATION_ID,ENTITY_ID,DUE_DATE,NOTIFICATION_EVENT_ID,CREATED_BY,CREATED_DATE,MODIFIED_BY,MODIFIED_DATE) VALUES
+		(#{ProviderId},#{lsEntityId},#{DueDate},#{NotificationName},'system',SYSDATE,'system',SYSDATE)	     		
+ 	</insert>
+
+	<!-- Transactions for Provider Expiry -->
+
+	<resultMap id="ProviderExpiryResult" type="com.nyc.hhs.model.ProviderExpiryRuleBean">
+		<result property="msProviderId" column="ORGANIZATION_ID" />
+		<result property="mdExpiryDate" column="ORGANIZATION_EXPIRATION_DATE" />
+		<result property="miNumDays" column="NUM_DAYS" />
+	</resultMap>
+
+	<resultMap id="ApplicationExpiryResult" type="com.nyc.hhs.model.ApplicationExpiryRuleBean">
+	    <result property="msApplicationId" column="BUSINESS_APPLICATION_ID" />
+		<result property="msProviderId" column="ORGANIZATION_ID" />
+		<result property="mdSubmissionDate" column="START_DATE" />
+		<result property="mdExpiryDate" column="EXPIRY_DATE" />
+		<result property="miNumDays" column="NUM_DAYS" />
+	</resultMap>
+
+	<update id="updateProviderExpiryStatus" parameterType="hashmap">
+		UPDATE
+		ORGANIZATION SET ORGANIZATION_STATUS = #{lsProviderExpiryStatus}  ,
+		                 MODIFIED_DATE = sysdate ,
+		                 MODIFIED_BY = 'Batch' ,
+		                 REPORTING_MODIFIED_BY = 'Batch' ,
+		                 REPORTING_MODIFIED_DATE = SYSTIMESTAMP 
+		where ORGANIZATION_EXPIRATION_DATE &lt;= sysdate 
+	</update>
+
+
+	<select id="fetchProviderExpiryRule" resultMap="ProviderExpiryResult">
+		<!-- SELECT ORGANIZATION_ID, ORGANIZATION_EXPIRATION_DATE , (ORGANIZATION_EXPIRATION_DATE 
+			- SYSDATE) AS NUM_DAYS FROM ORGANIZATION WHERE ORGANIZATION_STATUS &lt;&gt; 
+			'Expired' AND ORGANIZATION_EXPIRATION_DATE &gt; sysdate AND ORGANIZATION_EXPIRATION_DATE 
+			&lt;= (sysdate+90) -->
+		SELECT ORGANIZATION_ID, ORGANIZATION_EXPIRATION_DATE ,
+		(ORGANIZATION_EXPIRATION_DATE - SYSDATE) AS NUM_DAYS FROM ORGANIZATION
+		WHERE ORGANIZATION_STATUS &lt;&gt; #{lsProviderExpiryStatus}
+		AND
+		ORGANIZATION_EXPIRATION_DATE &gt; sysdate AND
+		ORGANIZATION_EXPIRATION_DATE &lt;= (sysdate+#{NT026})
+	</select>
+
+	<update id="updateProviderStatus" parameterType="hashmap">
+		UPDATE
+		ORGANIZATION SET ORGANIZATION_STATUS = #{asProviderStatus} ,
+		                 MODIFIED_DATE = sysdate ,
+		                 MODIFIED_BY = 'Batch',
+		                 REPORTING_MODIFIED_BY = 'Batch' ,
+		                 REPORTING_MODIFIED_DATE = SYSTIMESTAMP 
+		where ORGANIZATION_ID = #{asProviderId}
+	</update>
+
+	<update id="updateSuperSeedingStatus" parameterType="hashmap">
+		UPDATE
+		SUPERSEDING_STATUS set STATUS = #{asProviderStatus},MODIFIED_BY='system',MODIFIED_DATE=SYSDATE ,
+		REPORTING_MODIFIED_BY = 'Batch' , REPORTING_MODIFIED_DATE = SYSTIMESTAMP
+		 where ENTITY_ID =
+		(select BUSINESS_APPLICATION_ID from ( select
+		BUSINESS_APPLICATION_ID,SUBMISSION_DATE from BUSINESS_APPLICATION
+		where ORGANIZATION_ID = #{asProviderId}
+		and SUBMISSION_DATE is not null order by SUBMISSION_DATE desc) where
+		rownum =1) and ORGANIZATION_ID = #{asProviderId}
+	</update>	
+	
+	
+	
+	<select id="fetchLatestBRAppIdforProvider" parameterType="hashmap"
+		resultType="string">
+	
+	    Select BUSINESS_APPLICATION_ID as Entity_Id from ( select
+		        BUSINESS_APPLICATION_ID,SUBMISSION_DATE from BUSINESS_APPLICATION
+		        where ORGANIZATION_ID = #{asProviderId}
+		        and CREATED_DATE is not null order by CREATED_DATE desc) 
+		        where rownum =1	
+	</select>
+
+    <insert id="insertIntoSuperSeeding" parameterType="hashmap">
+     
+     <!-- 
+		INSERT INTO SUPERSEDING_STATUS
+		(ENTITY_TYPE,ENTITY_ID,EVENT,FLAG,STATUS,TIMESTAMP,USER_ID,ORGANIZATION_ID,REQUEST_ID,CREATED_BY,MODIFIED_BY,CREATED_DATE,MODIFIED_DATE,SUPERSEDING_STATUS_ID) 
+		VALUES
+		(#{lsEntityType},#{lsEntityId},#{asProviderStatus},'Y',#{asProviderStatus}, current_timestamp,'Batch',#{asProviderId},'ii','Batch','Batch',sysdate,sysdate,SEQ_SUPERSEDING_STATUS_ID.NEXTVAL)
+	-->	 
+		   
+		 INSERT INTO SUPERSEDING_STATUS
+		(ENTITY_TYPE,ENTITY_ID,EVENT,FLAG,TIMESTAMP,STATUS,USER_ID,ORGANIZATION_ID,CREATED_BY,MODIFIED_BY,CREATED_DATE,MODIFIED_DATE,SUPERSEDING_STATUS_ID , REPORTING_MODIFIED_BY , REPORTING_MODIFIED_DATE) 
+		VALUES
+		(#{lsEntityType},#{lsEntityId},#{asProviderStatus},'y',current_timestamp,#{asProviderStatus},'Batch',#{asProviderId},'system','system',SYSDATE,SYSDATE,SEQ_SUPERSEDING_STATUS_ID.NEXTVAL ,'Batch', SYSTIMESTAMP)
+			     		
+ 	</insert>
+ 	
+
+	<select id="fetchApplicationExpiryRule" resultMap="ApplicationExpiryResult">
+		<!-- 
+		SELECT ORGANIZATION_ID, SUBMISSION_DATE , add_months(SUBMISSION_DATE,36) 
+			as Expiry_Date , ( add_months(SUBMISSION_DATE,36)-SYSDATE) AS NUM_DAYS FROM 
+			BUSINESS_APPLICATION WHERE (sysdate <= add_months(SUBMISSION_DATE,36) ) and 
+			(add_months(SUBMISSION_DATE,36) - sysdate <= 90) 			
+		-->
+		
+		<!-- 
+		SELECT ORGANIZATION_ID, SUBMISSION_DATE ,
+		add_months(SUBMISSION_DATE,#{BR001}) as EXPIRY_DATE , (
+		add_months(SUBMISSION_DATE,#{BR001})-SYSDATE) AS NUM_DAYS FROM
+		BUSINESS_APPLICATION
+		WHERE (sysdate &lt;= add_months(SUBMISSION_DATE,#{BR001}) ) and
+		(add_months(SUBMISSION_DATE,#{BR001}) - sysdate &lt;= #{NT025}) and
+		application_status ='Approved'
+		-->
+		
+		<!-- 
+		SELECT BUSINESS_APPLICATION_ID , ORGANIZATION_ID, SUBMISSION_DATE , add_months(SUBMISSION_DATE,36) as EXPIRY_DATE , 
+		    ceil( add_months(SUBMISSION_DATE,36)-SYSDATE) AS NUM_DAYS 
+        FROM BUSINESS_APPLICATION 
+		WHERE 
+		   (sysdate <= add_months(SUBMISSION_DATE,36) ) and (add_months(SUBMISSION_DATE,36) - sysdate <= 180) 
+			and application_status ='Approved' 
+			and organization_id not in (select organization_id from business_application where application_status = 'In Review')		
+		 -->
+		
+		<!-- 
+		SELECT BUSINESS_APPLICATION_ID , ORGANIZATION_ID, SUBMISSION_DATE , 
+		     add_months(SUBMISSION_DATE,#{BR001}) as EXPIRY_DATE , 
+             ceil( add_months(SUBMISSION_DATE,#{BR001})-SYSDATE) AS NUM_DAYS 
+        FROM BUSINESS_APPLICATION 
+        WHERE 
+             (sysdate &lt;= add_months(SUBMISSION_DATE,#{BR001}) ) and (add_months(SUBMISSION_DATE,#{BR001}) - sysdate &lt;= #{NT025}) 
+             and application_status ='Approved' 
+             and organization_id not in (select organization_id from business_application where application_status = 'In Review')
+		 -->
+		 
+		 <!-- 
+		 SELECT BUSINESS_APPLICATION_ID , ORGANIZATION_ID, trunc(START_DATE) as START_DATE , 
+		        add_months(trunc(START_DATE),#{BR001}) as EXPIRY_DATE , 
+                ceil( add_months(trunc(START_DATE),#{BR001})-SYSDATE) AS NUM_DAYS
+         FROM BUSINESS_APPLICATION 
+         WHERE (add_months(trunc(START_DATE),#{BR001}) - sysdate &lt;= #{NT025}) 
+               and application_status = #{STATUS_APPROVED} 
+               and organization_id not in (select organization_id from business_application where application_status = #{STATUS_IN_REVIEW})		 
+		  -->
+		  
+		  <!--  *** Now working on EXPIRATION_DATE instead of  START_DATE *** 
+		  SELECT BUSINESS_APPLICATION_ID , ORGANIZATION_ID, trunc(START_DATE) as START_DATE , 
+		        EXPIRATION_DATE as EXPIRY_DATE , 
+                ceil( EXPIRATION_DATE-SYSDATE) AS NUM_DAYS
+         FROM BUSINESS_APPLICATION 
+         WHERE (EXPIRATION_DATE - sysdate <= 180) 
+               and application_status = 'Approved' 
+               and organization_id not in (select organization_id from business_application where application_status = 'In Review')
+		   -->
+		   
+		   <!-- 
+		 SELECT BUSINESS_APPLICATION_ID , ORGANIZATION_ID, trunc(START_DATE) as START_DATE , 
+		        EXPIRATION_DATE as EXPIRY_DATE , 
+                ceil(EXPIRATION_DATE-SYSDATE) AS NUM_DAYS
+         FROM BUSINESS_APPLICATION 
+         WHERE (EXPIRATION_DATE - sysdate &lt;= #{NT025}) 
+               and application_status = #{STATUS_APPROVED} 
+               and organization_id not in 
+               (select organization_id from business_application where application_status = #{STATUS_IN_REVIEW} 
+                 or application_status = #{STATUS_REJECTED}
+                 or application_status = #{STATUS_DEFFERED}
+               )  
+            -->
+         <!--   
+         SELECT BUSINESS_APPLICATION_ID , ORGANIZATION_ID, trunc(START_DATE) as START_DATE , 
+		        EXPIRATION_DATE as EXPIRY_DATE , 
+                ceil(EXPIRATION_DATE-SYSDATE) AS NUM_DAYS
+         FROM BUSINESS_APPLICATION 
+         WHERE (EXPIRATION_DATE - sysdate &lt;= #{NT025}) 
+               and application_status = #{STATUS_APPROVED} 
+               order by EXPIRATION_DATE desc      
+         -->
+         <!-- <Start> [R9.1.0]QC9610 #{NT025} to 180 -->
+	<![CDATA[   
+         SELECT BUSINESS_APPLICATION_ID , ORGANIZATION_ID, trunc(START_DATE) as START_DATE , 
+		        EXPIRATION_DATE as EXPIRY_DATE , 
+                ceil(EXPIRATION_DATE-SYSDATE) AS NUM_DAYS
+         FROM BUSINESS_APPLICATION 
+         WHERE (EXPIRATION_DATE - sysdate <= 180) 
+               and application_status = #{STATUS_APPROVED} 
+               order by ORGANIZATION_ID, EXPIRATION_DATE              
+		]]>
+	</select>
+         <!-- <End> [R9.1.0]QC9610 #{NT025} to 180 -->
+
+	<select id="fetchApplicationExpiryForDraft" resultMap="ApplicationExpiryResult">
+	     
+	     <!-- 
+	     SELECT BUSINESS_APPLICATION_ID , ORGANIZATION_ID, trunc(START_DATE) as START_DATE , 
+		        START_DATE+90 as EXPIRY_DATE , 
+                ceil((START_DATE+90)-SYSDATE) AS NUM_DAYS
+         FROM BUSINESS_APPLICATION 
+         WHERE (START_DATE+90<=SYSDATE) 
+               and application_status = 'Draft' 
+               and ( BUSINESS_APPLICATION_ID not in (select entity_id from superseding_status))	     
+	      -->
+	     
+	     SELECT BUSINESS_APPLICATION_ID , ORGANIZATION_ID, trunc(CREATED_DATE) as START_DATE , 
+		        CREATED_DATE+#{NT026} as EXPIRY_DATE , 
+                ceil((CREATED_DATE+#{NT026})-SYSDATE) AS NUM_DAYS
+         FROM BUSINESS_APPLICATION 
+         WHERE (CREATED_DATE+#{NT026} &lt;= SYSDATE) 
+               and (application_status = #{APP_STATUS_DRAFT} or application_status = #{APP_STATUS_DRAFT}) 
+               and ( BUSINESS_APPLICATION_ID not in (select entity_id from superseding_status))
+	
+	</select>
+	
+	
+	<select id = "selectSCIDsForBR" parameterType="map" resultType="String">
+		select SERVICE_APPLICATION_ID from  SERVICE_APPLICATION where BUSINESS_APPLICATION_ID = #{lsEntityId}
+	</select>
+	
+	
+	<select id="fetchDuplicateProviderApplicationCount" parameterType="hashmap"	resultType="string">		
+		 <!-- SELECT count(1) as COUNT from BUSINESS_APPLICATION where ORGANIZATION_ID = #{ProviderId} -->
+		 SELECT count(1) as COUNT from BUSINESS_APPLICATION where ORGANIZATION_ID = #{ProviderId} 
+         and created_date > (select created_date from business_application where BUSINESS_APPLICATION_ID = #{ApplicationId})		
+	</select>
+	
+	<select id="fetchBusinessApplicationStatus" parameterType="hashmap" resultType="string">
+		SELECT APPLICATION_STATUS 
+		FROM BUSINESS_APPLICATION
+		WHERE 
+		BUSINESS_APPLICATION_ID = #{asBussAppId} 
+	</select>
+	
+	 
+	<update id="updateBRApplicationExpiryStatus" parameterType="hashmap">
+		UPDATE 	BUSINESS_APPLICATION 
+		SET application_status = #{asApplicationStatus} ,
+		    MODIFIED_DATE = sysdate ,
+		    MODIFIED_BY = 'Batch' ,
+		    REPORTING_MODIFIED_BY = 'Batch' ,
+		    REPORTING_MODIFIED_DATE = SYSTIMESTAMP
+		where BUSINESS_APPLICATION_ID = #{asApplicationId}
+	</update>
+
+   <!-- Not needed now, entering values into superseding_status table instead for BR and SC.
+    <update id="updateServiceApplicationExpiryStatus" parameterType="hashmap">
+		UPDATE SERVICE_APPLICATION 
+		SET SERVICE_STATUS = #{asApplicationStatus}  
+		where BUSINESS_APPLICATION_ID = #{asApplicationId}
+	</update>
+  -->
+
+
+    <delete id="deleteConditionallyApprovedfromSuperseding"  parameterType="map" >	
+    	<!-- 
+    	select * from superseding_status where (sysdate-trunc(timestamp)) > 90 and status = 'Conditionally Approved'
+        and entity_id in (select BUSINESS_APPLICATION_ID from Business_application where APPLICATION_STATUS <> 'Draft')
+    	 -->
+		
+		<!-- 		delete from superseding_status where (sysdate-trunc(timestamp)) &gt; #{NT026} and status = #{superSedingStatusKey}
+		and entity_id in (select BUSINESS_APPLICATION_ID from Business_application where APPLICATION_STATUS &lt;&gt; #{superSedingStatusKeyDraft})
+		-->
+		
+		<!-- From Vipul
+		delete from superseding_status where entity_id in (
+        select sup.entity_id from superseding_status sup, business_Application br where sup.status = 'Conditionally Approved' 
+        and sup.entity_id = br.business_application_id and (sysdate - trunc(br.expiration_date)) > 0 
+        UNION ALL
+       select sup.entity_id from superseding_status sup, service_application sr where sup.status = 'Conditionally Approved' 
+       and sup.entity_id = sr.service_application_id and (sysdate - trunc(sr.expiration_date)) > 0 )		
+		 -->
+       delete from superseding_status where entity_id in (
+        select sup.entity_id from superseding_status sup, business_Application br where sup.status = #{superSedingStatusKeyCA} 
+        and sup.entity_id = br.business_application_id and (sysdate - trunc(br.expiration_date)) > 0 and sup.ORGANIZATION_ID = #{asOrganizationId}
+        UNION ALL
+       select sup.entity_id from superseding_status sup, service_application sr where sup.status = #{superSedingStatusKeyCA} 
+       and sup.entity_id = sr.service_application_id and (sysdate - trunc(sr.expiration_date)) > 0 and sup.organization_id = #{asOrganizationId} )
+        				
+				
+    </delete>
+    
+    
+    <!--<select id="selectConditionallyApprovedProvidersfromSuperseding" parameterType="map" resultType="String">
+		select ORGANIZATION_ID from superseding_status where entity_id in (
+        select sup.entity_id from superseding_status sup, business_Application br where sup.status = #{superSedingStatusKey} 
+        and sup.entity_id = br.business_application_id and (sysdate - trunc(br.expiration_date)) > 0 
+        UNION ALL
+       select sup.entity_id from superseding_status sup, service_application sr where sup.status = #{superSedingStatusKey} 
+       and sup.entity_id = sr.service_application_id and (sysdate - trunc(sr.expiration_date)) > 0 )
+	</select> -->
+	
+	<select id="selectConditionallyApprovedProvidersfromSuperseding" parameterType="map" resultType="HashMap">
+    
+               select ORGANIZATION_ID,ENTITY_TYPE,ENTITY_ID from superseding_status where entity_id in (
+                               select sup.entity_id from superseding_status sup, business_Application br where sup.status = #{superSedingStatusKeyCA} 
+                               and sup.entity_id = br.business_application_id and (sysdate - trunc(br.expiration_date)) > 0 
+						UNION ALL
+                               select sup.entity_id from superseding_status sup, service_application sr where sup.status = #{superSedingStatusKeyCA} 
+                                and sup.entity_id = sr.service_application_id and (sysdate - trunc(sr.expiration_date)) > 0 
+       					)
+     </select>
+	
+            
+
+    <!-- Transactions for PrintViewGeneration Batch    -->
+    
+    <resultMap id="PrintViewGenerationResult" type="com.nyc.hhs.model.PrintViewGenerationBean">
+		<result property="msPrintViewId" column="PRINT_VIEW_ID" />
+		<result property="msOrgId" column="ORGANIZATION_ID" />
+		<result property="msTaskType" column="TASK_TYPE" />
+		<result property="msModifiedDate" column="MODIFIED_DATE" />
+	</resultMap>	
+	
+	
+	<select id="fetchPrintViewGeneration" resultMap="PrintViewGenerationResult">
+		
+		SELECT PRINT_VIEW_ID, ORGANIZATION_ID, TASK_TYPE , MODIFIED_DATE
+		FROM PRINT_VIEW_GENERATION
+		WHERE IS_PRINT_GENERATED = 0 ORDER BY CREATED_DATE
+		
+	</select>
+    
+     
+    <update id="updatePrintViewGenerated" parameterType="hashmap">
+		UPDATE
+		PRINT_VIEW_GENERATION set IS_PRINT_GENERATED = 1 
+		WHERE PRINT_VIEW_ID = #{lsPrintViewId}
+		AND ORGANIZATION_ID = #{lsProviderId}
+		AND TASK_TYPE = #{lsTaskType}
+		AND MODIFIED_DATE = #{ldModifiedDate}
+	</update>	 
+
+    <!-- End Transactions for PrintViewGeneration Batch    -->
+    
+	<!--    
+	<update id="setExpiryDatetoNullForSC" parameterType="hashmap">
+        update service_application set EXPIRATION_DATE = null , city_status_set_by = null , CITY_STATUS_SET_DATE = null ,
+                                       MODIFIED_DATE = sysdate , MODIFIED_BY = 'Batch' ,
+                                       REPORTING_MODIFIED_BY = 'Batch' , REPORTING_MODIFIED_DATE = SYSTIMESTAMP 
+        where BUSINESS_APPLICATION_ID = #{lsBRAppId} and SERVICE_STATUS &lt;&gt; #{superSedingStatusKeyDraft}
+	</update>
+	-->
+	
+	<update id="setExpiryDatetoNull" parameterType="hashmap">
+        update business_application set EXPIRATION_DATE = null , city_status_set_by = null , CITY_STATUS_SET_DATE = null ,
+                                        MODIFIED_DATE = sysdate , MODIFIED_BY = 'Batch' , 
+                                        REPORTING_MODIFIED_BY = 'Batch' , REPORTING_MODIFIED_DATE = SYSTIMESTAMP 
+        where BUSINESS_APPLICATION_ID = #{BUSINESS_APPLICATION_ID} and application_status &lt;&gt; #{superSedingStatusKeyDraft}		
+	</update> 
+	
+	<update id="setExpiryDatetoNullForSC" parameterType="hashmap">
+        update service_application set EXPIRATION_DATE = null , city_status_set_by = null , CITY_STATUS_SET_DATE = null ,
+                                       MODIFIED_DATE = sysdate , MODIFIED_BY = 'Batch' ,
+                                       REPORTING_MODIFIED_BY = 'Batch' , REPORTING_MODIFIED_DATE = SYSTIMESTAMP 
+        where BUSINESS_APPLICATION_ID = #{BUSINESS_APPLICATION_ID} and SERVICE_STATUS &lt;&gt; #{superSedingStatusKeyDraft}
+	</update>
+	
+	<!-- Transaction for fetching the non latest BR ids and status for the same provider  -->
+	
+	<resultMap id="applicationIdStatusResult" type="com.nyc.hhs.model.ApplicationIdStatusBean">
+		<result property="msApplicationId" 			column="BUSINESS_APPLICATION_ID" />
+		<result property="msStatus" 				column="APPLICATION_STATUS" />
+		<result property="msExpiryDate" 			column="EXPIRY_DATE" />
+		<result property="msNumDays" 				column="NUM_DAYS" />
+	</resultMap>	
+	
+	<select id="fetchApplicationIdStatus" resultMap="applicationIdStatusResult">
+		   	     
+	     SELECT BUSINESS_APPLICATION_ID , APPLICATION_STATUS, to_char(EXPIRATION_DATE,'mm/dd/yyyy') as EXPIRY_DATE, 
+         	   decode(EXPIRATION_DATE, null, null, ceil(EXPIRATION_DATE-SYSDATE) )AS NUM_DAYS 
+         FROM (
+               SELECT BUSINESS_APPLICATION_ID, APPLICATION_STATUS, EXPIRATION_DATE
+               FROM BUSINESS_APPLICATION 
+               WHERE ORGANIZATION_ID = #{asProviderId}                
+               and BUSINESS_APPLICATION_ID != #{asBussAppId} and CREATED_DATE is not null order by CREATED_DATE desc 
+               ) 
+         WHERE rownum = 1
+               
+	</select>
+	
+	
+	<resultMap id="proposalAlertDetails" type="com.nyc.hhs.model.SMAlertNotificationBean">
+		<result property="noOfDays" column="NUM_DAYS" />
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<result property="procurementAgencyId" column="AGENCY_ID" />
+	</resultMap>
+
+	<select id="fetchProviderNameBatch" resultType="string">
+		select ORGANIZATION_LEGAL_NAME from ORGANIZATION where LOWER(ORGANIZATION_ID)= LOWER(#{asOrgId})
+	</select>
+	
+	<select id="fetchAgencyNameBatch" resultType="string">
+	    select agency_name from nyc_agency_details where agency_id = #{asAgencyId}		
+	</select>
+	
+	<!-- Below query modified as a part of release 2.6.0 for defect 5621 -->
+	<select id="fetchProposalDueDateAlertDetails" resultMap="proposalAlertDetails">
+		select PROCUREMENT_ID,PROCUREMENT_TITLE,AGENCY_ID, NUM_DAYS FROM 
+		(SELECT  PROCUREMENT_ID,PROCUREMENT_TITLE,AGENCY_ID,extract(day from UPD_PROPOSAL_DUE_DATE - TO_TIMESTAMP(SYSDATE)) AS NUM_DAYS,STATUS_ID FROM
+		PROCUREMENT WHERE UPD_PROPOSAL_DUE_DATE &lt;=
+		(TO_DATE(sysdate)+#{NoOfDays})) WHERE NUM_DAYS>0 AND STATUS_ID NOT IN ('7','8')
+		
+	</select>
+	
+	<select id="fetchApprovedProvidersList" resultType="String">
+		select distinct organization_id from  procurement_provider where procurement_id=#{procurementId} and provider_status_id=9
+	</select>
+
+	<resultMap id="RfpReleaseAlertDetails" type="com.nyc.hhs.model.SMAlertNotificationBean">
+		<result property="noOfDays" column="NUM_DAYS" />
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="procurementId" column="PROCUREMENT_ID" />
+	</resultMap>
+	
+	<!-- Below query modified as a part of release 2.6.0 for defect 5621 -->	
+	<select id="fetchRfpReleaseDueDateAlertDetails" resultMap="RfpReleaseAlertDetails">
+		select PROCUREMENT_ID,PROCUREMENT_TITLE, NUM_DAYS FROM 
+		(SELECT  PROCUREMENT_ID,PROCUREMENT_TITLE,extract(day from UPD_RFP_RELEASE_DATE - TO_TIMESTAMP(SYSDATE)) AS NUM_DAYS, STATUS_ID FROM
+		PROCUREMENT WHERE UPD_RFP_RELEASE_DATE &lt;=
+		(TO_DATE(sysdate)+#{NoOfDays})) WHERE NUM_DAYS>0 AND STATUS_ID NOT IN ('7','8')
+		
+	</select>
+	<resultMap id="FirstRoundEvaluationAlertDetails" type="com.nyc.hhs.model.SMAlertNotificationBean">
+		<result property="noOfDays" column="NUM_DAYS" />
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<result property="procurementAgencyId" column="AGENCY_ID" />
+		<result property="evaluationGroupId" column="EVALUATION_GROUP_ID" />
+		<result property="competitionPoolId" column="COMPETITION_POOL_ID" />
+		<result property="evaluationPoolMappingId" column="EVALUATION_POOL_MAPPING_ID" />
+	</resultMap>
+	
+	<!-- Below query modified as a part of release 2.6.0 for defect 5621 -->	
+	<select id="fetchFirstRoundEvaluationDueDateAlertDetails" resultMap="FirstRoundEvaluationAlertDetails">
+		select PROCUREMENT_ID,PROCUREMENT_TITLE,AGENCY_ID,NUM_DAYS,EVALUATION_GROUP_ID,EVALUATION_POOL_MAPPING_ID,COMPETITION_POOL_ID FROM 
+		(SELECT  proc.PROCUREMENT_ID,eg.EVALUATION_GROUP_ID,epm.EVALUATION_POOL_MAPPING_ID,epm.COMPETITION_POOL_ID,proc.PROCUREMENT_TITLE,extract(day from proc.UPD_FST_RND_EVAL_CMPLT_DATE - TO_TIMESTAMP(SYSDATE)) AS NUM_DAYS,proc.AGENCY_ID ,proc.STATUS_ID FROM
+		PROCUREMENT proc, EVALUATION_GROUP eg, EVALUATION_POOL_MAPPING epm 
+	    WHERE proc.PROCUREMENT_ID = eg.PROCUREMENT_ID
+	    AND eg.PROCUREMENT_ID = epm.PROCUREMENT_ID
+	    AND eg.EVALUATION_GROUP_ID = epm. EVALUATION_GROUP_ID
+	    AND proc.UPD_FST_RND_EVAL_CMPLT_DATE = (TO_DATE(sysdate)+#{NoOfDays}) 
+	    AND proc.STATUS_ID NOT IN ('7','8')
+		AND epm.STATUS_ID != '140')
+	</select>
+	
+	<resultMap id="FinalEvaluationDateAlertDetails" type="com.nyc.hhs.model.SMAlertNotificationBean">
+		<result property="noOfDays" column="NUM_DAYS" />
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<result property="procurementAgencyId" column="AGENCY_ID" />
+		<result property="evaluationGroupId" column="EVALUATION_GROUP_ID" />
+		<result property="evaluationPoolMappingId" column="EVALUATION_POOL_MAPPING_ID" />
+	</resultMap>
+	
+	<!-- Below query modified as a part of release 2.6.0 for defect 5621 -->	
+	<select id="fetchFinalEvaluationDueDateAlertDetails" resultMap="FinalEvaluationDateAlertDetails">
+		select PROCUREMENT_ID,PROCUREMENT_TITLE,AGENCY_ID,NUM_DAYS,EVALUATION_GROUP_ID,EVALUATION_POOL_MAPPING_ID FROM 
+		(SELECT  proc.PROCUREMENT_ID,eg.EVALUATION_GROUP_ID,epm.EVALUATION_POOL_MAPPING_ID,proc.PROCUREMENT_TITLE,extract(day from proc.UPD_FINALIZE_EVAL_DATE - TO_TIMESTAMP(SYSDATE)) AS NUM_DAYS,proc.AGENCY_ID ,proc.STATUS_ID FROM
+		PROCUREMENT proc, EVALUATION_GROUP eg, EVALUATION_POOL_MAPPING epm 
+	    WHERE proc.PROCUREMENT_ID = eg.PROCUREMENT_ID
+	    AND eg.PROCUREMENT_ID = epm.PROCUREMENT_ID
+	    AND eg.EVALUATION_GROUP_ID = epm. EVALUATION_GROUP_ID
+	    AND proc.UPD_FINALIZE_EVAL_DATE = (TO_DATE(sysdate)+#{NoOfDays}) 
+	    AND proc.STATUS_ID NOT IN ('7','8')
+		AND epm.STATUS_ID IN ('137','138','139'))
+  	</select>
+  	
+	<select id="filterNotificationListForList" resultType="map">
+		SELECT NOTIFICATION_ALERT_ID
+		FROM GROUP_NOTIFICATION	where notification_alert_id in <foreach item="items" index="index" collection="notificationList" open="(" separator="," close=")">#{items}</foreach> and notification_sent = 'true' and entity_id = #{entityId} and entity_type = #{entityType}
+	</select>
+    
+    <select id="filterNotificationListForString" resultType="Map">
+		SELECT NOTIFICATION_ALERT_ID FROM GROUP_NOTIFICATION 
+		WHERE NOTIFICATION_ALERT_ID =#{notificationList} AND ENTITY_TYPE=#{entityType}
+		AND ENTITY_ID=#{entityId} AND NOTIFICATION_SENT = 'true' 
+    </select>
+    
+<!-- code modification start --> 
+
+  	<delete id="deleteConditionallyApprovedExpiredServiceApp"  parameterType="map" >	
+       delete from superseding_status where entity_id = #{entityId}				
+				
+    </delete>	
+
+	<update id="setExpiryDatetoNullForExpiredSA" parameterType="hashmap">
+       update service_application set EXPIRATION_DATE = null , city_status_set_by = null , CITY_STATUS_SET_DATE = null ,
+                                      MODIFIED_DATE = sysdate , MODIFIED_BY = 'Batch' ,
+                                      REPORTING_MODIFIED_BY = 'Batch' , REPORTING_MODIFIED_DATE = SYSTIMESTAMP 
+       where SERVICE_APPLICATION_ID = #{entityId} and SERVICE_STATUS &lt;&gt; #{superSedingStatusKeyDraft}
+	</update>	
+	
+<!-- code modification end -->  
+
+<!-- LDAP CodeChanges Start -->
+
+<resultMap id="CityUSerResults" type="com.nyc.hhs.model.CityUserDetailsBeanForBatch">
+	<result property="msFirstName" column="FIRST_NAME" />
+	<result property="msLastName" column="LAST_NAME" />
+	<result property="msUserId" column="USER_ID" />
+	<result property="msEmailId" column="EMAIL_ID" />
+	<result property="msUserRole" column="USER_ROLE" />
+	<result property="msUserDn" column="USER_DN" />
+	<result property="msUserType" column="USER_TYPE" />
+	<result property="msOrgName" column="ORGANIZATION_NAME" />
+	<result property="msActiveFlag" column="ACTIVE_FLAG" />
+</resultMap>
+
+	<select id="fetchCityUserDetailsForBatch"  parameterType="string" resultMap="CityUSerResults">
+		select *
+		from city_user_details where ACTIVE_FLAG=#{activeFlag} and LOWER(user_dn) like 'cn=%'	
+	</select>
+
+	<update id="updateUserDNCityUserDetailsForBatch" parameterType="map">
+		update city_user_details set ACTIVE_FLAG=#{activeFlag} where user_dn=#{USER_DN}
+	</update>
+	
+	<resultMap id="nycAgency" type="com.nyc.hhs.model.NYCAgencyID">
+	    <result property="msNYCAgencyID" column="AGENCY_ID" />
+	</resultMap>
+
+		<select id="getAllNYCAgencyId" parameterType="String" resultMap="nycAgency">
+		SELECT AGENCY_ID FROM NYC_AGENCY_DETAILS
+	</select>
+	<!-- LDAP CodeChanges End -->	
+	
+	<!-- BEGIN QC 8515 Release 6.1.0 -->
+	<!-- Transaction for fetching the all BR ids, status and exp day for the same provider  -->
+	
+	<resultMap id="applicationIdBRStatusResult" type="com.nyc.hhs.model.ApplicationIdBRStatusBean">
+		<result property="msApplicationId" 			column="BUSINESS_APPLICATION_ID" />
+		<result property="msProviderId" 			column="ORGANIZATION_ID" />
+		<result property="msApplicationStatus" 		column="APPLICATION_STATUS" />
+		<result property="msProcApplicationStatus" 	column="PROC_APP_STATUS" />
+		<result property="msWorkflowId" 			column="WORKFLOW_ID" />
+		<result property="msStatusId" 				column="STATUS_ID" />
+		<result property="mdStartDate" 				column="START_DATE" />
+		<result property="msUserId" 				column="USER_ID" />
+		<result property="mdCreatedDate" 			column="CREATED_DATE" />
+		<result property="msCreatedBy" 				column="CREATED_BY" />
+		<result property="mdModifiedDate" 			column="MODIFIED_DATE" />
+		<result property="msModifiedBy" 			column="MODIFIED_BY" />
+		<result property="mdSubmissionDate" 		column="SUBMISSION_DATE" />
+		<result property="msSubmittedBy" 			column="SUBMITTED_BY" />
+		<result property="mdExpiryDate" 			column="EXPIRY_DATE" />
+		<result property="miNumDays" 				column="NUM_DAYS" />
+		<result property="msCityStatusSetBy" 		column="CITY_STATUS_SET_BY" />
+		<result property="mdCityStatusSetDate" 		column="CITY_STATUS_SET_DATE" />
+		
+	</resultMap>	
+	
+	<select id="fetchApplicationIdBRStatus" parameterType="hashmap" resultMap="applicationIdBRStatusResult">
+	  SELECT BUSINESS_APPLICATION_ID, ORGANIZATION_ID, APPLICATION_STATUS, PROC_APP_STATUS,  WORKFLOW_ID, STATUS_ID,
+	     to_char(START_DATE,'mm/dd/yyyy') as START_DATE, USER_ID, 
+	     to_char(CREATED_DATE,'mm/dd/yyyy') as CREAT_DATE, CREATED_BY,  
+         to_char(MODIFIED_DATE,'mm/dd/yyyy') as MODIFIED_DATE, MODIFIED_BY, 
+         to_char(SUBMISSION_DATE,'mm/dd/yyyy') as SUBMISSION_DATE, SUBMITTED_BY, 
+	     to_char(EXPIRATION_DATE,'mm/dd/yyyy') as EXPIRY_DATE, 
+         decode(EXPIRATION_DATE, null, null, ceil(EXPIRATION_DATE-SYSDATE) )AS NUM_DAYS,
+         CITY_STATUS_SET_BY, to_char(CITY_STATUS_SET_DATE,'mm/dd/yyyy') as CITY_STATUS_SET_DATE
+      FROM BUSINESS_APPLICATION 
+      WHERE ORGANIZATION_ID = #{asProviderId}
+      ORDER by EXPIRATION_DATE     
+	</select>
+	
+	<select id="fetchBusinessApplicationCount" parameterType="hashmap" resultType="String">		
+		 SELECT count(1) as COUNT from BUSINESS_APPLICATION where ORGANIZATION_ID = #{ProviderId} 
+    </select>
+	<!--END QC 8515 Release 6.1.0 -->
+	
+	<!-- BEGIN QC 8393 Release 6.1.0 -->
+	<!-- If DOC_LAPSING_RULES_MASTER has a future DUE_DATE, delete 'Suspended (Filings Expired)' records for that Org in Table Superseding_Status -->
+		<resultMap id="supersedingStatusResult" type="com.nyc.hhs.model.SupersedingStatusBean">
+			<result property="entityType" 			column="ENTITY_TYPE" />
+			<result property="entityId" 			column="ENTITY_ID" />
+			<result property="event" 				column="EVENT" />
+			<result property="flag" 				column="FLAG" />
+			<result property="status" 				column="STATUS" />
+			<result property="timestamp" 			column="TIMESTAMP" />
+			<result property="userId" 				column="USER_ID" />
+			<result property="orgId" 				column="ORGANIZATION_ID" />
+			<result property="requestId" 			column="REQUEST_ID" />
+			<result property="createdBy" 			column="CREATED_BY" />
+			<result property="modifiedBy" 			column="MODIFIED_BY" />
+			<result property="createdDate" 			column="CREATED_DATE" />
+			<result property="modifiedDate" 		column="MODIFIED_DATE" />
+			<result property="supersedingStatusId" 		column="SUPERSEDING_STATUS_ID" />
+			<result property="reportingModifiedBy" 		column="REPORTING_MODIFIED_BY" />
+			<result property="reportingModifiedDate" 	column="REPORTING_MODIFIED_DATE" />
+		</resultMap>	
+	<select id="fetchSupersedingStatusBeforeDelete" parameterType="hashmap" resultMap="supersedingStatusResult">
+	  SELECT ENTITY_TYPE, ENTITY_ID, EVENT, FLAG, STATUS,
+	     to_char(TIMESTAMP,'mm/dd/yyyy') as TIMESTAMP, USER_ID, ORGANIZATION_ID, REQUEST_ID, CREATED_BY, MODIFIED_BY, 
+	     to_char(CREATED_DATE,'mm/dd/yyyy') as CREAT_DATE,   
+         to_char(MODIFIED_DATE,'mm/dd/yyyy') as MODIFIED_DATE, SUPERSEDING_STATUS_ID, REPORTING_MODIFIED_BY,
+         to_char(REPORTING_MODIFIED_DATE,'mm/dd/yyyy') as REPORTING_MODIFIED_DATE
+      FROM SUPERSEDING_STATUS 
+      WHERE EVENT = 'Suspended (Filings Expired)'
+		AND ORGANIZATION_ID IN
+		  (SELECT ORGANIZATION_ID
+		  FROM DOC_LAPSING_RULES_MASTER
+		  WHERE DUE_DATE > sysdate
+		  )    
+	</select>
+	
+	<delete id="deleteErroneousFromSuperseding"  parameterType="map" >	
+    	DELETE
+		FROM SUPERSEDING_STATUS
+		WHERE EVENT          = 'Suspended (Filings Expired)'
+		AND ORGANIZATION_ID IN
+		  (SELECT ORGANIZATION_ID
+		  FROM DOC_LAPSING_RULES_MASTER
+		  WHERE DUE_DATE > sysdate
+		  ) 
+	</delete>
+    <!-- END QC 8393 Release 6.1.0 -->  
+    
+    <!-- BEGIN QC 8667   Release 6.1.0 --> 
+    <select id="fetchSupersedingStatusCount" parameterType="hashmap" resultType="String">	
+    	select count(1) as COUNT from SUPERSEDING_STATUS
+		where ORGANIZATION_ID = #{asProviderId} and  event = #{superSedingStatusKey} 
+	</select>
+	
+	<delete id="deleteEventFromSupersedingStatusForProvider"  parameterType="hashmap" >	
+    	delete from SUPERSEDING_STATUS
+		where ORGANIZATION_ID = #{asProviderId} and event = #{superSedingStatusKey} 
+	</delete>	
+	<!-- END QC 8667 Release 6.1.0 -->    
+          
+    <!--BEGIN  QC 6749 Release 6.1.0 -->
+	<select id="fetchLatestBADetailsForProvider" parameterType="hashmap" resultMap="applicationIdStatusResult">
+	
+	    SELECT BUSINESS_APPLICATION_ID , APPLICATION_STATUS, to_char(EXPIRATION_DATE,'mm/dd/yyyy') as EXPIRY_DATE, 
+         	   decode(EXPIRATION_DATE, null, null, ceil(EXPIRATION_DATE-SYSDATE) )AS NUM_DAYS 
+        FROM   (
+        		select BUSINESS_APPLICATION_ID, APPLICATION_STATUS, EXPIRATION_DATE
+		        from BUSINESS_APPLICATION
+		        where ORGANIZATION_ID = #{asProviderId}
+		        and CREATED_DATE is not null order by CREATED_DATE desc
+		        ) 
+		WHERE rownum =1	
+	</select>
+	<!--END  QC 6749 Release 6.1.0 -->
+</mapper>

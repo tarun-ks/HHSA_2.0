@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The "bighorn" skeleton is intended to be used as the new basis for custom 
+	skeleton development, replacing the existing "default", "classic" and "text" 
+	skeletons. This skeleton has several improvements over the existing skeletons, 
+	including: 1) Cleaner skeleton files which generally favor JSTL and EL over 
+	scriptlet 2) The use of JSP Documents which allow for more efficient development 
+	and rendering 3) A new rendering model which combines the previous begin/end 
+	phases into a single logical rendering phase This skeleton is designed to 
+	be valid in accordance with the HTML 4.01 Transitional DTD. Unlike previous 
+	skeletons, this skeleton provides CSS-based solutions for two of the three 
+	layouts, namely flow and border. The grid layout continues to use table-based 
+	solutions for both backward compatiblity and as an alternative for the CSS-based 
+	layouts. This skeleton includes a single CSS file containing styles for use 
+	with the CSS-based layouts. A few simple event handlers are also provided 
+	for the float and delete titlebar buttons which provide hooks for custom 
+	skin behavior. Some simple Javascript DOM utility functions are also provided 
+	for use by skin authors (and which are used by the "bighorn" skins). -->
+<skeleton xmlns="http://www.bea.com/servers/portal/framework/laf/1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.bea.com/servers/portal/framework/laf/1.0.0 laf-skeleton-1_0_0.xsd">
+	<render-format>
+		<preset>HTML_4_01_TRANSITIONAL</preset>
+	</render-format>
+	<render-strategy>
+		<search-path>
+			<path-element>.</path-element>
+		</search-path>
+	</render-strategy>
+	<render-dependencies>
+		<html>
+			<links>
+				<search-path>
+					<path-element>css</path-element>
+				</search-path>
+			</links>
+			<scripts>
+				<search-path>
+					<path-element>js</path-element>
+				</search-path>
+				<script src="jquery-1.7.2.min.js" type="text/javascript" />
+				<script src="jquery-ui-1.8.20.custom.min.js" type="text/javascript" />
+				<script src="jquery.allJS.min.js" type="text/javascript" />
+				<!--Start Added in R5 -->
+				<script src="jquery.highlight-within-textarea.js" type="text/javascript" />
+				<script src="dictionaryTypo.js" type="text/javascript" />
+				<!--End Added in R5 -->
+				<script src="util.js" type="text/javascript" />
+				<script src="utilR2.js" type="text/javascript" />
+			</scripts>
+		</html>
+	</render-dependencies>
+</skeleton>

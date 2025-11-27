@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    The "borderless" skeleton theme simply overrides selective skeleton files.  This configuration file
+    sets up the search path for skeleton files (render-strategy search path) to look first locally for
+    overrides, then at the main "bighorn" skeleton.  All other configuration elements are unnecessary.
+-->
+<skeleton
+    xmlns="http://www.bea.com/servers/portal/framework/laf/1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.bea.com/servers/portal/framework/laf/1.0.0 laf-skeleton-1_0_0.xsd"
+>
+    <render-format>
+        <preset>HTML_4_01_TRANSITIONAL</preset>
+    </render-format>
+    <render-strategy>
+        <search-path>
+            <path-element>.</path-element>
+            <path-element>..</path-element>
+        </search-path>
+    </render-strategy>
+</skeleton>

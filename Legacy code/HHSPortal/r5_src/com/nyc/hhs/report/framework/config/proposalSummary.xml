@@ -1,0 +1,29 @@
+<charts>
+		<chart width="500pt" height="500pt" id="proposalSummary"
+		chart_design_id="proposalSummaryScripted.rptdesign" 
+		export_design_id="export/proposalExport.rptdesign"
+		dashboard_chart_design_id="proposalSummaryScripted.rptdesign"
+		 exportdata="true" exportformat="csv" datasource="scripted" sqlID="getProposalDetailsChart" exportsqlID="getProposalDetails" exporttablename="data"
+		emitterClass="com.nyc.hhs.report.extension.ExportCSVReport">
+		<report-params>
+			<param name="submitDateFrom" scope="" target="submitDateFrom" />
+			<param name="submitDateTo" scope="" target="submitDateTo" />
+		</report-params>
+		<report-variables>
+			<variable name="reportList" scope="global" target="reportList" />
+		</report-variables>
+		<data-columns sqlID="getProposalDetails">
+				<column headingName="Agency" columnName="agencyId" size="10%" userType="city_org,provider_org"/>
+				<column headingName="Procurement Title" columnName="procurementTitle" size="15%" userType=""/>
+				<column headingName="Competition Pool" columnName="compitionPool" size="15%" userType=""/>
+				<column headingName="Provider" columnName="provider" size="15%" userType="agency_org,city_org"/>
+				<column headingName="Proposal Title" columnName="proposalTitle" size="15%" userType=""/>
+				<column headingName="Proposal ID" columnName="proposalId" size="5%" userType=""/>
+				<column headingName="Status" columnName="status" size="10%" userType=""/>
+				<column headingName="Score" columnName="amountType" size="5%" userType=""/>
+				<column headingName="Submitted Date" columnName="submitDate" size="10%" userType=""/>
+		</data-columns>
+		
+		<table-columns/>
+	</chart>
+</charts>

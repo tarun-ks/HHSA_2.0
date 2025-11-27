@@ -1,0 +1,691 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<portlet-app version="2.0"
+   xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<portlet>
+		<portlet-name>taskdetails</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Task Details</title>
+		</portlet-info>
+	</portlet>
+
+	<portlet>
+		<description>inbox</description>
+		<portlet-name>inbox</portlet-name>
+		<display-name>inbox</display-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<supported-locale>en</supported-locale>
+		<portlet-info>
+			<title>inbox</title>
+			<short-title>InboxPortletMVC</short-title>
+			<keywords>spring portlet</keywords>
+		</portlet-info>
+	</portlet>
+
+	<portlet>
+		<description>Document Vault</description>
+		<portlet-name>DocumentVault</portlet-name>
+		<display-name>Document Vault</display-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<supported-locale>en</supported-locale>
+		<portlet-info>
+			<title>documentVault</title>
+			<short-title>DocumentVaultPortletMVC</short-title>
+			<keywords>spring portlet</keywords>
+		</portlet-info>
+	</portlet>
+
+
+	<portlet>
+		<description>alert portlet</description>
+		<portlet-name>alertportlet</portlet-name>
+		<display-name>alert portlet</display-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<supported-locale>en</supported-locale>
+		<portlet-info>
+			<title>Alert Portlet</title>
+		</portlet-info>
+	</portlet>
+
+	<portlet>
+		<portlet-name>homedocumentvault</portlet-name>
+		<portlet-class>com.nyc.hhs.portlet.HomeDocumentVaultView</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Home Document VAult</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<!--portlet-name>homeapplication</portlet-name> <portlet-class>com.nyc.hhs.portlet.HomeApplicationPortletView</portlet-class> 
+			<supports> <mime-type>text/html</mime-type> <portlet-mode>view</portlet-mode> 
+			</supports> <portlet-info> <title>Home Application</title> </portlet-info! -->
+
+		<description>Home Application</description>
+		<portlet-name>homeapplication</portlet-name>
+		<display-name>Home Application</display-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<supported-locale>en</supported-locale>
+		<portlet-info>
+			<title>Home Application</title>
+			<short-title>HomeApplicationMVC</short-title>
+			<keywords>spring portlet</keywords>
+		</portlet-info>
+
+	</portlet>
+	<portlet>
+		<description>Home Account Maintenance</description>
+		<portlet-name>homeaccountmaintenance</portlet-name>
+		<display-name>Home Account Maintenance</display-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<supported-locale>en</supported-locale>
+		<portlet-info>
+			<title>Home Account Maintenance</title>
+			<short-title>HomeAccountMaintenancePortletMVC</short-title>
+			<keywords>spring portlet</keywords>
+		</portlet-info>
+	</portlet>
+
+	<portlet>
+		<portlet-name>homedocumentshared</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Home Document Shared</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>homeinboxtask</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Home Inbox Task</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>homeunassignedtask</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Home Unassigned Task</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>homeassignedtask</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Home Assigned Task</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>homesystemstatics</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Home System Statics</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<!-->portlet-name>homemanageprovider</portlet-name> <portlet-class>com.nyc.hhs.portlet.HomeManageProviderPortletView</portlet-class> 
+			<supports> <mime-type>text/html</mime-type> <portlet-mode>view</portlet-mode> 
+			</supports> <portlet-info> <title>home Manage Provider</title> </portlet-info -->
+		<description>Home Manage Provider</description>
+		<portlet-name>homemanageprovider</portlet-name>
+		<display-name>Home Manage Provider</display-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<supported-locale>en</supported-locale>
+		<portlet-info>
+			<title>Home Manage Provider</title>
+			<short-title>HomeManageProviderMVC</short-title>
+			<keywords>spring portlet</keywords>
+		</portlet-info>
+
+	</portlet>
+	<portlet>
+		<portlet-name>businessapplication</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Business Application</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>businesssummary</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Business Summary</title>
+		</portlet-info>
+	</portlet>
+
+	<portlet>
+		<portlet-name>faq</portlet-name>
+		<portlet-class>com.nyc.hhs.controllers.FaqPortletViewController</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Faq</title>
+		</portlet-info>
+	</portlet>
+
+	<portlet>
+		<portlet-name>maintenancefaq</portlet-name>
+		<portlet-class>com.nyc.hhs.controllers.MaintenanceFaqController</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Maintenance Faq</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>organizationinformation</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Organization Information</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>applicationservice</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Application Service</title>
+		</portlet-info>
+	</portlet>
+
+	<portlet>
+		<description>Maintenance Taxonomy</description>
+		<portlet-name>maintenancetaxonomy</portlet-name>
+		<display-name>Maintenance Taxonomy</display-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<supported-locale>en</supported-locale>
+		<portlet-info>
+			<title>Maintenance Taxonomy</title>
+			<short-title>MaintenanceTaxonomyPortletMVC</short-title>
+			<keywords>spring portlet</keywords>
+		</portlet-info>
+	</portlet>
+
+	<!-- Password Reset Controller -->
+
+	<portlet>
+		<description>Password Reset Email</description>
+		<portlet-name>passwordresetemail</portlet-name>
+		<display-name>Password Reset Email</display-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<supported-locale>en</supported-locale>
+		<portlet-info>
+			<title>passwordResetEmail</title>
+			<short-title>PasswordResetEmailPortletMVC</short-title>
+			<keywords>spring portlet</keywords>
+		</portlet-info>
+	</portlet>
+
+	<!-- Password Reset Controller -->
+
+	<!-- NYC Registration Controller -->
+	<portlet>
+		<description>Nyc Registration</description>
+		<portlet-name>nycregistration</portlet-name>
+		<display-name>Nyc Registration</display-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<supported-locale>en</supported-locale>
+		<portlet-info>
+			<title>Nyc Registration</title>
+			<short-title>NycRegistrationPortletMVC</short-title>
+			<keywords>spring portlet</keywords>
+		</portlet-info>
+	</portlet>
+
+	<!-- NYC Registration Controller -->
+
+	<!-- Missing Profile INformation Controller -->
+
+	<portlet>
+		<description>Missing Profile Information</description>
+		<portlet-name>missingprofileinformation</portlet-name>
+		<display-name>missingprofileinformation</display-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<supported-locale>en</supported-locale>
+		<portlet-info>
+			<title>Missing Profile Information</title>
+			<short-title>MissingProfileInformationPortletMVC</short-title>
+			<keywords>spring portlet</keywords>
+		</portlet-info>
+	</portlet>
+
+	<!-- Missing Profile INformation Controller End -->
+	<portlet>
+		<portlet-name>servicepostview</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>servicepostview</title>
+		</portlet-info>
+		<portlet-preferences>
+			<preference>
+				<name>after_submission</name>
+				<value>true</value>
+				<read-only>true</read-only>
+			</preference>
+		</portlet-preferences>
+	</portlet>
+	<portlet>
+		<portlet-name>loginportlet</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Login Portlet</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>managemembers</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Manage Members</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>providersharedocumnet</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>providersharedocumnet</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>errorportlet</portlet-name>
+		<portlet-class>com.nyc.hhs.controllers.ErrorController</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Error Portlet</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>procurement</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Procurement</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>agencysettings</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>agency settings</title>
+		</portlet-info>
+	</portlet>
+		<portlet>
+		<portlet-name>actionmenu</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>action menu control</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>testportlet1</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>test portlet1</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>finance</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Finance Portlet</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>homePageProcurement</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Home Page Procurement</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>homePageFinancials</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Home Page Financials</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>bmcportlet</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Budget Management Configuration</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<description>AgencyWorkflow</description>
+		<portlet-name>AgencyWorkflow</portlet-name>
+		<display-name>AgencyWorkflow</display-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<supported-locale>en</supported-locale>
+		<portlet-info>
+			<title>AgencyWorkflow</title>
+		</portlet-info>
+	</portlet>
+
+	<portlet>
+		<portlet-name>contractbudget</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Contract Budget Portlet</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>invoice</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Invoice</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>contractbudgetmodification</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>contract budget modification</title>
+		</portlet-info>
+	</portlet>
+	<portlet>
+		<portlet-name>taxonomytagging</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>taxonomytagging</title>
+		</portlet-info>
+	</portlet>
+<portlet>
+    <portlet-name>contractbudgetamendment</portlet-name>
+    <portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+    <supports>
+        <mime-type>text/html</mime-type>
+        <portlet-mode>view</portlet-mode>
+    </supports>
+    <portlet-info>
+    	<title>contract budget amendment</title>
+	</portlet-info>
+</portlet>
+<portlet>
+    <portlet-name>advancepayment</portlet-name>
+    <portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+    <supports>
+        <mime-type>text/html</mime-type>
+        <portlet-mode>view</portlet-mode>
+    </supports>
+    <portlet-info>
+    	<title>Advance Payment</title>
+	</portlet-info>
+</portlet>
+<portlet>
+    <portlet-name>paymentdetail</portlet-name>
+    <portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+    <supports>
+        <mime-type>text/html</mime-type>
+        <portlet-mode>view</portlet-mode>
+    </supports>
+    <portlet-info>
+    	<title>Payment Detail</title>
+	</portlet-info>
+</portlet>
+<portlet>
+    <portlet-name>advancepaymentdetail</portlet-name>
+    <portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+    <supports>
+        <mime-type>text/html</mime-type>
+        <portlet-mode>view</portlet-mode>
+    </supports>
+    <portlet-info>
+    	<title>Advance Payment Detail</title>
+	</portlet-info>
+</portlet>
+<portlet>
+    <portlet-name>multiaccount</portlet-name>
+    <portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+    <supports>
+        <mime-type>text/html</mime-type>
+        <portlet-mode>view</portlet-mode>
+    </supports>
+    <portlet-info>
+    	<title>multiaccount</title>
+	</portlet-info>
+</portlet>
+<portlet>
+    <portlet-name>multirole</portlet-name>
+    <portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+    <supports>
+        <mime-type>text/html</mime-type>
+        <portlet-mode>view</portlet-mode>
+    </supports>
+    <portlet-info>
+    	<title>multirole</title>
+	</portlet-info>
+</portlet>
+
+<portlet>
+    <portlet-name>maintenanceprovidersettings</portlet-name>
+    <portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+    <supports>
+        <mime-type>text/html</mime-type>
+        <portlet-mode>view</portlet-mode>
+    </supports>
+    <portlet-info>
+    	<title>maintenanceprovidersettings</title>
+	</portlet-info>
+</portlet>
+<portlet>
+	<description>Maintenance Program Names</description>
+    <portlet-name>maintenanceprogramnames</portlet-name>
+    <portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+    <supports>
+        <mime-type>text/html</mime-type>
+        <portlet-mode>view</portlet-mode>
+    </supports>
+    <supported-locale>en</supported-locale>
+    <portlet-info>
+    	<title>Program Names</title>
+	</portlet-info>
+</portlet>
+
+<!-- Start Release 3.6.0 Enhancement id 6516   -->
+<portlet>
+    <portlet-name>adminSettings</portlet-name>
+    <portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+    <supports>
+        <mime-type>text/html</mime-type>
+        <portlet-mode>view</portlet-mode>
+    </supports>
+    <portlet-info>
+    	<title>Admin Settings Portlet</title>
+	</portlet-info>
+</portlet>
+<!-- End Release 3.6.0 Enhancement id 6516   -->
+
+<portlet>
+    <portlet-name>BIRTReport</portlet-name>
+    <portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+    <supports>
+        <mime-type>text/html</mime-type>
+        <portlet-mode>view</portlet-mode>
+    </supports>
+    <portlet-info>
+    	<title>Report Portlet</title>
+	</portlet-info>
+</portlet>
+<!--Start Added in R5 -->
+<portlet>
+    <portlet-name>EnhancedDocumentVault</portlet-name>
+    <portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+    <supports>
+        <mime-type>text/html</mime-type>
+        <portlet-mode>view</portlet-mode>
+    </supports>
+    <portlet-info>
+    	<title>EnhancedDocumentVault</title>
+	</portlet-info>
+</portlet>
+<!--End Added in R5 -->
+<!--Start QC 9401 R 8.5 -->
+<portlet>
+		<portlet-name>rfpreport</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>rfpreport</title>
+		</portlet-info>
+</portlet>	
+<!--End QC 9401 R 8.5 -->
+
+</portlet-app>

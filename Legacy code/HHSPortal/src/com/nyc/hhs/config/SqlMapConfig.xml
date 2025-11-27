@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+	PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC" />
+			<dataSource type="jndi">
+				<property name="data_source" value="jndi_oracle" />
+			</dataSource>
+		</environment>
+	</environments>
+	<mappers>
+		<mapper resource="com/nyc/hhs/config/FileUploadMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/QuestionAnswerMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ApplicationMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/WorkflowDetailMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/InsertMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/TaxonomyMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/BusinessApplicationSummaryMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/TaskHistoryMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/SectionMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/MasterTableMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/FAQMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ApplicationSummaryMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ContactUsMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/InvoiceMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/AlertInboxMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/NycRegisterMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/AuditMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/SecurityMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/NotificationMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/TransactionLogMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/TaxonomyBatchMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ProcurementMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ContractMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/AgencySettingsMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/PaymentMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ProposalMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/TaskServiceMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/HhsAuditMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/InvoiceMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/CommonMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/EvaluationMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/AwardsMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/RFPReleaseMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/BudgetMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ConfigurationMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ContractBudgetMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/TaxonomyTaggingMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ContractBudgetModificationMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ContractBudgetAmendmentMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/PaymentModuleMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/TaskAuditMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/HHSComponentP8Mapper.xml" />
+		<!--Start Added in R5 -->
+		<mapper resource="com/nyc/hhs/config/FolderMappingMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/ReportMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/AuditHistoryMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/UserRoleMapper.xml" />
+		<mapper resource="com/nyc/hhs/config/AutoSaveMapper.xml" />
+		<!--End Added in R5 -->
+	</mappers>
+</configuration>

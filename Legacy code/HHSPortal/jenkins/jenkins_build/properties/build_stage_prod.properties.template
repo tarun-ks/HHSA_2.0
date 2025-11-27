@@ -1,0 +1,20 @@
+# $Header: svn://prtl-dev-src1.nycnet/HHSA-repo/HHSA_Portal/branches/City-Dev/HHSPortal-9.7.10/HHSPortal/jenkins/jenkins_build/properties/build_stage_prod.properties.template 11260 2021-02-24 15:28:02Z jeffrey.wong $
+#
+# QC9583: Jinja2 template for build_stage_prod.properties, to be interpolated using Ansible and related passwordstate python module
+  
+#hhsservices-prod-batch.properties
+CE_USER_ID_BATCH={{ buildprops_batchuser }}
+CE_PASSWORD_BATCH={{ buildprops_batchpwd }}
+LDAP_ADMIN_PASSWORD={{ buildprops_ldappwd }}
+
+#hhsservices-prod-component.properties       
+CE_USER_ID_COMPONENT={{ buildprops_componentuser }}
+CE_PASSWORD_COMPONENT={{ buildprops_componentpwd }}
+
+#BatchSqlMapCongig.xml        
+USERNAME_DB=HHSA_APP
+PASSWORD_DB={{ buildprops_appdbpwd }}
+
+#FilenetSqlMapConfigR2.xml       
+USERNAME_FILENET=HHSA_OS
+PASSWORD_FILENET={{ buildprops_osdbpwd }}

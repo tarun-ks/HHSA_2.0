@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<agencyTask>
+	<roles>
+		<role usertype="City" isFinancials="true">
+			<option value="Accept Proposal">Accept Proposal</option>
+			<option value="Evaluate Proposal" taskinbox="taskmanager">Evaluate Proposal</option>
+			<option value="Review Scores">Review Scores</option>
+			<option value="Configure Award Documents" taskinbox="taskmanager">Configure Award Documents</option>
+			<!-- 			Changes for R5 starts -->
+			<option value="Complete PSR">Complete PSR</option>
+			<option value="Finalize Award Amount">Finalize Award Amount</option>
+			<!-- 			Changes for R5 ends-->
+		</role>
+		<role usertype="ACCO_MANAGER" isFinancials="true">
+			<option value="Accept Proposal">Accept Proposal</option>
+			<option value="Evaluate Proposal" taskinbox="inbox">Evaluate Proposal</option>
+			<option value="Review Scores">Review Scores</option>
+			<option value="Configure Award Documents">Configure Award Documents</option>
+			<!-- 			Changes for R5 starts -->
+			<option value="Complete PSR">Complete PSR</option>
+			<option value="Finalize Award Amount">Finalize Award Amount</option>
+			<!-- 			Changes for R5 ends-->
+		</role>
+
+		<role usertype="ACCO_STAFF" isFinancials="true">
+			<option value="Evaluate Proposal" taskinbox="inbox">Evaluate Proposal</option>
+			<option value="Review Scores">Review Scores</option>
+			<!-- 			Changes for R5 starts -->
+			<option value="Complete PSR">Complete PSR</option>
+			<!-- 			Changes for R5 ends-->
+		</role>
+
+		<role usertype="ACCO_ADMIN_STAFF" isFinancials="true">
+			<option value="Accept Proposal" taskinbox="taskmanager">Accept Proposal</option>
+			<option value="Evaluate Proposal" taskinbox="inbox">Evaluate Proposal</option>
+			<option value="Review Scores">Review Scores</option>
+			<option value="Configure Award Documents" taskinbox="taskmanager">Configure Award Documents</option>
+			<!-- 			Changes for R5 starts -->
+			<option value="Complete PSR">Complete PSR</option>
+			<!-- 			Changes for R5 ends-->
+		</role>
+
+		<role usertype="PROGRAM_STAFF" isFinancials="true">
+			<option value="Evaluate Proposal" taskinbox="inbox">Evaluate Proposal</option>
+		</role>
+
+		<role usertype="PROGRAM_MANAGER" isFinancials="true">
+			<option value="Evaluate Proposal" taskinbox="inbox">Evaluate Proposal</option>
+		</role>
+
+
+		<role usertype="PROGRAM_ADMIN_STAFF" isFinancials="true">
+			<option value="Evaluate Proposal" taskinbox="inbox">Evaluate Proposal</option>
+		</role>
+		<!-- Changes done as a part of release 2.7.0 for enhancement 5666 -->
+		<role usertype="FINANCE_STAFF" isFinancials="true">
+			<option value="Evaluate Proposal" taskinbox="inbox">Evaluate Proposal</option>
+		</role>
+
+		<role usertype="FINANCE_ADMIN_STAFF" isFinancials="true">
+			<option value="Evaluate Proposal" taskinbox="inbox">Evaluate Proposal</option>
+		</role>
+
+		<role usertype="FINANCE_MANAGER" isFinancials="true">
+			<option value="Evaluate Proposal" taskinbox="inbox">Evaluate Proposal</option>
+		</role>
+
+		<role usertype="CFO" isFinancials="true">
+			<option value="Evaluate Proposal" taskinbox="inbox">Evaluate Proposal</option>
+		</role>
+		<!-- Changes done as a part of release 2.7.0 for enhancement 5666 -->
+	</roles>
+
+	<financial-task>
+		<!-- Change started for enhancement 5678. Fixed with Release 2.7.0 -->
+		<option value="Advance Payment Request" type="r3">Advance Request Review</option>
+		<!-- Change Ended for enhancement 5678. Fixed with Release 2.7.0 -->
+		<option value="Advance Payment Review" type="r3">Advance Payment Review</option>
+		<option value="Amendment Certification of Funds" type="r3">Amendment Certification of Funds</option>
+		<option value="Contract Budget Amendment Review" type="r3">Contract Budget Amendment Review</option>
+		<option value="Contract Budget Modification Review" type="r3">Contract Budget Modification Review</option>
+		<option value="Contract Budget Review" type="r3">Contract Budget Review</option>
+		<option value="Contract Budget Update Review" type="r3">Contract Budget Update Review</option>
+		<option value="Contract Certification of Funds" type="r3">Contract Certification of Funds</option>
+		<option value="Contract Configuration" type="r3">Contract Configuration</option>
+		<option value="Contract Configuration Amendment" type="r3">Contract Configuration Amendment</option>
+		<option value="Contract Configuration Update" type="r3">Contract Configuration Update</option>
+		<option value="Invoice Review" type="r3">Invoice Review</option>
+		<option value="New Fiscal Year Configuration" type="r3">New Fiscal Year Configuration</option>
+		<option value="Payment Review" type="r3">Payment Review</option>
+		<option value="Procurement Certification of Funds" type="r3">Procurement Certification of Funds</option>
+		<!-- Added in Release 6 - Returned Payment Review Task-->
+		<option value="Returned Payment Review" type="r3">Returned Payment Review</option>
+		<!-- Added in Release 6 -Returned Payment Review Task end-->
+	</financial-task>
+
+	<status-rules>
+		<tasktype value="Accept Proposal">
+			<option value="In Review">In Review</option>
+		</tasktype>
+		<!-- Added in Release 6 - Returned Payment Review Task-->
+		<tasktype value="Returned Payment Review">
+			<option value="In Review">In Review</option>
+			<option value="Returned for Revision">Returned for Revision</option>
+		</tasktype>
+		<!-- Added in Release 6 -Returned Payment Review Task end-->
+		<tasktype value="Evaluate Proposal">
+			<option value="In Review">In Review</option>
+			<option value="Scores Returned">Scores Returned</option>
+		</tasktype>
+		<tasktype value="Review Scores">
+			<option value="In Review">In Review</option>
+		</tasktype>
+		<tasktype value="Configure Award Documents">
+			<option value="In Review">In Review</option>
+		</tasktype>
+		<tasktype value="Advance Payment Request">
+			<option value="In Review">In Review</option>
+			<option value="Returned for Revision">Returned for Revision</option>
+			<option value="Suspended">Suspended</option>
+		</tasktype>
+		<tasktype value="Advance Payment Review">
+			<option value="In Review">In Review</option>
+			<option value="Returned for Revision">Returned for Revision</option>
+			<option value="Suspended">Suspended</option>
+		</tasktype>
+		<tasktype value="Invoice Review">
+			<option value="In Review">In Review</option>
+			<option value="Returned for Revision">Returned for Revision</option>
+			<option value="Suspended">Suspended</option>
+		</tasktype>
+		<tasktype value="Contract Budget Modification Review">
+			<option value="In Review">In Review</option>
+			<option value="Returned for Revision">Returned for Revision</option>
+			<option value="Suspended">Suspended</option>
+		</tasktype>
+		<tasktype value="Payment Review">
+			<option value="In Review">In Review</option>
+			<option value="Returned for Revision">Returned for Revision</option>
+			<option value="Suspended">Suspended</option>
+		</tasktype>
+		<tasktype value="Contract Budget Update Review">
+			<option value="In Review">In Review</option>
+			<option value="Returned for Revision">Returned for Revision</option>
+			<option value="Suspended">Suspended</option>
+		</tasktype>
+		<tasktype value="Contract Budget Review">
+			<option value="In Review">In Review</option>
+			<option value="Returned for Revision">Returned for Revision</option>
+			<option value="Suspended">Suspended</option>
+		</tasktype>
+		<tasktype value="Contract Budget Amendment Review">
+			<option value="In Review">In Review</option>
+			<option value="Returned for Revision">Returned for Revision</option>
+			<option value="Suspended">Suspended</option>
+		</tasktype>
+		<tasktype value="Contract Certification of Funds">
+			<option value="In Review">In Review</option>
+			<option value="Returned for Revision">Returned for Revision</option>
+			<option value="Suspended">Suspended</option>
+		</tasktype>
+		<tasktype value="Amendment Certification of Funds">
+			<option value="In Review">In Review</option>
+			<option value="Returned for Revision">Returned for Revision</option>
+			<option value="Suspended">Suspended</option>
+		</tasktype>
+		<tasktype value="Procurement Certification of Funds">
+			<option value="In Review">In Review</option>
+			<option value="Suspended">Suspended</option>
+		</tasktype>
+		<tasktype value="Contract Configuration">
+			<option value="In Review">In Review</option>
+			<option value="Suspended">Suspended</option>
+		</tasktype>
+		<tasktype value="Contract Configuration Amendment">
+			<option value="In Review">In Review</option>
+			<option value="Suspended">Suspended</option>
+		</tasktype>
+		<tasktype value="Contract Configuration Update">
+			<option value="In Review">In Review</option>
+			<option value="Suspended">Suspended</option>
+		</tasktype>
+		<tasktype value="New Fiscal Year Configuration">
+			<option value="In Review">In Review</option>
+			<option value="Suspended">Suspended</option>
+		</tasktype>
+		<!-- 			Changes for R5 starts -->
+		<tasktype value="Complete PSR">
+			<option value="In Review">In Review</option>
+		</tasktype>
+		<tasktype value="Finalize Award Amount">
+			<option value="In Review">In Review</option>
+		</tasktype>
+		<!-- 			Changes for R5 ends -->
+	</status-rules>
+</agencyTask>

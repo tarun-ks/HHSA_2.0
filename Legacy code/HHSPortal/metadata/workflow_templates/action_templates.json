@@ -1,0 +1,618 @@
+{
+  "version": "2.0.0",
+  "description": "Enterprise Workflow Action Templates",
+  "action_engine": {
+    "action_types": [
+      "notification",
+      "assignment",
+      "escalation",
+      "external_api",
+      "data_transformation",
+      "workflow_trigger",
+      "audit_log",
+      "file_operation",
+      "database_operation",
+      "custom_script"
+    ],
+    "async_support": true,
+    "retry_mechanisms": true,
+    "error_handling": true,
+    "conditional_execution": true,
+    "batch_processing": true
+  },
+  "action_templates": {
+    "notification_actions": {
+      "send_email_notification": {
+        "id": "send_email_notification",
+        "name": "Send Email Notification",
+        "description": "Send email notification to specified recipients",
+        "action_type": "notification",
+        "enabled": true,
+        "async": true,
+        "retry_attempts": 3,
+        "retry_backoff_seconds": 60,
+        "configuration": {
+          "template_id": "{{template_id}}",
+          "recipients": "{{recipients}}",
+          "priority": "{{priority}}",
+          "channels": ["email"],
+          "variables": "{{template_variables}}"
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "send_simple_notification",
+          "escalate_after_attempts": 3
+        },
+        "conditions": [
+          {
+            "field": "notification_enabled",
+            "operator": "equals",
+            "value": true
+          }
+        ]
+      },
+      "send_sms_notification": {
+        "id": "send_sms_notification",
+        "name": "Send SMS Notification",
+        "description": "Send SMS notification to specified recipients",
+        "action_type": "notification",
+        "enabled": true,
+        "async": true,
+        "retry_attempts": 2,
+        "retry_backoff_seconds": 30,
+        "configuration": {
+          "template_id": "{{template_id}}",
+          "recipients": "{{recipients}}",
+          "priority": "{{priority}}",
+          "channels": ["sms"],
+          "variables": "{{template_variables}}"
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "send_email_notification",
+          "escalate_after_attempts": 2
+        },
+        "conditions": [
+          {
+            "field": "sms_enabled",
+            "operator": "equals",
+            "value": true
+          },
+          {
+            "field": "priority",
+            "operator": "in",
+            "value": ["high", "urgent"]
+          }
+        ]
+      },
+      "send_in_app_notification": {
+        "id": "send_in_app_notification",
+        "name": "Send In-App Notification",
+        "description": "Send in-app notification to specified users",
+        "action_type": "notification",
+        "enabled": true,
+        "async": false,
+        "retry_attempts": 1,
+        "configuration": {
+          "template_id": "{{template_id}}",
+          "recipients": "{{recipients}}",
+          "priority": "{{priority}}",
+          "channels": ["in_app"],
+          "variables": "{{template_variables}}"
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "none"
+        }
+      }
+    },
+    "assignment_actions": {
+      "assign_to_user": {
+        "id": "assign_to_user",
+        "name": "Assign to User",
+        "description": "Assign workflow to specific user",
+        "action_type": "assignment",
+        "enabled": true,
+        "async": false,
+        "configuration": {
+          "assignee": "{{assignee}}",
+          "assignment_strategy": "direct",
+          "priority": "{{priority}}",
+          "sla_hours": "{{sla_hours}}",
+          "notify_assignee": true
+        },
+        "error_handling": {
+          "on_failure": "escalate",
+          "fallback_action": "assign_to_manager"
+        },
+        "conditions": [
+          {
+            "field": "assignee.availability",
+            "operator": "equals",
+            "value": "available"
+          }
+        ]
+      },
+      "assign_to_team": {
+        "id": "assign_to_team",
+        "name": "Assign to Team",
+        "description": "Assign workflow to team using assignment strategy",
+        "action_type": "assignment",
+        "enabled": true,
+        "async": true,
+        "configuration": {
+          "team": "{{team}}",
+          "assignment_strategy": "{{strategy}}",
+          "priority": "{{priority}}",
+          "sla_hours": "{{sla_hours}}",
+          "notify_team": true
+        },
+        "error_handling": {
+          "on_failure": "escalate",
+          "fallback_action": "assign_to_manager"
+        }
+      },
+      "reassign_workflow": {
+        "id": "reassign_workflow",
+        "name": "Reassign Workflow",
+        "description": "Reassign workflow to different user",
+        "action_type": "assignment",
+        "enabled": true,
+        "async": false,
+        "configuration": {
+          "new_assignee": "{{new_assignee}}",
+          "reason": "{{reassignment_reason}}",
+          "notify_previous_assignee": true,
+          "notify_new_assignee": true
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "escalate"
+        }
+      }
+    },
+    "escalation_actions": {
+      "escalate_to_manager": {
+        "id": "escalate_to_manager",
+        "name": "Escalate to Manager",
+        "description": "Escalate workflow to manager",
+        "action_type": "escalation",
+        "enabled": true,
+        "async": true,
+        "configuration": {
+          "escalate_to": "{{manager}}",
+          "escalation_level": "{{escalation_level}}",
+          "reason": "{{escalation_reason}}",
+          "priority": "{{priority}}",
+          "notify_assignee": true,
+          "notify_manager": true
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "escalate_to_department_head"
+        }
+      },
+      "escalate_to_department_head": {
+        "id": "escalate_to_department_head",
+        "name": "Escalate to Department Head",
+        "description": "Escalate workflow to department head",
+        "action_type": "escalation",
+        "enabled": true,
+        "async": true,
+        "configuration": {
+          "escalate_to": "{{department_head}}",
+          "escalation_level": "{{escalation_level}}",
+          "reason": "{{escalation_reason}}",
+          "priority": "{{priority}}",
+          "notify_assignee": true,
+          "notify_manager": true,
+          "notify_department_head": true
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "escalate_to_executive"
+        }
+      },
+      "create_escalation_ticket": {
+        "id": "create_escalation_ticket",
+        "name": "Create Escalation Ticket",
+        "description": "Create escalation ticket in helpdesk system",
+        "action_type": "escalation",
+        "enabled": true,
+        "async": true,
+        "configuration": {
+          "ticket_system": "{{ticket_system}}",
+          "priority": "{{priority}}",
+          "category": "{{category}}",
+          "description": "{{description}}",
+          "assignee": "{{assignee}}",
+          "due_date": "{{due_date}}"
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "send_email_notification"
+        }
+      }
+    },
+    "external_api_actions": {
+      "call_budget_api": {
+        "id": "call_budget_api",
+        "name": "Call Budget API",
+        "description": "Call external budget system API",
+        "action_type": "external_api",
+        "enabled": true,
+        "async": true,
+        "retry_attempts": 3,
+        "retry_backoff_seconds": 60,
+        "configuration": {
+          "endpoint": "{{budget_endpoint}}",
+          "method": "POST",
+          "headers": {
+            "Authorization": "Bearer {{budget_token}}",
+            "Content-Type": "application/json"
+          },
+          "payload": {
+            "agency_id": "{{agency_id}}",
+            "program_id": "{{program_id}}",
+            "amount": "{{contract_value}}",
+            "currency": "{{currency}}"
+          },
+          "timeout_seconds": 30
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "manual_budget_check",
+          "escalate_after_attempts": 3
+        },
+        "response_processing": {
+          "success_field": "available",
+          "error_field": "error_message",
+          "data_mapping": {
+            "budget_available": "available",
+            "available_amount": "available_amount",
+            "approval_required": "approval_required"
+          }
+        }
+      },
+      "call_legal_api": {
+        "id": "call_legal_api",
+        "name": "Call Legal API",
+        "description": "Call external legal system API",
+        "action_type": "external_api",
+        "enabled": true,
+        "async": true,
+        "retry_attempts": 2,
+        "retry_backoff_seconds": 120,
+        "configuration": {
+          "endpoint": "{{legal_endpoint}}",
+          "method": "POST",
+          "headers": {
+            "Authorization": "Bearer {{legal_token}}",
+            "Content-Type": "application/json"
+          },
+          "payload": {
+            "contract_id": "{{contract_id}}",
+            "contract_data": "{{contract_data}}",
+            "review_type": "{{review_type}}",
+            "priority": "{{priority}}"
+          },
+          "timeout_seconds": 60
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "manual_legal_review",
+          "escalate_after_attempts": 2
+        },
+        "response_processing": {
+          "success_field": "review_id",
+          "error_field": "error_message",
+          "data_mapping": {
+            "legal_review_id": "review_id",
+            "review_status": "status",
+            "estimated_completion": "estimated_completion"
+          }
+        }
+      },
+      "call_notification_api": {
+        "id": "call_notification_api",
+        "name": "Call Notification API",
+        "description": "Call external notification system API",
+        "action_type": "external_api",
+        "enabled": true,
+        "async": true,
+        "retry_attempts": 3,
+        "retry_backoff_seconds": 30,
+        "configuration": {
+          "endpoint": "{{notification_endpoint}}",
+          "method": "POST",
+          "headers": {
+            "Authorization": "Bearer {{notification_token}}",
+            "Content-Type": "application/json"
+          },
+          "payload": {
+            "workflow_id": "{{workflow_id}}",
+            "workflow_name": "{{workflow_name}}",
+            "state": "{{current_state}}",
+            "assignee": "{{assignee}}",
+            "priority": "{{priority}}",
+            "message": "{{message}}",
+            "channels": "{{channels}}",
+            "recipients": "{{recipients}}"
+          },
+          "timeout_seconds": 15
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "send_simple_notification",
+          "escalate_after_attempts": 3
+        }
+      }
+    },
+    "data_transformation_actions": {
+      "transform_contract_data": {
+        "id": "transform_contract_data",
+        "name": "Transform Contract Data",
+        "description": "Transform contract data for external systems",
+        "action_type": "data_transformation",
+        "enabled": true,
+        "async": false,
+        "configuration": {
+          "transformation_rules": "{{transformation_rules}}",
+          "input_format": "contract_data",
+          "output_format": "{{target_format}}",
+          "field_mapping": {
+            "agency_id": "{{agency_id}}",
+            "program_id": "{{program_id}}",
+            "amount": "{{contract_value}}",
+            "currency": "{{currency}}",
+            "fiscal_year": "{{fiscal_year}}"
+          }
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "use_default_mapping"
+        }
+      },
+      "validate_workflow_data": {
+        "id": "validate_workflow_data",
+        "name": "Validate Workflow Data",
+        "description": "Validate workflow data before processing",
+        "action_type": "data_transformation",
+        "enabled": true,
+        "async": false,
+        "configuration": {
+          "validation_rules": "{{validation_rules}}",
+          "required_fields": ["contract_id", "contract_value", "contract_type"],
+          "data_types": {
+            "contract_id": "string",
+            "contract_value": "number",
+            "contract_type": "string"
+          },
+          "custom_validators": "{{custom_validators}}"
+        },
+        "error_handling": {
+          "on_failure": "reject_workflow",
+          "fallback_action": "log_error"
+        }
+      }
+    },
+    "workflow_trigger_actions": {
+      "trigger_sub_workflow": {
+        "id": "trigger_sub_workflow",
+        "name": "Trigger Sub-Workflow",
+        "description": "Trigger a sub-workflow",
+        "action_type": "workflow_trigger",
+        "enabled": true,
+        "async": true,
+        "configuration": {
+          "sub_workflow_id": "{{sub_workflow_id}}",
+          "execution_mode": "{{execution_mode}}",
+          "input_data": "{{input_data}}",
+          "wait_for_completion": "{{wait_for_completion}}",
+          "timeout_hours": "{{timeout_hours}}"
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "manual_processing"
+        }
+      },
+      "trigger_parallel_workflow": {
+        "id": "trigger_parallel_workflow",
+        "name": "Trigger Parallel Workflow",
+        "description": "Trigger multiple workflows in parallel",
+        "action_type": "workflow_trigger",
+        "enabled": true,
+        "async": true,
+        "configuration": {
+          "workflow_ids": "{{workflow_ids}}",
+          "execution_mode": "parallel",
+          "input_data": "{{input_data}}",
+          "convergence_rule": "{{convergence_rule}}",
+          "timeout_hours": "{{timeout_hours}}"
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "sequential_execution"
+        }
+      }
+    },
+    "audit_actions": {
+      "create_audit_log": {
+        "id": "create_audit_log",
+        "name": "Create Audit Log",
+        "description": "Create audit log entry",
+        "action_type": "audit_log",
+        "enabled": true,
+        "async": true,
+        "configuration": {
+          "event_type": "{{event_type}}",
+          "workflow_id": "{{workflow_id}}",
+          "workflow_name": "{{workflow_name}}",
+          "state": "{{current_state}}",
+          "user_id": "{{user_id}}",
+          "timestamp": "{{timestamp}}",
+          "data": "{{event_data}}",
+          "security_level": "{{security_level}}"
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "none"
+        }
+      },
+      "update_audit_log": {
+        "id": "update_audit_log",
+        "name": "Update Audit Log",
+        "description": "Update existing audit log entry",
+        "action_type": "audit_log",
+        "enabled": true,
+        "async": true,
+        "configuration": {
+          "audit_log_id": "{{audit_log_id}}",
+          "updates": "{{updates}}",
+          "timestamp": "{{timestamp}}"
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "create_audit_log"
+        }
+      }
+    },
+    "file_actions": {
+      "upload_document": {
+        "id": "upload_document",
+        "name": "Upload Document",
+        "description": "Upload document to file system",
+        "action_type": "file_operation",
+        "enabled": true,
+        "async": true,
+        "configuration": {
+          "file_path": "{{file_path}}",
+          "destination": "{{destination}}",
+          "file_name": "{{file_name}}",
+          "file_type": "{{file_type}}",
+          "permissions": "{{permissions}}"
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "retry_upload"
+        }
+      },
+      "delete_document": {
+        "id": "delete_document",
+        "name": "Delete Document",
+        "description": "Delete document from file system",
+        "action_type": "file_operation",
+        "enabled": true,
+        "async": true,
+        "configuration": {
+          "file_path": "{{file_path}}",
+          "backup_before_delete": true,
+          "backup_location": "{{backup_location}}"
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "none"
+        }
+      }
+    },
+    "database_actions": {
+      "update_workflow_status": {
+        "id": "update_workflow_status",
+        "name": "Update Workflow Status",
+        "description": "Update workflow status in database",
+        "action_type": "database_operation",
+        "enabled": true,
+        "async": false,
+        "configuration": {
+          "table": "workflows",
+          "workflow_id": "{{workflow_id}}",
+          "updates": {
+            "status": "{{new_status}}",
+            "state": "{{new_state}}",
+            "updated_at": "{{timestamp}}",
+            "updated_by": "{{user_id}}"
+          }
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "retry_update"
+        }
+      },
+      "create_workflow_history": {
+        "id": "create_workflow_history",
+        "name": "Create Workflow History",
+        "description": "Create workflow history entry",
+        "action_type": "database_operation",
+        "enabled": true,
+        "async": true,
+        "configuration": {
+          "table": "workflow_history",
+          "data": {
+            "workflow_id": "{{workflow_id}}",
+            "state": "{{state}}",
+            "action": "{{action}}",
+            "user_id": "{{user_id}}",
+            "timestamp": "{{timestamp}}",
+            "data": "{{event_data}}"
+          }
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "none"
+        }
+      }
+    },
+    "custom_script_actions": {
+      "execute_custom_script": {
+        "id": "execute_custom_script",
+        "name": "Execute Custom Script",
+        "description": "Execute custom script for workflow processing",
+        "action_type": "custom_script",
+        "enabled": true,
+        "async": true,
+        "configuration": {
+          "script_path": "{{script_path}}",
+          "script_type": "{{script_type}}",
+          "parameters": "{{script_parameters}}",
+          "timeout_seconds": "{{timeout_seconds}}",
+          "working_directory": "{{working_directory}}"
+        },
+        "error_handling": {
+          "on_failure": "log_error",
+          "fallback_action": "manual_processing"
+        }
+      }
+    }
+  },
+  "action_management": {
+    "action_validation": {
+      "enabled": true,
+      "validate_configuration": true,
+      "validate_conditions": true,
+      "validate_dependencies": true
+    },
+    "action_testing": {
+      "enabled": true,
+      "test_mode": true,
+      "mock_external_apis": true,
+      "dry_run": true
+    },
+    "action_monitoring": {
+      "enabled": true,
+      "track_execution_time": true,
+      "track_success_rate": true,
+      "track_error_rate": true
+    }
+  },
+  "metadata": {
+    "created_at": "2024-01-01T00:00:00Z",
+    "created_by": "system",
+    "version": "2.0.0",
+    "description": "Enterprise workflow action templates with advanced features",
+    "tags": ["actions", "templates", "workflow", "automation", "integration"],
+    "dependencies": [
+      "schema/references.json",
+      "workflow_definitions.json"
+    ]
+  }
+}

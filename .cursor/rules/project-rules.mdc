@@ -1,0 +1,393 @@
+---
+alwaysApply: true
+---
+
+# Critical Rule Book - Enterprise Application Modernization
+
+> **Purpose**: This document contains critical rules and guidelines that must be followed throughout the project. These rules ensure consistency, maintainability, and alignment with project goals.
+
+---
+
+## 🎯 Core Principles
+
+### 1. Requirements-Driven Development
+- **RULE**: Only implement functionality explicitly specified in the attached requirement PDF (`Contract Financials and Contract Budget Design.pdf`)
+- **RULE**: Use legacy codebase ONLY to understand business requirements and domain context
+- **RULE**: Do NOT reuse legacy UI code - build modern UI from scratch
+- **RULE**: Do NOT implement features not mentioned in the requirements PDF
+
+### 2. Modular & Scalable Architecture
+- **RULE**: Build shared core services first - all modules depend on these
+- **RULE**: Each capability must be an independent microservice (or modular Spring Boot service)
+- **RULE**: Services must be pluggable - swapping providers should not require widespread code changes
+- **RULE**: Encapsulate internal implementation - services can be replaced without breaking consumers
+
+### 3. Modern Technology Stack (No Legacy Patterns)
+- **RULE**: Use modern frameworks and patterns (Spring Boot 3.x, React 18+, TypeScript)
+- **RULE**: Do NOT copy legacy code patterns or architecture
+- **RULE**: Follow modern best practices (RESTful APIs, microservices, component-based UI)
+
+---
+
+## 🔧 Backend Rules
+
+### Service Architecture
+- **RULE**: Each service must be independently deployable
+- **RULE**: All services must expose versioned REST APIs (`/api/v1/...`)
+- **RULE**: All services must publish OpenAPI documentation
+- **RULE**: All services must include integration tests
+- **RULE**: All services must include contract tests for API compatibility
+- **RULE**: Favor asynchronous/event-driven patterns for cross-service communication
+
+### API Gateway
+- **RULE**: **REQUIRED**: Use Spring Cloud Gateway as single entry point
+- **RULE**: API Gateway runs on port `8080` (standard HTTP port)
+- **RULE**: Frontend ONLY communicates with API Gateway, never directly with backend services
+- **RULE**: API Gateway handles:
+  - JWT validation (delegates to Keycloak)
+  - CORS (centralized)
+  - Rate limiting
+  - Request routing to backend services
+- **RULE**: Backend services are private (not directly accessible from frontend)
+- **RULE**: API Gateway routes: `/api/v1/{service-name}/**` → backend service
+
+### Authentication & Authorization
+- **RULE**: Use Keycloak ONLY for authentication - NO custom auth code
+- **RULE**: Support two user types (configured in Keycloak)
+- **RULE**: Keycloak runs in Docker for local POC - NO local DB auth fallback
+- **RULE**: All JWT tokens must be validated via Keycloak's public keys
+- **RULE**: Design LDAP integration points for future (but don't implement yet)
+
+### Database
+- **RULE**: Use PostgreSQL for all services
+- **RULE**: **PROJECT DECISION**: Use single shared database `eprocurement` for all services
+  - All services connect to: `jdbc:postgresql://localhost:5432/eprocurement`
+  - **Note**: This is a project-specific decision. In production, consider Database-per-Service for better isolation
+- **RULE**: Connection string: `jdbc:postgresql://localhost:5432/eprocurement`
+- **RULE**: Each service has its own `application.yml` with service-specific configuration
+- **RULE**: Local overrides via `application-local.yml` (if exists)
+- **RULE**: All schema changes must use migrations (Flyway/Liquibase)
+- **RULE**: All entities must extend BaseEntity (pagination, soft delete, audit fields)
+- **RULE**: Use soft delete pattern - never hard delete data
+- **RULE**: All tables must have audit fields (created_at, updated_at, created_by, updated_by)
+- **RULE**: Use table prefixes or schemas to organize tables by service (e.g., `contract_*`, `workflow_*`)
+- **RULE**: **EXCEPTION**: `auth-service` uses Keycloak's database (managed by Keycloak, separate from shared DB)
+
+### Workflow Integration
+- **RULE**: Use Camunda 8 (Zeebe) for BPMN and DMN - NO custom workflow engine
+- **RULE**: Zeebe Gateway: `localhost:26500`
+- **RULE**: All workflow logic must be in BPMN/DMN - business logic in services
+- **RULE**: Workflow adapter service must abstract Camunda implementation
+
+### Observability
+- **RULE**: Use OpenTelemetry for audit logging - NO custom audit code
+- **RULE**: All services must publish audit events via OpenTelemetry
+- **RULE**: Audit all create, update, delete operations
+- **RULE**: Audit all workflow state changes
+
+### Document Management
+- **RULE**: Design storage abstraction (pluggable) - local file system for POC
+- **RULE**: Design S3/object storage integration points for future
+- **RULE**: Document service must be independent and reusable
+
+### Common Core Service
+- **RULE**: Common Core Service must be packaged as Spring Boot starter/library
+- **RULE**: **CRITICAL**: Common Core scope is STRICTLY LIMITED to:
+  - ✅ DTOs (e.g., `ApiResponse`, `PageResponse`)
+  - ✅ Exception Handling (e.g., `ResourceNotFoundException`, `ValidationException`)
+  - ✅ Security Utilities (JWT parsing, token validation helpers)
+  - ✅ Constants and Enums
+- **RULE**: **FORBIDDEN** in Common Core:
+  - ❌ Business Logic
+  - ❌ Entities (JPA dependencies)
+  - ❌ Repositories
+  - ❌ Services with business logic
+- **RULE**: For JPA infrastructure (BaseEntity, BaseRepository, BaseService):
+  - Create separate `common-infrastructure` library (JPA-dependent)
+  - Services that need JPA can depend on `common-infrastructure`
+  - Services that don't need JPA only depend on `common-core`
+- **RULE**: All microservices may import Common Core Service (lightweight)
+- **RULE**: Optional: Include caching abstraction (Redis integration) in `common-infrastructure`
+
+### Code Quality
+- **RULE**: All services must pass lint checks
+- **RULE**: Minimum 70% unit test coverage
+- **RULE**: All public APIs must have integration tests
+- **RULE**: All APIs must have contract tests
+- **RULE**: No unused code - remove old code to avoid confusion
+- **RULE**: Production-grade code only - no dummy code or random calculations
+
+### API Design
+- **RULE**: Consistent error response format across all services
+- **RULE**: Backward compatibility must be maintained
+- **RULE**: API versioning required for breaking changes
+- **RULE**: All endpoints must be documented in OpenAPI
+
+---
+
+## 🎨 Frontend Rules
+
+### Technology Stack
+- **RULE**: Use React 18+ with TypeScript
+- **RULE**: Use TailwindCSS for styling
+- **RULE**: Use Redux Toolkit + React Query for state management
+- **RULE**: Use React Router for routing
+- **RULE**: Use Vite for build tooling
+
+### Component Architecture
+- **RULE**: Follow atomic design patterns (atoms → molecules → organisms → templates)
+- **RULE**: All components must be documented in Storybook
+- **RULE**: Reusable components must be in shared component library
+- **RULE**: Domain-specific components in module folders
+
+### UI/UX
+- **RULE**: Modern UI patterns only - do NOT reuse legacy UI
+- **RULE**: Theme engine must support branding changes (TailwindCSS)
+- **RULE**: Must support theme switching (dark/light mode)
+- **RULE**: All forms must have validation
+- **RULE**: All async operations must show loading states
+- **RULE**: All errors must be displayed to users (toasts/notifications)
+
+### API Integration
+- **RULE**: All API calls must go through centralized API client (`src/services/apiClient`)
+- **RULE**: API client base URL: `http://localhost:8080` (API Gateway)
+- **RULE**: Frontend ONLY communicates with API Gateway, never directly with backend services
+- **RULE**: Use OpenAPI-generated TypeScript clients
+- **RULE**: Use React Query for server state and caching
+- **RULE**: Consistent error handling across all API calls
+- **RULE**: Implement request/response interceptors
+
+### State Management
+- **RULE**: Redux Toolkit for global client state
+- **RULE**: React Query for server state and caching
+- **RULE**: Local component state for UI-only state
+- **RULE**: No prop drilling - use appropriate state management
+
+---
+
+## 🧪 Testing Rules
+
+### Backend Testing
+- **RULE**: Unit tests for all business logic
+- **RULE**: Integration tests for all API endpoints
+- **RULE**: Contract tests for API compatibility
+- **RULE**: Use TestContainers for database testing
+- **RULE**: Use MockMvc for controller testing
+
+### Frontend Testing
+- **RULE**: Unit tests for all components (Jest + React Testing Library)
+- **RULE**: Integration tests for user flows
+- **RULE**: E2E tests for critical paths (optional but recommended)
+
+### Test Data
+- **RULE**: Use test fixtures, not production data
+- **RULE**: Tests must be independent and isolated
+- **RULE**: Clean up test data after tests
+
+---
+
+## 📦 Development & Deployment Rules
+
+### Local Development
+- **RULE**: All services must run locally without cloud dependencies
+- **RULE**: PostgreSQL: local instance with single shared database `eprocurement`
+- **RULE**: Camunda 8: local Docker instance
+- **RULE**: Keycloak: local Docker instance (NO local DB auth, uses its own database)
+- **RULE**: OpenTelemetry: local collector
+- **RULE**: API Gateway: runs locally on port 8080
+
+### Configuration
+- **RULE**: Each service has its own `application.yml` in its repository (NO global config)
+- **RULE**: Local `application-local.yml` overrides service config (if exists)
+- **RULE**: Environment-specific configuration via Spring profiles
+- **RULE**: No hardcoded values - use configuration
+- **RULE**: **ANTI-PATTERN**: Do NOT create "global" config that requires redeploying all services
+- **RULE**: Optional: Spring Cloud Config Server for production (future enhancement)
+
+### CI/CD
+- **RULE**: All services must have CI checks: lint, unit tests, contract tests
+- **RULE**: API compatibility tests must run in CI
+- **RULE**: No deployment without passing tests
+
+### Code Organization
+- **RULE**: Clear separation between core services and domain modules
+- **RULE**: Domain modules depend on core services, not vice versa
+- **RULE**: Shared code in common libraries
+- **RULE**: No circular dependencies
+
+---
+
+## 🔒 Security Rules
+
+### Authentication
+- **RULE**: All APIs must be authenticated (except public endpoints)
+- **RULE**: Use JWT tokens from Keycloak
+- **RULE**: Implement token refresh mechanism
+- **RULE**: Validate tokens on every request
+
+### Authorization
+- **RULE**: Role-based access control (RBAC)
+- **RULE**: Check permissions at service layer
+- **RULE**: Never trust client-side authorization
+
+### Data Protection
+- **RULE**: Input validation on all endpoints
+- **RULE**: SQL injection prevention (use parameterized queries)
+- **RULE**: XSS prevention in frontend
+- **RULE**: CSRF protection for state-changing operations
+
+---
+
+## 📋 Business Logic Rules
+
+### Contract Management (from Requirements)
+- **RULE**: Only implement features specified in `Contract Financials and Contract Budget Design.pdf`
+- **RULE**: Contract status codes: 59 (Pending Config), 60 (Pending COF), 61 (Pending Registration), 62 (Registered), etc.
+- **RULE**: Contract Configuration: COA allocation mandatory, total must equal contract value
+- **RULE**: Contract COF: Multi-level review workflow
+- **RULE**: E-PIN validation required for contract creation
+
+### Workflow Rules
+- **RULE**: WF302: Contract Configuration workflow
+- **RULE**: WF303: Contract Certification of Funds workflow
+- **RULE**: Workflows must be defined in BPMN and deployed to Camunda 8
+
+---
+
+## 🚫 Anti-Patterns (What NOT to Do)
+
+### Code Anti-Patterns
+- ❌ **DO NOT** copy legacy code patterns
+- ❌ **DO NOT** write custom authentication code (use Keycloak ONLY)
+- ❌ **DO NOT** implement local DB auth as fallback (Keycloak runs in Docker for POC)
+- ❌ **DO NOT** write custom workflow engine (use Camunda 8)
+- ❌ **DO NOT** write custom audit logging (use OpenTelemetry)
+- ❌ **DO NOT** include dummy code or random calculations
+- ❌ **DO NOT** leave unused code in codebase
+- ❌ **DO NOT** hardcode values - use configuration
+- ❌ **DO NOT** skip tests for "quick fixes"
+- ❌ **DO NOT** put business logic or entities in `common-core`
+
+### Architecture Anti-Patterns
+- ❌ **DO NOT** create tight coupling between services
+- ❌ **DO NOT** create circular dependencies
+- ❌ **DO NOT** bypass service boundaries
+- ❌ **DO NOT** implement features not in requirements PDF
+- ❌ **DO NOT** expose backend services directly to frontend (use API Gateway)
+- ❌ **DO NOT** create "global" configuration that requires redeploying all services
+- ❌ **DO NOT** put business logic in `common-core` library
+- ⚠️ **NOTE**: Shared database is a project decision. Use table prefixes/schemas to organize by service
+
+### UI Anti-Patterns
+- ❌ **DO NOT** reuse legacy JSP/portlet code
+- ❌ **DO NOT** create monolithic components
+- ❌ **DO NOT** mix business logic with UI components
+- ❌ **DO NOT** skip error handling in UI
+
+---
+
+## ✅ Code Review Checklist
+
+Before merging any code, ensure:
+- [ ] Follows all rules in this document
+- [ ] Has unit tests (minimum 70% coverage)
+- [ ] Has integration tests (for APIs)
+- [ ] OpenAPI documentation updated
+- [ ] No unused code
+- [ ] No hardcoded values
+- [ ] Error handling implemented
+- [ ] Security checks in place
+- [ ] Lint checks passing
+- [ ] Only implements requirements from PDF
+
+---
+
+## 📝 Documentation Rules
+
+### Code Documentation
+- **RULE**: All public APIs must be documented
+- **RULE**: Complex business logic must have comments
+- **RULE**: README files for each service/module
+
+### API Documentation
+- **RULE**: OpenAPI specification for all services
+- **RULE**: API usage examples
+- **RULE**: Error response documentation
+
+### Architecture Documentation
+- **RULE**: Document service boundaries
+- **RULE**: Document data flow
+- **RULE**: Document deployment architecture
+
+---
+
+## 🔄 Change Management
+
+### Breaking Changes
+- **RULE**: Breaking API changes require version bump
+- **RULE**: Maintain backward compatibility for at least one version
+- **RULE**: Document breaking changes in changelog
+
+### Requirements Changes
+- **RULE**: If requirements change, update this rule book
+- **RULE**: Only implement new requirements after approval
+- **RULE**: Update implementation plan if scope changes
+
+---
+
+## 🎓 Learning & Reference
+
+### Legacy Code Usage
+- **RULE**: Use legacy code ONLY to understand:
+  - Business requirements
+  - Domain concepts
+  - Data relationships
+  - Business rules
+- **RULE**: Do NOT use legacy code for:
+  - Implementation patterns
+  - UI design
+  - Architecture decisions
+  - Technology choices
+
+---
+
+## 📌 Critical Reminders
+
+1. **Requirements First**: Only implement what's in the PDF
+2. **Core Services First**: Build foundation before domain modules
+3. **Modern Stack**: No legacy patterns or technologies
+4. **Test Everything**: No code without tests
+5. **Document Everything**: APIs, architecture, decisions
+6. **Security Always**: Authentication, authorization, validation
+7. **Pluggable Design**: Services must be replaceable
+8. **Production Ready**: No dummy code, no unused code
+
+---
+
+**Last Updated**: 2025-01-18 (Architect Review)
+**Status**: Active
+**Version**: 2.0
+
+---
+
+## 📋 Architecture Changes (v2.0)
+
+### Major Updates Based on Architect Review:
+1. ✅ **Database**: Single shared database `eprocurement` (project decision)
+2. ✅ **API Gateway**: Added Spring Cloud Gateway as single entry point
+3. ✅ **Configuration**: Removed "global config" anti-pattern
+4. ✅ **Common Core**: Limited scope to DTOs, exceptions, security utilities only
+5. ✅ **Authentication**: Keycloak ONLY, removed local DB auth fallback
+
+**Note**: Single shared database is a project-specific decision. Use table prefixes/schemas for organization.
+
+See `ARCHITECTURE_RECOMMENDATIONS_RESPONSE.md` for detailed implementation plan.
+
+---
+
+## 🔗 Related Documents
+
+- `IMPLEMENTATION_PLAN.md` - Detailed implementation plan
+- `Contract Financials and Contract Budget Design.pdf` - Requirements document
+- Legacy code documentation (for business context only)
+

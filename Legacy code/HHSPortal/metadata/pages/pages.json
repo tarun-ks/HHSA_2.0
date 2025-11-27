@@ -1,0 +1,698 @@
+{
+  "version": "1.0.0",
+  "description": "Complete Contract Management Pages Configuration",
+  "global_config": {
+    "default_layout_wrapper": "AppLayout",
+    "default_requires_auth": true,
+    "default_permissions": ["contract:view"]
+  },
+  "pages": [
+    {
+      "id": "contract_dashboard",
+      "name": "ContractDashboard",
+      "type": "dashboard",
+      "object": "contract",
+      "route": "/contracts/dashboard",
+      "display": {
+        "opening_mode": "page",
+        "icon": "LayoutDashboard",
+        "title": "Contract Dashboard",
+        "subtitle": "Overview of contract activities and key metrics"
+      },
+      "layout_wrapper": "AppLayout",
+      "layout_ref": "contract_dashboard_layout",
+      "permissions": ["contract:view"],
+      "roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROGRAM_MANAGER", "PROVIDER_MANAGER", "PROVIDER_STAFF"],
+      "metadata": {
+        "description": "Main dashboard for contract management overview",
+        "keywords": ["contracts", "dashboard", "metrics", "overview"],
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "contract_list",
+      "name": "ContractList",
+      "type": "list",
+      "object": "contract",
+      "route": "/contracts",
+      "display": {
+        "opening_mode": "page",
+        "icon": "List",
+        "title": "Contracts",
+        "subtitle": "Manage and track all contracts",
+        "breadcrumbs": [
+          "Home",
+          "Contract Management",
+          "Contracts"
+        ]
+      },
+      "layout_wrapper": "AppLayout",
+      "layout_ref": "contract_list_layout",
+      "permissions": ["contract:view"],
+      "roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROGRAM_MANAGER", "PROVIDER_MANAGER", "PROVIDER_STAFF"],
+      "query_params": {
+        "status": {
+          "type": "string",
+          "multiple": true,
+          "description": "Filter by contract status"
+        },
+        "agency_id": {
+          "type": "uuid",
+          "multiple": true,
+          "description": "Filter by agency"
+        },
+        "provider_id": {
+          "type": "uuid",
+          "multiple": true,
+          "description": "Filter by provider"
+        },
+        "contract_type_id": {
+          "type": "uuid",
+          "multiple": true,
+          "description": "Filter by contract type"
+        },
+        "search": {
+          "type": "string",
+          "description": "Search query"
+        },
+        "start_date_from": {
+          "type": "date",
+          "description": "Filter by start date from"
+        },
+        "start_date_to": {
+          "type": "date",
+          "description": "Filter by start date to"
+        },
+        "amount_from": {
+          "type": "decimal",
+          "description": "Filter by amount from"
+        },
+        "amount_to": {
+          "type": "decimal",
+          "description": "Filter by amount to"
+        },
+        "sort": {
+          "type": "string",
+          "description": "Sort field and direction",
+          "default": "created_date:desc"
+        },
+        "page": {
+          "type": "integer",
+          "description": "Page number",
+          "default": 1
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Items per page",
+          "default": 25
+        }
+      },
+      "metadata": {
+        "description": "List view for contracts with filtering and actions",
+        "keywords": ["contracts", "list", "filter", "search", "management"],
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "contract_create",
+      "name": "ContractCreate",
+      "type": "form",
+      "object": "contract",
+      "route": "/contracts/create",
+      "display": {
+        "opening_mode": "page",
+        "icon": "Plus",
+        "title": "Create Contract",
+        "subtitle": "Create a new contract",
+        "breadcrumbs": [
+          "Home",
+          "Contract Management",
+          "Contracts",
+          "Create Contract"
+        ]
+      },
+      "layout_wrapper": "AppLayout",
+      "layout_ref": "contract_create_layout",
+      "permissions": ["contract:create"],
+      "roles": ["ACCO_MANAGER", "ACCO_STAFF"],
+      "global_actions": {
+        "enabled": true,
+        "position": "sticky_bottom",
+        "actions": ["save", "cancel", "close"],
+        "form_state_tracking": true,
+        "unsaved_changes_warning": true,
+        "auto_save": {
+          "enabled": false,
+          "interval": 30000
+        }
+      },
+      "metadata": {
+        "description": "Form for creating new contracts",
+        "keywords": ["contracts", "create", "form", "new"],
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "contract_edit",
+      "name": "ContractEdit",
+      "type": "form",
+      "object": "contract",
+      "route": "/contracts/:id/edit",
+      "display": {
+        "opening_mode": "page",
+        "icon": "Edit",
+        "title": "Edit Contract",
+        "subtitle": "Edit contract details",
+        "breadcrumbs": [
+          "Home",
+          "Contract Management",
+          "Contracts",
+          "{{contract.title}}",
+          "Edit"
+        ]
+      },
+      "layout_wrapper": "AppLayout",
+      "layout_ref": "contract_edit_layout",
+      "permissions": ["contract:edit"],
+      "roles": ["ACCO_MANAGER", "ACCO_STAFF"],
+      "global_actions": {
+        "enabled": true,
+        "position": "sticky_bottom",
+        "actions": ["save", "cancel", "close"],
+        "form_state_tracking": true,
+        "unsaved_changes_warning": true,
+        "auto_save": {
+          "enabled": false,
+          "interval": 30000
+        }
+      },
+      "conditions": {
+        "status": ["{{references.contract_statuses.DRAFT.code}}", "{{references.contract_statuses.PENDING_CONFIGURATION.code}}"]
+      },
+      "params": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "description": "Contract ID"
+        }
+      },
+      "metadata": {
+        "description": "Form for editing existing contracts",
+        "keywords": ["contracts", "edit", "form", "update"],
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "contract_details",
+      "name": "ContractDetails",
+      "type": "detail",
+      "object": "contract",
+      "route": "/contracts/:id",
+      "display": {
+        "opening_mode": "page",
+        "icon": "FileText",
+        "title": "Contract Details",
+        "subtitle": "{{contract.title}}",
+        "breadcrumbs": [
+          "Home",
+          "Contract Management",
+          "Contracts",
+          "{{contract.title}}"
+        ]
+      },
+      "layout_wrapper": "AppLayout",
+      "layout_ref": "contract_details_layout",
+      "permissions": ["contract:view"],
+      "roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROGRAM_MANAGER", "PROVIDER_MANAGER", "PROVIDER_STAFF"],
+      "params": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "description": "Contract ID"
+        }
+      },
+      "metadata": {
+        "description": "Detailed view of a specific contract",
+        "keywords": ["contracts", "details", "view", "information"],
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "amendment_create",
+      "name": "AmendmentCreate",
+      "type": "form",
+      "object": "contract_amendment",
+      "route": "/contracts/:id/amendments/create",
+      "display": {
+        "opening_mode": "page",
+        "icon": "Plus",
+        "title": "Create Amendment",
+        "subtitle": "Add an amendment to {{contract.title}}",
+        "breadcrumbs": [
+          "Home",
+          "Contract Management",
+          "Contracts",
+          "{{contract.title}}",
+          "Create Amendment"
+        ]
+      },
+      "layout_wrapper": "AppLayout",
+      "layout_ref": "amendment_create_layout",
+      "permissions": ["contract:create_amendment"],
+      "roles": ["ACCO_MANAGER", "ACCO_STAFF", "PROVIDER_MANAGER"],
+      "global_actions": {
+        "enabled": true,
+        "position": "sticky_bottom",
+        "actions": ["save", "cancel", "close"],
+        "form_state_tracking": true,
+        "unsaved_changes_warning": true,
+        "auto_save": {
+          "enabled": false,
+          "interval": 30000
+        }
+      },
+      "conditions": {
+        "status": ["{{references.contract_statuses.REGISTERED.code}}", "{{references.contract_statuses.IN_PROGRESS.code}}"]
+      },
+      "params": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "description": "Contract ID"
+        }
+      },
+      "metadata": {
+        "description": "Form for creating contract amendments",
+        "keywords": ["contracts", "amendments", "create", "form"],
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "amendment_list",
+      "name": "AmendmentList",
+      "type": "list",
+      "object": "contract_amendment",
+      "route": "/contracts/:id/amendments",
+      "display": {
+        "opening_mode": "page",
+        "icon": "List",
+        "title": "Contract Amendments",
+        "subtitle": "View all amendments for {{contract.title}}",
+        "breadcrumbs": [
+          "Home",
+          "Contract Management",
+          "Contracts",
+          "{{contract.title}}",
+          "Amendments"
+        ]
+      },
+      "layout_wrapper": "AppLayout",
+      "layout_ref": "amendment_list_layout",
+      "permissions": ["contract:view"],
+      "roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROGRAM_MANAGER", "PROVIDER_MANAGER", "PROVIDER_STAFF"],
+      "params": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "description": "Contract ID"
+        }
+      },
+      "metadata": {
+        "description": "List view for contract amendments",
+        "keywords": ["contracts", "amendments", "list", "view"],
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "amendment_details",
+      "name": "AmendmentDetails",
+      "type": "detail",
+      "object": "contract_amendment",
+      "route": "/contracts/:id/amendments/:amendment_id",
+      "display": {
+        "opening_mode": "page",
+        "icon": "FileText",
+        "title": "Amendment Details",
+        "subtitle": "{{amendment.title}}",
+        "breadcrumbs": [
+          "Home",
+          "Contract Management",
+          "Contracts",
+          "{{contract.title}}",
+          "Amendments",
+          "{{amendment.title}}"
+        ]
+      },
+      "layout_wrapper": "AppLayout",
+      "layout_ref": "amendment_details_layout",
+      "permissions": ["contract:view"],
+      "roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROGRAM_MANAGER", "PROVIDER_MANAGER", "PROVIDER_STAFF"],
+      "params": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "description": "Contract ID"
+        },
+        "amendment_id": {
+          "type": "uuid",
+          "required": true,
+          "description": "Amendment ID"
+        }
+      },
+      "metadata": {
+        "description": "Detailed view of a specific amendment",
+        "keywords": ["contracts", "amendments", "details", "view"],
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "contract_financials",
+      "name": "ContractFinancials",
+      "type": "detail",
+      "object": "contract",
+      "route": "/contracts/:id/financials",
+      "display": {
+        "opening_mode": "page",
+        "icon": "DollarSign",
+        "title": "Contract Financials",
+        "subtitle": "Financial information for {{contract.title}}",
+        "breadcrumbs": [
+          "Home",
+          "Contract Management",
+          "Contracts",
+          "{{contract.title}}",
+          "Financials"
+        ]
+      },
+      "layout_wrapper": "AppLayout",
+      "layout_ref": "contract_financials_layout",
+      "permissions": ["contract:view_financials"],
+      "roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROVIDER_MANAGER"],
+      "params": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "description": "Contract ID"
+        }
+      },
+      "metadata": {
+        "description": "Financial information for a specific contract",
+        "keywords": ["contracts", "financials", "money", "budget"],
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "contract_history",
+      "name": "ContractHistory",
+      "type": "detail",
+      "object": "contract",
+      "route": "/contracts/:id/history",
+      "display": {
+        "opening_mode": "page",
+        "icon": "Clock",
+        "title": "Contract History",
+        "subtitle": "Activity and change history for {{contract.title}}",
+        "breadcrumbs": [
+          "Home",
+          "Contract Management",
+          "Contracts",
+          "{{contract.title}}",
+          "History"
+        ]
+      },
+      "layout_wrapper": "AppLayout",
+      "layout_ref": "contract_history_layout",
+      "permissions": ["contract:view"],
+      "roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROGRAM_MANAGER", "PROVIDER_MANAGER", "PROVIDER_STAFF"],
+      "params": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "description": "Contract ID"
+        }
+      },
+      "metadata": {
+        "description": "Activity and change history for a specific contract",
+        "keywords": ["contracts", "history", "activity", "changes"],
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "my_contracts",
+      "name": "MyContracts",
+      "type": "list",
+      "object": "contract",
+      "route": "/contracts/my",
+      "display": {
+        "opening_mode": "page",
+        "icon": "User",
+        "title": "My Contracts",
+        "subtitle": "Contracts assigned to you",
+        "breadcrumbs": [
+          "Home",
+          "Contract Management",
+          "My Contracts"
+        ]
+      },
+      "layout_wrapper": "AppLayout",
+      "layout_ref": "contract_list_layout",
+      "permissions": ["contract:view"],
+      "roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROGRAM_MANAGER", "PROVIDER_MANAGER", "PROVIDER_STAFF"],
+      "query_params": {
+        "status": {
+          "type": "string",
+          "multiple": true,
+          "description": "Filter by contract status"
+        },
+        "search": {
+          "type": "string",
+          "description": "Search query"
+        },
+        "sort": {
+          "type": "string",
+          "description": "Sort field and direction",
+          "default": "updated_date:desc"
+        }
+      },
+      "metadata": {
+        "description": "Contracts assigned to the current user",
+        "keywords": ["contracts", "my", "assigned", "personal"],
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "contract_reports",
+      "name": "ContractReports",
+      "type": "dashboard",
+      "object": "contract",
+      "route": "/contracts/reports",
+      "display": {
+        "opening_mode": "page",
+        "icon": "BarChart",
+        "title": "Contract Reports",
+        "subtitle": "Generate and view contract reports",
+        "breadcrumbs": [
+          "Home",
+          "Contract Management",
+          "Reports"
+        ]
+      },
+      "layout_wrapper": "AppLayout",
+      "layout_ref": "contract_reports_layout",
+      "permissions": ["contract:view"],
+      "roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROGRAM_MANAGER"],
+      "metadata": {
+        "description": "Contract reporting and analytics dashboard",
+        "keywords": ["contracts", "reports", "analytics", "dashboard"],
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "contract_summary_report",
+      "name": "ContractSummaryReport",
+      "type": "report",
+      "object": "contract",
+      "route": "/contracts/reports/summary",
+      "display": {
+        "opening_mode": "page",
+        "icon": "FileText",
+        "title": "Contract Summary Report",
+        "subtitle": "Contract summary and statistics report",
+        "breadcrumbs": [
+          "Home",
+          "Contract Management",
+          "Reports",
+          "Summary Report"
+        ]
+      },
+      "layout_wrapper": "AppLayout",
+      "layout_ref": "contract_reports_layout",
+      "permissions": ["contract:view"],
+      "roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROGRAM_MANAGER"],
+      "metadata": {
+        "description": "Contract summary and statistics report",
+        "keywords": ["contracts", "summary", "report", "statistics"],
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "contract_financial_report",
+      "name": "ContractFinancialReport",
+      "type": "report",
+      "object": "contract",
+      "route": "/contracts/reports/financial",
+      "display": {
+        "opening_mode": "page",
+        "icon": "DollarSign",
+        "title": "Financial Report",
+        "subtitle": "Contract financial analysis report",
+        "breadcrumbs": [
+          "Home",
+          "Contract Management",
+          "Reports",
+          "Financial Report"
+        ]
+      },
+      "layout_wrapper": "AppLayout",
+      "layout_ref": "contract_reports_layout",
+      "permissions": ["contract:view_financials"],
+      "roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF"],
+      "metadata": {
+        "description": "Contract financial analysis report",
+        "keywords": ["contracts", "financial", "report", "analysis"],
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "contract_status_report",
+      "name": "ContractStatusReport",
+      "type": "report",
+      "object": "contract",
+      "route": "/contracts/reports/status",
+      "display": {
+        "opening_mode": "page",
+        "icon": "TrendingUp",
+        "title": "Status Report",
+        "subtitle": "Contract status and workflow report",
+        "breadcrumbs": [
+          "Home",
+          "Contract Management",
+          "Reports",
+          "Status Report"
+        ]
+      },
+      "layout_wrapper": "AppLayout",
+      "layout_ref": "contract_reports_layout",
+      "permissions": ["contract:view"],
+      "roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROGRAM_MANAGER"],
+      "metadata": {
+        "description": "Contract status and workflow report",
+        "keywords": ["contracts", "status", "report", "workflow"],
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "contract_export",
+      "name": "ContractExport",
+      "type": "utility",
+      "object": "contract",
+      "route": "/contracts/export",
+      "display": {
+        "opening_mode": "page",
+        "icon": "Download",
+        "title": "Export Contracts",
+        "subtitle": "Export contract data to various formats",
+        "breadcrumbs": [
+          "Home",
+          "Contract Management",
+          "Export"
+        ]
+      },
+      "layout_wrapper": "AppLayout",
+      "layout_ref": "contract_export_layout",
+      "permissions": ["contract:export"],
+      "roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROGRAM_MANAGER"],
+      "metadata": {
+        "description": "Export contract data to various formats",
+        "keywords": ["contracts", "export", "data", "download"],
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+      }
+    }
+  ],
+  "page_groups": {
+    "contract_management": {
+      "name": "Contract Management",
+      "description": "Core contract management pages",
+      "pages": [
+        "contract_dashboard",
+        "contract_list",
+        "contract_create",
+        "contract_edit",
+        "contract_details",
+        "amendment_create",
+        "amendment_list",
+        "amendment_details",
+        "contract_financials",
+        "contract_history",
+        "my_contracts"
+      ]
+    },
+    "contract_reports": {
+      "name": "Contract Reports",
+      "description": "Contract reporting and analytics pages",
+      "pages": [
+        "contract_reports",
+        "contract_summary_report",
+        "contract_financial_report",
+        "contract_status_report",
+        "contract_export"
+      ]
+    }
+  },
+  "page_metadata": {
+    "seo": {
+      "contract_dashboard": {
+        "title": "Contract Management Dashboard",
+        "description": "Overview of contract activities, key metrics, and recent changes",
+        "keywords": ["contracts", "management", "dashboard", "metrics"]
+      },
+      "contract_list": {
+        "title": "Contract List",
+        "description": "Browse and manage all contracts with advanced filtering and search",
+        "keywords": ["contracts", "list", "filter", "search", "management"]
+      },
+      "contract_create": {
+        "title": "Create New Contract",
+        "description": "Create a new contract with guided workflow and validation",
+        "keywords": ["contracts", "create", "new", "form"]
+      },
+      "contract_details": {
+        "title": "Contract Details - {{contract.title}}",
+        "description": "View comprehensive contract information, financials, and amendments",
+        "keywords": ["contracts", "details", "view", "information"]
+      }
+    },
+    "analytics": {
+      "track_page_views": true,
+      "track_user_interactions": true,
+      "track_form_submissions": true,
+      "track_downloads": true
+    }
+  }
+}

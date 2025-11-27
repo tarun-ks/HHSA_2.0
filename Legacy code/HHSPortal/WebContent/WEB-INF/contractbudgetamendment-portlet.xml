@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+     http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context-3.0.xsd
+     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+     http://www.springframework.org/schema/mvc
+	 http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+
+<mvc:annotation-driven />
+
+
+<context:component-scan base-package="com.nyc.hhs.controllers" />
+
+	<bean id="configurationLoader"
+        class="org.springmodules.validation.bean.conf.loader.annotation.AnnotationBeanValidationConfigurationLoader"/>
+    <bean id="validator" class="org.springmodules.validation.bean.BeanValidator"
+        p:configurationLoader-ref="configurationLoader"/>
+
+	<bean id="portletParameterHandlerMapping"
+		class="org.springframework.web.portlet.handler.ParameterHandlerMapping">
+		<property name="parameterMap">
+			<map>
+				<entry key="contractBudgetAmendmentHandler" value-ref="contractBudgetAmendmentHandler" />
+				<!--Start Added in R5 -->
+				<entry key="enhanceddocumentvault" value-ref="enhanceddocumentvault"></entry>
+			<!--End Added in R5 -->
+			</map>
+		</property>
+	</bean>
+
+	<bean id="portletModeHandlerMapping"
+		class="org.springframework.web.portlet.handler.PortletModeHandlerMapping">
+		<property name="portletModeMap">
+			<map>
+				<entry key="view" value-ref="contractBudgetAmendmentHandler" />
+			</map>
+		</property>
+	</bean>
+	
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basename" value="/WEB-INF/errors" />
+	</bean>
+
+<!-- ********************************************* -->
+	<bean id="contractBudgetAmendmentHandler" class="com.nyc.hhs.controllers.ContractBudgetAmendmentController" />
+	<!--Start Added in R5 -->
+	<bean id="enhanceddocumentvault" class="com.nyc.hhs.controllers.DocumentVaultController" />	
+	<bean id="viewResolver"
+		class="com.nyc.hhs.spring.view.resolver.HHSSpringViewResolver">
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="/WEB-INF/r2/" />
+		<property name="alternatePrefix" value="/WEB-INF/r2/jsp/tasks/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+<!--End Added in R5 -->
+<!-- ********************************************* -->
+
+</beans>
+
+
+ 
+

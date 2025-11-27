@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<peers>
+	<!--Procurement Screens start -->
+	<peer jspid="procurementroadmap" controller="com.nyc.hhs.controllers.ProcurementController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ReleaseAccessHandler">
+	</peer>
+	<peer jspid="addprocurement" controller="com.nyc.hhs.controllers.ProcurementController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ProcurementAccessHandler"
+		rule="isCityUser">
+		<child jspid="cancelProcurement" controller="com.nyc.hhs.controllers.ProcurementController"></child>
+		<child jspid="closeProcurement" controller="com.nyc.hhs.controllers.ProcurementController"></child>
+	</peer>
+	<peer jspid="approvedproviders" controller="com.nyc.hhs.controllers.ProcurementController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ProcurementAccessHandler"
+		rule="isCityUser">
+	</peer>
+	<peer jspid="serviceSelection" controller="com.nyc.hhs.controllers.ProcurementController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ProcurementAccessHandler"
+		rule="isCityUser">
+	</peer>
+	<peer jspid="publishProcurement" controller="com.nyc.hhs.controllers.ProcurementController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ProcurementAccessHandler"
+		rule="isCityUser">
+	</peer>
+	<peer jspid="proposalconfiguration" controller="com.nyc.hhs.controllers.RFPReleaseController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ProcurementAccessHandler"
+		rule="isCityUser">
+	</peer>
+	<peer jspid="competitionPoolConfiguration" controller="com.nyc.hhs.controllers.RFPReleaseController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ProcurementAccessHandler"
+		rule="isCityUser">
+	</peer>
+	<peer jspid="releaserfp" controller="com.nyc.hhs.controllers.RFPReleaseController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ProcurementAccessHandler"
+		rule="isCityUser">
+	</peer>
+	<peer jspid="rfpReleaseDocument" controller="com.nyc.hhs.controllers.RFPReleaseController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ProcurementAccessHandler"
+		rule="isCityUser">
+	</peer>
+	<peer jspid="releaseAddendum" controller="com.nyc.hhs.controllers.RFPReleaseController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ProcurementAccessHandler"
+		rule="isCityUser">
+	</peer>
+	<peer jspid="evaluationCriteria" controller="com.nyc.hhs.controllers.RFPReleaseController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ProcurementAccessHandler"
+		rule="isCityUser">
+	</peer>
+	<!-- Procurement Screens end -->
+
+
+	<!--Proposal Screens start -->
+	<peer jspid="retractProposal" controller="com.nyc.hhs.controllers.ProposalEvaluationController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ProposalAccessHandler">
+	</peer>
+	<peer jspid="cancelProposal" controller="com.nyc.hhs.controllers.ProposalEvaluationController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ProposalAccessHandler">
+	</peer>
+	<peer jspid="proposalSummary" controller="com.nyc.hhs.controllers.ProposalEvaluationController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ReleaseAccessHandler">
+	</peer>
+	<peer jspid="proposalDetails" controller="com.nyc.hhs.controllers.RFPReleaseController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ProposalAccessHandler"
+		rule="proposalReadOnly">
+	</peer>
+	<peer jspid="proposalDocuments" controller="com.nyc.hhs.controllers.RFPReleaseController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ProposalAccessHandler"
+		rule="proposalReadOnly">
+	</peer>
+	<peer jspid="providerSubmitProposal" controller="com.nyc.hhs.controllers.RFPReleaseController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ProposalAccessHandler"
+		rule="proposalReadOnly">
+	</peer>
+	<!-- Proposal Screens end -->
+
+
+	<!--Evaluation Screens start -->
+	<peer jspid="evaluationSummary" controller="com.nyc.hhs.controllers.ProposalEvaluationController"
+		rule="isAccoAgencyUser" handlerName="com.nyc.hhs.aop.access.handlers.EvaluationGroupAccessHandler">
+	</peer>
+	
+	<peer jspid="evaluationsettings" controller="com.nyc.hhs.controllers.ProposalEvaluationController"
+		rule="isAccoAgencyUser" handlerName="com.nyc.hhs.aop.access.handlers.EvaluationAccessHandler">
+	</peer>
+	<peer jspid="proposalsEvaluationStatus" controller="com.nyc.hhs.controllers.ProposalEvaluationController"
+		rule="isAccoAgencyUser" handlerName="com.nyc.hhs.aop.access.handlers.EvaluationAccessHandler">
+		<child jspid="viewResponse" controller="com.nyc.hhs.controllers.BaseControllerSM"></child>
+		<child jspid="viewEvaluationSummary"
+			controller="com.nyc.hhs.controllers.ProposalEvaluationController"></child>
+	</peer>
+	<peer jspid="evaluationresultsandselections" controller="com.nyc.hhs.controllers.ProposalEvaluationController"
+		rule="isAccoAgencyUser" handlerName="com.nyc.hhs.aop.access.handlers.EvaluationAccessHandler">
+		<child jspid="viewResponse" controller="com.nyc.hhs.controllers.BaseControllerSM"></child>
+		<child jspid="viewEvaluationSummary"
+			controller="com.nyc.hhs.controllers.ProposalEvaluationController"></child>
+		<child jspid="viewSelectionComments"
+			controller="com.nyc.hhs.controllers.ProposalEvaluationController"></child>
+	</peer>
+	<peer jspid="awardAndContracts" controller="com.nyc.hhs.controllers.AwardContractController"
+		rule="isAccoAgencyUser" handlerName="com.nyc.hhs.aop.access.handlers.EvaluationAccessHandler">
+		<child jspid="viewAwardDocuments"
+			controller="com.nyc.hhs.controllers.SelectionDetailsController"></child>
+		<child jspid="viewAptProgress" controller="com.nyc.hhs.controllers.AwardContractController"></child>
+	</peer>
+	<!-- Evaluation Screens end -->
+
+	<!-- Contract Invoice Screens Start -->
+	<peer jspid="contractInvoice" controller="com.nyc.hhs.controllers.InvoiceController"
+		handlerName="com.nyc.hhs.aop.access.handlers.InvoiceAccessHandler"
+		rule="readOnlyPageAttributeRuleInvoice" negaterule="true">
+	</peer>
+	<peer jspid="invoiceWithdraw" controller="com.nyc.hhs.controllers.InvoiceListController"
+		handlerName="com.nyc.hhs.aop.access.handlers.InvoiceAccessHandler">
+	</peer>
+	<peer jspid="deleteInvoiceConfirmation" controller="com.nyc.hhs.controllers.InvoiceListController"
+		handlerName="com.nyc.hhs.aop.access.handlers.InvoiceAccessHandler">
+	</peer>
+	<!-- Contract Invoice Screens End -->
+
+	<peer jspid="financials" controller="com.nyc.hhs.controllers.RFPReleaseController"
+		handlerName="com.nyc.hhs.aop.access.handlers.RFPFinancialAccessHandler"
+		rule="editableFinancialScreenUser">
+	</peer>
+	<peer jspid="financialsMessage" controller="com.nyc.hhs.controllers.RFPReleaseController"
+		handlerName="com.nyc.hhs.aop.access.handlers.RFPFinancialAccessHandler">
+	</peer>
+	<!-- Contract Budget Modification Screens Start -->
+	<peer jspid="contractBudgetModificationLanding"
+		controller="com.nyc.hhs.controllers.ContractBudgetModificationController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ContractBudgetModificationAccessHandler"
+		rule="readOnlyPageAttributeRule" negaterule="true">
+	</peer>
+	<peer jspid="cancelBudgetModification" controller="com.nyc.hhs.controllers.BudgetListController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ContractBudgetModificationAccessHandler">
+	</peer>
+	<!-- Contract Budget Modification Screens End -->
+
+
+
+	<!-- Contract Budget Screens Start -->
+	<peer jspid="contractBudgetLanding" controller="com.nyc.hhs.controllers.ContractBudgetController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ContractBudgetModificationAccessHandler"
+		rule="readOnlyPageAttributeRule" negaterule="true">
+	</peer>
+	<!-- Contract Budget Screens End -->
+
+
+	<!-- Contract Budget Update Screens Start -->
+	<peer jspid="contractBudgetUpdateLanding"
+		controller="com.nyc.hhs.controllers.ContractBudgetModificationController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ContractBudgetModificationAccessHandler"
+		rule="readOnlyPageAttributeRule" negaterule="true">
+	</peer>
+	<!-- Contract Budget Update Screens End -->
+
+
+	<!-- Contract Budget Amendment Screens Start -->
+	<peer jspid="contractBudgetAmendmentLanding"
+		controller="com.nyc.hhs.controllers.ContractBudgetAmendmentController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ContractBudgetModificationAccessHandler"
+		rule="readOnlyPageAttributeRule" negaterule="true">
+	</peer>
+	<!-- Contract Budget Amendment Screens End -->
+
+	<!-- Document Properties Start -->
+	<peer jspid="viewdocumentinfo" controller="com.nyc.hhs.controllers.BaseControllerSM"
+		handlerName="com.nyc.hhs.aop.access.handlers.DocumentAccessHandler">
+	</peer>
+	<!--Start : Added in R5 -->
+	<!-- Document Properties Start -->
+	
+	<!-- Task Start -->
+	<!-- <peer jspid="approvePsr" controller="com.nyc.hhs.controllers.WorkflowDetailControllerExtended"
+		handlerName="com.nyc.hhs.aop.access.handlers.TaskHandler">
+	</peer>
+	<peer jspid="ServiceApplicationTaskDetails" controller="com.nyc.hhs.controllers.WorkflowDetailController"
+		handlerName="com.nyc.hhs.aop.access.handlers.TaskHandler">
+	</peer>
+	<peer jspid="evaluateProposalTask" controller="com.nyc.hhs.controllers.AgencyWorkflowController"
+		handlerName="com.nyc.hhs.aop.access.handlers.TaskHandler">
+	</peer>
+	<peer jspid="reviewScore" controller="com.nyc.hhs.controllers.AgencyWorkflowController"
+		handlerName="com.nyc.hhs.aop.access.handlers.TaskHandler">
+	</peer>
+	<peer jspid="completePsr" controller="com.nyc.hhs.controllers.AgencyWorkflowController"
+		handlerName="com.nyc.hhs.aop.access.handlers.TaskHandler">
+	</peer>
+	<peer jspid="acceptProposalTask" controller="com.nyc.hhs.controllers.AgencyWorkflowController"
+		handlerName="com.nyc.hhs.aop.access.handlers.TaskHandler">
+	</peer>
+	<peer jspid="procurementCertFundsTask" controller="com.nyc.hhs.controllers.BmcController"
+		handlerName="com.nyc.hhs.aop.access.handlers.TaskHandler">
+	</peer>
+	<peer jspid="contractCertificationFundsTask" controller="com.nyc.hhs.controllers.BmcController"
+		handlerName="com.nyc.hhs.aop.access.handlers.TaskHandler">
+	</peer>
+	<peer jspid="amendmentConfiguration" controller="com.nyc.hhs.controllers.BmcController"
+		handlerName="com.nyc.hhs.aop.access.handlers.TaskHandler">
+	</peer>
+	<peer jspid="contractConfigurationUpdate" controller="com.nyc.hhs.controllers.BmcController"
+		handlerName="com.nyc.hhs.aop.access.handlers.TaskHandler">
+	</peer>
+	<peer jspid="amendmentCertificationOfFunds" controller="com.nyc.hhs.controllers.BmcController"
+		handlerName="com.nyc.hhs.aop.access.handlers.TaskHandler">
+	</peer>
+	<peer jspid="contractBudgetReviewTask" controller="com.nyc.hhs.controllers.ContractBudgetController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ContractBudgetModificationAccessHandler">
+	</peer>
+	<peer jspid="budgetAmendmentReviewTask" controller="com.nyc.hhs.controllers.ContractBudgetAmendmentController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ContractBudgetModificationAccessHandler">
+	</peer>
+	<peer jspid="paymentReviewTaskDetails" controller="com.nyc.hhs.controllers.PaymentReviewController"
+		handlerName="com.nyc.hhs.aop.access.handlers.ContractBudgetModificationAccessHandler">
+	</peer>
+	
+	
+	
+	<peer jspid="contractFinancials" controller="com.nyc.hhs.controllers.WorkflowDetailController"
+		handlerName="com.nyc.hhs.aop.access.handlers.TaskHandler">
+	</peer>
+	<peer jspid="TaskContactUs" controller="com.nyc.hhs.controllers.WorkflowDetailController"
+		handlerName="com.nyc.hhs.aop.access.handlers.TaskHandler">
+	</peer>
+	<peer jspid="createadminacctreadonly" controller="com.nyc.hhs.controllers.MissingProfileInfoController"
+		handlerName="com.nyc.hhs.aop.access.handlers.TaskHandler">
+	</peer> -->
+	<!-- <peer jspid="viewTaskDetails" controller="com.nyc.hhs.controllers.AgencyWorkflowController"
+		handlerName="com.nyc.hhs.aop.access.handlers.TaskHandler">
+	</peer>  -->
+	<!-- Task Start -->
+	<!--End : Added in R5 -->
+</peers>

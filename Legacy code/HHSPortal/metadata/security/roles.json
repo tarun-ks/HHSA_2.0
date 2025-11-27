@@ -1,0 +1,490 @@
+{
+  "version": "1.0.0",
+  "description": "Complete Contract Management Role Definitions",
+  "roles": {
+    "ACCO_MANAGER": {
+      "id": "ACCO_MANAGER",
+      "name": "Account Manager",
+      "description": "Full contract management access with approval authority",
+      "level": "manager",
+      "organization_types": ["AGENCY", "CITY"],
+      "permissions": [
+        "contract:create",
+        "contract:view",
+        "contract:edit",
+        "contract:delete",
+        "contract:approve",
+        "contract:change_status",
+        "contract:create_amendment",
+        "contract:export",
+        "contract:view_financials",
+        "amendment:create",
+        "amendment:view",
+        "amendment:edit",
+        "amendment:approve",
+        "workflow:launch",
+        "workflow:view",
+        "workflow:assign",
+        "workflow:complete",
+        "workflow:terminate",
+        "document:upload",
+        "document:view",
+        "document:download",
+        "document:edit",
+        "document:delete",
+        "notification:send",
+        "notification:view",
+        "organization:view",
+        "user:view"
+      ],
+      "restrictions": {
+        "contract_access": "all",
+        "organization_access": "all",
+        "financial_access": "all"
+      },
+      "workflow_permissions": {
+        "can_initiate": ["DRAFT", "PENDING_CONFIGURATION", "PENDING_SUBMISSION"],
+        "can_approve": ["PENDING_COF", "PENDING_APPROVAL"],
+        "can_change_status": ["DRAFT", "PENDING_CONFIGURATION", "PENDING_SUBMISSION", "REGISTERED", "SUSPENDED"],
+        "can_suspend": ["REGISTERED", "IN_PROGRESS"],
+        "can_close": ["REGISTERED", "IN_PROGRESS", "SUSPENDED"]
+      },
+      "ui_permissions": {
+        "dashboard": true,
+        "contract_list": true,
+        "contract_create": true,
+        "contract_edit": true,
+        "contract_details": true,
+        "amendment_create": true,
+        "reports": true,
+        "export": true
+      }
+    },
+    "ACCO_STAFF": {
+      "id": "ACCO_STAFF",
+      "name": "Account Staff",
+      "description": "Contract creation and management without approval authority",
+      "level": "staff",
+      "organization_types": ["AGENCY", "CITY"],
+      "permissions": [
+        "contract:create",
+        "contract:view",
+        "contract:edit",
+        "contract:create_amendment",
+        "contract:export",
+        "contract:view_financials",
+        "amendment:create",
+        "amendment:view",
+        "amendment:edit",
+        "organization:view",
+        "user:view"
+      ],
+      "restrictions": {
+        "contract_access": "agency_only",
+        "organization_access": "agency_only",
+        "financial_access": "agency_only"
+      },
+      "workflow_permissions": {
+        "can_initiate": ["DRAFT", "PENDING_CONFIGURATION", "PENDING_SUBMISSION"],
+        "can_approve": [],
+        "can_change_status": ["DRAFT", "PENDING_CONFIGURATION", "PENDING_SUBMISSION"],
+        "can_suspend": false,
+        "can_close": false
+      },
+      "ui_permissions": {
+        "dashboard": true,
+        "contract_list": true,
+        "contract_create": true,
+        "contract_edit": true,
+        "contract_details": true,
+        "amendment_create": true,
+        "reports": true,
+        "export": true
+      }
+    },
+    "ACCO_ADMIN_STAFF": {
+      "id": "ACCO_ADMIN_STAFF",
+      "name": "Account Admin Staff",
+      "description": "Administrative contract functions and system management",
+      "level": "admin",
+      "organization_types": ["AGENCY", "CITY"],
+      "permissions": [
+        "contract:create",
+        "contract:view",
+        "contract:edit",
+        "contract:delete",
+        "contract:approve",
+        "contract:change_status",
+        "contract:create_amendment",
+        "contract:export",
+        "contract:view_financials",
+        "amendment:create",
+        "amendment:view",
+        "amendment:edit",
+        "amendment:approve",
+        "amendment:delete",
+        "organization:view",
+        "organization:edit",
+        "user:view",
+        "user:edit",
+        "system:admin"
+      ],
+      "restrictions": {
+        "contract_access": "all",
+        "organization_access": "all",
+        "financial_access": "all"
+      },
+      "workflow_permissions": {
+        "can_initiate": ["DRAFT", "PENDING_CONFIGURATION", "PENDING_SUBMISSION"],
+        "can_approve": ["PENDING_COF", "PENDING_APPROVAL"],
+        "can_change_status": ["DRAFT", "PENDING_CONFIGURATION", "PENDING_SUBMISSION", "REGISTERED", "SUSPENDED"],
+        "can_suspend": ["REGISTERED", "IN_PROGRESS"],
+        "can_close": ["REGISTERED", "IN_PROGRESS", "SUSPENDED"]
+      },
+      "ui_permissions": {
+        "dashboard": true,
+        "contract_list": true,
+        "contract_create": true,
+        "contract_edit": true,
+        "contract_details": true,
+        "amendment_create": true,
+        "reports": true,
+        "export": true,
+        "admin": true
+      }
+    },
+    "PROGRAM_MANAGER": {
+      "id": "PROGRAM_MANAGER",
+      "name": "Program Manager",
+      "description": "Program-specific contract oversight and management",
+      "level": "manager",
+      "organization_types": ["AGENCY", "CITY"],
+      "permissions": [
+        "contract:view",
+        "contract:view_financials",
+        "amendment:view",
+        "organization:view",
+        "user:view"
+      ],
+      "restrictions": {
+        "contract_access": "program_only",
+        "organization_access": "agency_only",
+        "financial_access": "program_only"
+      },
+      "workflow_permissions": {
+        "can_initiate": [],
+        "can_approve": [],
+        "can_change_status": [],
+        "can_suspend": false,
+        "can_close": false
+      },
+      "ui_permissions": {
+        "dashboard": true,
+        "contract_list": true,
+        "contract_create": false,
+        "contract_edit": false,
+        "contract_details": true,
+        "amendment_create": false,
+        "reports": true,
+        "export": true
+      }
+    },
+    "PROGRAM_STAFF": {
+      "id": "PROGRAM_STAFF",
+      "name": "Program Staff",
+      "description": "Program contract participation and monitoring",
+      "level": "staff",
+      "organization_types": ["AGENCY", "CITY"],
+      "permissions": [
+        "contract:view",
+        "amendment:view",
+        "organization:view",
+        "user:view"
+      ],
+      "restrictions": {
+        "contract_access": "program_only",
+        "organization_access": "agency_only",
+        "financial_access": "none"
+      },
+      "workflow_permissions": {
+        "can_initiate": [],
+        "can_approve": [],
+        "can_change_status": [],
+        "can_suspend": false,
+        "can_close": false
+      },
+      "ui_permissions": {
+        "dashboard": true,
+        "contract_list": true,
+        "contract_create": false,
+        "contract_edit": false,
+        "contract_details": true,
+        "amendment_create": false,
+        "reports": false,
+        "export": false
+      }
+    },
+    "FINANCE_MANAGER": {
+      "id": "FINANCE_MANAGER",
+      "name": "Finance Manager",
+      "description": "Financial contract oversight and budget management",
+      "level": "manager",
+      "organization_types": ["AGENCY", "CITY"],
+      "permissions": [
+        "contract:view",
+        "contract:approve",
+        "contract:change_status",
+        "contract:view_financials",
+        "amendment:view",
+        "amendment:approve",
+        "organization:view",
+        "user:view"
+      ],
+      "restrictions": {
+        "contract_access": "all",
+        "organization_access": "all",
+        "financial_access": "all"
+      },
+      "workflow_permissions": {
+        "can_initiate": [],
+        "can_approve": ["PENDING_COF", "PENDING_APPROVAL"],
+        "can_change_status": ["PENDING_COF", "PENDING_APPROVAL"],
+        "can_suspend": false,
+        "can_close": false
+      },
+      "ui_permissions": {
+        "dashboard": true,
+        "contract_list": true,
+        "contract_create": false,
+        "contract_edit": false,
+        "contract_details": true,
+        "amendment_create": false,
+        "reports": true,
+        "export": true
+      }
+    },
+    "FINANCE_STAFF": {
+      "id": "FINANCE_STAFF",
+      "name": "Finance Staff",
+      "description": "Financial contract processing and tracking",
+      "level": "staff",
+      "organization_types": ["AGENCY", "CITY"],
+      "permissions": [
+        "contract:view",
+        "contract:view_financials",
+        "amendment:view",
+        "organization:view",
+        "user:view"
+      ],
+      "restrictions": {
+        "contract_access": "agency_only",
+        "organization_access": "agency_only",
+        "financial_access": "agency_only"
+      },
+      "workflow_permissions": {
+        "can_initiate": [],
+        "can_approve": [],
+        "can_change_status": [],
+        "can_suspend": false,
+        "can_close": false
+      },
+      "ui_permissions": {
+        "dashboard": true,
+        "contract_list": true,
+        "contract_create": false,
+        "contract_edit": false,
+        "contract_details": true,
+        "amendment_create": false,
+        "reports": true,
+        "export": true
+      }
+    },
+    "PROVIDER_MANAGER": {
+      "id": "PROVIDER_MANAGER",
+      "name": "Provider Manager",
+      "description": "Provider contract management and participation",
+      "level": "manager",
+      "organization_types": ["PROVIDER"],
+      "permissions": [
+        "contract:view",
+        "contract:create_amendment",
+        "contract:view_financials",
+        "amendment:create",
+        "amendment:view",
+        "amendment:edit",
+        "organization:view",
+        "user:view"
+      ],
+      "restrictions": {
+        "contract_access": "provider_only",
+        "organization_access": "provider_only",
+        "financial_access": "provider_only"
+      },
+      "workflow_permissions": {
+        "can_initiate": [],
+        "can_approve": [],
+        "can_change_status": [],
+        "can_suspend": false,
+        "can_close": false
+      },
+      "ui_permissions": {
+        "dashboard": true,
+        "contract_list": true,
+        "contract_create": false,
+        "contract_edit": false,
+        "contract_details": true,
+        "amendment_create": true,
+        "reports": false,
+        "export": false
+      }
+    },
+    "PROVIDER_STAFF": {
+      "id": "PROVIDER_STAFF",
+      "name": "Provider Staff",
+      "description": "Provider contract participation and updates",
+      "level": "staff",
+      "organization_types": ["PROVIDER"],
+      "permissions": [
+        "contract:view",
+        "amendment:view",
+        "organization:view",
+        "user:view"
+      ],
+      "restrictions": {
+        "contract_access": "provider_only",
+        "organization_access": "provider_only",
+        "financial_access": "none"
+      },
+      "workflow_permissions": {
+        "can_initiate": [],
+        "can_approve": [],
+        "can_change_status": [],
+        "can_suspend": false,
+        "can_close": false
+      },
+      "ui_permissions": {
+        "dashboard": true,
+        "contract_list": true,
+        "contract_create": false,
+        "contract_edit": false,
+        "contract_details": true,
+        "amendment_create": false,
+        "reports": false,
+        "export": false
+      }
+    },
+    "PROVIDER_ADMIN": {
+      "id": "PROVIDER_ADMIN",
+      "name": "Provider Admin",
+      "description": "Administrative provider functions and user management",
+      "level": "admin",
+      "organization_types": ["PROVIDER"],
+      "permissions": [
+        "contract:view",
+        "contract:create_amendment",
+        "contract:view_financials",
+        "amendment:create",
+        "amendment:view",
+        "amendment:edit",
+        "amendment:delete",
+        "organization:view",
+        "organization:edit",
+        "user:view",
+        "user:edit"
+      ],
+      "restrictions": {
+        "contract_access": "provider_only",
+        "organization_access": "provider_only",
+        "financial_access": "provider_only"
+      },
+      "workflow_permissions": {
+        "can_initiate": [],
+        "can_approve": [],
+        "can_change_status": [],
+        "can_suspend": false,
+        "can_close": false
+      },
+      "ui_permissions": {
+        "dashboard": true,
+        "contract_list": true,
+        "contract_create": false,
+        "contract_edit": false,
+        "contract_details": true,
+        "amendment_create": true,
+        "reports": false,
+        "export": false,
+        "admin": true
+      }
+    }
+  },
+  "role_hierarchy": {
+    "CITY_ADMIN": {
+      "level": 10,
+      "inherits_from": ["ACCO_MANAGER", "FINANCE_MANAGER", "PROGRAM_MANAGER"]
+    },
+    "ACCO_MANAGER": {
+      "level": 8,
+      "inherits_from": ["ACCO_STAFF"]
+    },
+    "ACCO_ADMIN_STAFF": {
+      "level": 8,
+      "inherits_from": ["ACCO_MANAGER"]
+    },
+    "FINANCE_MANAGER": {
+      "level": 7,
+      "inherits_from": ["FINANCE_STAFF"]
+    },
+    "PROGRAM_MANAGER": {
+      "level": 6,
+      "inherits_from": ["PROGRAM_STAFF"]
+    },
+    "ACCO_STAFF": {
+      "level": 5,
+      "inherits_from": []
+    },
+    "FINANCE_STAFF": {
+      "level": 4,
+      "inherits_from": []
+    },
+    "PROGRAM_STAFF": {
+      "level": 3,
+      "inherits_from": []
+    },
+    "PROVIDER_MANAGER": {
+      "level": 6,
+      "inherits_from": ["PROVIDER_STAFF"]
+    },
+    "PROVIDER_ADMIN": {
+      "level": 7,
+      "inherits_from": ["PROVIDER_MANAGER"]
+    },
+    "PROVIDER_STAFF": {
+      "level": 2,
+      "inherits_from": []
+    }
+  },
+  "role_assignments": {
+    "default_roles": {
+      "AGENCY": ["ACCO_MANAGER", "ACCO_STAFF", "PROGRAM_MANAGER", "PROGRAM_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF"],
+      "PROVIDER": ["PROVIDER_MANAGER", "PROVIDER_STAFF", "PROVIDER_ADMIN"],
+      "CITY": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROGRAM_MANAGER", "PROGRAM_STAFF"]
+    },
+    "role_requirements": {
+      "ACCO_MANAGER": {
+        "min_experience": "2 years",
+        "required_training": ["Contract Management", "Procurement Law"],
+        "certification_required": false
+      },
+      "FINANCE_MANAGER": {
+        "min_experience": "3 years",
+        "required_training": ["Financial Management", "Budget Planning"],
+        "certification_required": true
+      },
+      "PROGRAM_MANAGER": {
+        "min_experience": "2 years",
+        "required_training": ["Program Management", "Contract Oversight"],
+        "certification_required": false
+      }
+    }
+  }
+}

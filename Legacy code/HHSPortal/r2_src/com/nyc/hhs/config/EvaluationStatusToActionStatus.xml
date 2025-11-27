@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapping>
+	<role name="accomanager">
+		<status name="18">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+		</status>
+		<status name="19">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+			<action>Mark Non-Responsive</action>
+		</status>
+		<status name="20">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+			<action>Unlock Proposal</action>
+		</status>
+		<status name="21">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+		</status>
+		<status name="22">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+		</status>
+		<status name="23">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+		</status>
+		<status name="24">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+		</status>
+		<status name="25">
+			<action>View Proposal</action>
+			<action>Mark Returned for Revision</action>
+			<action>Unlock Proposal</action>
+		</status>
+		<status name="141">
+			<action>View Proposal</action>
+		</status>
+	</role>
+		<role name="others">
+		<status name="18">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+		</status>
+		<status name="19">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+			<action>Mark Non-Responsive</action>
+		</status>
+		<status name="20">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+		</status>
+		<status name="21">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+		</status>
+		<status name="22">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+		</status>
+		<status name="23">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+		</status>
+		<status name="24">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+		</status>
+		<status name="25">
+			<action>View Proposal</action>
+			<action>Mark Returned for Revision</action>
+		</status>
+	</role>
+	<role name="">
+		<status name="18">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+		</status>
+		<status name="19">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+		</status>
+		<status name="20">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+		</status>
+		<status name="21">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+		</status>
+		<status name="22">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+		</status>
+		<status name="23">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+		</status>
+		<status name="24">
+			<action>View Proposal</action>
+			<action>View Evaluation Summary</action>
+		</status>
+		<status name="25">
+			<action>View Proposal</action>
+		</status>
+		<status name="141">
+			<action>View Proposal</action>
+		</status>
+	</role>
+</mapping>

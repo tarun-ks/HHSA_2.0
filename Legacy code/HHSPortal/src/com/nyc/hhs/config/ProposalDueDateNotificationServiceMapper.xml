@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper
+	namespace="com.nyc.hhs.service.db.services.application.ProposalDueDateNotificationServiceMapper">
+	<resultMap id="proposalDetails" type="com.nyc.hhs.model.ProposalReportBean">
+	    <result property="procurementTitle"         column="PROCUREMENT_TITLE"/>
+	    <result property="providerName"             column="PROVIDER_NAME"/>
+	    <result property="providerEIN"              column="EIN"/>
+	    <result property="proposalTitle"            column="PROPOSAL_TITLE"/>
+	    <result property="proposalId"               column="PROPOSAL_ID"/>
+	    <result property="proposalStatus"           column="PROPOSAL_STATUS"/>
+	    <result property="competitionPoolId"        column="COMPETITION_POOL_ID"/>
+	    <result property="competitionPool"          column="COMPETITION_POOL"/>
+	    <result property="totalFundingRequest"      column="TOTAL_FUNDING_REQUEST"/>
+	    <result property="totalNumberOfService"     column="TOTAL_SERVICE_UNITS"/>
+	    <result property="costPerUnit"     			column="COST_PER_UNIT"/>
+	    
+
+	    <result property="createdDate"              column="CREATED_DATE_AND_TIME"/>
+	    <result property="lastModifiedDate"         column="MODIFIED_DATE_AND_TIME"/>
+	    <result property="lastModifiedByName"       column="LAST_MODIFIED_BY_NAME"/>
+	    <result property="lastModifiedByEmail"      column="LAST_MODIFIED_BY_EMAIL"/>
+	    <result property="lastModifiedByPhone"      column="LAST_MODIFIED_BY_PHONE"/>
+
+	    <result property="question1Answer"          column="QUESTION_1_ANSWER"/>
+	    <result property="question2Answer"          column="QUESTION_2_ANSWER"/>
+	    <result property="question3Answer"          column="QUESTION_3_ANSWER"/>
+	    <result property="question4Answer"          column="QUESTION_4_ANSWER"/>
+	    <result property="question5Answer"          column="QUESTION_5_ANSWER"/>
+	    <result property="question6Answer"          column="QUESTION_6_ANSWER"/>
+	    <result property="question7Answer"          column="QUESTION_7_ANSWER"/>
+	    <result property="question8Answer"          column="QUESTION_8_ANSWER"/>
+	    <result property="question9Answer"          column="QUESTION_9_ANSWER"/>
+	    <result property="question10Answer"         column="QUESTION_10_ANSWER"/>
+	    <result property="question11Answer"         column="QUESTION_11_ANSWER"/>
+	    <result property="question12Answer"         column="QUESTION_12_ANSWER"/>
+	    <result property="question13Answer"         column="QUESTION_13_ANSWER"/>
+	    <result property="question14Answer"         column="QUESTION_14_ANSWER"/>
+	    <result property="question15Answer"         column="QUESTION_15_ANSWER"/>
+	                                                
+	    <result property="schoolDistrictName"       column="SCHOOL_DISTR_NAME"/>
+	    <result property="addressValidation"        column="VALIDATION_STATUS"/>
+	    <result property="communityDistinct"        column="COMMUNITY_DISTRICT"/>
+	                                                
+	    <result property="numberOfSites"            column="SITE_COUNT"/>
+	    <result property="siteName"                 column="SITE_NAME"/>
+	    <result property="siteAddress1"             column="SITE_ADDRESS_1"/>
+	    <result property="siteAddress2"             column="SITE_ADDRESS_2"/>
+	    <result property="siteCity"                 column="SITE_CITY"/>
+	    <result property="siteState"                column="SITE_STATE"/>
+	    <result property="siteZip"                  column="SITE_ZIP"/>
+		<result property="agencyId"                 column="AGENCY_ID"/>
+	</resultMap>
+
+	<select id="getProposalDueDateList" parameterType="String"
+		resultMap="proposalDetails">
+	<![CDATA[
+
+		SELECT REP.PROCUREMENT_TITLE       
+			,REP.PROVIDER_NAME                 
+			,REP.EIN                           
+			,REP.PROPOSAL_ID                   
+			,REP.PROPOSAL_TITLE                
+			,REP.PROPOSAL_STATUS               
+			,REP.COMPETITION_POOL_ID           
+			,REP.COMPETITION_POOL              
+			,REP.TOTAL_FUNDING_REQUEST         
+			,REP.TOTAL_SERVICE_UNITS           
+	        ,DECODE( REP.service_units_required,
+	                1,DECODE(REP.TOTAL_SERVICE_UNITS, 0,0,round((REP.TOTAL_FUNDING_REQUEST/REP.TOTAL_SERVICE_UNITS),2) )
+	                ,0)   
+			AS COST_PER_UNIT
+			,REP.SCHOOL_DISTR_NAME             
+			,REP.VALIDATION_STATUS             
+			,REP.COMMUNITY_DISTRICT            
+
+			,REP.SITE_COUNT                    
+			,REP.SITE_NAME                     
+			,REP.SITE_ADDRESS_1                
+			,REP.SITE_ADDRESS_2                
+			,REP.SITE_CITY                     
+			,REP.SITE_STATE                    
+			,REP.SITE_ZIP                      
+			,REP.AGENCY_ID                     
+
+			,REP.CREATED_DATE_AND_TIME         
+			,REP.MODIFIED_DATE_AND_TIME        
+			,REP.LAST_MODIFIED_BY_NAME         
+			,REP.LAST_MODIFIED_BY_EMAIL        
+			,REP.LAST_MODIFIED_BY_PHONE        
+
+		      ,NVL(Q_A.QUESTION_1_ANSWER ,'NA') AS QUESTION_1_ANSWER
+		      ,NVL(Q_A.QUESTION_2_ANSWER ,'NA') AS QUESTION_2_ANSWER
+		      ,NVL(Q_A.QUESTION_3_ANSWER ,'NA') AS QUESTION_3_ANSWER
+		      ,NVL(Q_A.QUESTION_4_ANSWER ,'NA') AS QUESTION_4_ANSWER
+		      ,NVL(Q_A.QUESTION_5_ANSWER ,'NA') AS QUESTION_5_ANSWER
+		      ,NVL(Q_A.QUESTION_6_ANSWER ,'NA') AS QUESTION_6_ANSWER
+		      ,NVL(Q_A.QUESTION_7_ANSWER ,'NA') AS QUESTION_7_ANSWER
+		      ,NVL(Q_A.QUESTION_8_ANSWER ,'NA') AS QUESTION_8_ANSWER
+		      ,NVL(Q_A.QUESTION_9_ANSWER ,'NA') AS QUESTION_9_ANSWER
+		      ,NVL(Q_A.QUESTION_10_ANSWER,'NA') AS QUESTION_10_ANSWER
+		      ,NVL(Q_A.QUESTION_11_ANSWER,'NA') AS QUESTION_11_ANSWER
+		      ,NVL(Q_A.QUESTION_12_ANSWER,'NA') AS QUESTION_12_ANSWER
+		      ,NVL(Q_A.QUESTION_13_ANSWER,'NA') AS QUESTION_13_ANSWER
+		      ,NVL(Q_A.QUESTION_14_ANSWER,'NA') AS QUESTION_14_ANSWER
+		      ,NVL(Q_A.QUESTION_15_ANSWER,'NA') AS QUESTION_15_ANSWER
+		FROM (
+		        SELECT  PROC.PROCUREMENT_TITLE AS PROCUREMENT_TITLE,
+				                NVL(PCONF.ORGANIZATION_LEGAL_NAME,'NA') AS PROVIDER_NAME, 
+				                NVL(PCONF.VAL_SCHOOL_DISTR_NAME ,'NA')  AS SCHOOL_DISTRICT_NAME ,
+		                PCONF.PROPOSAL_TITLE AS PROPOSAL_TITLE  ,
+		                PCONF.COMPETITION_POOL_ID ,
+		                NVL(COMP.COMPETITION_POOL_TITLE,'NA') AS  COMPETITION_POOL, 
+		                NVL(PCONF.TOTAL_NUM_OF_SERVICE_REQUEST,0) AS TOTAL_SERVICE_UNITS,
+		                NVL(PCONF.TOTAL_FUNDING_REQUEST,0)  AS TOTAL_FUNDING_REQUEST, 
+		                NVL(PROC.SERVICE_UNITS_REQUIRED,0)    AS SERVICE_UNITS_REQUIRED, 		                
+				                NVL(PCONF.PHONE_NUMBER,'NA') AS PROVIDER_CONTACT,
+		                NVL( (SELECT COUNT(*)
+		                      FROM PROPOSAL_SITE 
+		                      WHERE PROPOSAL_ID=PCONF.PROPOSAL_ID
+		                      GROUP BY PROPOSAL_ID),0) AS SITE_COUNT ,
+		                NVL(PSITE.SITE_NAME, 'NA') AS SITE_NAME,
+		                NVL(PSITE.ADDRESS1, 'NA') AS SITE_ADDRESS_1,
+		                NVL(PSITE.ADDRESS2, 'NA') AS SITE_ADDRESS_2,
+		                NVL(PSITE.CITY, 'NA')     AS SITE_CITY , 
+		                NVL(PSITE.STATE, 'NA')    AS  SITE_STATE, 
+		                NVL(PSITE.ZIP_CODE, 'NA')      AS  SITE_ZIP, 
+		                NVL(PSITE.VAL_SCHOOL_DISTR_NAME, 'NA')      AS  SCHOOL_DISTR_NAME, 
+		                CASE WHEN LOWER(SUBSTR(PSITE.VAL_STATUS_DECSCRIPTION,1,10)) = 'successful'
+		                     THEN 'true' 
+		                     ELSE 'false'
+		                END  AS VALIDATION_STATUS,
+		                NVL(PSITE.VAL_COMMUNITY_DISTRICT,'NA') AS COMMUNITY_DISTRICT,
+		                STAT.STATUS AS PROPOSAL_STATUS,
+		                TO_CHAR(PCONF.CREATED_DATE,'MM/DD/YYYY HH24:MI:SS') AS CREATED_DATE_AND_TIME,
+		                TO_CHAR(PCONF.MODIFIED_DATE,'MM/DD/YYYY HH24:MI:SS') AS MODIFIED_DATE_AND_TIME,
+		                     (PCONF.FIRST_NAME||' '||PCONF.LAST_NAME)  AS LAST_MODIFIED_BY_NAME,
+				                PCONF.EMAIL AS LAST_MODIFIED_BY_EMAIL, 
+				                NVL(PCONF.PHONE,'NA') AS LAST_MODIFIED_BY_PHONE,
+				                PCONF.PROPOSAL_ID, NVL(PCONF.EIN_ID_NN,'NA') AS EIN,
+		                PCONF.FIRST_NAME,  PCONF.LAST_NAME, 
+		                PCONF.EMAIL,  PCONF.PHONE,
+                    	PROC.AGENCY_ID
+		        FROM    PROCUREMENT PROC, 
+		                ( 
+		                  SELECT PCON.PROCUREMENT_ID, PCON.PROPOSAL_STATUS_ID, PCON.MODIFIED_BY_USERID, PCON.MODIFIED_DATE
+                                       , PCON.ORGANIZATION_ID ,   PCON.PROPOSAL_ID, PCON.CREATED_DATE  
+		                         , NVL(PCON.COMPETITION_POOL_ID, PCON.TEMP_COMPETITION_POOL_ID) AS COMPETITION_POOL_ID
+		                         , PCON.TOTAL_FUNDING_REQUEST, PCON.TOTAL_NUM_OF_SERVICE_REQUEST, PCON.PROPOSAL_TITLE
+                                       , NVL(SDET.FIRST_NAME,'NA') AS FIRST_NAME, NVL(SDET.LAST_NAME,'') AS LAST_NAME  
+                                       , NVL(SDET.EMAIL, 'NA') AS EMAIL      , NVL(SDET.PHONE, 'NA') AS PHONE  
+                                       , ORG.ORGANIZATION_LEGAL_NAME, ORG.PHONE_NUMBER, ORG.EIN_ID_NN, ORG.VAL_SCHOOL_DISTR_NAME
+		                  FROM PROPOSAL_CONFIG PCON, STAFF_DETAILS SDET, ORGANIZATION ORG
+                                WHERE  PCON.ORGANIZATION_ID =  ORG.ORGANIZATION_ID
+                                  AND  PCON.MODIFIED_BY_USERID = SDET.STAFF_ID
+                                  AND PCON.PROCUREMENT_ID  IN (SELECT PROCUREMENT_ID FROM PROCUREMENT WHERE TO_CHAR(UPD_PROPOSAL_DUE_DATE, 'MM/DD/YYYY') =  #{dueDate}  )
+		                        )  PCONF , PROPOSAL_SITE PSITE  , STATUS_MASTER_R2_R3 STAT, COMPETITION_POOL COMP 
+		              WHERE PROC.PROCUREMENT_ID = PCONF.PROCUREMENT_ID 
+		        AND PCONF.PROPOSAL_ID = PSITE.PROPOSAL_ID(+)
+		        AND PCONF.PROPOSAL_STATUS_ID = STAT.STATUS_ID
+		        AND PCONF.COMPETITION_POOL_ID = COMP.COMPETITION_POOL_ID(+)
+
+		        ) REP , 
+		        (
+		        SELECT PROPOSAL_ID
+		              , MAX(CASE WHEN SEQ = 1  THEN CUSTOM_ANSWER ELSE NULL END ) AS QUESTION_1_ANSWER
+		              , MAX(CASE WHEN SEQ = 2  THEN CUSTOM_ANSWER ELSE NULL END ) AS QUESTION_2_ANSWER
+		              , MAX(CASE WHEN SEQ = 3  THEN CUSTOM_ANSWER ELSE NULL END ) AS QUESTION_3_ANSWER
+		              , MAX(CASE WHEN SEQ = 4  THEN CUSTOM_ANSWER ELSE NULL END ) AS QUESTION_4_ANSWER
+		              , MAX(CASE WHEN SEQ = 5  THEN CUSTOM_ANSWER ELSE NULL END ) AS QUESTION_5_ANSWER
+		              , MAX(CASE WHEN SEQ = 6  THEN CUSTOM_ANSWER ELSE NULL END ) AS QUESTION_6_ANSWER
+		              , MAX(CASE WHEN SEQ = 7  THEN CUSTOM_ANSWER ELSE NULL END ) AS QUESTION_7_ANSWER
+		              , MAX(CASE WHEN SEQ = 8  THEN CUSTOM_ANSWER ELSE NULL END ) AS QUESTION_8_ANSWER
+		              , MAX(CASE WHEN SEQ = 9  THEN CUSTOM_ANSWER ELSE NULL END ) AS QUESTION_9_ANSWER
+		              , MAX(CASE WHEN SEQ = 10 THEN CUSTOM_ANSWER ELSE NULL END ) AS QUESTION_10_ANSWER
+		              , MAX(CASE WHEN SEQ = 11 THEN CUSTOM_ANSWER ELSE NULL END ) AS QUESTION_11_ANSWER
+		              , MAX(CASE WHEN SEQ = 12 THEN CUSTOM_ANSWER ELSE NULL END ) AS QUESTION_12_ANSWER
+		              , MAX(CASE WHEN SEQ = 13 THEN CUSTOM_ANSWER ELSE NULL END ) AS QUESTION_13_ANSWER
+		              , MAX(CASE WHEN SEQ = 14 THEN CUSTOM_ANSWER ELSE NULL END ) AS QUESTION_14_ANSWER
+		              , MAX(CASE WHEN SEQ = 15 THEN CUSTOM_ANSWER ELSE NULL END ) AS QUESTION_15_ANSWER
+		        FROM ( SELECT PCR.PROPOSAL_ID,  PQM.QUESTION_SEQUENCE_NUMBER AS SEQ, CUSTOM_ANSWER 
+		                  FROM PROPOSAL_QUESTION_RESPONSE PCR, 
+		                       PROCUREMENT_QUESTION_CONFIG PQC , 
+		                            PRCRMNT_QUESTION_MAPPING PQM 
+		                       WHERE PCR.PROCUREMENT_QN_ID= PQC.PROCUREMENT_QN_ID 
+		                         AND PQM.PROCUREMENT_QN_ID= PQC.PROCUREMENT_QN_ID 
+		                         AND PQC.PROCUREMENT_ID IN (SELECT PROCUREMENT_ID FROM PROCUREMENT WHERE TO_CHAR(UPD_PROPOSAL_DUE_DATE, 'MM/DD/YYYY') = #{dueDate} )
+		                         AND PQM.VERSION_NUMBER= (SELECT MAX(VERSION_NUMBER)
+		                                                   FROM PRCRMNT_QUESTION_MAPPING PQM2 
+		                                                    WHERE PQM2.QUESTION_SEQUENCE_NUMBER=PQM.QUESTION_SEQUENCE_NUMBER
+		                                                      AND PQM2.PROCUREMENT_QN_ID=PQM.PROCUREMENT_QN_ID)
+		                  ORDER BY PCR.PROPOSAL_ID, PQM.QUESTION_SEQUENCE_NUMBER
+		            ) 
+		            GROUP BY PROPOSAL_ID
+		        ) Q_A
+		 WHERE REP.PROPOSAL_ID = Q_A.PROPOSAL_ID(+)
+		 ORDER BY REP.PROCUREMENT_TITLE, REP.PROVIDER_NAME, REP.PROPOSAL_TITLE
+
+	]]>
+	</select>
+
+
+	<select id="getReportRecipientsList"  resultType="String">
+		SELECT EMAIL_ID
+		FROM   CITY_USER_DETAILS
+		WHERE  USER_TYPE = 'city_org'
+		AND USER_ROLE IN (
+		'manager' )
+		AND    ACTIVE_FLAG = 1
+	</select>
+
+</mapper>
+

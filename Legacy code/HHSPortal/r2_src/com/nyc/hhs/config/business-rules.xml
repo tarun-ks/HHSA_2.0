@@ -1,0 +1,1535 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rules
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:noNamespaceSchemaLocation="business-rule.xsd">
+	<rule id="DisableProposalDetails">
+		<expression operator="or">
+			<expression channel_variable="procurementStatus" method="equals" type="Integer" value="7" />
+			<expression operator="and">
+				<expression channel_variable="proposalStatus" method="notEquals" type="Integer" value="17" />
+				<expression channel_variable="proposalStatus" method="notEquals" type="Integer" value="19" />
+			</expression>
+		</expression>
+	</rule>
+	<rule id="showProposalCommentLinkPropDetalis">
+		<expression operator="and">
+			<expression channel_variable="commentSize" method="greaterThan" type="Integer" value="0" />
+			<expression channel_variable="proposalStatus" method="notEquals" type="Integer" value="17" />
+			<expression channel_variable="proposalStatus" method="notEquals" type="Integer" value="18" />
+		</expression>
+	</rule>
+	<rule id="DisableGenerateListButton">
+		<expression operator="and">
+			<expression channel_variable="status" method="notEquals" type="Integer" value="4" />
+			<expression channel_variable="status" method="notEquals" type="Integer" value="5" />
+			<expression channel_variable="status" method="notEquals" type="Integer" value="6" />
+			<expression channel_variable="status" method="notEquals" type="Integer" value="7" />
+			<expression channel_variable="status" method="notEquals" type="Integer" value="8" />
+		</expression>
+	</rule>
+	<rule id="DisableSelectionBoxDropDown">
+		<expression operator="or">
+			<expression channel_variable="status" method="equals" type="Integer" value="1" />
+			<expression channel_variable="status" method="equals" type="Integer" value="2" />
+		</expression>
+	</rule>
+	<rule id="testRule1">
+		<expression operator="or">
+			<expression channel_variable="testChVarString" method="equals" type="String" value="helloTest" />
+		</expression>
+	</rule>
+	<rule id="testRule2">
+		<expression channel_variable="testChVar" method="equals"
+			type="String" value="helloTest" />
+	</rule>
+	<rule id="testRule3">
+		<expression operator="or">
+			<expression channel_variable="testChVarInteger" method="equals"
+				type="Integer" value="10" />
+			<expression channel_variable="testChVarFloat" method="equals"
+				type="Float" value="11.5" />
+			<expression channel_variable="testChVarInteger" method="greaterThanEquals"
+				type="Integer" value="10" />
+			<expression channel_variable="testChVarString"
+				channel_variable2="testChVarString2" method="equals" type="String" />
+
+			<expression operator="and">
+				<expression channel_variable="testChVarInteger"
+					channel_variable2="testChVarInteger2" method="greaterThanEquals"
+					type="Integer" />
+				<expression channel_variable="testChVarInteger"
+					channel_variable2="testChVarInteger3" method="lessThanEquals" type="Integer" />
+				<expression channel_variable="testChVarInteger"
+					channel_variable2="testChVarInteger4" method="lessThan" type="Integer" />
+				<expression channel_variable="testChVarInteger"
+					channel_variable2="testChVarInteger5" method="notGreaterThan" type="Integer" />
+			</expression>
+
+			<expression operator="and">
+				<expression channel_variable="testChVarFloat"
+					channel_variable2="testChVarFloat2" method="greaterThanEquals"
+					type="Float" />
+				<expression channel_variable="testChVarFloat"
+					channel_variable2="testChVarFloat3" method="lessThanEquals" type="Float" />
+				<expression channel_variable="testChVarFloat"
+					channel_variable2="testChVarFloat4" method="lessThan" type="Float" />
+				<expression channel_variable="testChVarFloat"
+					channel_variable2="testChVarFloat5" method="greaterThan" type="Float" />
+				<expression channel_variable="testChVarFloat"
+					channel_variable2="testChVarFloat6" method="notLessThan" type="Float" />
+				<expression channel_variable="testChVarFloat"
+					channel_variable2="testChVarFloat7" method="notGreaterThan" type="Float" />
+			</expression>
+
+
+			<expression operator="and">
+				<expression channel_variable="testChVarInteger"
+					channel_variable2="testChVarInteger2" method="greaterThanEquals"
+					type="Integer" />
+				<expression channel_variable="testChVarInteger"
+					channel_variable2="testChVarInteger2" method="lessThanEquals" type="Integer" />
+				<expression channel_variable="testChVarFloat"
+					channel_variable2="testChVarFloat2" method="lessThan" type="Float" />
+				<expression channel_variable="testChVarInteger"
+					channel_variable2="testChVarInteger2" method="notGreaterThan" type="Integer" />
+			</expression>
+		</expression>
+	</rule>
+	<rule id="testRule3a">
+		<expression operator="and">
+			<expression channel_variable="testChVarInteger" method="equals"
+				type="Integer" value="10" />
+			<expression channel_variable="testChVarInteger"
+				channel_variable2="testChVarInteger2" method="notEquals" type="Integer" />
+		</expression>
+	</rule>
+	
+	<rule id="testRule4StringEqualsHandler1">
+		<expression channel_variable="testChVar" method="equals" type="String" value="helloTest" />
+	</rule>
+	
+	<rule id="testRule4StringEqualsHandler2">
+		<expression channel_variable="testChVar" channel_variable2="testChVar2" method="equals" type="String"/>
+	</rule>	
+	
+	<rule id="testRule4StringNotEqualsHandler1">
+		<expression channel_variable="testChVar" method="notEquals" type="String" value="helloTest" />
+	</rule>
+	
+	<!-- Contract Budget List starts -->
+	<rule id="contractList1">
+		<expression method="equals" channel_variable="status"
+			value="Registered" type="String" />
+	</rule>
+	<rule id="contractList2">
+		<expression method="equals" channel_variable="status"
+			value="Pending Registration" type="String" />
+			<!--  begin R6.3 QC5690  new contract code Pending Notification 
+		<expression operator="or">
+			<expression method="equals" channel_variable="status"
+				value="Pending Registration" type="String" />
+			<expression method="equals" channel_variable="status"
+				value="Pending Notification" type="String" />
+		</expression>	
+		-->
+	 <!--  end R6.3 QC5690  new contract code Pending Notification	-->
+	</rule>
+	<rule id="contractList3">
+		<expression method="equals" channel_variable="status"
+			value="Suspended" type="String" />
+	</rule>
+	<rule id="contractList4">
+		<expression operator="or">
+			<expression method="equals" channel_variable="status"
+				value="Cancelled" type="String" />
+			<expression method="equals" channel_variable="status"
+				value="Closed" type="String" />
+		</expression>
+	</rule>
+	<rule id="contractList5">
+		<expression operator="or">
+			<expression method="equals" channel_variable="status"
+				value="Pending Configuration" type="String" />
+			<expression method="equals" channel_variable="status"
+				value="Pending CoF" type="String" />
+		</expression>
+	</rule>
+	<!-- Contract Budget List ends -->
+
+	<rule id="isProposalReturnedForRevision">
+		<expression method="equals" channel_variable="statusId"
+			value="19" type="String" />
+	</rule>
+	<rule id="isProposalSubmitted">
+		<expression method="equals" channel_variable="statusId"
+			value="18" type="String" />
+	</rule>
+	<rule id="rule1">
+		<expression operator="and">
+			<expression method="equals" channel_variable="role" value="L2Provider"
+				type="String" />
+			<expression operator="or">
+				<expression method="equals" channel_variable="status"
+					type="String" value="Pending Submission" />
+				<expression operator="or">
+					<expression method="equals" channel_variable="status"
+						type="String" value="Pending Submission" />
+					<expression method="equals" channel_variable="status"
+						type="String" value="Returned for Revision" />
+				</expression>
+			</expression>
+		</expression>
+	</rule>
+	<rule id="rule2">
+		<expression operator="and">
+			<expression method="equals" channel_variable="role" value="L2Provider"
+				type="String" />
+			<expression operator="or">
+				<expression method="equals" channel_variable="status"
+					type="String" value="Pending Submission" />
+				<expression operator="or">
+					<expression method="equals" channel_variable="status"
+						type="String" value="Pending Submission" />
+					<expression method="equals" channel_variable="status"
+						type="String" value="Returned for Revision" />
+				</expression>
+			</expression>
+		</expression>
+	</rule>
+	<rule id="ruleContractStatusToContractNoAgency">
+		<expression operator="or">
+			<expression method="equals" channel_variable="role" value="L2Provider"
+				type="String" />
+			<expression method="equals" channel_variable="role" value="L2Provider"
+				type="String" />
+			<expression method="equals" channel_variable="role" value="3"
+				type="String" />
+			<expression method="equals" channel_variable="role" value="1"
+				type="String" />
+		</expression>
+	</rule>
+	<rule id="ruleContractStatusToContractNoProvider">
+		<expression operator="or">
+			<expression method="equals" channel_variable="role" value="L2Provider"
+				type="String" />
+			<expression method="equals" channel_variable="role" value="L2Provider"
+				type="String" />
+			<expression method="equals" channel_variable="role" value="3"
+				type="String" />
+			<expression method="equals" channel_variable="role" value="1"
+				type="String" />
+		</expression>
+	</rule>
+
+	<rule id="statusReturnNoPublicCommentLevel1">
+		<expression operator="and">
+			<expression method="equals" channel_variable="selectedStatus"
+				value="Return" type="String" />
+			<expression method="equals" channel_variable="publicComments"
+				value="" type="String" />
+			<expression method="equals" channel_variable="levelAgency"
+				value="1" type="Integer" />
+		</expression>
+	</rule>
+
+	<rule id="statusReturnNoInternalCommentLevel2">
+		<expression operator="and">
+			<expression method="equals" channel_variable="selectedStatus"
+				value="Return" type="String" />
+			<expression method="equals" channel_variable="internalComments"
+				value="" type="String" />
+			<expression method="equals" channel_variable="levelAgency"
+				value="2" type="Integer" />
+		</expression>
+	</rule>
+
+	<rule id="statusApproveLevel1">
+		<expression operator="and">
+			<expression method="equals" channel_variable="selectedStatus"
+				value="Approve" type="String" />
+			<expression method="equals" channel_variable="levelAgency"
+				value="1" type="Integer" />
+		</expression>
+	</rule>
+
+	<rule id="statusReturnLevel1">
+		<expression operator="and">
+			<expression method="equals" channel_variable="selectedStatus"
+				value="Return" type="String" />
+			<expression method="equals" channel_variable="levelAgency"
+				value="1" type="Integer" />
+		</expression>
+	</rule>
+
+	<rule id="statusApproveLevel2">
+		<expression operator="and">
+			<expression method="equals" channel_variable="selectedStatus"
+				value="Approve" type="String" />
+			<expression method="equals" channel_variable="levelAgency"
+				value="2" type="Integer" />
+		</expression>
+	</rule>
+
+	<rule id="statusApproveFinalReviewer">
+		<expression operator="and">
+			<expression method="greaterThan" channel_variable="levelAgency"
+				value="2" type="Integer" />
+			<expression method="equals" channel_variable="selectedStatus"
+				value="Approve" type="String" />
+			<expression method="equals" channel_variable="isFinalReviewer"
+				value="true" type="String" />
+		</expression>
+	</rule>
+
+	<rule id="statusReturnLevel2OrHigher">
+		<expression operator="and">
+			<expression operator="or">
+				<expression method="greaterThan" channel_variable="levelAgency"
+					value="2" type="Integer" />
+				<expression method="equals" channel_variable="levelAgency"
+					value="2" type="Integer" />
+			</expression>
+			<expression method="equals" channel_variable="selectedStatus"
+				value="Return" type="String" />
+		</expression>
+	</rule>
+	<rule id="paymentListInstructionsProvider">
+		<expression method="equals" channel_variable="orgType"
+			value="provider_org" type="String" />
+	</rule>
+	<rule id="paymentListInstructionsAcceleratorAgency">
+		<expression operator="or">
+			<expression method="equals" channel_variable="orgType"
+				value="city_org" type="String" />
+			<expression method="equals" channel_variable="orgType"
+				value="agency_org" type="String" />
+		</expression>
+	</rule>
+	<rule id="paymentListAccelerator">
+		<expression operator="or">
+			<expression method="equals" channel_variable="paymentStatus"
+				value="Pending Approval" type="String" />
+			<expression method="equals" channel_variable="paymentStatus"
+				value="Suspended" type="String" />
+			<expression method="equals" channel_variable="paymentStatus"
+				value="Approved" type="String" />
+			<expression method="equals" channel_variable="paymentStatus"
+				value="Cancelled" type="String" />
+			<expression method="equals" channel_variable="paymentStatus"
+				value="Disbursed" type="String" />
+		</expression>
+	</rule>
+	<rule id="paymentListProvider">
+		<expression method="equals" channel_variable="paymentStatus"
+			value="Disbursed" type="String" />
+	</rule>
+	<rule id="paymentListColumnVisibleForProvider">
+		<expression method="equals" channel_variable="orgType"
+			value="provider_org" type="String" />
+	</rule>
+	<rule id="paymentListColumnVisibleForAcceleratorAgency">
+		<expression operator="or">
+			<expression method="equals" channel_variable="orgType"
+				value="city_org" type="String" />
+			<expression method="equals" channel_variable="orgType"
+				value="agency_org" type="String" />
+		</expression>
+	</rule>
+
+	<rule id="checkStatusForSuspended">
+			<expression operator="or">
+				<expression method="equals" channel_variable="ContractStatusId" value="61" type="String"/>
+				<expression method="equals" channel_variable="ContractStatusId" value="62" type="String"/>
+				<!-- R6.3 QC5690
+				<expression method="equals" channel_variable="ContractStatusId" value="194" type="String"/>
+				 -->
+			</expression>
+	</rule>
+	
+	<rule id="checkStatusForUnSuspended">
+				<expression method="equals" channel_variable="ContractStatusId" value="67" type="String"/>
+	</rule>	
+	<rule id="errorMessageBudgetUpdateInProgress">
+		<expression operator="or">
+			<expression operator="and">
+				<expression operator="or">
+					<expression method="equals" channel_variable="budgetStatusId"
+						value="70" type="String" />
+					<expression method="equals" channel_variable="budgetStatusId"
+						value="72" type="String" />
+					<expression method="equals" channel_variable="budgetStatusId"
+						value="Id for Returned for Revision" type="String" />
+				</expression>
+				<expression method="equals" channel_variable="budgetTypeId"
+					value="3" type="String" />
+			</expression>
+
+			<expression operator="and">
+				<expression method="equals" channel_variable="budgetStatusId"
+					value="33" type="String" />
+				<expression method="equals" channel_variable="budgetTypeId"
+					value="2" type="String" />
+			</expression>
+		</expression>
+	</rule>
+
+	<rule id="errorMessageBudgetModificationInProgress">
+		<expression operator="and">
+			<expression operator="or">
+				<expression method="equals" channel_variable="budgetStatusId"
+					value="70" type="String" />
+				<expression method="equals" channel_variable="budgetStatusId"
+					value="72" type="String" />
+				<expression method="equals" channel_variable="budgetStatusId"
+					value="Id for Returned for Revision" type="String" />
+			</expression>
+			<expression method="equals" channel_variable="budgetTypeId"
+				value="3" type="String" />
+		</expression>
+	</rule>
+
+	<rule id="errorMessageBudgetInProgress">
+		<expression operator="or">
+			<expression operator="and">
+				<expression operator="or">
+					<expression method="equals" channel_variable="budgetStatusId"
+						value="70" type="String" />
+					<expression method="equals" channel_variable="budgetStatusId"
+						value="72" type="String" />
+					<expression method="equals" channel_variable="budgetStatusId"
+						value="Id for Returned for Revision" type="String" />
+				</expression>
+				<expression operator="or">
+					<expression method="equals" channel_variable="budgetTypeId"
+						value="1" type="String" />
+					<expression method="equals" channel_variable="budgetTypeId"
+						value="2" type="String" />
+					<expression method="equals" channel_variable="budgetTypeId"
+						value="3" type="String" />
+					<expression method="equals" channel_variable="budgetTypeId"
+						value="4" type="String" />
+				</expression>
+			</expression>
+			<expression operator="and">
+				<expression method="equals" channel_variable="budgetStatusId"
+					value="33" type="String" />
+				<expression method="equals" channel_variable="budgetTypeId"
+					value="2" type="String" />
+			</expression>
+		</expression>
+	</rule>
+
+	<rule id="errorMessageOutstandingInvoicePayments">
+		<expression operator="or">
+			<expression method="equals" type="String"
+				channel_variable="invoiceStatusId" value="70" />
+			<expression method="equals" type="String"
+				channel_variable="invoiceStatusId" value="72" />
+			<expression method="equals" type="String"
+				channel_variable="invoiceStatusId" value="71" />
+			<expression method="notEquals" type="String"
+				channel_variable="paymentStatusId" value="Id for Disbursed" />
+		</expression>
+	</rule>
+
+	<rule id="displayPaymentHyperlink">
+		<expression operator="or">
+			<expression method="equals" channel_variable="paymentStatus"
+				value="Approved" type="String" />
+			<expression method="equals" channel_variable="paymentStatus"
+				value="Disbursed" type="String" />
+		</expression>
+	</rule>
+
+	<rule id="ReadOnlyIndirectRate">
+		<expression operator="and">
+			<expression method="equals" channel_variable="budgetTypeId"
+				value="2" type="String" />
+			<expression operator="or">
+				<expression method="equals" channel_variable="budgetStatus"
+					value="Pending Approval" type="String" />
+				<expression method="equals" channel_variable="budgetStatus"
+					value="Approved" type="String" />
+				<expression method="equals" channel_variable="budgetStatus"
+					value="Active" type="String" />
+			</expression>
+		</expression>
+	</rule>
+	<rule id="ReadOnlyIndirectRateModification">
+		<expression operator="and">
+			<expression method="equals" channel_variable="budgetTypeId"
+				value="3" type="String" />
+			<expression operator="or">
+				<expression method="equals" channel_variable="budgetStatus"
+					value="Pending Approval" type="String" />
+				<expression method="equals" channel_variable="budgetStatus"
+					value="Approved" type="String" />
+				<expression method="equals" channel_variable="budgetStatus"
+					value="Cancelled" type="String" />
+				<expression method="equals" channel_variable="budgetStatus"
+					value="Suspended" type="String" />
+			</expression>
+		</expression>
+	</rule>
+	<rule id="ReadOnlyIndirectRateAmendment">
+		<expression operator="and">
+			<expression method="equals" channel_variable="budgetTypeId"
+				value="1" type="String" />
+			<expression operator="or">
+				<expression method="equals" channel_variable="budgetStatus"
+					value="Pending Approval" type="String" />
+				<expression method="equals" channel_variable="budgetStatus"
+					value="Approved" type="String" />
+				<expression method="equals" channel_variable="budgetStatus"
+					value="Pending Registration" type="String" />
+				<expression method="equals" channel_variable="budgetStatus"
+					value="Cancelled" type="String" />
+				<expression method="equals" channel_variable="budgetStatus"
+					value="Suspended" type="String" />
+				<expression method="equals" channel_variable="budgetStatus"
+					value="Closed" type="String" />
+			</expression>
+		</expression>
+	</rule>
+
+	<rule id="positiveAmendment">
+		<expression operator="and">
+			<expression method="greaterThan" channel_variable="subBudgetSectionAmendAmount"
+				value="0" type="Integer" />
+			<expression method="greaterThan" channel_variable="totalBudgetAmendmentAmount"
+				value="0" type="Integer" />
+		</expression>
+	</rule>
+
+	<rule id="negativeAmendment">
+		<expression operator="and">
+			<expression method="lessThan" channel_variable="subBudgetSectionAmendAmount"
+				value="0" type="Integer" />
+			<expression method="lessThan" channel_variable="totalBudgetAmendmentAmount"
+				value="0" type="Integer" />
+		</expression>
+	</rule>
+
+	<rule id="budgetNotLessThanInvoiceForNegativeAmendment">
+		<expression operator="and">
+			<expression method="greaterThan" channel_variable="subBudgetSectionAmount"
+				value="subBudgetSectionInvoiceAmount" type="Integer" />
+			<expression method="lessThan" channel_variable="subBudgetSectionAmount"
+				value="0" type="Integer" />
+		</expression>
+	</rule>
+
+	<!-- Invoice List Rules for S309 & S310 Start -->
+	<rule id="deleteInvoiceIfInvoiceStatusPendingForSubmissionAndIsProvider">
+		<expression operator="and">
+			<expression method="equals" channel_variable="role" value="L2Provider"
+				type="String" />
+			<expression method="equals" channel_variable="invoiceStatus"
+				value="Pending Submission" type="String" />
+		</expression>
+	</rule>
+	<rule id="WithdrawInvoiceIfInvoiceStatusReturnedForRevisionAndIsProvider">
+		<expression operator="and">
+			<expression method="equals" channel_variable="role" value="L2Provider"
+				type="String" />
+			<expression method="equals" channel_variable="invoiceStatus"
+				value="Returned for Revision" type="String" />
+		</expression>
+	</rule>
+	<rule id="invoiceListInstructionsProvider">
+		<expression method="equals" channel_variable="orgType"
+			value="provider_org" type="String" />
+	</rule>
+	<rule id="invoiceListInstructionsAcceleratorAgency">
+		<expression operator="or">
+			<expression method="equals" channel_variable="orgType"
+				value="city_org" type="String" />
+			<expression method="equals" channel_variable="orgType"
+				value="agency_org" type="String" />
+		</expression>
+	</rule>
+	<rule id="displayDateIfInvoiceStatusIsPendingApproval">
+		<expression method="equals" channel_variable="invoiceStatus"
+			value="Pending Approval" type="String" />
+	</rule>
+	<rule id="displayDateApprovedIfInvoiceStatusIsPendingApproval">
+		<expression method="equals" channel_variable="invoiceStatus"
+			value="Approved" type="String" />
+	</rule>
+
+	<!-- Invoice List Rules for 309 & 310 Ends -->
+
+	<!-- Financials screen validations based on Procurement Status -->
+	<rule id="submitCoFEnabled">
+		<expression method="equals" channel_variable="procurementStatus"
+			value="Not Submitted" type="String" />
+	</rule>
+	<rule id="submitCoFDisabled">
+		<expression operator="or">
+			<expression method="equals" channel_variable="procurementStatus"
+				value="In Review" type="String" />
+			<expression method="equals" channel_variable="procurementStatus"
+				value="Approved" type="String" />
+			<expression method="equals" channel_variable="procurementStatus"
+				value="Cancelled" type="String" />
+		</expression>
+	</rule>
+	<rule id="viewCoFEnabled">
+		<expression operator="or">
+			<expression method="equals" channel_variable="procurementStatus"
+				value="In Review" type="String" />
+			<expression method="equals" channel_variable="procurementStatus"
+				value="Approved" type="String" />
+		</expression>
+	</rule>
+	<rule id="financialsGridDisabled">
+		<expression method="equals" channel_variable="procurementStatus"
+			value="Closed" type="String" />
+	</rule>
+	<rule id="financialsGridEnabled">
+		<expression></expression>
+		<!-- Needs to be worked upon Condition : The grid will only be editable 
+			by Finance Manager or CFO users if <Procurement Certification of Funds Status> 
+			= “Approved” and <Procurement Status> does not equal -->
+	</rule>
+
+	<!-- Financials screen validations ends -->
+
+	<rule id="IfAgencyShowViewContractConfiguration">
+		<expression method="equals" channel_variable="role" value="Agency"
+			type="String" />
+	</rule>
+
+	<!-- Validations on advance amount entered on initiate advance screen -->
+	<rule id="advanceAmountCheck">
+		<expression method="greaterThan" channel_variable="advanceAmt"
+			value="FYTotalAmount" type="Integer" />
+	</rule>
+
+	<rule id="ReadOnlyUtility">
+		<expression operator="or">
+			<expression method="equals" channel_variable="budgetStatus"
+				value="Pending Approval" type="String" />
+			<expression method="equals" channel_variable="budgetStatus"
+				value="Approved" type="String" />
+			<expression method="equals" channel_variable="budgetStatus"
+				value="Active" type="String" />
+			<expression method="equals" channel_variable="budgetStatus"
+				value="Cancelled" type="String" />
+			<expression method="equals" channel_variable="budgetStatus"
+				value="Suspended" type="String" />
+			<expression method="equals" channel_variable="budgetStatus"
+				value="Closed" type="String" />
+		</expression>
+	</rule>
+
+	<rule id="ReadOnlyUtilityModification">
+		<expression operator="or">
+			<expression method="equals" channel_variable="budgetStatus"
+				value="Pending Approval" type="String" />
+			<expression method="equals" channel_variable="budgetStatus"
+				value="Approved" type="String" />
+			<expression method="equals" channel_variable="budgetStatus"
+				value="Cancelled" type="String" />
+			<expression method="equals" channel_variable="budgetStatus"
+				value="Suspended" type="String" />
+		</expression>
+	</rule>
+
+	<rule id="ReadOnlyUtilityAmendment">
+		<expression operator="or">
+			<expression method="equals" channel_variable="budgetStatus"
+				value="Pending Approval" type="String" />
+			<expression method="equals" channel_variable="budgetStatus"
+				value="Approved" type="String" />
+			<expression method="equals" channel_variable="budgetStatus"
+				value="Active" type="String" />
+			<expression method="equals" channel_variable="budgetStatus"
+				value="Pending Registration" type="String" />
+			<expression method="equals" channel_variable="budgetStatus"
+				value="Cancelled" type="String" />
+			<expression method="equals" channel_variable="budgetStatus"
+				value="Suspended" type="String" />
+			<expression method="equals" channel_variable="budgetStatus"
+				value="Closed" type="String" />
+		</expression>
+	</rule>
+
+
+	<rule id="errorMessageInADvance">
+		<expression operator="and">
+			<expression method="equals" channel_variable="advanceRequest"
+				value="In Progress" type="String" />
+			<expression operator="or">
+				<expression method="notEquals" channel_variable="advanceRequestReviewTaskStatus"
+					value="Complete" type="String" />
+				<expression method="notEquals" channel_variable="paymentStatus"
+					value="Disbursed" type="String" />
+			</expression>
+		</expression>
+	</rule>
+
+	<rule id="errorMessageModifyBudget1">
+		<expression operator="and">
+			<expression operator="and">
+				<expression method="equals" channel_variable="amendment"
+					value="In Progress" type="String" />
+				<expression method="lessThan" channel_variable="amendment"
+					value="0" type="Integer" />
+			</expression>
+			<expression operator="or">
+				<expression method="notEquals" channel_variable="amendmentConfigurationTaskStatus"
+					value="Complete" type="String" />
+				<expression method="notEquals"
+					channel_variable="amendmentCertificationofFundsTaskStatus" value="Complete"
+					type="String" />
+				<expression method="equals" channel_variable="budgetAmendmentStatus"
+					value="Pending Submission" type="String" />
+				<expression method="equals" channel_variable="budgetAmendmentStatus"
+					value="Pending Approval" type="String" />
+				<expression method="equals" channel_variable="budgetAmendmentStatus"
+					value="Returned for Revision" type="String" />
+			</expression>
+		</expression>
+	</rule>
+
+	<rule id="errorMessageModifyBudget2">
+		<expression operator="and">
+			<expression method="equals" channel_variable="budgetModification"
+				value="In Progress" type="String" />
+			<expression operator="or">
+				<expression method="equals" channel_variable="budgetModificationStatus"
+					value="Pending Submission" type="String" />
+				<expression method="equals" channel_variable="budgetModificationStatus"
+					value="Pending Approval" type="String" />
+				<expression method="equals" channel_variable="budgetModificationStatus"
+					value="Returned for Revision" type="String" />
+			</expression>
+		</expression>
+	</rule>
+
+	<rule id="errorMessageModifyBudget3">
+		<expression operator="and">
+			<expression method="equals" channel_variable="configurationUpdate "
+				value="In Progress" type="String" />
+			<expression operator="or">
+				<expression method="equals" channel_variable="configurationUpdateTaskStatus"
+					value="In Review" type="String" />
+				<expression method="equals" channel_variable="budgetUpdateStatus"
+					value="Pending Submission" type="String" />
+				<expression method="equals" channel_variable="budgetUpdateStatus"
+					value="Pending Approval" type="String" />
+				<expression method="equals" channel_variable="budgetUpdateStatus"
+					value="Return for Revision" type="String" />
+			</expression>
+		</expression>
+	</rule>
+
+	<rule id="errorMessageModifyBudget4">
+		<expression operator="or">
+			<expression operator="and">
+				<expression method="equals" channel_variable="invoices"
+					value="open" type="String" />
+				<expression operator="or">
+					<expression method="equals" channel_variable="invoiceStatus"
+						value="Pending Submission" type="String" />
+					<expression method="equals" channel_variable="invoiceStatus"
+						value="Pending Approval" type="String" />
+					<expression method="equals" channel_variable="invoiceStatus"
+						value="Returned for Revision" type="String" />
+				</expression>
+			</expression>
+			<expression method="notEquals" channel_variable="paymentStatus"
+				value="Disbursed" type="String" />
+		</expression>
+	</rule>
+
+	<rule id="errorMessageSubmitInvoice1">
+		<expression operator="and">
+			<expression method="equals" channel_variable="budgetModification"
+				value="In Progress" type="String" />
+			<expression operator="or">
+				<expression method="equals" channel_variable="budgetModificationStatus"
+					value="Pending Submission" type="String" />
+				<expression method="equals" channel_variable="budgetModificationStatus"
+					value="Pending Approval" type="String" />
+				<expression method="equals" channel_variable="budgetModificationStatus"
+					value="Returned for Revision" type="String" />
+			</expression>
+		</expression>
+	</rule>
+
+	<rule id="errorMessageSubmitInvoice2">
+		<expression operator="and">
+			<expression method="equals" channel_variable="budgetUpdate "
+				value="In Progress" type="String" />
+			<expression operator="or">
+				<expression method="equals" channel_variable="configurationUpdateTaskStatus"
+					value="In Review" type="String" />
+				<expression method="equals" channel_variable="budgetUpdateStatus"
+					value="Pending Approval" type="String" />
+				<expression method="equals" channel_variable="budgetUpdateStatus"
+					value="Pending Submission" type="String" />
+				<expression method="equals" channel_variable="budgetUpdateStatus"
+					value="Return for Revision" type="String" />
+			</expression>
+		</expression>
+	</rule>
+
+	<rule id="errorMessageSubmitInvoice3">
+		<expression operator="and">
+			<expression operator="and">
+				<expression method="equals" channel_variable="amendment"
+					value="In Progress" type="String" />
+				<expression method="lessThan" channel_variable="amendment"
+					value="0" type="Integer" />
+			</expression>
+			<expression operator="or">
+				<expression method="notEquals" channel_variable="amendmentConfigurationTaskStatus"
+					value="Complete" type="String" />
+				<expression method="notEquals"
+					channel_variable="amendmentCertificationofFundsTaskStatus" value="Complete"
+					type="String" />
+				<expression method="equals" channel_variable="budgetAmendmentStatus"
+					value="Pending Submission" type="String" />
+				<expression method="equals" channel_variable="budgetAmendmentStatus"
+					value="Pending Approval" type="String" />
+				<expression method="equals" channel_variable="budgetAmendmentStatus"
+					value="Returned for Revision" type="String" />
+			</expression>
+		</expression>
+	</rule>
+
+	<rule id="errorMessageRequestAdvance1">
+		<expression operator="and">
+			<expression operator="and">
+				<expression method="equals" channel_variable="amendment"
+					value="In Progress" type="String" />
+				<expression method="lessThan" channel_variable="amendment"
+					value="0" type="Integer" />
+			</expression>
+			<expression operator="or">
+				<expression method="notEquals" channel_variable="amendmentConfigurationTaskStatus"
+					value="Complete" type="String" />
+				<expression method="notEquals"
+					channel_variable="amendmentCertificationofFundsTaskStatus" value="Complete"
+					type="String" />
+				<expression method="equals" channel_variable="budgetAmendmentStatus"
+					value="Pending Submission" type="String" />
+				<expression method="equals" channel_variable="budgetAmendmentStatus"
+					value="Pending Approval" type="String" />
+				<expression method="equals" channel_variable="budgetAmendmentStatus"
+					value="Returned for Revision" type="String" />
+			</expression>
+		</expression>
+	</rule>
+
+	<rule id="errorMessageRequestAdvance2">
+		<expression operator="or">
+			<expression operator="and">
+				<expression method="equals" channel_variable="advanceRequest "
+					value="In progress " type="String" />
+				<expression method="notEquals" channel_variable="advanceRequestReviewTaskStatus "
+					value="Complete" type="String" />
+			</expression>
+			<expression method="notEquals" channel_variable="Payment Status"
+				value="Disbursed" type="String" />
+		</expression>
+	</rule>
+
+	<rule id="advanceRequestAmount">
+		<expression method="greaterThan" channel_variable="advanceAmount"
+			value="fYTotalRemainingAmount" type="Integer" />
+	</rule>
+
+	<rule id="contractedServicesReadOnly">
+		<expression operator="or">
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Pending Approval" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Approved" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Active" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Cancelled" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Suspended" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Closed" type="String" />
+		</expression>
+	</rule>
+
+	<rule id="sumOfInvoiceAmount">
+		<expression operator="or">
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Pending Approval" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Approved" type="String" />
+		</expression>
+	</rule>
+	<rule id="RFPDocumentStatusRule">
+		<expression operator="or">
+			<expression method="equals" channel_variable="lsProcurementStatus"
+				value="Draft" type="String" />
+			<expression method="equals" channel_variable="lsProcurementStatus"
+				value="Planned" type="String" />
+		</expression>
+	</rule>
+	<rule id="cityInstruction">
+		<expression method="equals" channel_variable="org_type"
+			value="city_org" type="String" />
+	</rule>
+
+	<rule id="providerInstruction">
+		<expression method="equals" channel_variable="org_type"
+			value="provider_org" type="String" />
+	</rule>
+
+	<rule id="displayCancelCloseProcHyperlinks">
+		<expression operator="and">
+			<expression method="equals" channel_variable="org_type"
+				value="city_org" type="String" />
+			<expression method="equals" channel_variable="user_role"
+				value="manager" type="String" />
+		</expression>
+	</rule>
+
+	<rule id="disableFieldsForDraftStatus">
+		<expression method="equals" channel_variable="procurementStatus"
+			value="Draft" type="String" />
+	</rule>
+	
+	<rule id="disableFieldsForPlannedStatus">
+		<expression method="equals" channel_variable="procurementStatus"
+			value="Planned" type="String" />
+	</rule>
+
+	<rule id="disableProgramNameDropDown">
+		<expression method="equals" channel_variable="nycAgency"
+			value="" type="String" />
+	</rule>
+
+	<rule id="disableAccUserDropDown">
+		<expression method="equals" channel_variable="accUserDropDown"
+			value="" type="String" />
+	</rule>
+
+	<rule id="disableAgencyUserDropDown">
+		<expression method="equals" channel_variable="agencyUserDropDown"
+			value="" type="String" />
+	</rule>
+	<rule id="contractBudgetGridReadOnly">
+		<expression operator="or">
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Pending Approval" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Approved" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Active" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Cancelled" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Suspended" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Closed" type="String" />
+		</expression>
+	</rule>
+
+	<rule id="contractBudgetModificationGridReadOnly">
+		<expression operator="or">
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Pending Approval" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Approved" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Cancelled" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Suspended" type="String" />
+		</expression>
+	</rule>
+
+	<rule id="contractBudgetChangeFTE">
+		<expression method="lessThan" channel_variable="changedNoOfFTE"
+			value="0" type="Integer" />
+	</rule>
+
+	<rule id="contractBudgetChangeAmount">
+		<expression method="lessThan" channel_variable="changedAmount"
+			value="InvoicedAmount" type="Integer" />
+	</rule>
+
+	<rule id="closeContractBudgetStatusValidation">
+		<expression operator="or">
+			<expression method="notEquals" channel_variable="budgetModificationStatus"
+				value="Approved" type="String" />
+			<expression method="notEquals" channel_variable="budgetAmendmentStatus"
+				value="Approved" type="String" />
+			<expression method="notEquals" channel_variable="budgetUpdateStatus"
+				value="Approved" type="String" />
+		</expression>
+	</rule>
+
+	<rule id="closeContractInvoiceStatusValidation">
+		<expression operator="and">
+			<expression method="notEquals" channel_variable="invoiceStatus"
+				value="Approved" type="String" />
+			<expression method="notEquals" channel_variable="paymentStatus"
+				value="Disbursed" type="String" />
+		</expression>
+	</rule>
+	<rule id="contractBudgetGridReadOnly1">
+		<expression operator="or">
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Pending Approval" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Approved" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Active" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Cancelled" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Suspended" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Closed" type="String" />
+		</expression>
+	</rule>
+
+	<rule id="contractBudgetModificationGridReadOnly1">
+		<expression operator="or">
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Pending Approval" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Approved" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Cancelled" type="String" />
+			<expression method="equals" channel_variable="contractBudgetStatus"
+				value="Suspended" type="String" />
+		</expression>
+	</rule>
+
+	<rule id="contractBudgetChangeFTE1">
+		<expression method="lessThan" channel_variable="changedNoOfFTE"
+			value="0" type="Integer" />
+	</rule>
+
+	<rule id="contractBudgetChangeAmount1">
+		<expression method="lessThan" channel_variable="changedAmount"
+			value="InvoicedAmount" type="Integer" />
+	</rule>
+
+	<rule id="closeContractBudgetStatusValidation1">
+		<expression operator="or">
+			<expression method="notEquals" channel_variable="budgetModificationStatus"
+				value="Approved" type="String" />
+			<expression method="notEquals" channel_variable="budgetAmendmentStatus"
+				value="Approved" type="String" />
+			<expression method="notEquals" channel_variable="budgetUpdateStatus"
+				value="Approved" type="String" />
+		</expression>
+	</rule>
+
+	<rule id="closeContractInvoiceStatusValidation1">
+		<expression operator="and">
+			<expression method="notEquals" channel_variable="invoiceStatus"
+				value="Approved" type="String" />
+			<expression method="notEquals" channel_variable="paymentStatus"
+				value="Disbursed" type="String" />
+		</expression>
+	</rule>
+
+	<rule id="deleteInvoiceStatusValidation">
+		<expression operator="and">
+			<expression method="notEquals" channel_variable="reviewStatus"
+				value="Submitted" type="String" />
+			<expression method="equals" channel_variable="invoiceStatus"
+				value="Pending Submission" type="String" />
+		</expression>
+	</rule>
+
+	<rule id="checkBudgetStatus">
+		<expression operator="or">
+			<expression method="equals" channel_variable="budgetStatus"
+				value="Pending submission" type="String" />
+			<expression method="equals" channel_variable="budgetStatus"
+				value="Returned for revision" type="String" />
+		</expression>
+	</rule>
+
+	<rule id="errorMessageBudgetStatusCancelled">
+		<expression method="equals" channel_variable="budgetStatus"
+			value="Cancelled" type="String" />
+	</rule>
+
+	<rule id="errorMessageBudgetStatusSuspended">
+		<expression method="equals" channel_variable="budgetStatus"
+			value="Suspended" type="String" />
+	</rule>
+
+	<rule id="errorMessageBudgetStatusClosed">
+		<expression method="equals" channel_variable="budgetStatus"
+			value="Closed" type="String" />
+	</rule>
+
+	<rule id="makeChangesForAgency">
+		<expression method="equals" channel_variable="org_type"
+			value="agency_org" type="String" />
+	</rule>
+
+	<rule id="amendFundsStatusError">
+		<expression operator="or">
+			<expression method="equals" channel_variable="amendStatus"
+				value="Suspended" type="String" />
+			<expression method="equals" channel_variable="amendStatus"
+				value="Cancelled" type="String" />
+		</expression>
+	</rule>
+	<!-- Cancel Amendment Starts S407 -->
+
+	<rule id="errorMessageCancelAmendmentr">
+		<expression operator="or">
+			<expression method="equals" channel_variable="userName "
+				value="" type="String" />
+			<expression operator="or">
+				<expression method="equals" channel_variable="password"
+					value="" type="String" />
+			</expression>
+		</expression>
+	</rule>
+
+	<rule id="negativeAmendmentWithApprovedAmendmentBudgetPriorRegistration">
+		<expression operator="or">
+			<expression method="equals" channel_variable="Amendment "
+				value="Negative" type="String" />
+			<expression operator="and">
+				<expression method="equals" channel_variable="Status"
+					value="Approved" type="String" />
+			</expression>
+		</expression>
+	</rule>
+
+	<!-- Cancel Amendment Ends S407 -->
+
+		<rule id="errorMessageCancelAmendmentr1">
+	 <expression operator="or">
+	   <expression method="equals" channel_variable="userName " value="" type="String"/>
+	  <expression operator="or">
+	    <expression method="equals" channel_variable="password" value="" type="String"/>
+	  </expression>	
+	  </expression>	  
+	  </rule>
+	  
+	  <rule id="negativeAmendmentWithApprovedAmendmentBudgetPriorRegistration1">
+	 <expression operator="or">
+		   <expression method="equals" channel_variable="Amendment " value="Negative" type="String"/>
+		  	<expression operator="and">
+		    	<expression method="equals" channel_variable="Status" value="Approved" type="String"/>
+		  </expression>
+	  </expression>
+	  </rule>
+	  
+	  <!-- Cancel Amendment Ends S407 -->
+	<rule id="amendStatusMessage1">
+	  <expression method="equals" channel_variable="amendmentBudgetStatus" value="Cancelled" type="String"/>
+	</rule>
+	
+
+	<rule id="amendStatusMessage2">
+	  <expression method="equals" channel_variable="amendmentBudgetStatus" value="Suspended" type="String"/>
+	</rule>
+	
+	<rule id="amendStatusMessage3">
+	  <expression method="equals" channel_variable="amendmentBudgetStatus" value="Closed" type="String"/>
+	</rule>
+	
+	<rule id="ProposalConfigurationSaveRule">
+		<expression operator="and">
+			<expression operator="or">
+				<expression method="equals" channel_variable="procurementStatus" value="3" type="Integer"/>
+				<expression method="equals" channel_variable="procurementStatus" value="2" type="Integer"/>
+			</expression>
+			<expression method="equals" channel_variable="orgType" value="city_org" type="String"/>
+		</expression>
+	</rule>
+
+	<rule id="ServiceSelectionBackRule">
+		<expression operator="or">
+		<expression method="equals" channel_variable="orgType" value="city_org" type="String"/>
+		<expression method="equals" channel_variable="orgType" value="agency_org" type="String"/>
+		</expression>
+	</rule>
+	<rule id="ServiceSelectionSaveRule">
+		<expression method="equals" channel_variable="orgType" value="city_org" type="String"/>
+	</rule>
+	<rule id="ServiceSelectionNextRule">
+		<expression method="equals" channel_variable="orgType" value="agency_org" type="String"/>
+	</rule>
+	
+	
+	<rule id="RFPDocumentUploadRule">
+		<expression operator="and">
+			<expression operator="or">
+				<expression method="equals" channel_variable="procurementStatus" value="Released" type="String"/>
+				<expression method="equals" channel_variable="procurementStatus" value="Planned" type="String"/>
+			</expression>
+			<expression method="equals" channel_variable="orgType" value="city_org" type="String"/>
+		</expression>
+	</rule>
+	
+	<rule id="rfpDocumentScreenReadonlyRule">
+			<expression operator="or">
+				<expression method="equals" channel_variable="procurementStatus" value="Released" type="String"/>
+				<expression method="equals" channel_variable="procurementStatus" value="Proposals Received" type="String"/>
+				<expression method="equals" channel_variable="procurementStatus" value="Evaluations Complete" type="String"/>
+				<expression method="equals" channel_variable="procurementStatus" value="Selections Made" type="String"/>
+				<expression method="equals" channel_variable="procurementStatus" value="Cancelled" type="String"/>
+				<expression method="equals" channel_variable="procurementStatus" value="Closed" type="String"/>
+			</expression>
+	</rule>
+	
+		<rule id="UpdateConfigurationErrorRule01">
+	<expression operator="or">
+			<expression operator="or">
+				<expression method="equals" channel_variable="ConfUpdateTaskStatus" value="78" type="String"/>
+				<expression method="equals" channel_variable="ConfUpdateTaskStatus" value="79" type="String"/>
+			</expression>
+			<expression operator="or">
+				<expression method="equals" channel_variable="BudgetUpdateStatus" value="82" type="String"/>
+				<expression method="equals" channel_variable="BudgetUpdateStatus" value="83" type="String"/>
+				<expression method="equals" channel_variable="BudgetUpdateStatus" value="84" type="String"/>
+			</expression>
+	</expression>
+	</rule>
+	
+	<rule id="UpdateConfigurationErrorRule03">
+			<expression operator="or">
+				<expression method="equals" channel_variable="BudgetModificationStatus" value="82" type="String"/>
+				<expression method="equals" channel_variable="BudgetModificationStatus" value="83" type="String"/>
+				<expression method="equals" channel_variable="BudgetModificationStatus" value="84" type="String"/>
+			</expression>
+	</rule>
+	
+	<!--<rule id="UpdateConfigurationErrorRule02">
+	<expression operator="and">		
+			<expression method="lessThan" channel_variable="amendmentValue" value="0" type="Float" />
+			<expression operator="or">
+				
+					<expression method="equals" channel_variable="BudgetAmendmentStatus" value="82" type="String"/>
+					<expression method="equals" channel_variable="BudgetAmendmentStatus" value="83" type="String"/>
+					<expression method="equals" channel_variable="BudgetAmendmentStatus" value="84" type="String"/>
+					<expression method="equals" channel_variable="BudgetAmendmentStatus" value="61" type="String"/>
+				
+			<expression method="greaterThan" channel_variable="openTaskAmendConf" value="0" type="Integer"/>
+			<expression method="greaterThan" channel_variable="openTaskAmendCertFund" value="0" type="Integer"/>
+			</expression>
+	</expression>
+	</rule>-->
+	
+	<rule id="UpdateConfigurationErrorRule05">
+			<expression method="equals" channel_variable="FYConfTaskStatus" value="78" type="String"/>
+	</rule>
+	
+	<!-- Release 3.8.0 Enhancement 6481 -->
+	<rule id="UpdateConfigurationErrorRule06">
+	<expression operator="and">
+	<expression operator="or">
+			<expression method="equals" channel_variable="contractStatusId" value="61" type="String"/>
+			<expression method="equals" channel_variable="contractStatusId" value="62" type="String"/>
+			<!-- R6.3 QC5690 
+			<expression method="equals" channel_variable="contractStatusId" value="194" type="String"/>
+			-->
+	</expression>
+			<expression method="equals" channel_variable="getPendingRegContractApprovedBudgetCount" value="0" type="Integer"/>
+	</expression>
+	</rule>
+	
+	<rule id="CloseContractErrorRule01">
+	 	<expression method="greaterThan" channel_variable="OpenTaskRelatedContract" value="0" type="Integer" />
+	</rule>
+	
+	<rule id="CloseContractErrorRule02">
+	 	<expression method="greaterThan" channel_variable="BudgetNotApprovedCount" value="0" type="Integer" />
+	</rule>
+	
+	<rule id="CloseContractErrorRule03">
+	<expression operator="or">		
+	 	<expression method="greaterThan" channel_variable="NotApprovedInvoiceCount" value="0" type="Integer" />
+	 	<expression method="greaterThan" channel_variable="NotDisbursedPaymentCount" value="0" type="Integer" />
+	 </expression>	
+	</rule>
+	
+	<rule id="AmendContractErrorRule01">
+		<expression operator="and">		
+			<expression method="lessThan" channel_variable="amendmentValue" value="0" type="Float" />			
+			<expression operator="or">			
+				<expression method="equals" channel_variable="ConfUpdateTaskStatus" value="78" type="String"/>
+				<expression method="equals" channel_variable="BudgetUpdateStatus" value="82" type="String"/>
+				<expression method="equals" channel_variable="BudgetUpdateStatus" value="83" type="String"/>
+				<expression method="equals" channel_variable="BudgetUpdateStatus" value="84" type="String"/>						
+			</expression>
+		</expression>
+	</rule>
+	
+	<rule id="AmendContractErrorRule02">
+			<expression operator="or">
+				<expression method="equals" channel_variable="BudgetModificationStatus" value="82" type="String"/>
+				<expression method="equals" channel_variable="BudgetModificationStatus" value="83" type="String"/>
+				<expression method="equals" channel_variable="BudgetModificationStatus" value="84" type="String"/>
+			</expression>
+	</rule>	
+	
+	<rule id="AmendContractErrorRule03">			
+			<expression operator="or">
+				<expression method="equals" channel_variable="FYConfTaskStatus" value="78" type="String"/>
+				<expression method="equals" channel_variable="BudgetNewFYStatus" value="82" type="String"/>
+				<expression method="equals" channel_variable="BudgetNewFYStatus" value="83" type="String"/>
+				<expression method="equals" channel_variable="BudgetNewFYStatus" value="84" type="String"/>
+			</expression>			
+	</rule>	
+	
+	<rule id="cancelContractRuleForAccelerator">
+		<expression operator="and">
+					
+			<expression method="equals" channel_variable="ContractSourceType" value="2" type="String"/>			
+
+			<expression operator="or">
+				<expression method="equals" channel_variable="ContractType" value="1" type="String"/>
+				<expression method="equals" channel_variable="ContractType" value="3" type="String"/>				
+			</expression>		
+						
+			<expression operator="or">
+				<expression method="equals" channel_variable="ContractStatus" value="59" type="String"/>
+				<expression method="equals" channel_variable="ContractStatus" value="60" type="String"/>
+				<expression method="equals" channel_variable="ContractStatus" value="61" type="String"/>
+				<!-- R6.3 QC5690 
+				<expression method="equals" channel_variable="ContractStatus" value="194" type="String"/>
+				-->
+			</expression>
+						
+		</expression>
+	</rule>	
+
+	<rule id="cancelContractRuleForAgency">
+		<expression operator="and">
+					
+			<expression method="equals" channel_variable="ContractSourceType" value="2" type="String"/>
+						
+			<expression method="equals" channel_variable="ContractType" value="3" type="String"/>				
+						
+			<expression operator="or">
+				<expression method="equals" channel_variable="ContractStatus" value="59" type="String"/>
+				<expression method="equals" channel_variable="ContractStatus" value="60" type="String"/>
+				<expression method="equals" channel_variable="ContractStatus" value="61" type="String"/>
+				<!-- R6.3 QC5690
+				<expression method="equals" channel_variable="ContractStatus" value="194" type="String"/>
+				 -->
+			</expression>
+						
+		</expression>
+	</rule>	
+	
+	<rule id="NewFYConfigErrorRule01">
+			<expression operator="or">
+				<expression method="equals" channel_variable="ConfUpdateTaskStatus" value="78" type="String"/>
+				<expression method="equals" channel_variable="ConfUpdateTaskStatus" value="79" type="String"/>
+			</expression>
+	</rule>
+	
+	<rule id="NewFYConfigErrorRule02">
+			<expression operator="or">
+				<expression method="equals" channel_variable="FYConfTaskStatus" value="78" type="String"/>
+				<expression method="equals" channel_variable="FYConfTaskStatus" value="79" type="String"/>
+			</expression>
+	</rule>
+	
+	<rule id="NewFYConfigErrorRule03">
+			<expression operator="or">
+				<expression method="greaterThan" channel_variable="openTaskAmendConf" value="0" type="Integer"/>
+				<expression method="greaterThan" channel_variable="openTaskAmendCertFund" value="0" type="Integer"/>
+			</expression>
+	</rule>
+	
+	<!-- Start || Changes done for enhancement #6577 for Release 3.10.0 -->
+	<rule id="proposalDocScreenReadOnlyRule">
+		<expression operator="or">
+				<expression operator="or">
+					<expression method="equals" channel_variable="procurementStatusId" value="7" type="String"/>
+					<expression method="equals" channel_variable="procurementStatusId" value="8" type="String"/>
+				</expression>
+				<expression operator="or">
+					<expression method="equals" channel_variable="proposalStatusId" value="18" type="String"/>
+					<expression method="equals" channel_variable="proposalStatusId" value="20" type="String"/>
+					<expression method="equals" channel_variable="proposalStatusId" value="23" type="String"/>
+					<expression method="equals" channel_variable="proposalStatusId" value="24" type="String"/>
+					<expression method="equals" channel_variable="proposalStatusId" value="25" type="String"/>
+					<expression method="equals" channel_variable="proposalStatusId" value="166" type="String"/>
+				</expression>
+		</expression>
+	</rule>
+	<!-- End || Changes done for enhancement #6577 for Release 3.10.0 --> 
+	
+	<rule id="proposalDocStatusCompletedRule">
+				<expression operator="or">
+					<expression method="equals" channel_variable="documentStatusId" value="28" type="String"/>
+					<expression method="equals" channel_variable="documentStatusId" value="30" type="String"/>
+				</expression>
+	</rule>
+	<rule id="proposalDocStatusSubmittedRule">
+				<expression operator="or">
+					<expression method="equals" channel_variable="documentStatusId" value="29" type="String"/>
+					<expression method="equals" channel_variable="documentStatusId" value="31" type="String"/>
+					<expression method="equals" channel_variable="documentStatusId" value="32" type="String"/>
+				</expression>
+	</rule>
+	<rule id="isAccoAgencyUser">
+		<expression operator="and">
+			<expression method="equals" channel_variable="org_type"
+				value="agency_org" type="String" />
+			<expression operator="or">
+				<expression method="equals" channel_variable="user_role"
+					value="ACCO_MANAGER" type="String" />
+				<expression method="equals" channel_variable="user_role"
+					value="ACCO_STAFF" type="String" />
+				<expression method="equals" channel_variable="user_role"
+					value="ACCO_ADMIN_STAFF" type="String" />
+			</expression>
+		</expression>
+	</rule>
+	
+	<rule id="readOnlyPageAttributeBusinessRule">
+		<expression operator="and">	
+			<expression operator="or">
+				<expression method="equals" channel_variable="budgetStatus" value="83" type="String"/>
+				<expression method="equals" channel_variable="budgetStatus" value="84" type="String"/>
+			</expression>
+			<expression operator="or">
+				<expression method="equals" channel_variable="org_type" value="provider_org" type="String"/>
+			</expression>
+		</expression>	
+	</rule>
+	
+	
+	<rule id="readOnlyPageAttributeBusinessRuleInvoice">
+		<expression operator="and">	
+			<expression operator="or">
+				<expression method="equals" channel_variable="invoiceStatus" value="70" type="String"/>
+				<expression method="equals" channel_variable="invoiceStatus" value="71" type="String"/>
+			</expression>
+			<expression operator="or">
+				<expression method="equals" channel_variable="org_type" value="provider_org" type="String"/>
+			</expression>
+		</expression>	
+	</rule>
+	
+	<rule id="editableFinancialScreenUser">
+			<expression operator="or">
+			
+				<expression operator="and">
+					<expression method="equals" channel_variable="user_role" value="FINANCE_STAFF" type="String"/>
+					<expression method="equals" channel_variable="procurementStatus" value="Not Submitted" type="String"/>
+				</expression>
+				
+				<expression operator="and">
+					<expression method="equals" channel_variable="user_role" value="FINANCE_ADMIN_STAFF" type="String"/>
+					<expression method="equals" channel_variable="procurementStatus" value="Not Submitted" type="String"/>
+				</expression>
+				
+				<expression operator="and">
+					<expression method="equals" channel_variable="user_role" value="FINANCE_MANAGER" type="String"/>
+						<expression operator="or">
+							<expression method="equals" channel_variable="procurementStatus" value="Not Submitted" type="String"/>
+							<expression method="equals" channel_variable="procurementStatus" value="Approved" type="String"/>
+						</expression>
+				</expression>
+				
+				<expression operator="and">
+					<expression method="equals" channel_variable="user_role" value="CFO" type="String"/>
+						<expression operator="or">
+							<expression method="equals" channel_variable="procurementStatus" value="Not Submitted" type="String"/>
+							<expression method="equals" channel_variable="procurementStatus" value="Approved" type="String"/>
+						</expression>
+				</expression>
+				
+			</expression>
+	</rule>
+	
+	<rule id="proposalReadOnly">
+		<expression operator="and">	
+			<expression operator="or">
+				<expression method="equals" channel_variable="proposalStatus" value="17" type="Integer"/>
+				<expression method="equals" channel_variable="proposalStatus" value="19" type="Integer"/>
+			</expression>
+			<expression method="notEquals" channel_variable="procurementStatus" value="7" type="Integer"/>
+		</expression>	
+	</rule>
+	
+	<rule id="checkProposalEditSubmit">
+		<expression operator="or">	
+			<expression operator="and">
+				<expression method="equals" channel_variable="procurementStatus" value="3" type="String"/>
+				<expression method="equals" channel_variable="proposalStatus" value="17" type="String"/>
+				<expression method="equals" channel_variable="evaluationPoolStatus" value="136" type="String"/>
+			</expression>
+			<expression operator="and">
+				<expression method="equals" channel_variable="procurementStatus" value="3" type="String"/>
+				<expression method="equals" channel_variable="proposalStatus" value="19" type="String"/>
+				<expression method="equals" channel_variable="evaluationPoolStatus" value="137" type="String"/>
+			</expression>
+			<expression operator="and">
+				<expression method="equals" channel_variable="procurementStatus" value="4" type="String"/>
+				<expression method="equals" channel_variable="proposalStatus" value="19" type="String"/>
+				<expression method="equals" channel_variable="evaluationPoolStatus" value="137" type="String"/>
+			</expression>
+			<expression operator="and">
+				<expression method="equals" channel_variable="procurementStatus" value="3" type="String"/>
+				<expression method="equals" channel_variable="proposalStatus" value="19" type="String"/>
+				<expression method="equals" channel_variable="evaluationPoolStatus" value="140" type="String"/>
+			</expression>
+			<expression operator="and">
+				<expression method="equals" channel_variable="procurementStatus" value="4" type="String"/>
+				<expression method="equals" channel_variable="proposalStatus" value="19" type="String"/>
+				<expression method="equals" channel_variable="evaluationPoolStatus" value="140" type="String"/>
+			</expression>
+		</expression>	
+	</rule>
+	
+	<rule id="sendEvalButtonStatus">
+		<expression operator="and">
+			<expression method="greaterThanEquals" channel_variable="evaluatorCount" value="3" type="Integer"/>
+			<expression method="equals" channel_variable="evaluationSent" value="0" type="String"/>
+			<expression method="equals" channel_variable="PROPOSAL_COUNT" value="0" type="Integer"/>
+			<expression method="greaterThan" channel_variable="PROPOSAL_COUNT_TOTAL" value="0" type="Integer"/>
+		</expression>
+	</rule>
+	
+	<rule id="evalSummaryAccoUserCheck">
+		<expression operator="and">
+			<expression operator="or">
+				<expression method="equals" channel_variable="userRole" value="ACCO_MANAGER" type="String"/>
+				<expression method="equals" channel_variable="userRole" value="ACCO_STAFF" type="String"/>
+				<expression method="equals" channel_variable="userRole" value="ACCO_ADMIN_STAFF" type="String"/>
+				<expression method="equals" channel_variable="userRole" value="manager" type="String"/>
+				<expression method="equals" channel_variable="userRole" value="staff" type="String"/>
+			</expression>
+			<expression operator="and">
+			<expression method="notEquals" channel_variable="status" value="No Proposals Received" type="String"/>
+			<expression method="notEquals" channel_variable="status" value="Cancelled" type="String"/>
+			</expression>
+		</expression>
+	</rule>
+	
+	<rule id="evalSummaryNonAccoUserCheck">
+		<expression operator="and">
+			<expression operator="or">
+				<expression method="equals" channel_variable="userRole" value="PROGRAM_STAFF" type="String"/>
+				<expression method="equals" channel_variable="userRole" value="PROGRAM_ADMIN_STAFF" type="String"/>
+				<expression method="equals" channel_variable="userRole" value="PROGRAM_MANAGER" type="String"/>
+				<expression method="equals" channel_variable="userRole" value="FINANCE_STAFF" type="String"/>
+				<expression method="equals" channel_variable="userRole" value="FINANCE_ADMIN_STAFF" type="String"/>
+				<expression method="equals" channel_variable="userRole" value="FINANCE_MANAGER" type="String"/>
+				<expression method="equals" channel_variable="userRole" value="CFO" type="String"/>
+			</expression>
+			<expression method="notEquals" channel_variable="status" value="No Proposals Received" type="String"/>
+			<expression method="greaterThan" channel_variable="awardApprovalCount" value="0" type="Integer"/>
+		</expression>
+	</rule>
+</rules>

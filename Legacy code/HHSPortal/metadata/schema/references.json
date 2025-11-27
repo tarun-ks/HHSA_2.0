@@ -1,0 +1,980 @@
+{
+  "version": "1.0.0",
+  "description": "Master reference values for all objects - Single source of truth",
+  "metadata": {
+    "created_at": "2024-01-01T00:00:00Z",
+    "last_modified": "2024-01-01T00:00:00Z",
+    "created_by": "system",
+    "last_modified_by": "system",
+    "change_history": [],
+    "traceability": {
+      "reference_count": 0,
+      "dependent_files": [],
+      "impact_level": "high"
+    }
+  },
+  "reference_values": {
+    "contract_statuses": {
+      "object_type": "contract",
+      "table_name": "contract_statuses",
+      "values": [
+        {
+          "code": "DRAFT",
+          "name": "Draft",
+          "description": "Contract is in draft state",
+          "sort_order": 1,
+          "is_active": true,
+          "color": "#6B7280",
+          "workflow_enabled": true
+        },
+        {
+          "code": "PENDING_CONFIGURATION",
+          "name": "Pending Configuration",
+          "description": "Contract is pending configuration",
+          "sort_order": 2,
+          "is_active": true,
+          "color": "#8B5CF6",
+          "workflow_enabled": true
+        },
+        {
+          "code": "PENDING_COF",
+          "name": "Pending COF",
+          "description": "Contract is pending Certificate of Funding",
+          "sort_order": 3,
+          "is_active": true,
+          "color": "#F59E0B",
+          "workflow_enabled": true
+        },
+        {
+          "code": "PENDING_SUBMISSION",
+          "name": "Pending Submission",
+          "description": "Contract is pending submission",
+          "sort_order": 4,
+          "is_active": true,
+          "color": "#06B6D4",
+          "workflow_enabled": true
+        },
+        {
+          "code": "SENT_FOR_REGISTRATION",
+          "name": "Sent for Registration",
+          "description": "Contract sent for registration",
+          "sort_order": 5,
+          "is_active": true,
+          "color": "#3B82F6",
+          "workflow_enabled": true
+        },
+        {
+          "code": "PENDING_REGISTRATION",
+          "name": "Pending Registration",
+          "description": "Contract is pending registration",
+          "sort_order": 6,
+          "is_active": true,
+          "color": "#3B82F6",
+          "workflow_enabled": true
+        },
+        {
+          "code": "REGISTERED",
+          "name": "Registered",
+          "description": "Contract is registered and active",
+          "sort_order": 7,
+          "is_active": true,
+          "color": "#10B981",
+          "workflow_enabled": true
+        },
+        {
+          "code": "IN_PROGRESS",
+          "name": "In Progress",
+          "description": "Contract is in progress",
+          "sort_order": 8,
+          "is_active": true,
+          "color": "#10B981",
+          "workflow_enabled": true
+        },
+        {
+          "code": "SUSPENDED",
+          "name": "Suspended",
+          "description": "Contract is suspended",
+          "sort_order": 9,
+          "is_active": true,
+          "color": "#EF4444",
+          "workflow_enabled": true
+        },
+        {
+          "code": "CLOSED",
+          "name": "Closed",
+          "description": "Contract is closed",
+          "sort_order": 10,
+          "is_active": true,
+          "color": "#6B7280",
+          "workflow_enabled": false
+        },
+        {
+          "code": "CANCELLED",
+          "name": "Cancelled",
+          "description": "Contract is cancelled",
+          "sort_order": 11,
+          "is_active": true,
+          "color": "#DC2626",
+          "workflow_enabled": false
+        }
+      ]
+    },
+    "award_statuses": {
+      "object_type": "award",
+      "table_name": "award_statuses",
+      "values": [
+        {
+          "code": "PENDING",
+          "name": "Pending",
+          "description": "Award is pending",
+          "sort_order": 1,
+          "is_active": true
+        },
+        {
+          "code": "APPROVED",
+          "name": "Approved",
+          "description": "Award is approved",
+          "sort_order": 2,
+          "is_active": true
+        },
+        {
+          "code": "REJECTED",
+          "name": "Rejected",
+          "description": "Award is rejected",
+          "sort_order": 3,
+          "is_active": true
+        },
+        {
+          "code": "CANCELLED",
+          "name": "Cancelled",
+          "description": "Award is cancelled",
+          "sort_order": 4,
+          "is_active": true
+        },
+        {
+          "code": "COMPLETED",
+          "name": "Completed",
+          "description": "Award is completed",
+          "sort_order": 5,
+          "is_active": true
+        }
+      ]
+    },
+    "payment_statuses": {
+      "object_type": "payment",
+      "table_name": "payment_statuses",
+      "values": [
+        {
+          "code": "PENDING",
+          "name": "Pending",
+          "description": "Payment is pending",
+          "sort_order": 1,
+          "is_active": true
+        },
+        {
+          "code": "APPROVED",
+          "name": "Approved",
+          "description": "Payment is approved",
+          "sort_order": 2,
+          "is_active": true
+        },
+        {
+          "code": "PAID",
+          "name": "Paid",
+          "description": "Payment is paid",
+          "sort_order": 3,
+          "is_active": true
+        },
+        {
+          "code": "REJECTED",
+          "name": "Rejected",
+          "description": "Payment is rejected",
+          "sort_order": 4,
+          "is_active": true
+        },
+        {
+          "code": "CANCELLED",
+          "name": "Cancelled",
+          "description": "Payment is cancelled",
+          "sort_order": 5,
+          "is_active": true
+        },
+        {
+          "code": "RETURNED",
+          "name": "Returned",
+          "description": "Payment is returned",
+          "sort_order": 6,
+          "is_active": true
+        }
+      ]
+    },
+    "budget_statuses": {
+      "object_type": "budget",
+      "table_name": "budget_statuses",
+      "values": [
+        {
+          "code": "DRAFT",
+          "name": "Draft",
+          "description": "Budget is in draft state",
+          "sort_order": 1,
+          "is_active": true
+        },
+        {
+          "code": "PENDING_REVIEW",
+          "name": "Pending Review",
+          "description": "Budget is pending review",
+          "sort_order": 2,
+          "is_active": true
+        },
+        {
+          "code": "APPROVED",
+          "name": "Approved",
+          "description": "Budget is approved",
+          "sort_order": 3,
+          "is_active": true
+        },
+        {
+          "code": "REJECTED",
+          "name": "Rejected",
+          "description": "Budget is rejected",
+          "sort_order": 4,
+          "is_active": true
+        },
+        {
+          "code": "ACTIVE",
+          "name": "Active",
+          "description": "Budget is active",
+          "sort_order": 5,
+          "is_active": true
+        },
+        {
+          "code": "EXHAUSTED",
+          "name": "Exhausted",
+          "description": "Budget is exhausted",
+          "sort_order": 6,
+          "is_active": true
+        },
+        {
+          "code": "CANCELLED",
+          "name": "Cancelled",
+          "description": "Budget is cancelled",
+          "sort_order": 7,
+          "is_active": true
+        },
+        {
+          "code": "CLOSED",
+          "name": "Closed",
+          "description": "Budget is closed",
+          "sort_order": 8,
+          "is_active": true
+        },
+        {
+          "code": "AMENDED",
+          "name": "Amended",
+          "description": "Budget is amended",
+          "sort_order": 9,
+          "is_active": true
+        }
+      ]
+    },
+    "invoice_statuses": {
+      "object_type": "invoice",
+      "table_name": "invoice_statuses",
+      "values": [
+        {
+          "code": "DRAFT",
+          "name": "Draft",
+          "description": "Invoice is in draft state",
+          "sort_order": 1,
+          "is_active": true
+        },
+        {
+          "code": "SUBMITTED",
+          "name": "Submitted",
+          "description": "Invoice is submitted",
+          "sort_order": 2,
+          "is_active": true
+        },
+        {
+          "code": "PENDING_REVIEW",
+          "name": "Pending Review",
+          "description": "Invoice is pending review",
+          "sort_order": 3,
+          "is_active": true
+        },
+        {
+          "code": "APPROVED",
+          "name": "Approved",
+          "description": "Invoice is approved",
+          "sort_order": 4,
+          "is_active": true
+        },
+        {
+          "code": "REJECTED",
+          "name": "Rejected",
+          "description": "Invoice is rejected",
+          "sort_order": 5,
+          "is_active": true
+        },
+        {
+          "code": "PAID",
+          "name": "Paid",
+          "description": "Invoice is paid",
+          "sort_order": 6,
+          "is_active": true
+        },
+        {
+          "code": "CANCELLED",
+          "name": "Cancelled",
+          "description": "Invoice is cancelled",
+          "sort_order": 7,
+          "is_active": true
+        },
+        {
+          "code": "DISPUTED",
+          "name": "Disputed",
+          "description": "Invoice is disputed",
+          "sort_order": 8,
+          "is_active": true
+        },
+        {
+          "code": "RETURNED",
+          "name": "Returned",
+          "description": "Invoice is returned",
+          "sort_order": 9,
+          "is_active": true
+        }
+      ]
+    },
+    "contract_types": {
+      "object_type": "contract",
+      "table_name": "contract_types",
+      "values": [
+        {
+          "code": "CT1",
+          "name": "Service Contract",
+          "description": "Service-based contract",
+          "sort_order": 1,
+          "is_active": true
+        },
+        {
+          "code": "CT2",
+          "name": "Supply Contract",
+          "description": "Supply-based contract",
+          "sort_order": 2,
+          "is_active": true
+        },
+        {
+          "code": "CT3",
+          "name": "Construction Contract",
+          "description": "Construction-based contract",
+          "sort_order": 3,
+          "is_active": true
+        },
+        {
+          "code": "CT4",
+          "name": "Consulting Contract",
+          "description": "Consulting-based contract",
+          "sort_order": 4,
+          "is_active": true
+        }
+      ]
+    },
+    "amendment_statuses": {
+      "object_type": "amendment",
+      "table_name": "amendment_statuses",
+      "values": [
+        {
+          "code": "DRAFT",
+          "name": "Draft",
+          "description": "Amendment is in draft state",
+          "sort_order": 1,
+          "is_active": true,
+          "color": "#6B7280"
+        },
+        {
+          "code": "PENDING_REVIEW",
+          "name": "Pending Review",
+          "description": "Amendment is pending review",
+          "sort_order": 2,
+          "is_active": true,
+          "color": "#F59E0B"
+        },
+        {
+          "code": "APPROVED",
+          "name": "Approved",
+          "description": "Amendment is approved",
+          "sort_order": 3,
+          "is_active": true,
+          "color": "#10B981"
+        },
+        {
+          "code": "REJECTED",
+          "name": "Rejected",
+          "description": "Amendment is rejected",
+          "sort_order": 4,
+          "is_active": true,
+          "color": "#EF4444"
+        }
+      ]
+    },
+    "priority_levels": {
+      "object_type": "global",
+      "table_name": "priority_levels",
+      "values": [
+        {
+          "code": "LOW",
+          "name": "Low",
+          "description": "Low priority",
+          "sort_order": 1,
+          "is_active": true,
+          "color": "#10B981"
+        },
+        {
+          "code": "MEDIUM",
+          "name": "Medium",
+          "description": "Medium priority",
+          "sort_order": 2,
+          "is_active": true,
+          "color": "#F59E0B"
+        },
+        {
+          "code": "HIGH",
+          "name": "High",
+          "description": "High priority",
+          "sort_order": 3,
+          "is_active": true,
+          "color": "#EF4444"
+        },
+        {
+          "code": "URGENT",
+          "name": "Urgent",
+          "description": "Urgent priority",
+          "sort_order": 4,
+          "is_active": true,
+          "color": "#DC2626"
+        }
+      ]
+    },
+    "organization_types": {
+      "object_type": "organization",
+      "table_name": "organization_types",
+      "values": [
+        {
+          "code": "AGENCY",
+          "name": "Agency",
+          "description": "Government agency",
+          "sort_order": 1,
+          "is_active": true
+        },
+        {
+          "code": "PROVIDER",
+          "name": "Provider",
+          "description": "Service provider",
+          "sort_order": 2,
+          "is_active": true
+        },
+        {
+          "code": "VENDOR",
+          "name": "Vendor",
+          "description": "Vendor organization",
+          "sort_order": 3,
+          "is_active": true
+        }
+      ]
+    },
+    "user_roles": {
+      "object_type": "user",
+      "table_name": "user_roles",
+      "values": [
+        {
+          "code": "ACCO_MANAGER",
+          "name": "Account Manager",
+          "description": "Account manager role",
+          "sort_order": 1,
+          "is_active": true
+        },
+        {
+          "code": "FINANCE_MANAGER",
+          "name": "Finance Manager",
+          "description": "Finance manager role",
+          "sort_order": 2,
+          "is_active": true
+        },
+        {
+          "code": "PROGRAM_MANAGER",
+          "name": "Program Manager",
+          "description": "Program manager role",
+          "sort_order": 3,
+          "is_active": true
+        },
+        {
+          "code": "ACCO_STAFF",
+          "name": "ACCO Staff",
+          "description": "ACCO staff role",
+          "sort_order": 4,
+          "is_active": true
+        },
+        {
+          "code": "ACCO_ADMIN_STAFF",
+          "name": "ACCO Admin Staff",
+          "description": "ACCO admin staff role",
+          "sort_order": 5,
+          "is_active": true
+        },
+        {
+          "code": "FINANCE_STAFF",
+          "name": "Finance Staff",
+          "description": "Finance staff role",
+          "sort_order": 6,
+          "is_active": true
+        },
+        {
+          "code": "PROVIDER_MANAGER",
+          "name": "Provider Manager",
+          "description": "Provider manager role",
+          "sort_order": 7,
+          "is_active": true
+        },
+        {
+          "code": "PROVIDER_STAFF",
+          "name": "Provider Staff",
+          "description": "Provider staff role",
+          "sort_order": 8,
+          "is_active": true
+        },
+        {
+          "code": "CONTRACT_OWNER",
+          "name": "Contract Owner",
+          "description": "Contract owner role",
+          "sort_order": 9,
+          "is_active": true
+        },
+        {
+          "code": "VIEWER",
+          "name": "Viewer",
+          "description": "View-only access",
+          "sort_order": 5,
+          "is_active": true
+        }
+      ]
+    },
+    "permission_codes": {
+      "object_type": "global",
+      "table_name": "permissions",
+      "values": [
+        {
+          "code": "contract:view",
+          "name": "View Contract",
+          "description": "View contract details",
+          "sort_order": 1,
+          "is_active": true
+        },
+        {
+          "code": "contract:create",
+          "name": "Create Contract",
+          "description": "Create new contracts",
+          "sort_order": 2,
+          "is_active": true
+        },
+        {
+          "code": "contract:edit",
+          "name": "Edit Contract",
+          "description": "Edit contract details",
+          "sort_order": 3,
+          "is_active": true
+        },
+        {
+          "code": "contract:delete",
+          "name": "Delete Contract",
+          "description": "Delete contracts",
+          "sort_order": 4,
+          "is_active": true
+        },
+        {
+          "code": "contract:approve",
+          "name": "Approve Contract",
+          "description": "Approve contracts",
+          "sort_order": 5,
+          "is_active": true
+        },
+        {
+          "code": "amendment:view",
+          "name": "View Amendment",
+          "description": "View amendment details",
+          "sort_order": 6,
+          "is_active": true
+        },
+        {
+          "code": "amendment:create",
+          "name": "Create Amendment",
+          "description": "Create new amendments",
+          "sort_order": 7,
+          "is_active": true
+        },
+        {
+          "code": "amendment:edit",
+          "name": "Edit Amendment",
+          "description": "Edit amendment details",
+          "sort_order": 8,
+          "is_active": true
+        },
+        {
+          "code": "document:view",
+          "name": "View Document",
+          "description": "View documents",
+          "sort_order": 9,
+          "is_active": true
+        },
+        {
+          "code": "document:upload",
+          "name": "Upload Document",
+          "description": "Upload documents",
+          "sort_order": 10,
+          "is_active": true
+        },
+        {
+          "code": "document:download",
+          "name": "Download Document",
+          "description": "Download documents",
+          "sort_order": 11,
+          "is_active": true
+        }
+      ]
+    },
+    "workflow_statuses": {
+      "object_type": "workflow",
+      "table_name": "workflow_statuses",
+      "values": [
+        {
+          "code": "PENDING",
+          "name": "Pending",
+          "description": "Workflow is pending",
+          "sort_order": 1,
+          "is_active": true,
+          "color": "#F59E0B"
+        },
+        {
+          "code": "IN_PROGRESS",
+          "name": "In Progress",
+          "description": "Workflow is in progress",
+          "sort_order": 2,
+          "is_active": true,
+          "color": "#3B82F6"
+        },
+        {
+          "code": "COMPLETED",
+          "name": "Completed",
+          "description": "Workflow is completed",
+          "sort_order": 3,
+          "is_active": true,
+          "color": "#10B981"
+        },
+        {
+          "code": "CANCELLED",
+          "name": "Cancelled",
+          "description": "Workflow is cancelled",
+          "sort_order": 4,
+          "is_active": true,
+          "color": "#EF4444"
+        }
+      ]
+    },
+    "notification_channels": {
+      "object_type": "notification",
+      "table_name": "notification_channels",
+      "values": [
+        {
+          "code": "EMAIL",
+          "name": "Email",
+          "description": "Email notifications",
+          "sort_order": 1,
+          "is_active": true
+        },
+        {
+          "code": "SMS",
+          "name": "SMS",
+          "description": "SMS notifications",
+          "sort_order": 2,
+          "is_active": true
+        },
+        {
+          "code": "PUSH",
+          "name": "Push Notification",
+          "description": "Push notifications",
+          "sort_order": 3,
+          "is_active": true
+        },
+        {
+          "code": "IN_APP",
+          "name": "In-App",
+          "description": "In-app notifications",
+          "sort_order": 4,
+          "is_active": true
+        },
+        {
+          "code": "SLACK",
+          "name": "Slack",
+          "description": "Slack notifications",
+          "sort_order": 5,
+          "is_active": true
+        },
+        {
+          "code": "TEAMS",
+          "name": "Microsoft Teams",
+          "description": "Teams notifications",
+          "sort_order": 6,
+          "is_active": true
+        }
+      ]
+    },
+    "document_types": {
+      "object_type": "document",
+      "table_name": "document_types",
+      "values": [
+        {
+          "code": "CONTRACT_AGREEMENT",
+          "name": "Contract Agreement",
+          "description": "Main contract document",
+          "category": "CONTRACT_DOCUMENTS",
+          "sort_order": 1,
+          "is_active": true,
+          "is_required": true
+        },
+        {
+          "code": "AMENDMENT_DOCUMENT",
+          "name": "Amendment Document",
+          "description": "Contract amendment document",
+          "category": "CONTRACT_DOCUMENTS",
+          "sort_order": 2,
+          "is_active": true,
+          "is_required": false
+        },
+        {
+          "code": "TERMS_CONDITIONS",
+          "name": "Terms & Conditions",
+          "description": "System and application terms",
+          "category": "CONTRACT_DOCUMENTS",
+          "sort_order": 3,
+          "is_active": true,
+          "is_required": true
+        },
+        {
+          "code": "STANDARD_CONTRACT",
+          "name": "Standard Contract",
+          "description": "Template contract documents",
+          "category": "CONTRACT_DOCUMENTS",
+          "sort_order": 4,
+          "is_active": true,
+          "is_required": false
+        },
+        {
+          "code": "APPENDIX_A",
+          "name": "Appendix A",
+          "description": "Contract appendices and attachments",
+          "category": "CONTRACT_DOCUMENTS",
+          "sort_order": 5,
+          "is_active": true,
+          "is_required": false
+        },
+        {
+          "code": "BUDGET_DOCUMENT",
+          "name": "Budget Document",
+          "description": "Contract budget allocations",
+          "category": "FINANCIAL_DOCUMENTS",
+          "sort_order": 6,
+          "is_active": true,
+          "is_required": true
+        },
+        {
+          "code": "INVOICE_DOCUMENT",
+          "name": "Invoice Document",
+          "description": "Provider invoices and payment requests",
+          "category": "FINANCIAL_DOCUMENTS",
+          "sort_order": 7,
+          "is_active": true,
+          "is_required": false
+        },
+        {
+          "code": "PAYMENT_DOCUMENT",
+          "name": "Payment Document",
+          "description": "Payment vouchers and receipts",
+          "category": "FINANCIAL_DOCUMENTS",
+          "sort_order": 8,
+          "is_active": true,
+          "is_required": false
+        },
+        {
+          "code": "A133_REPORT",
+          "name": "A-133 Report",
+          "description": "Single audit reports",
+          "category": "COMPLIANCE_DOCUMENTS",
+          "sort_order": 9,
+          "is_active": true,
+          "is_required": true
+        },
+        {
+          "code": "ANNUAL_FINANCIAL_STATEMENT",
+          "name": "Annual Financial Statement",
+          "description": "Provider financial statements",
+          "category": "COMPLIANCE_DOCUMENTS",
+          "sort_order": 10,
+          "is_active": true,
+          "is_required": true
+        },
+        {
+          "code": "CORRECTIVE_ACTION_PLAN",
+          "name": "Corrective Action Plan",
+          "description": "CAP documents for audit findings",
+          "category": "COMPLIANCE_DOCUMENTS",
+          "sort_order": 11,
+          "is_active": true,
+          "is_required": false
+        },
+        {
+          "code": "CPA_REVIEW_REPORT",
+          "name": "CPA Review Report",
+          "description": "Certified public accountant reviews",
+          "category": "COMPLIANCE_DOCUMENTS",
+          "sort_order": 12,
+          "is_active": true,
+          "is_required": false
+        }
+      ]
+    },
+    "workflow_definitions": {
+      "object_type": "workflow",
+      "table_name": "workflow_definitions",
+      "values": [
+        {
+          "workflow_id": "WF301",
+          "name": "WF301 - Procurement CoF",
+          "description": "Procurement Certification of Funds workflow",
+          "workflow_type": "PROCUREMENT",
+          "version": "1.0.0",
+          "is_active": true
+        },
+        {
+          "workflow_id": "WF302",
+          "name": "WF302 - Contract Configuration",
+          "description": "Contract configuration and setup workflow",
+          "workflow_type": "CONTRACT",
+          "version": "1.0.0",
+          "is_active": true
+        },
+        {
+          "workflow_id": "WF303",
+          "name": "WF303 - Contract Certification of Funds",
+          "description": "Contract certification of funds workflow",
+          "workflow_type": "CONTRACT",
+          "version": "1.0.0",
+          "is_active": true
+        },
+        {
+          "workflow_id": "WF304",
+          "name": "WF304 - Contract Budget",
+          "description": "Contract budget management workflow",
+          "workflow_type": "BUDGET",
+          "version": "1.0.0",
+          "is_active": true
+        },
+        {
+          "workflow_id": "WF305",
+          "name": "WF305 - Invoice Review",
+          "description": "Invoice review and approval workflow",
+          "workflow_type": "INVOICE",
+          "version": "1.0.0",
+          "is_active": true
+        },
+        {
+          "workflow_id": "WF306",
+          "name": "WF306 - Payment Review",
+          "description": "Payment review and approval workflow",
+          "workflow_type": "PAYMENT",
+          "version": "1.0.0",
+          "is_active": true
+        },
+        {
+          "workflow_id": "WF307",
+          "name": "WF307 - Advance Payment Request",
+          "description": "Advance payment request workflow",
+          "workflow_type": "PAYMENT",
+          "version": "1.0.0",
+          "is_active": true
+        },
+        {
+          "workflow_id": "WF308",
+          "name": "WF308 - Advance Payment Review",
+          "description": "Advance payment review workflow",
+          "workflow_type": "PAYMENT",
+          "version": "1.0.0",
+          "is_active": true
+        },
+        {
+          "workflow_id": "WF309",
+          "name": "WF309 - New Fiscal Year Configuration",
+          "description": "New fiscal year configuration workflow",
+          "workflow_type": "ADMINISTRATIVE",
+          "version": "1.0.0",
+          "is_active": true
+        },
+        {
+          "workflow_id": "WF310",
+          "name": "WF310 - Contract Configuration Update",
+          "description": "Contract configuration update workflow",
+          "workflow_type": "CONTRACT",
+          "version": "1.0.0",
+          "is_active": true
+        },
+        {
+          "workflow_id": "WF311",
+          "name": "WF311 - Contract Budget Update Review",
+          "description": "Contract budget update review workflow",
+          "workflow_type": "BUDGET",
+          "version": "1.0.0",
+          "is_active": true
+        },
+        {
+          "workflow_id": "WF312",
+          "name": "WF312 - Contract Budget Modification (MOD)",
+          "description": "Contract budget modification workflow",
+          "workflow_type": "BUDGET",
+          "version": "1.0.0",
+          "is_active": true
+        },
+        {
+          "workflow_id": "WF313",
+          "name": "WF313 - Amendment Configuration",
+          "description": "Contract amendment configuration workflow",
+          "workflow_type": "AMENDMENT",
+          "version": "1.0.0",
+          "is_active": true
+        },
+        {
+          "workflow_id": "WF314",
+          "name": "WF314 - Amendment Certification of Funds",
+          "description": "Amendment certification of funds workflow",
+          "workflow_type": "AMENDMENT",
+          "version": "1.0.0",
+          "is_active": true
+        },
+        {
+          "workflow_id": "WF315",
+          "name": "WF315 - Contract Budget Amendment (AMD)",
+          "description": "Contract budget amendment workflow",
+          "workflow_type": "BUDGET",
+          "version": "1.0.0",
+          "is_active": true
+        },
+        {
+          "workflow_id": "WF316",
+          "name": "WF316 - Returned Payment Review",
+          "description": "Returned payment review workflow",
+          "workflow_type": "PAYMENT",
+          "version": "1.0.0",
+          "is_active": true
+        }
+      ]
+    }
+  }
+}

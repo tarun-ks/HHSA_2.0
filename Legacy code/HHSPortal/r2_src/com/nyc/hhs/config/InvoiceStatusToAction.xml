@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapping>
+	<page name="invoiceList">
+	<status name="Cancelled">
+			<action>View Contact CoF</action>
+			<action>View Contact Configuration</action>
+	</status>
+	</page>
+	
+	<!--Start : Added in R5 -->
+	<page name="invoiceListProvider">
+		<status name="119">
+			<action>View Invoice</action>
+			<action>Withdraw</action>
+			<action>View Contract</action>
+			<action>View Budget</action>
+		</status>
+		<status name="120">
+			<action>View Invoice</action>
+			<action>Delete</action>
+			<action>View Contract</action>
+			<action>View Budget</action>
+		</status>
+		<status name="121">
+			<action>View Invoice</action>
+			<action>View Contract</action>
+			<action>View Budget</action>
+		</status>
+		<status name="122">
+			<action>View Invoice</action>
+			<action>View Contract</action>
+			<action>View Budget</action>
+			<action>View Payments</action>
+		</status>
+		<status name="123">
+			<action>View Invoice</action>
+			<action>View Contract</action>
+			<action>View Budget</action>
+		</status>
+		<status name="124">
+			<action>View Invoice</action>
+			<action>View Contract</action>
+			<action>View Budget</action>
+		</status>
+	
+	</page>
+	<page name="invoiceListAgencyOrCity">
+		<status name="70">
+			<action>View Invoice</action>
+			<action>View Contract</action>
+			<action>View Budget</action>
+		</status>
+		<status name="71">
+			<action>View Invoice</action>
+			<action>View Contract</action>
+			<action>View Budget</action>
+		</status>
+		<status name="72">
+			<action>View Invoice</action>
+			<action>View Contract</action>
+			<action>View Budget</action>
+		</status>
+		<status name="73">
+			<action>View Invoice</action>
+			<action>View Contract</action>
+			<action>View Budget</action>
+			<action>View Payments</action>
+		</status>
+		<status name="74">
+			<action>View Invoice</action>
+			<action>View Contract</action>
+			<action>View Budget</action>
+		</status>
+		<status name="75">
+			<action>View Invoice</action>
+			<action>View Contract</action>
+			<action>View Budget</action>
+		</status>
+	</page>
+	<!--End : Added in R5 -->
+</mapping>

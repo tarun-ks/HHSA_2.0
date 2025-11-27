@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.TaxonomyBatchMapper">
+
+	<resultMap id="taxonomyTreeBeanList" type="com.nyc.hhs.model.TaxonomyTree">
+		<result property="msElementid" column="ELEMENT_ID" />
+		<result property="msBranchid" column="BRANCH_ID" />
+		<result property="msElementName" column="ELEMENT_NAME" />
+		<result property="msElementType" column="ELEMENT_TYPE" />
+		<result property="msParentid" column="PARENT_ID"/>
+		<result property="msElementDescription" column="ELEMENT_DESCRIPTION"/>
+		<result property="msEvidenceReqd" column="EVIDENCE_REQUIRED_FLAG"/>
+		<result property="msActiveFlag" column="ACTIVE_FLAG"/>
+		<result property="msSelectionFlag" column="SELECTION_FLAG"/>
+		<result property="msDeleteStatus" column="DELETE_STATUS"/>
+		<result property="msLevel" column="BRANCH_LEVEL"/>
+		<result property="msTaxTranRecStatus" column="TTR_STATUS"/>
+		<result property="msTaxTranRecEvent" column="TTR_EVENT"/>
+		<result property="msLeaf" column="LEAF"/>
+		<result property="msCount" column="COUNT" />
+		
+	</resultMap>
+	
+	<resultMap id="serviceApplicationBean" type="com.nyc.hhs.model.TaxonomyServiceBean">
+		<result property="businessApplicationId" column="BUSINESS_APPLICATION_ID" />
+		<result property="serviceApplicationId" column="SERVICE_APPLICATION_ID" />
+		<result property="applicationId" column="APPLICATION_ID" />
+		<result property="removedFlag" column="REMOVED_FLAG" />
+		<result property="serviceElementId" column="ELEMENT_ID" />
+		<result property="modifiedBy" column="MODIFIED_BY"></result>
+		<result property="modifiedDate" column="MODIFIED_DATE"></result>
+		<result property="submittedBy" column="SUBMITTED_BY"></result>
+		<result property="submittionDate" column="SUBMISSION_DATE"></result>				
+		<result property="startDate" column="START_DATE" />
+		<result property="expirationDate" column="EXPIRATION_DATE" />
+		<result property="organizationId" column="ORGANIZATION_ID" />
+		<result property="userId" column="USER_ID" />
+		<result property="inActiveFlag" column="INACTIVE_FLAG" />
+		<result property="statusId" column="STATUS_ID" />
+		<result property="serviceStatus" column="SERVICE_STATUS" />
+		<result property="processStatus" column="PROCESS_STATUS" />
+		<result property="applicationId" column="APPLICATION_ID" />
+		<result property="oldServiceApplicationId" column="OLD_SERVICE_APPLICATION_ID" />
+	</resultMap>
+	
+	<select id="executeTaxonomyBtch" resultMap="taxonomyTreeBeanList">
+		SELECT  TM.ELEMENT_ID,
+		        TM.ELEMENT_NAME,
+		        TM.ELEMENT_TYPE,
+		        TM.ACTIVE_FLAG,
+		        TM.SELECTION_FLAG,
+		        TM.EVIDENCE_REQUIRED_FLAG,
+		        TM.DELETE_STATUS,
+		        TM.PARENT_ID,
+		        TTR.TRANSACTION_EVENT as TTR_EVENT,
+		        TTR.STATUS as TTR_STATUS,
+		        TTR.MODIFIED_DATE
+		 FROM taxonomy_master TM
+		 INNER JOIN ( 
+					SELECT ELEMENT_ID,MIN(MODIFIED_DATE)as modifieddate
+						FROM taxonomy_transaction_record
+            			WHERE (TRANSACTION_EVENT='Evidence' OR TRANSACTION_EVENT='Approval' OR TRANSACTION_EVENT='Active')
+						GROUP BY ELEMENT_ID
+					  ) TEMP ON  TM.ELEMENT_ID = temp.ELEMENT_ID
+		 INNER JOIN taxonomy_transaction_record TTR ON (TM.ELEMENT_ID = TTR.ELEMENT_ID
+												AND TTR.MODIFIED_DATE = temp.modifieddate)
+		                    WHERE
+		                    ((TTR.TRANSACTION_EVENT='Evidence') AND (TM.EVIDENCE_REQUIRED_FLAG!=ttr.status)
+		                     OR 
+		                     (TTR.TRANSACTION_EVENT='Active') AND (TM.active_flag!=ttr.status) 
+		                     OR
+		                     (TTR.TRANSACTION_EVENT='Approval') AND (TM.SELECTION_FLAG!=ttr.status))
+    </select>
+    
+    
+  	<select id="parentEvidenceFlagCheck" resultMap="taxonomyTreeBeanList">
+
+          SELECT connect_by_root element_id as leaf, element_id, EVIDENCE_REQUIRED_FLAG
+				               FROM   TAXONOMY_MASTER b 
+				               WHERE DELETE_STATUS='N' and EVIDENCE_REQUIRED_FLAG='1'
+				               CONNECT BY prior parent_id=element_id
+					                        start with element_id in 
+       <foreach item="item" index="index" collection="msParentElementIdList"
+			open="(" separator="," close=")">
+			#{item}
+       </foreach>
+    </select>
+    
+    <update id="updateServiceAppForEvidenceCheck" parameterType="com.nyc.hhs.model.TaxonomyTree">
+        UPDATE SUPERSEDING_STATUS 
+               SET STATUS='Deactivated',
+                   MODIFIED_BY=#{msModifyBy}, 
+                   MODIFIED_DATE=SYSDATE 
+        WHERE ((trim(lower(STATUS)) = 'draft') OR (trim(lower(STATUS)) = 'in review') OR
+        	   (trim(lower(STATUS)) = 'deferred')  OR (trim(lower(STATUS)) = 'returned for revisions')OR
+        	   (trim(lower(STATUS)) = 'deactivated'))
+        	   AND ENTITY_ID in (select service_application_id from service_application
+                            where ELEMENT_ID = #{msElementid})
+	</update>
+	
+    <update id="updateServiceAppForApprovalCheck" parameterType="com.nyc.hhs.model.TaxonomyTree">
+        UPDATE SUPERSEDING_STATUS 
+               SET STATUS='Deactivated',
+                MODIFIED_BY=#{msModifyBy}, 
+                MODIFIED_DATE=SYSDATE
+        WHERE  ((trim(lower(STATUS)) = 'approved') OR (trim(lower(STATUS)) = 'active')OR (trim(lower(STATUS)) = 'deactivated'))
+          AND ENTITY_ID in (select service_application_id from service_application
+                             where ELEMENT_ID =#{msElementid})
+	</update>
+	
+	<update id="updateForEvidenceMovedToParentCheck" parameterType="com.nyc.hhs.model.TaxonomyTree">
+        UPDATE SUPERSEDING_STATUS 
+               SET STATUS='Deactivated',
+                   MODIFIED_BY=#{msModifyBy}, 
+                   MODIFIED_DATE=SYSDATE 
+        WHERE  ((trim(lower(STATUS)) = 'approved') OR (trim(lower(STATUS)) = 'active')OR (trim(lower(STATUS)) = 'deactivated'))
+				AND ENTITY_ID in (select service_application_id from service_application
+                            where ELEMENT_ID =#{msElementid})                
+                
+	</update>
+	
+    <insert id="insertIntoServiceApplication" parameterType="com.nyc.hhs.model.TaxonomyServiceBean">
+        INSERT INTO SERVICE_APPLICATION 
+           (BUSINESS_APPLICATION_ID,ELEMENT_ID,
+            ORGANIZATION_ID,USER_ID,SUBMITTED_BY,SUBMISSION_DATE,
+            MODIFIED_BY,MODIFIED_DATE,START_DATE,EXPIRATION_DATE,
+            REMOVED_FLAG,INACTIVE_FLAG,STATUS_ID,SERVICE_STATUS,PROCESS_STATUS,
+            SERVICE_APPLICATION_ID,WORKFLOW_ID,APPLICATION_ID,OLD_SERVICE_APPLICATION_ID,CREATED_BY,CREATED_DATE,REPORTING_MODIFIED_BY,
+			REPORTING_MODIFIED_DATE) 
+        VALUES
+			(#{businessApplicationId},#{serviceElementId},#{organizationId},#{userId},#{submittedBy},
+				#{submittionDate},#{modifiedBy},SYSDATE,#{startDate},
+				#{expirationDate},#{removedFlag},#{inActiveFlag}, #{statusId},
+				#{serviceStatus},#{processStatus}, #{serviceApplicationId},' ', #{applicationId},#{oldServiceApplicationId},#{createdBy},SYSTIMESTAMP,#{modifiedBy},SYSTIMESTAMP) 	
+	</insert>	
+	
+	
+  	<select id="getDataFromServiceApplication" resultMap="serviceApplicationBean">
+
+          SELECT BUSINESS_APPLICATION_ID,ELEMENT_ID,
+            	 ORGANIZATION_ID,USER_ID,SUBMITTED_BY,SUBMISSION_DATE,
+           		 MODIFIED_BY,MODIFIED_DATE,START_DATE,EXPIRATION_DATE,
+                 REMOVED_FLAG,INACTIVE_FLAG,STATUS_ID,SERVICE_STATUS,PROCESS_STATUS,
+                 SERVICE_APPLICATION_ID,WORKFLOW_ID,APPLICATION_ID
+          FROM SERVICE_APPLICATION
+          WHERE 
+                 ELEMENT_ID=#{msElementid}
+    </select>	
+    <!-- Start [R9.3.0] qc 9638 Vuln 5: CWE 331 - Insufficient Entropy -->
+    <insert id="insertIntoSupersedingStatus" parameterType="hashmap">
+        INSERT INTO SUPERSEDING_STATUS 
+           (ENTITY_TYPE,ENTITY_ID,EVENT,FLAG,STATUS,TIMESTAMP,USER_ID,ORGANIZATION_ID,REQUEST_ID,SUPERSEDING_STATUS_ID,
+            CREATED_BY,CREATED_DATE,MODIFIED_BY,MODIFIED_DATE) 
+        VALUES
+			(#{entityType},#{entityId}, #{event},#{flag}, #{status},current_timestamp,#{userId},#{orgId},#{requestId,jdbcType=VARCHAR},SEQ_SUPERSEDING_STATUS_ID.NEXTVAL,
+			 #{userId},SYSDATE,#{userId},SYSDATE) 	
+	</insert>
+	 <!-- End [R9.3.0] qc 9638 Vuln 5: CWE 331 - Insufficient Entropy -->
+	<select id="getServiceApplicationID" resultMap="serviceApplicationBean">
+          SELECT ORGANIZATION_ID,SERVICE_APPLICATION_ID FROM SERVICE_APPLICATION
+                WHERE 
+                 ELEMENT_ID=#{lsElementid}
+    </select>
+    
+    <select id="getOldServiceApplicationId" resultMap="serviceApplicationBean">
+      SELECT OLD_SERVICE_APPLICATION_ID from SERVICE_APPLICATION
+             WHERE SERVICE_APPLICATION_ID = #{oldServiceApplicationId} 
+    </select>
+    
+    <delete id="deleteFromSupersedingStatus" parameterType="String">
+      DELETE FROM  SUPERSEDING_STATUS
+             WHERE EVENT='evidenceToNonEvidence' OR EVENT='approvalToNonApproval'
+             AND ENTITY_ID in (select service_application_id from service_application
+                            where ELEMENT_ID =#{asElementId})
+                
+    </delete>
+    
+    <select id="getApprovedServiceCount" resultMap="taxonomyTreeBeanList">
+      select count(1) as COUNT from service_application where trim(lower(SERVICE_STATUS))='approved'
+  				and element_id in  
+   	   <foreach item="item" index="index" collection="msParentElementIdList"
+			open="(" separator="," close=")">
+			#{item}
+       </foreach>
+    </select>
+    
+    <select id="checkEventInSuperseding" parameterType="String" resultMap="taxonomyTreeBeanList">
+		select count(1) as COUNT from superseding_status
+				where entity_id=#{msEntityId} and event='EvidenceMovedFromChildToParent'
+    </select>    
+    
+      
+</mapper>

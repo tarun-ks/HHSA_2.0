@@ -1,0 +1,1341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.NotificationMapper">
+
+	<resultMap type="com.nyc.hhs.model.NotificationBean" id="emailNotification">
+		<result property="subject" column="NOTIFICATION_NAME" />
+		<result property="messageBody" column="NOTIFICATION_DESC" />
+		<result property="userId" column="EMAIL_ID" />
+		<result property="groupName" column="GROUP_ID" />
+		<result property="notificationDate" column="NOTIFICATION_DATE" />
+		<result property="providerId" column="ORGANIZATION_ID" />
+		<result property="generalized" column="GENERALIZED" />
+		<result property="groupNotificationId" column="GROUP_NOTIFICATION_ID" />
+		<result property="notificationId" column="NOTIFICATION_ID" />
+	</resultMap>
+
+	<!-- START || Changes for enhancement 5978 for Release 3.11.0 -->
+	<resultMap id="getUserEmailId" type="com.nyc.hhs.model.UserEmailIdBean">
+		<result property="userEmailId" column="EMAIL" />
+		<result property="staffId" column="STAFF_ID" />
+		<result property="userLevel" column="USER_LEVEL" />
+		<result property="userOrgId" column="ORG_ID" />
+		<result property="orgLegalName" column="ORG_NAME" />
+		<result property="bccFlag" column="BCC_FLAG" />
+	</resultMap>
+	<!-- END || Changes for enhancement 5978 for Release 3.11.0 -->
+
+
+	<resultMap id="userEmailList" type="com.nyc.hhs.model.NotificationBean">
+		<result property="subject" column="NOTIFICATION_NAME" />
+		<result property="messageBody" column="NOTIFICATION_DESC" />
+		<result property="userId" column="EMAIL_ID" />
+		<result property="groupName" column="GROUP_ID" />
+		<result property="notificationDate" column="NOTIFICATION_DATE" />
+		<result property="providerId" column="ORGANIZATION_ID" />
+	</resultMap>
+
+
+	<resultMap type="com.nyc.hhs.model.NotificationBean" id="resultGroupIdList">
+		<result property="subject" column="NOTIFICATION_NAME" />
+		<result property="messageBody" column="NOTIFICATION_DESC" />
+		<result property="groupName" column="GROUP_ID" />
+		<result property="notificationDate" column="NOTIFICATION_DATE" />
+		<result property="providerId" column="ORGANIZATION_ID" />
+		<result property="alertType" column="NOTIFICATION_TYPE" />
+		<result property="groupNotificationId" column="GROUP_NOTIFICATION_ID" />
+	</resultMap>
+
+	<insert id="insertNotAlertMaster" parameterType="hashmap">
+		Insert into
+		NOTIFICATION_ALERT_MASTER
+		VALUES(NOTIFICATION_ALERT_MASTER_ID.NEXTVAL,#{eventId},#{name,jdbcType=VARCHAR},#{eventType},
+		#{moduleName},#{groupRole,jdbcType=VARCHAR},#{userLevel,jdbcType=VARCHAR},#{noOfLinks},
+		#{body},0,#{generalized,jdbcType=CHAR},'PC',sysdate,#{createdBy,jdbcType=VARCHAR},#{modifiedBy,jdbcType=VARCHAR},sysdate,null,#{orgType})
+	</insert>
+
+
+	<resultMap id="notificationAlertMasterBeanList" type="com.nyc.hhs.model.NotificationAlertMasterBean">
+		<result property="notificationALertMasterId" column="NOTIFICATION_ALERT_MASTER_ID" />
+		<result property="notificationALertId" column="NOTIFICATION_ALERT_ID" />
+		<result property="subject" column="NAME" />
+		<result property="alertType" column="TYPE" />
+		<result property="moduleName" column="MODULE_NAME" />
+		<result property="groupRole" column="GROUP_ROLE" />
+		<result property="userLevel" column="USER_LEVEL" />
+		<result property="noOfUrl" column="NO_OF_URL_REQUIRED" />
+		<result property="messageBody" column="EMAIL_BODY_DESCRIPTION" />
+		<result property="preProcessingRequired" column="PREPROCESSING_REQUIRED" />
+		<result property="preProcessingClass" column="PREPROCESSING_CLASS" />
+		<result property="generalized" column="GENERALIZED" />
+		<result property="orgType" column="ORG_TYPE" />
+		<result property="permissionType" column="PERMISSION_TYPE" />
+	</resultMap>
+
+	<select id="getNotificationAlertMasterDetails" parameterType="hashmap"
+		resultMap="notificationAlertMasterBeanList">
+		SELECT NOTIFICATION_ALERT_MASTER_ID, NOTIFICATION_ALERT_ID, NAME,
+		TYPE, MODULE_NAME, GROUP_ROLE, USER_LEVEL,
+		NO_OF_URL_REQUIRED,
+		EMAIL_BODY_DESCRIPTION,PREPROCESSING_REQUIRED,PREPROCESSING_CLASS,GENERALIZED,ORG_TYPE,PERMISSION_TYPE
+		FROM NOTIFICATION_ALERT_MASTER
+		<if test="notificationAlertId != null">
+			WHERE
+			NOTIFICATION_ALERT_ID = #{notificationAlertId}
+		</if>
+	</select>
+
+
+	<insert id="insertIntoGroupNotificationTable">
+		Insert into
+		GROUP_NOTIFICATION(GROUP_NOTIFICATION_ID,
+		MODULE_NAME, NAME, DESCRIPTION, NOTIFICATION_SENT, CREATED_DATE,
+		ENTITY_ID, ENTITY_TYPE, NOTIFICATION_ALERT_ID, ORGANIZATION_ID,
+		CREATED_BY_USERID, MODIFIED_DATE, ORG_TYPE) values
+		(#{groupNotificationId},#{moduleName},#{subject},
+		#{messageBody,jdbcType=VARCHAR},#{notificationSent},sysdate,
+		#{entityId},
+		#{entityType,jdbcType=VARCHAR},#{eventId},#{providerId,jdbcType=VARCHAR},
+		#{createdBy,jdbcType=VARCHAR},sysdate,#{orgType})
+	</insert>
+
+	<update id="updateGroupNotificationTable">
+		Update GROUP_NOTIFICATION set DESCRIPTION =
+		#{msgBody}
+		where GROUP_NOTIFICATION_ID = #{groupNotificationId}
+	</update>
+
+	<select id="getNextGroupNotificationId" resultType="java.lang.Integer">
+		select
+		SEQ_GROUP_NOTIFICATION_ID.nextval CURRENTELEMENTID from dual
+	</select>
+
+	<select id="getNextNotificationAlertUrlId" resultType="java.lang.Integer">
+		select
+		SEQ_NOTIFICATION_ALERT_URL_ID.nextval CURRENTELEMENTID from dual
+	</select>
+
+	<insert id="insertIntoNotificationAlertUrl" parameterType="hashmap">
+		Insert into
+		NOTIFICATION_ALERT_URL(NOTIFICATION_ALERT_URL_ID,
+		URL_ORDER_ID, GROUP_NOTIFICATION_ID, URL, CREATED_DATE,
+		CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID) values
+		(#{groupNotificationUrlId},#{urlOrder},#{groupNotificationId},
+		#{url,jdbcType=VARCHAR},
+		sysdate, #{createdBy}, sysdate,#{modifiedBy})
+	</insert>
+
+
+	<resultMap type="com.nyc.hhs.model.NotificationBean" id="usentGroupIdList">
+		<result property="groupNotificationId" column="GROUP_NOTIFICATION_ID" />
+		<result property="subject" column="NAME" />
+		<result property="messageBody" column="DESCRIPTION" />
+		<result property="moduleName" column="MODULE_NAME" />
+		<result property="entityId" column="ENTITY_ID" />
+		<result property="entityType" column="ENTITY_TYPE" />
+		<result property="notificationAlertId" column="NOTIFICATION_ALERT_ID" />
+		<result property="providerId" column="ORGANIZATION_ID" />
+		<result property="orgType" column="ORG_TYPE" />
+		<result property="providerName" column="ORGANIZATION_LEGAL_NAME" />
+	</resultMap>
+
+
+<!-- [Start] R7.4.0 QC9134 Approved Payment Rejected by FMS -->
+
+	<select id="getUnsentGroupNotificationsList" resultMap="usentGroupIdList">
+		SELECT   GROUP_NOTIFICATION_ID, NAME, DESCRIPTION, MODULE_NAME, ENTITY_ID,
+		         ENTITY_TYPE, NOTIFICATION_ALERT_ID,ORGANIZATION_ID,ORG_TYPE 
+		from     GROUP_NOTIFICATION
+		where    NOTIFICATION_SENT = 'false'
+		order  by  CREATED_DATE
+	</select>
+
+<!-- [Start] R7.5.0 QC9162 Refactoring -->
+	<insert id="rewriteMsgBodyNT318ByAgency_old" >
+		 {call
+		      BEGIN
+		      	<![CDATA[
+				insert into GROUP_NOTIFICATION 
+				       ( GROUP_NOTIFICATION_ID ,MODULE_NAME,NAME,NOTIFICATION_SENT,CREATED_DATE,ENTITY_ID,ENTITY_TYPE,
+				         NOTIFICATION_ALERT_ID,ORGANIZATION_ID,CREATED_BY_USERID,MODIFIED_DATE,ORG_TYPE,DESCRIPTION )         
+				select SEQ_GROUP_NOTIFICATION_ID.NEXTVAL as GROUP_NOTIFICATION_ID, MODULE_NAME,   NAME,  NOTIFICATION_SENT , CREATED_DATE,  ENTITY_ID, ENTITY_TYPE
+				       , NOTIFICATION_ALERT_ID , ORGANIZATION_ID,  CREATED_BY_USERID, MODIFIED_DATE ,  ORG_TYPE , DESCRIPTION
+				from (	select     MODULE_NAME,   NAME,  'false' as NOTIFICATION_SENT , SYSTIMESTAMP as CREATED_DATE , 'NA' as ENTITY_ID, ENTITY_TYPE
+				                   , NOTIFICATION_ALERT_ID , ORGANIZATION_ID,'system' as  CREATED_BY_USERID, SYSTIMESTAMP as MODIFIED_DATE,  ORG_TYPE  
+				                   , (select   SUBSTR(EMAIL_BODY_DESCRIPTION,1, INSTR(EMAIL_BODY_DESCRIPTION,'{#FMS_ERROR_DESCRIPTION}')-1) 
+                                        from   NOTIFICATION_ALERT_MASTER where NOTIFICATION_ALERT_ID = 'NT318N' )
+                                     || replace(wm_concat( DESCRIPTION  ) ,',','<br/>')
+                                     || ( select  SUBSTR(EMAIL_BODY_DESCRIPTION, INSTR(EMAIL_BODY_DESCRIPTION,'{#FMS_ERROR_DESCRIPTION}') + length('{#FMS_ERROR_DESCRIPTION}') , length(EMAIL_BODY_DESCRIPTION)-1 )
+                                            from  NOTIFICATION_ALERT_MASTER where NOTIFICATION_ALERT_ID = 'NT318N' 
+                                         )
+                             as  DESCRIPTION
+						  from     GROUP_NOTIFICATION
+						 where     NOTIFICATION_SENT = 'false'
+						   and     NOTIFICATION_ALERT_ID =  'NT318'
+						   and     ENTITY_ID != 'NA'
+				         group by  NAME,  MODULE_NAME, ORGANIZATION_ID, MODULE_NAME, ENTITY_TYPE,ORG_TYPE , NOTIFICATION_ALERT_ID
+				       )
+ 				]]>
+				;
+
+				update GROUP_NOTIFICATION
+				set      MODIFIED_DATE = SYSTIMESTAMP
+				,        NOTIFICATION_SENT = 'true'
+				where    NOTIFICATION_SENT = 'false'
+				  and    NOTIFICATION_ALERT_ID =  'NT318'
+				  and     ENTITY_ID != 'NA'
+				;
+	        END
+	    }	
+	</insert>
+<!-- [End] R7.5.0 QC9162 Refactoring -->
+	<select id="getUserEmailIdsNT318" resultMap="getUserEmailId">
+		select cud.USER_ROLE as user_level , cud.EMAIL_ID  as email , cud.ORGANIZATION_NAME as ORG_ID , cud.USER_ID as staff_id , org.agency_name as ORG_NAME
+		from CITY_USER_DETAILS  cud, 
+		     ( select   replace(agency_name,agency_id||' - ','') as agency_name, AGENCY_ID
+                 from   nyc_agency_details  where ACTIVE_FLAG = 1 and AGENCY_ID = #{orgId} ) org
+		where  cud.ORGANIZATION_NAME = #{orgId}
+        and    cud.ORGANIZATION_NAME = org.AGENCY_ID
+		and    cud.USER_ROLE in ( select USER_LEVEL from NOTIFICATION_ALERT_MASTER where  NOTIFICATION_ALERT_ID =  'NT318' )
+		and    cud.ACTIVE_FLAG = 1
+	</select>
+
+<!-- [End] R7.4.0 QC9134 Approved Payment Rejected by FMS -->
+
+
+	<insert id="insertInUserNotification">
+		Insert into
+		USER_NOTIFICATION(NOTIFICATION_TYPE,
+		NOTIFICATION_NAME,
+		NOTIFICATION_DESC, EMAIL_ID, NOTIFICATION_DELETE,
+		NOTIFICATION_READ,
+		NOTIFICATION_DATE, NOTIFICATION_ID, ENTITY_ID,
+		ENTITY_TYPE, EVENT_ID,
+		GROUP_NOTIFICATION_ID, ORGANIZATION_ID,
+		ORG_TYPE,
+		CREATED_BY_USERID,
+		MODIFIED_BY_USERID, MODIFIED_DATE,
+		USER_LEVEL) VALUES
+		(#{moduleName,jdbcType=VARCHAR},#{subject,jdbcType=VARCHAR},#{messageBody,jdbcType=VARCHAR},
+		#{userId,jdbcType=VARCHAR},#{deleteNotification,jdbcType=CHAR},#{readNotification,jdbcType=CHAR},sysdate,SEQ_USER_NOTIFICATION_ID.NEXTVAL,
+		#{entityId,jdbcType=VARCHAR},#{entityType,jdbcType=VARCHAR},#{notificationAlertId,jdbcType=VARCHAR},#{groupNotificationId,jdbcType=VARCHAR},
+		#{providerId,jdbcType=VARCHAR},#{orgType,jdbcType=VARCHAR},#{createdBy,jdbcType=VARCHAR},
+		#{modifiedBy,jdbcType=VARCHAR},sysdate,#{groupName,jdbcType=VARCHAR})
+	</insert>
+
+	<insert id="insertInNotificationTable">
+		Insert into
+		NOTIFICATION(NOTIFICATION_ID,
+		GROUP_NOTIFICATION_ID, ORGANIZATION_ID,
+		ORG_TYPE, USER_ID, USER_LEVEL,
+		NOTIFICATION_DATE,CREATED_DATE, CREATED_BY_USERID, MODIFIED_DATE,
+		MODIFIED_BY_USERID)
+		VALUES
+		(SEQ_NOTIFICATION_ID.NEXTVAL,#{groupNotificationId,jdbcType=VARCHAR},#{providerId,jdbcType=VARCHAR},
+		#{orgType,jdbcType=VARCHAR},#{userId,jdbcType=VARCHAR},#{groupName,jdbcType=VARCHAR},sysdate,sysdate,#{createdBy,jdbcType=VARCHAR},
+		sysdate,#{modifiedBy,jdbcType=VARCHAR})
+	</insert>
+	<!-- Query modified as a part of release 3.1.0 defect 6393 .. check added 
+		to send notification to Active users only -->
+	<select id="getUserEmailIds" resultMap="getUserEmailId">
+
+		select SOM.PERMISSION_LEVEL
+		user_level,sd.email,sd.staff_id,SOM.ORGANIZATION_ID
+		ORG_ID,org.organization_legal_name ORG_NAME
+		from staff_details sd,
+		staff_organization som, member_title mt,organization org
+		where
+		SD.STAFF_ID =
+		SOM.STAFF_ID and SOM.ORGANIZATION_ID = #{orgId}
+		and
+		SOM.USER_STATUS = 'Yes'
+		and SD.USER_DN is not null
+		and
+		org.ORGANIZATION_ID = SOM.ORGANIZATION_ID
+		and MT.MEMBER_ID = SOM.TITLE
+		<if test="userLevels != null">
+			AND SOM.PERMISSION_LEVEL IN
+			<foreach item="items" index="index" collection="userLevels"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+		<if test="permissionType != null">
+			AND SOM.PERMISSION_TYPE IN
+			<foreach item="items" index="index" collection="permissionType"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+		<if test="contractRestrictedNotification  == 'Budget'">
+			and
+			sd.staff_id not in (
+			select staff_id from
+			contract_restriction where contract_id
+			in (
+			select contract_id from
+			budget where budget_id in (
+			select
+			parent_id from budget where
+			budget_id=#{entityId}
+			)
+			))
+		</if>
+		<if test="contractRestrictedNotification  == 'Invoice'">
+			and sd.staff_id not in (
+			select staff_id from
+			contract_restriction where contract_id in
+			(select contract_id from
+			invoice where invoice_id in (#{entityId})
+			))
+		</if>
+		union
+
+		select SOM.PERMISSION_LEVEL
+		user_level,sd.email,sd.staff_id,SOM.ORGANIZATION_ID
+		ORG_ID,org.organization_legal_name ORG_NAME
+		from staff_details sd,
+		staff_organization som, member_title
+		mt,organization org
+		where
+		SD.STAFF_ID = SOM.STAFF_ID and SOM.ORGANIZATION_ID = #{orgId}
+		and
+		org.ORGANIZATION_ID = SOM.ORGANIZATION_ID
+		and MT.MEMBER_ID = SOM.TITLE
+		and SOM.MEMBER_STATUS='Active'
+		<if test="userLevels != null">
+			AND MT.MEMBER_NOTIFICATION_NAME IN
+			<foreach item="items" index="index" collection="userLevels"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+
+
+		union
+		<!-- incident regarding Agency abbreviation instead of Accelerator and 
+			Agency Name in Emails -->
+		select city.user_role user_level, email_id EMAIL,
+		to_char(user_id) as
+		STAFF_ID,city.organization_name ORG_ID,
+		case when organization_name =
+		'city' then 'Accelerator' else
+		(select
+		substr(agency_name,instr(agency_name,'-')+2) as ORG_NAME from
+		nyc_agency_details where agency_id = city.organization_name) end
+		ORG_NAME
+		from city_user_details city
+		where
+		active_flag = 1 and
+		(user_type=#{orgId} OR organization_name=#{orgId})
+		<if test="userLevels != null">
+			AND user_role IN
+			<foreach item="items" index="index" collection="userLevels"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+	</select>
+
+
+	<select id="getUserEmailIdsForBulkNotification" resultMap="getUserEmailId">
+
+		select SOM.PERMISSION_LEVEL
+		user_level,sd.email,sd.staff_id,SOM.ORGANIZATION_ID
+		ORG_ID,org.organization_legal_name ORG_NAME
+		from staff_details sd,
+		staff_organization som, member_title mt,organization org
+		where
+		SD.STAFF_ID =
+		SOM.STAFF_ID and SOM.ORGANIZATION_ID = #{orgId}
+		and
+		SOM.USER_STATUS = 'Yes'
+		and SD.USER_DN is not null
+		and
+		org.ORGANIZATION_ID = SOM.ORGANIZATION_ID
+		and MT.MEMBER_ID = SOM.TITLE
+			AND ((SOM.PERMISSION_LEVEL IN ('Level 2')
+			AND SOM.PERMISSION_TYPE IN ('F','FP')) or MT.MEMBER_ID IN ('1'))
+		<if test="contractRestrictedNotification  == 'Budget'">
+			and
+			sd.staff_id not in (
+			select staff_id from
+			contract_restriction where contract_id
+			in (
+			select contract_id from
+			budget where budget_id in (
+			select
+			parent_id from budget where
+			budget_id=#{entityId}
+			)
+			))
+		</if>
+		<if test="contractRestrictedNotification  == 'Invoice'">
+			and sd.staff_id not in (
+			select staff_id from
+			contract_restriction where contract_id in
+			(select contract_id from
+			invoice where invoice_id in (#{entityId})
+			))
+		</if>
+		
+		
+	</select>
+	
+	<select id="fetchCityUserNT234" resultMap="getUserEmailId">
+		select city.user_role
+		user_level, email_id EMAIL,
+		to_char(user_id) as
+		STAFF_ID,city.organization_name ORG_ID,
+		case when organization_name =
+		'city' then 'Accelerator' else
+		(select
+		substr(agency_name,instr(agency_name,'-')+2) as ORG_NAME from
+		nyc_agency_details where agency_id = city.organization_name) end
+		ORG_NAME
+		from city_user_details city, bulk_task_export b
+		where
+		city.active_flag = 1 and b.EXPORT_REQUEST_ID = #{entityId} and
+		b.created_by_user_id = city.user_id
+	</select>
+
+	<select id="fetchCityUserNT232" resultMap="getUserEmailId">
+		select city.user_role
+		user_level, email_id EMAIL,
+		to_char(user_id) as
+		STAFF_ID,city.organization_name ORG_ID,
+		case when organization_name =
+		'city' then 'Accelerator' else
+		(select
+		substr(agency_name,instr(agency_name,'-')+2) as ORG_NAME from
+		nyc_agency_details where agency_id = city.organization_name) end
+		ORG_NAME
+		from city_user_details city, bulk_document_download b
+		where
+		city.active_flag = 1 and b.DOWNLOAD_REQUEST_ID = #{entityId} and
+		b.created_by_user_id = city.user_id
+	</select>
+
+	<!-- Start || Added for enhancement 5978 for Release 3.11.0 -->
+	<select id="fetchUsersForNT225" resultMap="getUserEmailId">
+
+		select SOM.PERMISSION_LEVEL
+		user_level, 'false' as
+		BCC_FLAG,sd.email,sd.staff_id,SOM.ORGANIZATION_ID
+		ORG_ID,org.organization_legal_name ORG_NAME
+		from staff_details sd,
+		staff_organization som, member_title mt,organization org
+		where
+		SD.STAFF_ID =
+		SOM.STAFF_ID and SOM.ORGANIZATION_ID = #{orgId}
+		and
+		SOM.USER_STATUS = 'Yes'
+		and SD.USER_DN is not null
+		and
+		org.ORGANIZATION_ID = SOM.ORGANIZATION_ID
+		and MT.MEMBER_ID = SOM.TITLE
+		<if test="userLevels != null">
+			AND SOM.PERMISSION_LEVEL IN
+			<foreach item="items" index="index" collection="userLevels"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+		<if test="permissionType != null">
+			AND SOM.PERMISSION_TYPE IN
+			<foreach item="items" index="index" collection="permissionType"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+
+		union
+
+		select SOM.PERMISSION_LEVEL
+		user_level, 'false' as
+		BCC_FLAG,sd.email,sd.staff_id,SOM.ORGANIZATION_ID
+		ORG_ID,org.organization_legal_name ORG_NAME
+		from staff_details sd,
+		staff_organization som, member_title
+		mt,organization org
+		where
+		SD.STAFF_ID = SOM.STAFF_ID and SOM.ORGANIZATION_ID = #{orgId}
+		and
+		org.ORGANIZATION_ID = SOM.ORGANIZATION_ID
+		and MT.MEMBER_ID = SOM.TITLE
+		and SOM.MEMBER_STATUS='Active'
+		<if test="userLevels != null">
+			AND MT.MEMBER_NOTIFICATION_NAME IN
+			<foreach item="items" index="index" collection="userLevels"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+
+		union
+
+		select city.user_role user_level, 'true' as BCC_FLAG, email_id
+		EMAIL,
+		to_char(user_id) as STAFF_ID,city.organization_name ORG_ID,
+		case
+		when organization_name = 'city' then 'Accelerator' else
+		(select
+		substr(agency_name,instr(agency_name,'-')+2) as ORG_NAME from
+		nyc_agency_details where agency_id = city.organization_name) end
+		ORG_NAME
+		from city_user_details city
+		where
+		active_flag = 1 and
+		(user_type=#{agencyId} OR organization_name=#{agencyId})
+		<if test="userLevelsAgency != null">
+			AND user_role IN
+			<foreach item="items" index="index" collection="userLevelsAgency"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+
+	</select>
+
+	<select id="fetchAgencyUserIdForNT225" parameterType="String"
+		resultType="String">
+		select proc.agency_id from proposal_config prop,
+		procurement proc where
+		proc.procurement_id = prop.procurement_id and
+		prop.proposal_id=#{entityId}
+	</select>
+
+	<select id="fetchAgencyUserIdForProc" parameterType="String"
+		resultType="String">
+		select proc.agency_id from procurement proc where
+		proc.procurement_id = #{entityId}
+	</select>
+	<!-- End || Added for enhancement 5978 for Release 3.11.0 -->
+
+
+
+	<!-- fix done for NT012 in release 3.6.0 -->
+	<select id="getUserEmailIds012" resultMap="getUserEmailId">
+
+		select sd.email,
+		to_char(sd.STAFF_ID) as STAFF_ID, org.organization_id
+		ORG_ID,so.permission_level user_level,org.organization_legal_name
+		ORG_NAME
+		from staff_organization so,staff_details sd, organization
+		org
+		where org.organization_id = #{orgId}
+		and so.organization_id =
+		org.organization_id
+		and so.staff_id=sd.staff_id
+		and so.active_flag='No'
+		and so.permission_level='Level 2'
+
+		union
+
+
+		select sd.email,
+		to_char(sd.STAFF_ID) as STAFF_ID, org.organization_id
+		ORG_ID,so.permission_level user_level,org.organization_legal_name
+		ORG_NAME
+		from staff_organization so,staff_details sd, organization
+		org
+		where org.organization_id = #{orgId}
+		and so.organization_id =
+		org.organization_id
+		and so.staff_id=sd.staff_id
+		and so.active_flag='Yes'
+		and so.permission_level='Level 2'
+
+	</select>
+
+
+	<update id="updateGroupNotificationStatus" parameterType="hashmap">
+		UPDATE
+		GROUP_NOTIFICATION SET NOTIFICATION_SENT ='true' WHERE
+		GROUP_NOTIFICATION_ID=#{groupNotificationId}
+	</update>
+
+	<resultMap type="com.nyc.hhs.model.NotificationURLBean" id="notificationUrlResultMap">
+		<result property="groupNotificationId" column="GROUP_NOTIFICATION_ID" />
+		<result property="notificationUrlId" column="NOTIFICATION_ALERT_URL_ID" />
+		<result property="organizationId" column="ORGANIZATION_ID" />
+		<result property="orgType" column="ORG_TYPE" />
+		<result property="url" column="URL" />
+	</resultMap>
+
+<!--[Start] fixed for QC9416 Broken Url  -->
+	<select id="getUrlNotificationDetails" resultMap="notificationUrlResultMap">
+	SELECT   		NOTIFICATION_ALERT_URL_ID, URL, GROUP_NOTIFICATION_ID, 	ORGANIZATION_ID, ORG_TYPE 
+	FROM ( 	SELECT  NOTIFICATION_ALERT_URL_ID, URL, nau.GROUP_NOTIFICATION_ID, noti.ORGANIZATION_ID, noti.ORG_TYPE from NOTIFICATION_ALERT_URL nau
+	         INNER  JOIN GROUP_NOTIFICATION gn on nau.GROUP_NOTIFICATION_ID =  gn.GROUP_NOTIFICATION_ID
+	         INNER  JOIN notification NOTI on noti.group_notification_id = gn.group_notification_id
+			 WHERE  NOTIFICATION_ALERT_URL_ID = #{asNotificationUrlId}
+	
+			union
+	
+			SELECT  NOTIFICATION_ALERT_URL_ID, URL, nau.GROUP_NOTIFICATION_ID, noti.ORGANIZATION_ID, noti.ORG_TYPE from NOTIFICATION_ALERT_URL nau
+	         INNER  JOIN GROUP_NOTIFICATION gn on nau.GROUP_NOTIFICATION_ID = gn.GROUP_NOTIFICATION_ID
+	         INNER  JOIN user_notification NOTI on  noti.group_notification_id = gn.group_notification_id
+			 WHERE  NOTIFICATION_ALERT_URL_ID = #{asNotificationUrlId}
+	)
+    WHERE ROWNUM = 1
+	</select>
+<!--[End] fixed for QC9416 Broken Url  -->
+
+	<!-- incident regarding Agency abbreviation instead of Accelerator and Agency 
+		Name in Emails -->
+	<select id="getAgencyContacts" parameterType="string" resultMap="getUserEmailId">
+		SELECT proc.AGENCY_ID ORG_ID,city.user_role USER_LEVEL,city.user_id
+		STAFF_ID,
+		city.email_id EMAIL,
+		(select
+		substr(agency_name,instr(agency_name,'-')+2) as ORG_NAME from
+		nyc_agency_details where agency_id = city.organization_name) as
+		ORG_NAME
+		FROM city_user_details city,procurement PROC
+		WHERE city.user_id
+		= proc.AGENCY_PRIMARY_CONTACT_ID
+		and PROCUREMENT_ID =#{entityId}
+		union
+		SELECT proc.AGENCY_ID ORG_ID,city.user_role USER_LEVEL,city.user_id
+		STAFF_ID,
+		city.email_id EMAIL ,
+		(select
+		substr(agency_name,instr(agency_name,'-')+2) as ORG_NAME from
+		nyc_agency_details where agency_id = city.organization_name) as
+		ORG_NAME
+		FROM city_user_details city,procurement PROC
+		WHERE city.user_id
+		= proc.AGENCY_SECONDARY_CONTACT_ID
+		and PROCUREMENT_ID =#{entityId}
+	</select>
+
+	<!-- Start of Defect :6391 incident regarding Agency abbreviation instead 
+		of Accelerator and Agency Name in emails -->
+	<select id="fetchUserEmailIdsForNT220" parameterType="java.lang.String"
+		resultMap="getUserEmailId">
+		SELECT CUD.EMAIL_ID EMAIL,cud.user_role
+		USER_LEVEL,cud.organization_name ORG_ID,cud.user_id STAFF_ID,
+		(select
+		substr(agency_name,instr(agency_name,'-')+2) as ORG_NAME from
+		nyc_agency_details where agency_id = cud.organization_name) ORG_NAME
+		FROM CITY_USER_DETAILS CUD, EVALUATION_STATUS ES,
+		EVALUATION_SETTINGS_INTERNAL ESI
+		WHERE CUD.USER_ID=
+		ESI.INT_EVALUATOR_USERID
+		AND ES.EVAL_SETTINGS_INT_ID =
+		ESI.EVAL_SETTINGS_INT_ID
+		AND ES.PROPOSAL_ID = #{entityId}
+		AND
+		ES.status_id = '42'
+		UNION
+		SELECT CUD.EMAIL_ID EMAIL,cud.user_role
+		USER_LEVEL ,cud.organization_name
+		ORG_ID,cud.user_id STAFF_ID,
+		(select
+		substr(agency_name,instr(agency_name,'-')+2) as ORG_NAME from
+		nyc_agency_details where agency_id = cud.organization_name) ORG_NAME
+		FROM CITY_USER_DETAILS CUD, EVALUATION_STATUS ES,
+		EVALUATION_SETTINGS_EXTERNAL ESE
+		WHERE CUD.USER_ID = ESE.AGENCY_USERID
+		AND ESE.EVAL_SETTINGS_EXT_ID = ES.EVAL_SETTINGS_EXT_ID
+		AND PROPOSAL_ID
+		=#{entityId}
+		AND ES.status_id = '42'
+	</select>
+	<!-- End of Defect :6391 -->
+
+	<insert id="insertInNotificationParams">
+		Insert into
+		NOTIFICATION_PARAM_VALUES(NOTIFICATION_PARAM_VALUE_ID,GROUP_NOTIFICATION_ID,PARAMETER_NAME,VALUE)
+		VALUES
+		(SEQ_NOTI_PARAM_VALUE_ID.NEXTVAL,#{groupNotificationId,jdbcType=VARCHAR},#{paramName,jdbcType=VARCHAR},
+		#{paramValue,jdbcType=VARCHAR})
+	</insert>
+
+	<resultMap type="com.nyc.hhs.model.NotificationParamBean" id="notificationParamsMap">
+		<result property="groupNotificationId" column="GROUP_NOTIFICATION_ID" />
+		<result property="paramName" column="PARAMETER_NAME" />
+		<result property="paramValue" column="VALUE" />
+	</resultMap>
+
+
+	<select id="fetchNotificationsParams" resultMap="notificationParamsMap">
+		Select
+		GROUP_NOTIFICATION_ID,PARAMETER_NAME,VALUE from
+		NOTIFICATION_PARAM_VALUES
+		where GROUP_NOTIFICATION_ID =
+		#{groupNotificationId,jdbcType=VARCHAR}
+	</select>
+
+	<!-- incident regarding Agency abbreviation instead of Accelerator and Agency 
+		Name in emails -->
+	<select id="fetchUserEmailIdsForNT210" resultMap="getUserEmailId"
+		parameterType="hashmap">
+		SELECT DISTINCT CUD.EMAIL_ID EMAIL,cud.user_role
+		USER_LEVEL,cud.organization_name ORG_ID,cud.user_id STAFF_ID,
+		(select
+		substr(agency_name,instr(agency_name,'-')+2) as ORG_NAME from
+		nyc_agency_details where agency_id = cud.organization_name) as
+		ORG_NAME
+		FROM city_user_details CUD where user_id in
+		(SELECT
+		AGENCY_USERID userid
+		FROM EVALUATION_SETTINGS_EXTERNAL WHERE
+		<if test="Procurement != null">PROCUREMENT_ID=#{Procurement} and </if>
+		<if test="EvaluationPoolMappingId != null">EVALUATION_POOL_MAPPING_ID=#{EvaluationPoolMappingId} and
+		</if>
+		ADD_DELETE_FLAG is null
+		UNION
+		SELECT INT_EVALUATOR_USERID userid FROM
+		EVALUATION_SETTINGS_INTERNAL
+		WHERE
+		<if test="Procurement != null">PROCUREMENT_ID=#{Procurement} and </if>
+		<if test="EvaluationPoolMappingId != null">EVALUATION_POOL_MAPPING_ID=#{EvaluationPoolMappingId} and
+		</if>
+		ADD_DELETE_FLAG is null)
+	</select>
+
+
+	<select id="fetchDataForIndividualUser" parameterType="java.lang.String"
+		resultMap="getUserEmailId">
+		Select EMAIL,STAFF_ID from STAFF_DETAILS
+		where STAFF_ID =
+		#{entityId} OR EMAIL = #{entityId}
+	</select>
+
+	<select id="fetchBulkUploadNotificationData" parameterType="java.lang.String"
+		resultMap="getUserEmailId">
+		Select cud.organization_name ORG_ID, cud.user_id STAFF_ID,
+		CUD.email_id EMAIL, CUD.user_role USER_LEVEL,cud.organization_name
+		ORG_NAME
+		from city_user_details CUD
+		inner join bulk_upload bu on
+		bu.created_by_userid = cud.user_id
+		where bu.bulk_upload_id =
+		#{entityId}
+	</select>
+
+	<select id="fetchInitiatorsDetails" parameterType="hashmap"
+		resultMap="getUserEmailId">
+
+		select ct.organization_id ORG_ID, so.permission_level USER_LEVEL,
+		sd.email EMAIL, sd.staff_id STAFF_ID,
+		org.organization_legal_name
+		ORG_NAME
+		from contract ct
+		inner join staff_organization so on
+		so.organization_id =
+		ct.organization_id
+		inner join staff_details sd on
+		sd.staff_id =
+		so.staff_id
+		inner join organization org on
+		org.organization_id = so.organization_id
+		where sd.staff_id =
+		#{userId,jdbcType=VARCHAR} and ct.contract_id =
+		#{contractId,jdbcType=VARCHAR}
+
+		union
+		<!-- incident regarding Agency abbreviation instead of Accelerator and 
+			Agency Name in emails -->
+		Select cud.organization_name ORG_ID, CUD.user_role USER_LEVEL,
+		CUD.email_id
+		EMAIL, cud.user_id STAFF_ID,
+		(select
+		substr(agency_name,instr(agency_name,'-')+2) as ORG_NAME from
+		nyc_agency_details where agency_id = cud.organization_name) ORG_NAME
+		from city_user_details CUD
+		where CUD.user_id =
+		#{userId,jdbcType=VARCHAR}
+	</select>
+
+	<!-- Start of Enhancement 3.2.0 : Defect 6384 Fetching users only with permission 
+		type FP and F for Alert AL305 -->
+	<select id="fetchInitiatorsDetailsForAL305" parameterType="hashmap"
+		resultMap="getUserEmailId">
+
+		select ct.organization_id ORG_ID, so.permission_level
+		USER_LEVEL, sd.email EMAIL, sd.staff_id STAFF_ID,
+		org.organization_legal_name ORG_NAME
+		from contract ct
+		inner join
+		staff_organization so on so.organization_id =
+		ct.organization_id
+		inner
+		join staff_details sd on sd.staff_id =
+		so.staff_id
+		inner join
+		organization org on org.organization_id = so.organization_id
+		where
+		sd.staff_id = #{userId,jdbcType=VARCHAR} and ct.contract_id =
+		#{contractId,jdbcType=VARCHAR}
+		and so.PERMISSION_TYPE in ('F','FP')
+
+		union
+
+		Select cud.organization_name ORG_ID, CUD.user_role USER_LEVEL,
+		CUD.email_id
+		EMAIL, cud.user_id STAFF_ID,
+		(select
+		substr(agency_name,instr(agency_name,'-')+2) as ORG_NAME from
+		nyc_agency_details where agency_id = cud.organization_name) ORG_NAME
+		from city_user_details CUD
+		where CUD.user_id =
+		#{userId,jdbcType=VARCHAR}
+	</select>
+	<!-- End of Enhancement 3.2.0 : Defect 6384 -->
+
+	<update id="updateNotificationStatus" parameterType="hashmap">
+		UPDATE GROUP_NOTIFICATION SET NOTIFICATION_SENT ='override'
+		WHERE
+		ENTITY_TYPE=#{entityType} AND ENTITY_ID=#{entityId} and
+		NOTIFICATION_ALERT_ID IN
+		<foreach item="items" index="index" collection="notificationList"
+			open="(" separator="," close=")">
+			#{items}
+		</foreach>
+	</update>
+
+	<select id="fetchAgencyUsersForDocumentSharing" parameterType="hashmap"
+		resultMap="getUserEmailId">
+
+		select city.user_role user_level, email_id email,
+		to_char(user_id) as STAFF_ID,city.organization_name
+		ORG_ID,city.organization_name
+		ORG_NAME
+		from city_user_details city
+		where
+		active_flag = 1 and (user_type=#{orgId} OR organization_name=#{orgId})
+	</select>
+
+	<!-- fix done for NT019 .. HD02030160 - start -->
+	<select id="getUserEmailIds019" resultMap="getUserEmailId">
+		select email,
+		to_char(sd.STAFF_ID) as STAFF_ID, so.organization_id ORG_ID,
+		so.permission_level user_level
+		from staff_organization so,staff_details
+		sd
+		where
+		sd.staff_id = so.staff_id
+		and so.organization_id=#{orgId}
+		and
+		so.admin_permission='Yes'
+		and sd.user_dn is not null
+	</select>
+	<!-- fix done for NT019 .. HD02030160 - end -->
+
+	<!-- Query Added for resolving defect #6434 in Release 3.2.0 -->
+	<!-- Query Modified as a result of observations in Release 3.6.0 for enhancement 
+		5905 -->
+	<select id="fetchUserIdForEmailId" parameterType="String"
+		resultMap="getUserEmailId">
+		SELECT DISTINCT CUD.EMAIL_ID EMAIL,cud.user_role
+		USER_LEVEL,cud.organization_name ORG_ID,cud.user_id STAFF_ID,
+		(select
+		substr(agency_name,instr(agency_name,'-')+2) as ORG_NAME from
+		nyc_agency_details where agency_id = cud.organization_name) as
+		ORG_NAME
+		FROM city_user_details CUD where lower(EMAIL_ID) =
+		lower(#{emailId})
+		and active_flag ='1'
+	</select>
+
+	<!-- Start of changes for Release 3.11.0 enhancement 6620 -->
+	<select id="fetchAgencyNameFromBudget" parameterType="String"
+		resultType="String">
+		select AGENCY_NAME from NYC_AGENCY_DETAILS where AGENCY_ID
+		= (select AGENCY_ID from BUDGET where BUDGET_ID = #{aoEntityId})
+	</select>
+
+	<select id="fetchAgencyNameFromInvoice" parameterType="String"
+		resultType="String">
+		select AGENCY_NAME from NYC_AGENCY_DETAILS where AGENCY_ID
+		= (select AGENCY_ID from INVOICE where INVOICE_ID = #{aoEntityId})
+	</select>
+
+	<select id="fetchCommentsForAL314" parameterType="map"
+		resultType="String">
+		SELECT INTERNAL_COMMENT FROM (SELECT INTERNAL_COMMENT
+		FROM
+		USER_COMMENT WHERE
+		ENTITY_ID = #{entityId} and
+		ENTITY_TYPE=#{entityType} ORDER BY
+		AUDIT_DATE DESC) WHERE ROWNUM=1
+	</select>
+
+	<select id="fetchAgencyNameForNT207AL212" parameterType="String"
+		resultType="String">
+		select AGENCY_NAME from NYC_AGENCY_DETAILS where AGENCY_ID
+		= (select agency_id from procurement where procurement_id =
+		#{entityId})
+	</select>
+	<!-- End of changes for Release 3.11.0 enhancement 6620 -->
+<!-- R6 Start: Added in R6 for Return Payment -->
+	<select id="fetchMaxGroupNotificationId" resultType="String">
+		SELECT
+		MAX(group_notification_id) FROM group_notification
+	</select>
+
+	<resultMap id="fetchGroupNotificationIds" type="com.nyc.hhs.model.ReturnedPayment">
+		<result property="groupNotificationId" column="group_notification_id" />
+		<result property="budgetId" column="entity_id" />
+	</resultMap>
+	<!-- varibale maxcount updated to lastInsertedGroupNotificationId -->
+	<select id="fetchUpdatedNotificationId" parameterType="hashmap"
+		resultMap="fetchGroupNotificationIds">
+		SELECT group_notification_id, entity_id
+		FROM group_notification
+		WHERE
+		created_by_userid =#{createdBy} and notification_alert_id IN
+		('NT321','NT322','NT323','NT323_L2','NT323_ED','NT321_L2','NT321_EDL2')
+		AND group_notification_id>#{lastInsertedGroupNotificationId}
+	</select>
+	
+	<select id="fetchNotificationSequenceMappingId" resultType="String">
+	select SEQ_NOTIFICATION_BATCH_ID.NEXTVAL from dual
+	</select>
+
+	<insert id="insertIntoPaymentNotificationMapping" parameterType="hashmap">
+		Insert into
+		RETURN_PAYMENT_NOTIF_MAPPING(RETURN_PAYMENT_NOTIF_MAP_ID,batch_id,CREATED_BY_USERID,GROUP_NOTIFICATION_ID,CREATED_DATE,ROLE,MODIFIED_DATE,MODIFIED_BY_USERID,PAYMENT_NOTIFICATION_STATUS,BUDGET_ID)
+		values(SEQ_PAY_NOTIFICATION_MAPPING.NEXTVAL,#{notificationSessionId},#{createdBy,jdbcType=VARCHAR},#{groupNotificationId},systimestamp,#{role},systimestamp,#{createdBy,jdbcType=VARCHAR},#{status},#{budgetId})
+	</insert>
+
+	<select id="getBulkInputRequestData" parameterType="String" resultMap="fetchInputBulkBeanList">
+		SELECT ex.created_by_userid CREATED_BY,
+		ex.RETURN_PAYMENT_NOTIF_EXP_ID requestId,
+		ex.program_id,pm.program_name,
+		cd.ORGANIZATION_NAME,
+		ex.fiscal_year,
+		cd.ORGANIZATION_NAME
+		FROM RETURN_PAYMENT_NOTIF_EXPORT ex ,
+		city_user_details cd, program_master pm
+		WHERE status =#{pendingExport}
+		AND ex.created_by_userid=cd.USER_ID
+    and pm.program_id=ex.program_id
+		ORDER BY RETURN_PAYMENT_NOTIF_EXP_ID
+	</select>
+	<resultMap id="fetchInputBulkBeanList" type="com.nyc.hhs.model.BudgetList">
+		<result property="userId" column="CREATED_BY" />
+		<result property="programId" column="PROGRAM_ID" />
+		<result property="fiscalYearId" column="FISCAL_YEAR" />
+		<result property="requestNotificationId" column="REQUESTID" />
+		<result property="orgType" column="ORGANIZATION_NAME" />
+		<result property="programName" column="PROGRAM_NAME" />
+	</resultMap>
+
+	<select id="downloadFileData" parameterType="map"
+		resultMap="downloadFileDetails">
+		select RETURN_PAYMENT_NOTIF_EXP_ID requestId, RETURN_PAYMENT_NOTIF_EXP_ID
+		SESSIONID from RETURN_PAYMENT_NOTIF_EXPORT
+		WHERE CREATED_BY_USERID=#{userId} and program_id=#{programId} and
+		fiscal_year=#{fiscalYear}
+		order by RETURN_PAYMENT_NOTIF_EXP_ID desc
+	</select>
+	<resultMap id="downloadFileDetails" type="com.nyc.hhs.model.BudgetList">
+		<result property="fileName" column="SESSIONID" />
+		<result property="requestNotificationId" column="REQUESTID" />
+	</resultMap>
+<select id="fetchCityUserNTEXPORT" resultMap="getUserEmailId">
+		select city.user_role
+		user_level, email_id EMAIL,
+		to_char(user_id) as
+		STAFF_ID,city.organization_name ORG_ID,
+		case when organization_name =
+		'city' then 'Accelerator' else
+		(select
+		substr(agency_name,instr(agency_name,'-')+2) as ORG_NAME from
+		nyc_agency_details where agency_id = city.organization_name) end
+		ORG_NAME
+		from city_user_details city, RETURN_PAYMENT_NOTIF_EXPORT b
+		where
+		city.active_flag = 1 and b.RETURN_PAYMENT_NOTIF_EXP_ID = #{entityId} and
+		b.created_by_userid = city.user_id
+</select>
+<!-- updated for defect 8596 -->
+<select id="fetchCityUserNT_BULK_ACK" parameterType="hashmap" resultMap="getUserEmailId">
+    select distinct city.user_role
+		user_level, email_id EMAIL,
+		to_char(user_id) as
+		STAFF_ID,city.organization_name ORG_ID,
+		case when organization_name =
+		'city' then 'Accelerator' else
+		(select
+		substr(agency_name,instr(agency_name,'-')+2) as ORG_NAME from
+		nyc_agency_details where agency_id = city.organization_name) end
+		ORG_NAME
+		from city_user_details city, group_notification b
+		where
+		city.active_flag = 1  and
+		b.created_by_userid = city.user_id and
+		b.group_notification_id=#{requestId}
+</select>
+<select id="fetchAckNotificationList" resultMap="pendingNotioficationAckDetails">
+SELECT pd.batch_id,
+  to_number(pd.total_count)-to_number(pd.sent_count) notification_count,
+  pd.CREATED_BY_userid CREATED_BY,
+  cd.organization_name,pd.total_count
+FROM
+  (SELECT DISTINCT NVL(
+    (SELECT COUNT(*)
+    FROM RETURN_PAYMENT_NOTIF_MAPPING
+    WHERE payment_notification_status = 1
+    AND batch_id                      = a.batch_id
+    GROUP BY batch_id
+    ),0) AS Sent_count,
+    (SELECT COUNT(*)
+    FROM RETURN_PAYMENT_NOTIF_MAPPING
+    WHERE batch_id = a.batch_id
+    GROUP BY batch_id
+    ) AS total_count,
+    batch_id,
+    CREATED_BY_USERID
+  FROM RETURN_PAYMENT_NOTIF_MAPPING a
+  ) pd
+INNER JOIN city_user_details cd
+ON pd.created_by_userid=cd.user_id 
+</select>
+<resultMap id="pendingNotioficationAckDetails" type="com.nyc.hhs.model.NotificationBean">
+		<result property="createdBy" column="CREATED_BY" />
+		<result property="entityId" column="BATCH_ID" />
+		<result property="orgType" column="ORGANIZATION_NAME" />
+		<result property="notificationCount" column="NOTIFICATION_COUNT" />
+			<result property="totalCount" column="TOTAL_COUNT" />
+	</resultMap>
+<!-- R6 End  -->
+
+   <!-- //[Start]Added in R8.1.0 for 9378 -->
+	<select id="fetchOldUserNotification" resultType="Integer">
+   	<![CDATA[
+      SELECT NOTIFICATION_ID FROM USER_NOTIFICATION  WHERE NOTIFICATION_DATE + 365 < SYSTIMESTAMP
+      ORDER BY NOTIFICATION_ID  
+    ]]>  
+	</select>
+
+	<insert id="archiveUserNotificationData" parameterType="map" >
+		INSERT INTO USER_NOTIFICATION_BKUP 
+				(NOTIFICATION_TYPE, NOTIFICATION_NAME, EMAIL_ID, NOTIFICATION_DELETE, NOTIFICATION_READ, NOTIFICATION_DATE, NOTIFICATION_ID, ORG_TYPE,
+				 ENTITY_ID, ENTITY_TYPE,EVENT_ID,CREATED_BY_USERID,MODIFIED_BY_USERID,MODIFIED_DATE,GROUP_NOTIFICATION_ID,ORGANIZATION_ID,USER_LEVEL, NOTIFICATION_DESC )
+		SELECT NOTIFICATION_TYPE, NOTIFICATION_NAME, EMAIL_ID, NOTIFICATION_DELETE, NOTIFICATION_READ, NOTIFICATION_DATE, NOTIFICATION_ID, ORG_TYPE,
+			   ENTITY_ID, ENTITY_TYPE,EVENT_ID,CREATED_BY_USERID,MODIFIED_BY_USERID,MODIFIED_DATE,GROUP_NOTIFICATION_ID,ORGANIZATION_ID,USER_LEVEL, NOTIFICATION_DESC
+		FROM USER_NOTIFICATION
+	    <if test="notification_ids == null">
+	    	WHERE NOTIFICATION_ID IN (0)
+		</if>		
+		<if test="notification_ids != null">
+			WHERE NOTIFICATION_ID IN 
+			<foreach item="items" index="index" collection="notification_ids"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+	</insert>
+
+	<delete id="shrinkUserNotificationData" parameterType="map" >
+		DELETE FROM USER_NOTIFICATION
+	    <if test="notification_ids == null">
+	    	WHERE NOTIFICATION_ID IN (0)
+		</if>		
+		<if test="notification_ids != null">
+			WHERE NOTIFICATION_ID IN 
+			<foreach item="items" index="index" collection="notification_ids"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+	</delete>
+
+	<select id="fetchOldNotificationAlertUrl" resultType="int">
+   	<![CDATA[
+		SELECT NOTIFICATION_ALERT_URL_ID FROM NOTIFICATION_ALERT_URL
+		WHERE CREATED_DATE + 365 < SYSTIMESTAMP
+		ORDER BY NOTIFICATION_ALERT_URL_ID 
+    ]]>  
+	</select>
+
+	<insert id="archiveNotificationAlertUrlData" parameterType="map" >
+			INSERT INTO NOTIFICATION_ALERT_URL_BKUP
+			        ( NOTIFICATION_ALERT_URL_ID, URL_ORDER_ID, GROUP_NOTIFICATION_ID, URL,
+			          CREATED_DATE, CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID  )
+			SELECT  NOTIFICATION_ALERT_URL_ID, URL_ORDER_ID, GROUP_NOTIFICATION_ID, URL,
+			        CREATED_DATE, CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID 
+			FROM    NOTIFICATION_ALERT_URL
+	    <if test="alert_url_ids == null">
+	    	WHERE NOTIFICATION_ALERT_URL_ID IN (0)
+		</if>		
+		<if test="alert_url_ids != null">
+			WHERE NOTIFICATION_ALERT_URL_ID IN 
+			<foreach item="items" index="index" collection="alert_url_ids"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+	</insert>
+
+	<delete id="shrinkNotificationAlertUrlData" parameterType="map" >
+		DELETE FROM NOTIFICATION_ALERT_URL
+	    <if test="alert_url_ids == null">
+	    	WHERE NOTIFICATION_ALERT_URL_ID IN (0)
+		</if>		
+		<if test="alert_url_ids != null">
+			WHERE NOTIFICATION_ALERT_URL_ID IN 
+			<foreach item="items" index="index" collection="alert_url_ids"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+	</delete>
+
+   <!-- //[End]Added in R8.1.0 for 9378 -->
+    
+   <!-- //[Start]Added in R8.4.1 for QC9513 -->
+	<select id="fetchOldGroupNotification" resultType="int">
+   	<![CDATA[
+		SELECT GROUP_NOTIFICATION_ID FROM GROUP_NOTIFICATION 
+		WHERE CREATED_DATE + 365 < SYSTIMESTAMP 
+	      AND  GROUP_NOTIFICATION_ID not in ( select GROUP_NOTIFICATION_ID from NOTIFICATION_ALERT_URL )
+	      AND  GROUP_NOTIFICATION_ID not in ( select GROUP_NOTIFICATION_ID from USER_NOTIFICATION )
+		ORDER BY GROUP_NOTIFICATION_ID
+    ]]>  
+	</select>
+   	<insert id="archiveGroupNotificationData" parameterType="map" >
+			INSERT INTO GROUP_NOTIFICATION_BKUP
+			        ( GROUP_NOTIFICATION_ID, MODULE_NAME, NAME, NOTIFICATION_SENT, CREATED_DATE, ENTITY_ID, ENTITY_TYPE,
+                      NOTIFICATION_ALERT_ID,ORGANIZATION_ID,CREATED_BY_USERID,MODIFIED_DATE,ORG_TYPE,DESCRIPTION  )
+			SELECT  GROUP_NOTIFICATION_ID, MODULE_NAME, NAME, NOTIFICATION_SENT, CREATED_DATE, ENTITY_ID, ENTITY_TYPE,
+                    NOTIFICATION_ALERT_ID,ORGANIZATION_ID,CREATED_BY_USERID,MODIFIED_DATE,ORG_TYPE,DESCRIPTION
+            FROM    GROUP_NOTIFICATION
+	    <if test="group_noti_ids == null">
+	    	WHERE GROUP_NOTIFICATION_ID IN (0)
+		</if>		
+		<if test="group_noti_ids != null">
+			WHERE GROUP_NOTIFICATION_ID IN 
+			<foreach item="items" index="index" collection="group_noti_ids"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+	</insert>
+   
+   	<delete id="shrinkGroupNotificationData" parameterType="map" >
+		DELETE FROM GROUP_NOTIFICATION
+	    <if test="group_noti_ids == null">
+	    	WHERE GROUP_NOTIFICATION_ID IN (0)
+		</if>
+		<if test="group_noti_ids != null">
+			WHERE GROUP_NOTIFICATION_ID IN 
+			<foreach item="items" index="index" collection="group_noti_ids"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+	</delete>
+	
+		<!-- NOTIFICATION -->
+	   	<insert id="archiveNotificationData" parameterType="map" >
+			INSERT INTO NOTIFICATION_BKUP
+			        ( NOTIFICATION_ID, GROUP_NOTIFICATION_ID, ORGANIZATION_ID, ORG_TYPE, USER_ID, USER_LEVEL, 
+			          NOTIFICATION_DATE, CREATED_DATE, CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID  )
+			SELECT  NOTIFICATION_ID, GROUP_NOTIFICATION_ID, ORGANIZATION_ID, ORG_TYPE, USER_ID, USER_LEVEL, 
+			          NOTIFICATION_DATE, CREATED_DATE, CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID
+            FROM    NOTIFICATION
+	    <if test="group_noti_ids == null">
+	    	WHERE GROUP_NOTIFICATION_ID IN (0)
+		</if>		
+		<if test="group_noti_ids != null">
+			WHERE GROUP_NOTIFICATION_ID IN 
+			<foreach item="items" index="index" collection="group_noti_ids"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+	</insert>
+   
+   	<delete id="shrinkNotificationData" parameterType="map" >
+		DELETE FROM NOTIFICATION
+	    <if test="group_noti_ids == null">
+	    	WHERE GROUP_NOTIFICATION_ID IN (0)
+		</if>
+		<if test="group_noti_ids != null">
+			WHERE GROUP_NOTIFICATION_ID IN 
+			<foreach item="items" index="index" collection="group_noti_ids"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+	</delete>
+	
+	<!-- NOTIFICATION_PARAM_VALUES -->
+	<insert id="archiveNotificationParamValData" parameterType="map" >
+			INSERT INTO NOTIFICATION_PARAM_VALUES_BKUP
+			        ( NOTIFICATION_PARAM_VALUE_ID , GROUP_NOTIFICATION_ID , PARAMETER_NAME , VALUE )
+			SELECT  NOTIFICATION_PARAM_VALUE_ID , GROUP_NOTIFICATION_ID , PARAMETER_NAME , VALUE
+            FROM    NOTIFICATION_PARAM_VALUES
+	    <if test="group_noti_ids == null">
+	    	WHERE GROUP_NOTIFICATION_ID IN (0)
+		</if>		
+		<if test="group_noti_ids != null">
+			WHERE GROUP_NOTIFICATION_ID IN 
+			<foreach item="items" index="index" collection="group_noti_ids"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+	</insert>
+   
+   	<delete id="shrinkNotificationParamValData" parameterType="map" >
+		DELETE FROM NOTIFICATION_PARAM_VALUES
+	    <if test="group_noti_ids == null">
+	    	WHERE GROUP_NOTIFICATION_ID IN (0)
+		</if>
+		<if test="group_noti_ids != null">
+			WHERE GROUP_NOTIFICATION_ID IN 
+			<foreach item="items" index="index" collection="group_noti_ids"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+	</delete>
+
+    <!-- RETURN_PAYMENT_NOTIF_HISTORY -->
+	<insert id="archiveReturnPaymentNotifHistoryData" parameterType="map" >
+			INSERT INTO RETURN_PAYMENT_NOTIF_HIST_BKUP
+			     ( RETURN_PAYMENT_NOTIF_HIST_ID , SENT_BY,BUDGET_ID,SENT_TO,GROUP_NOTIFICATION_ID,
+                   SENT_DATE,CREATED_DATE,MODIFIED_DATE,CREATED_BY_USERID,MODIFIED_BY_USERID,REPORTING_MODIFIED_DATE )
+			SELECT  RETURN_PAYMENT_NOTIF_HIST_ID , SENT_BY,BUDGET_ID,SENT_TO,GROUP_NOTIFICATION_ID,
+                   SENT_DATE,CREATED_DATE,MODIFIED_DATE,CREATED_BY_USERID,MODIFIED_BY_USERID,REPORTING_MODIFIED_DATE
+            FROM    RETURN_PAYMENT_NOTIF_HISTORY
+	    <if test="group_noti_ids == null">
+	    	WHERE GROUP_NOTIFICATION_ID IN (0)
+		</if>		
+		<if test="group_noti_ids != null">
+			WHERE GROUP_NOTIFICATION_ID IN 
+			<foreach item="items" index="index" collection="group_noti_ids"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+	</insert>
+
+   	<delete id="shrinkReturnPaymentNotifHistoryData" parameterType="map" >
+		DELETE FROM RETURN_PAYMENT_NOTIF_HISTORY
+	    <if test="group_noti_ids == null">
+	    	WHERE GROUP_NOTIFICATION_ID IN (0)
+		</if>
+		<if test="group_noti_ids != null">
+			WHERE GROUP_NOTIFICATION_ID IN 
+			<foreach item="items" index="index" collection="group_noti_ids"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+	</delete>
+
+    <!-- RETURN_PAYMENT_NOTIF_MAPPING -->
+	<insert id="archiveReturnPaymentNotifMappingData" parameterType="map" >
+			INSERT INTO RETURN_PAYMENT_NOTIF_MAP_BKUP
+			     ( RETURN_PAYMENT_NOTIF_MAP_ID, BATCH_ID,CREATED_BY_USERID,GROUP_NOTIFICATION_ID,ROLE,MODIFIED_BY_USERID,
+			       CREATED_DATE,MODIFIED_DATE,PAYMENT_NOTIFICATION_STATUS,BUDGET_ID )
+			SELECT  RETURN_PAYMENT_NOTIF_MAP_ID, BATCH_ID,CREATED_BY_USERID,GROUP_NOTIFICATION_ID,ROLE,MODIFIED_BY_USERID,
+			       CREATED_DATE,MODIFIED_DATE,PAYMENT_NOTIFICATION_STATUS,BUDGET_ID
+            FROM    RETURN_PAYMENT_NOTIF_MAPPING
+	    <if test="group_noti_ids == null">
+	    	WHERE GROUP_NOTIFICATION_ID IN (0)
+		</if>		
+		<if test="group_noti_ids != null">
+			WHERE GROUP_NOTIFICATION_ID IN 
+			<foreach item="items" index="index" collection="group_noti_ids"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+	</insert>
+
+   	<delete id="shrinkReturnPaymentNotifMappingData" parameterType="map" >
+		DELETE FROM RETURN_PAYMENT_NOTIF_MAPPING
+	    <if test="group_noti_ids == null">
+	    	WHERE GROUP_NOTIFICATION_ID IN (0)
+		</if>
+		<if test="group_noti_ids != null">
+			WHERE GROUP_NOTIFICATION_ID IN 
+			<foreach item="items" index="index" collection="group_noti_ids"
+				open="(" separator="," close=")">
+				#{items}
+			</foreach>
+		</if>
+	</delete>
+
+
+   <!-- //[End]Added in R8.4.1 for QC9513  -->
+   
+      <!-- Start QC9630 R 9.0.1 - Optimize NT318 Notifications  -->
+   <select id="fetchNT318Description" resultMap="usentGroupIdList">
+		SELECT   NAME,  MODULE_NAME, ORGANIZATION_ID, ENTITY_TYPE, ORG_TYPE , DESCRIPTION
+		from    GROUP_NOTIFICATION
+		where   NOTIFICATION_SENT = 'false'
+				and     NOTIFICATION_ALERT_ID =  'NT318'
+				and     ENTITY_ID != 'NA'
+		order by NAME,  MODULE_NAME, ORGANIZATION_ID, ENTITY_TYPE, ORG_TYPE 
+	</select>
+   
+    
+	<insert id="rewriteMsgBodyNT318ByAgency" >
+		 {call
+		      DECLARE
+			  message_clob CLOB := #{description};
+
+		      BEGIN
+		      	<![CDATA[
+				insert into GROUP_NOTIFICATION 
+				       ( GROUP_NOTIFICATION_ID, MODULE_NAME, NAME, NOTIFICATION_SENT, CREATED_DATE, ENTITY_ID, ENTITY_TYPE,
+				         NOTIFICATION_ALERT_ID, ORGANIZATION_ID, CREATED_BY_USERID, MODIFIED_DATE, ORG_TYPE, DESCRIPTION )   
+				               
+				select SEQ_GROUP_NOTIFICATION_ID.NEXTVAL as GROUP_NOTIFICATION_ID, MODULE_NAME, NAME, NOTIFICATION_SENT, CREATED_DATE,  ENTITY_ID, ENTITY_TYPE,
+				         NOTIFICATION_ALERT_ID , ORGANIZATION_ID,  CREATED_BY_USERID, MODIFIED_DATE ,  ORG_TYPE , DESCRIPTION
+				       
+				from (	select     MODULE_NAME,   NAME,  'false' as NOTIFICATION_SENT , SYSTIMESTAMP as CREATED_DATE , 'NA' as ENTITY_ID, ENTITY_TYPE
+				                   , NOTIFICATION_ALERT_ID , #{agency} as ORGANIZATION_ID,'system' as  CREATED_BY_USERID, SYSTIMESTAMP as MODIFIED_DATE,  ORG_TYPE  
+				                   , (select   SUBSTR(EMAIL_BODY_DESCRIPTION,1, INSTR(EMAIL_BODY_DESCRIPTION,'{#FMS_ERROR_DESCRIPTION}')-1) 
+                                        from   NOTIFICATION_ALERT_MASTER where NOTIFICATION_ALERT_ID = 'NT318N' )
+                                                   
+                                    
+                                     || message_clob
+                                     
+                                     || ( select  SUBSTR(EMAIL_BODY_DESCRIPTION, INSTR(EMAIL_BODY_DESCRIPTION,'{#FMS_ERROR_DESCRIPTION}') + length('{#FMS_ERROR_DESCRIPTION}') , length(EMAIL_BODY_DESCRIPTION)-1 )
+                                            from  NOTIFICATION_ALERT_MASTER where NOTIFICATION_ALERT_ID = 'NT318N' 
+                                         )
+                             as  DESCRIPTION
+						  from     GROUP_NOTIFICATION
+						 where     NOTIFICATION_SENT = 'false'
+						   and     NOTIFICATION_ALERT_ID =  'NT318'
+						   and     ENTITY_ID != 'NA'
+						   and    ORGANIZATION_ID = #{agency}
+				         group by  NAME,  MODULE_NAME, ORGANIZATION_ID, MODULE_NAME, ENTITY_TYPE,ORG_TYPE , NOTIFICATION_ALERT_ID
+				       )
+ 				]]>
+				;
+
+			END
+	    }	
+	</insert>
+	
+		
+	<update id="updateNotificationStatusNT318">
+		update GROUP_NOTIFICATION
+		set      MODIFIED_DATE = SYSTIMESTAMP,
+				 NOTIFICATION_SENT = 'true'
+		where    NOTIFICATION_SENT = 'false'
+				  and    NOTIFICATION_ALERT_ID = 'NT318'
+				  and    ENTITY_ID != 'NA'
+				 
+	</update>
+ <!-- End QC9630 R 9.0.1 - Optimize NT318 Notifications  -->
+   
+
+</mapper>
+

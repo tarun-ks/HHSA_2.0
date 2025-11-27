@@ -1,0 +1,590 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sort-master>
+	<sort userType="provider_org" gridName="procurementRoadMap">
+		<column first="procurementTitle" same="true" firstColumnName="Procurement_Title"
+			secondColumnName="Agency_ID" default="ASC" />
+		<column first="providerStatus" same="true"
+			firstColumnName="stm.status_process_type_id" secondColumnName="Procurement_Title"
+			default="ASC" isFirstSortDate="true" />
+		<column first="agencyId" same="true" firstColumnName="Agency_ID"
+			secondColumnName="Procurement_Title" default="ASC" />
+		<column first="procurementStatus" same="true"
+			firstColumnName="stm1.status_process_type_id" secondColumnName="Upd_Proposal_Due_Date"
+			default="ASC" isSecondSortDate="true" />
+		<column first="lastPublishedDate" same="false" firstColumnName="Last_Published_Date"
+			secondColumnName="Procurement_Title" default="DESC" isFirstSortDate="true" />
+		<column first="releaseDate" same="true" firstColumnName="Upd_RFP_Release_Date"
+			secondColumnName="Procurement_Title" default="ASC" isFirstSortDate="true" />
+		<column first="proposalDueDate" same="true" firstColumnName="Upd_Proposal_Due_Date"
+			secondColumnName="Procurement_Title" default="ASC" isFirstSortDate="true" />
+		<column first="contractStartDate" same="true"
+			firstColumnName="Upd_Contract_Start_Date" secondColumnName="Procurement_Title"
+			default="ASC" isFirstSortDate="true" />
+	</sort>
+	<sort userType="city_org,agency_org" gridName="procurementRoadMap">
+		<column first="procurementTitle" same="true" firstColumnName="Procurement_Title"
+			secondColumnName="Agency_ID" default="ASC" />
+		<column first="procurementEpin" same="true" firstColumnName="EPIN"
+			secondColumnName="" default="ASC" />
+		<column first="agencyId" same="true" firstColumnName="Agency_ID"
+			secondColumnName="Procurement_Title" default="ASC" />
+		<column first="procurementStatus" same="true" firstColumnName="STATUS_PROCESS_TYPE_ID"
+			secondColumnName="Upd_Proposal_Due_Date" default="ASC"
+			isSecondSortDate="true" />
+		<column first="lastPublishedDate" same="false" firstColumnName="Last_Published_Date"
+			secondColumnName="Procurement_Title" default="DESC" isFirstSortDate="true" />
+		<column first="releaseDate" same="true" firstColumnName="Upd_RFP_Release_Date"
+			secondColumnName="Procurement_Title" default="ASC" isFirstSortDate="true" />
+		<column first="proposalDueDate" same="true" firstColumnName="Upd_Proposal_Due_Date"
+			secondColumnName="Procurement_Title" default="ASC" isFirstSortDate="true" />
+		<column first="contractStartDate" same="true"
+			firstColumnName="Upd_Contract_Start_Date" secondColumnName="Procurement_Title"
+			default="ASC" isFirstSortDate="true" />
+	</sort>
+	<sort userType="city_org,agency_org" gridName="budgetListMap">
+		<column first="contractTitle" same="true" firstColumnName="CONTRACT_TITLE"
+			secondColumnName="ORGANIZATION_LEGAL_NAME" default="ASC" />
+		<column first="providerName" same="true" firstColumnName="ORGANIZATION_LEGAL_NAME"
+			secondColumnName="CONTRACT_TITLE" default="ASC" />
+		<column first="fiscalYear" same="false" firstColumnName="FISCAL_YEAR"
+			secondColumnName="CONTRACT_TITLE" default="DESC" />
+		<column first="budgetValue" same="false" firstColumnName="FISCAL_YEAR_AMOUNT"
+			secondColumnName="CONTRACT_TITLE" default="DESC" isFirstSortDate="true" />
+		<!-- Start Defect 6155 Release 3.10.0 -->
+				<!--Start Release 7.12.0 defect 9208-->
+		<column first="dateOfLastUpdate" same="false" firstColumnName="LAST_UPDATE_DATE"
+			secondColumnName="bud.STATUS_ID" default="DESC" isFirstSortDate="true" />
+		<column first="status" same="true" firstColumnName="bud.STATUS_ID"
+			secondColumnName="LAST_UPDATE_DATE" default="ASC" isSecondSortDate="true" />
+		<!--End Release 7.12.0 defect 9208-->
+		<!-- End Defect 6155 Release 3.10.0 -->
+		<!-- Made for defect id 6248 release 3.3.0 -->
+		<column first="agencyId" same="true" firstColumnName="AGENCY_ID"
+			isFirstSortDate="false" secondColumnName="bud.STATUS_ID"
+			isSecondSortDate="false" default="ASC" />
+		<column first="ctId" same="true" firstColumnName="CT_NUMBER"
+			isFirstSortDate="false" secondColumnName="LAST_UPDATE_DATE" default="ASC"
+			isSecondSortDate="true" />
+	</sort>
+	
+	<sort userType="provider_org" gridName="budgetListMap">
+		<column first="contractTitle" same="true" firstColumnName="CONTRACT_TITLE"
+			secondColumnName="AGENCY_NAME" default="ASC" />
+		<!-- Made for defect id 6248 release 3.3.0 -->
+		<!--Start Release 7.12.0 defect 9208-->
+		<column first="agencyId" same="true" firstColumnName="AGENCY_ID"
+			isFirstSortDate="false" secondColumnName="LAST_UPDATE_DATE"
+			isSecondSortDate="false" default="ASC" />
+		<!--End Release 7.12.0 defect 9208-->	
+		<column first="fiscalYear" same="false" firstColumnName="FISCAL_YEAR"
+			secondColumnName="STATUS_ID" default="DESC" />
+		<column first="budgetValue" same="false" firstColumnName="FISCAL_YEAR_AMOUNT"
+			secondColumnName="CONTRACT_TITLE" default="DESC" isFirstSortDate="true" />
+		<!-- Start Defect 6155 Release 3.10.0 -->
+				<!--Start Release 7.12.0 defect 9208-->
+		<column first="dateOfLastUpdate" same="false" firstColumnName="LAST_UPDATE_DATE"
+			secondColumnName="STATUS_ID" default="DESC" isFirstSortDate="true" />
+		<column first="status" same="true" firstColumnName="STATUS_ID"
+			isFirstSortDate="false" secondColumnName="LAST_UPDATE_DATE" default="ASC"
+			isSecondSortDate="true" />
+		<!--End Release 7.12.0 defect 9208-->
+		<!-- End Defect 6155 Release 3.10.0 -->
+		<!--Start Release 7.12.0 defect 9208-->
+		<column first="ctId" same="true" firstColumnName="CT_NUMBER"
+			isFirstSortDate="false" secondColumnName="LAST_UPDATE_DATE" default="ASC"
+			isSecondSortDate="true" />
+		<!--End Release 7.12.0 defect 9208-->
+	</sort>
+
+	<sort userType="city_org,agency_org" gridName="amendContractListMap">
+		<column first="baseContractTitle" same="false" firstColumnName="BASE_CONTRACT_TITLE"
+			secondColumnName="modified_date" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="true" />
+		<column first="contractTitle" same="false" firstColumnName="CONTRACT_TITLE"
+			secondColumnName="modified_date" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="true" />
+		<column first="awardEpin" same="true" firstColumnName="EXT_EPIN"
+			secondColumnName="" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="" />
+		<column first="contractValue" same="false" firstColumnName="CONTRACT_AMOUNT"
+			secondColumnName="BASE_CONTRACT_TITLE" default="DESC"
+			isFirstSortDate="true" isSecondSortDate="false" />
+		<column first="contractStatus" same="false" firstColumnName="STATUS_PROCESS_TYPE_ID"
+			secondColumnName="modified_date" default="ASC" isFirstSortDate="true"
+			isSecondSortDate="true" />
+		<!-- Made for defect id 6248 release 3.3.0 -->
+		<column first="contractAgencyName" same="true" firstColumnName="AGENCY_ID"
+			secondColumnName="STATUS_PROCESS_TYPE_ID" default="ASC"
+			isFirstSortDate="false" isSecondSortDate="false" />
+		<column first="provider" same="true" firstColumnName="ORGANIZATION_LEGAL_NAME"
+			secondColumnName="EXT_EPIN" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="false" />
+	</sort>
+
+	<sort userType="provider_org" gridName="amendContractListMap">
+		<column first="baseContractTitle" same="false" firstColumnName="BASE_CONTRACT_TITLE"
+			secondColumnName="modified_date" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="true" />
+		<column first="contractTitle" same="false" firstColumnName="CONTRACT_TITLE"
+			secondColumnName="modified_date" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="true" />
+		<column first="awardEpin" same="true" firstColumnName="EXT_EPIN"
+			secondColumnName="" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="" />
+		<column first="contractValue" same="false" firstColumnName="CONTRACT_AMOUNT"
+			secondColumnName="BASE_CONTRACT_TITLE" default="DESC"
+			isFirstSortDate="true" isSecondSortDate="false" />
+		<column first="lastUpdateDate" same="false" firstColumnName="modified_date"
+			secondColumnName="STATUS_PROCESS_TYPE_ID" default="DESC"
+			isFirstSortDate="true" isSecondSortDate="true" />
+		<column first="contractStatus" same="false" firstColumnName="STATUS_PROCESS_TYPE_ID"
+			secondColumnName="modified_date" default="ASC" isFirstSortDate="true"
+			isSecondSortDate="true" />
+		<!-- Made for defect id 6248 release 3.3.0 -->
+		<column first="contractAgencyName" same="true" firstColumnName="AGENCY_ID"
+			secondColumnName="STATUS_PROCESS_TYPE_ID" default="ASC"
+			isFirstSortDate="false" isSecondSortDate="false" />
+		<column first="ctId" same="false" firstColumnName="ext_ct_number"
+			secondColumnName="modified_date" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="false" />
+	</sort>
+
+
+	<sort userType="city_org,agency_org" gridName="contractListMap">
+		<column first="contractTitle" same="true" firstColumnName="CONTRACT_TITLE"
+			secondColumnName="ORGANIZATION_LEGAL_NAME" default="ASC"
+			isFirstSortDate="false" isSecondSortDate="false" />
+		<column first="provider" same="true" firstColumnName="ORGANIZATION_LEGAL_NAME"
+			secondColumnName="CONTRACT_TITLE" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="false" />
+		<column first="ctId" same="true" firstColumnName="EXT_CT_NUMBER"
+			secondColumnName="" default="DESC" isFirstSortDate="false"
+			isSecondSortDate="false" />
+		<column first="contractValue" same="false" firstColumnName="CONTRACT_AMOUNT"
+			secondColumnName="ORGANIZATION_LEGAL_NAME" default="DESC"
+			isFirstSortDate="true" isSecondSortDate="false" />
+		<column first="contractStatus" same="true" firstColumnName="STATUS_PROCESS_TYPE_ID"
+			secondColumnName="modified_date" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="true" />
+		<!-- Made for defect id 6248 release 3.3.0 -->
+		<column first="contractAgencyName" same="true" firstColumnName="AGENCY_ID"
+			secondColumnName="" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="false" />
+	</sort>
+	<sort userType="provider_org" gridName="contractListMap">
+		<column first="contractTitle" same="true" firstColumnName="CONTRACT_TITLE"
+			secondColumnName="AGENCY_ID" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="false" />
+		<column first="contractAgencyName" same="true" firstColumnName="AGENCY_ID"
+			secondColumnName="MODIFIED_DATE" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="true" />
+		<column first="ctId" same="true" firstColumnName="EXT_CT_NUMBER"
+			secondColumnName="" default="DESC" isFirstSortDate="false"
+			isSecondSortDate="false" />
+		<column first="contractValue" same="false" firstColumnName="CONTRACT_AMOUNT"
+			secondColumnName="AGENCY_ID" default="DESC" isFirstSortDate="true"
+			isSecondSortDate="false" />
+		<column first="lastUpdateDate" same="false" firstColumnName="modified_date"
+			isFirstSortDate="true" secondColumnName="STATUS_PROCESS_TYPE_ID"
+			default="DESC" isSecondSortDate="false" />
+		<column first="contractStatus" same="false" firstColumnName="STATUS_PROCESS_TYPE_ID"
+			secondColumnName="modified_date" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="true" />
+	</sort>
+	<sort userType="provider_org" gridName="paymentSort">
+		<column first="paymentContractTitle" same="false"
+			firstColumnName="contract_title" secondColumnName="payment_voucher_num"
+			default="asc" />
+		<column first="paymentPayeeName" same="false" firstColumnName="payee_name"
+			secondColumnName="payment_voucher_num" default="asc" />
+		<column first="paymentCtId" same="true" firstColumnName="CT_NUMBER"
+			secondColumnName="payment_voucher_num" default="desc" />
+		<column first="paymentVoucherNumber" same="true"
+			firstColumnName="payment_voucher_num" secondColumnName="" default="desc" />
+		<column first="paymentValue" same="true" firstColumnName="payment_amount"
+			secondColumnName="payment_voucher_num" default="desc"
+			isFirstSortDate="true" />
+		<!-- start for enhancement id 6495 for release 3.12.0 -->
+		<column first="paymentDisNum" same="true" firstColumnName="payment_voucher_num"
+			secondColumnName="CT_NUMBER" default="desc" />
+		<column first="paymentDisDate" same="true"
+			firstColumnName="status_process_type_id asc,disbursement_date"
+			secondColumnName="payment_voucher_num" default="desc"
+			isFirstSortDate="true" />
+		<!-- end for enhancement id 6495 for release 3.12.0 -->
+		<!-- Made for defect id 6248 release 3.3.0 -->
+		<column first="paymentAgencyId" same="true" firstColumnName="AGENCY_ID"
+			secondColumnName="CT_NUMBER" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="false" />
+	</sort>
+	<sort userType="city_org,agency_org" gridName="paymentSort">
+		<column first="paymentContractTitle" same="false"
+			firstColumnName="contract_title" secondColumnName="payment_voucher_num"
+			default="asc" />
+		<column first="paymentProvider" same="false" firstColumnName="organization_legal_name"
+			secondColumnName="payment_voucher_num" default="asc" />
+		<column first="paymentVoucherNumber" same="true"
+			firstColumnName="payment_voucher_num" secondColumnName="" default="desc" />
+		<column first="paymentValue" same="true" firstColumnName="payment_amount"
+			secondColumnName="payment_voucher_num" default="desc"
+			isFirstSortDate="true" />
+		<column first="paymentStatus" same="true" firstColumnName="STATUS_PROCESS_TYPE_ID"
+			secondColumnName="last_update_date" default="ASC" isSecondSortDate="true" />
+		<column first="paymentLastUpdateDate" same="false"
+			isSecondSortDate="true" firstColumnName="last_update_date"
+			secondColumnName="STATUS_PROCESS_TYPE_ID" default="desc"
+			isFirstSortDate="true" />
+		<!-- Made for defect id 6248 release 3.3.0 -->
+		<column first="paymentAgencyId" same="false" firstColumnName="AGENCY_ID"
+			secondColumnName="CT_NUMBER" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="false" />
+		<column first="paymentCtId" same="false" firstColumnName="CT_NUMBER"
+			secondColumnName="payment_voucher_num" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="false" />
+	</sort>
+	<sort userType="city_org,agency_org" gridName="approvedProviders">
+		<column first="organizationLegalName" same="true"
+			firstColumnName="ORGANIZATION_LEGAL_NAME" secondColumnName=""
+			default="ASC" />
+		<column first="baExpDate" same="true" firstColumnName="EXPIRATION_DATE"
+			secondColumnName="ORGANIZATION_LEGAL_NAME" default="ASC"
+			isFirstSortDate="true" />
+		<column first="filingExpDate" same="true" firstColumnName="DUE_DATE"
+			secondColumnName="ORGANIZATION_LEGAL_NAME" default="ASC"
+			isFirstSortDate="true" />
+	</sort>
+	<sort userType="provider_org" gridName="approvedProviders">
+		<column first="organizationLegalName" same="true"
+			firstColumnName="ORGANIZATION_LEGAL_NAME" secondColumnName=""
+			default="ASC" />
+	</sort>
+	<sort userType="provider_org" gridName="invoiceListMap">
+		<column first="invoiceNumber" same="false" firstColumnName="INVOICE_NUMBER"
+			secondColumnName="" default="DESC" />
+		<column first="invoiceDateSubmitted" same="true"
+			firstColumnName="INVOICE_SUBMITTED_DATE" secondColumnName="INVOICE_NUMBER"
+			default="DESC" isFirstSortDate="true" />
+		<column first="invoiceDateApproved" same="false"
+			firstColumnName="INVOICE_APPROVED_DATE" secondColumnName="INVOICE_NUMBER"
+			default="ASC" isFirstSortDate="true" />
+		<column first="invoiceValue" same="true" firstColumnName="INVOICE_AMOUNT_TOTAL"
+			secondColumnName="INVOICE_NUMBER" default="DESC" isFirstSortDate="true" />
+		<column first="invoiceStatus" same="false" firstColumnName="STATUS_ID"
+			secondColumnName="INVOICE_NUMBER" default="ASC" />
+		<!-- Made for defect id 6248 release 3.3.0 -->
+		<column first="invoiceAgencyId" same="true" firstColumnName="AGENCY_ID"
+			secondColumnName="STATUS_ID" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="false" />
+		<column first="invoiceCtId" same="false" firstColumnName="ct_number"
+			secondColumnName="INVOICE_NUMBER" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="false" />
+	</sort>
+	<sort userType="city_org,agency_org" gridName="invoiceListMap">
+		<column first="invoiceNumber" same="false" firstColumnName="INVOICE_NUMBER"
+			secondColumnName="" default="DESC" />
+		<column first="invoiceDateSubmitted" same="true"
+			firstColumnName="INVOICE_SUBMITTED_DATE" secondColumnName="INVOICE_NUMBER"
+			default="DESC" isFirstSortDate="true" />
+		<column first="invoiceDateApproved" same="false"
+			firstColumnName="INVOICE_APPROVED_DATE" secondColumnName="INVOICE_NUMBER"
+			default="ASC" isFirstSortDate="true" />
+		<column first="invoiceValue" same="true" firstColumnName="INVOICE_AMOUNT_TOTAL"
+			secondColumnName="INVOICE_NUMBER" default="DESC" isFirstSortDate="true" />
+		<column first="invoiceStatus" same="false" firstColumnName="STATUS_PROCESS_TYPE_ID"
+			secondColumnName="INVOICE_NUMBER" default="ASC" />
+		<!-- Made for defect id 6248 release 3.3.0 -->
+		<column first="invoiceAgencyId" same="true" firstColumnName="AGENCY_ID"
+			secondColumnName="STATUS_PROCESS_TYPE_ID" default="ASC"
+			isFirstSortDate="false" isSecondSortDate="false" />
+		<column first="invoiceProvider" same="true" firstColumnName="organization_legal_name"
+			secondColumnName="ct_number" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="false" />
+		<column first="invoiceCtId" same="false" firstColumnName="ct_number"
+			secondColumnName="INVOICE_NUMBER" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="false" />
+	</sort>
+	<sort userType="city_org,agency_org" gridName="evaluationResults">
+		<column first="proposalTitle" same="false" firstColumnName="PROPOSAL_TITLE"
+			secondColumnName="EVALUATION_SCORE" isSecondSortDate="true" />
+		<column first="organizationName" same="false" firstColumnName="ORGANIZATION_LEGAL_NAME"
+			secondColumnName="EVALUATION_SCORE" isSecondSortDate="true" />
+		<column first="evaluationScore" same="false" firstColumnName="EVALUATION_SCORE"
+			secondColumnName="ORGANIZATION_LEGAL_NAME" isFirstSortDate="true" />
+		<column first="proposalStatus" same="false" firstColumnName="STATUS"
+			secondColumnName="EVALUATION_SCORE" isSecondSortDate="true" />
+		<column first="awardAmount" same="false" firstColumnName="AWARD_AMOUNT"
+			secondColumnName="EVALUATION_SCORE" isSecondSortDate="true" />
+	</sort>
+	<sort userType="provider_org" gridName="proposalSummary">
+		<column first="proposalTitle" same="false" firstColumnName="PROPOSAL_TITLE"
+			secondColumnName="a.MODIFIED_DATE" default="ASC" isSecondSortDate="true" />
+		<column first="competitionPoolTitle" same="true"
+			firstColumnName="COMPETITION_POOL_TITLE" secondColumnName="PROPOSAL_TITLE"
+			default="ASC" isSecondSortDate="false" />
+		<column first="evaluationScore" same="false" firstColumnName="EVALUATION_SCORE"
+			secondColumnName="PROPOSAL_TITLE" default="DESC" isFirstSortDate="true" />
+		<column first="rank" same="true" firstColumnName="rank"
+			secondColumnName="PROPOSAL_TITLE" default="ASC" isFirstSortDate="true" />
+		<column first="proposalStatus" same="false" firstColumnName="PROPOSAL_STATUS_ID"
+			secondColumnName="a.MODIFIED_DATE" default="ASC" isSecondSortDate="true" />
+		<column first="modifiedDate" same="false" firstColumnName="a.MODIFIED_DATE"
+			secondColumnName="PROPOSAL_TITLE" default="DESC" isFirstSortDate="true" />
+		<column first="modifiedBy" same="true" firstColumnName="MODIFIED_BY_USERID"
+			secondColumnName="PROPOSAL_TITLE" default="ASC" />
+	</sort>
+	<!-- Start || Changes done for 6636 for release 3.12.0 -->
+	<sort userType="city_org,agency_org" gridName="proposalEvaluationStatus">
+		<column first="proposalId" same="true" firstColumnName="PROPOSAL_ID"
+			secondColumnName="Evalution_Completed" default="ASC" />
+		<column first="proposalTitle" same="true" firstColumnName="PROPOSAL_TITLE"
+			secondColumnName="Evalution_Completed" default="ASC" />
+		<column first="organizationName" same="true" firstColumnName="ORGANIZATION_LEGAL_NAME"
+			secondColumnName="Evalution_Completed" default="ASC" />
+		<column first="proposalStatus" same="true" firstColumnName="STATUS"
+			secondColumnName="Evalution_Completed" default="ASC" />
+		<column first="evalutionsInProgress" same="true"
+			firstColumnName="Evaluation_InProgress" secondColumnName="ORGANIZATION_LEGAL_NAME"
+			default="ASC" />
+		<column first="evalutionsCompleted" same="true"
+			firstColumnName="Evalution_Completed" secondColumnName="ORGANIZATION_LEGAL_NAME"
+			default="ASC" />
+	</sort>
+	<sort userType="city_org,agency_org" gridName="proposalEvaluationResults">
+		<column first="proposalId" same="true" firstColumnName="PROPOSAL_ID"
+			secondColumnName="evaluation_score" default="ASC" />
+		<column first="proposalTitle" same="false" firstColumnName="PROPOSAL_TITLE"
+			secondColumnName="evaluation_score" default="ASC" isSecondSortDate="true" />
+		<column first="organizationName" same="false" firstColumnName="ORGANIZATION_LEGAL_NAME"
+			secondColumnName="evaluation_score" default="ASC" isSecondSortDate="true" />
+		<column first="evaluationScore" same="false" firstColumnName="evaluation_score"
+			secondColumnName="ORGANIZATION_LEGAL_NAME" default="DESC"
+			isFirstSortDate="true" />
+		<column first="proposalStatus" same="false" firstColumnName="status"
+			secondColumnName="evaluation_score" default="ASC" isSecondSortDate="true" />
+		<column first="awardAmount" same="false" firstColumnName="award_amount"
+			secondColumnName="evaluation_score" default="ASC" isSecondSortDate="true" />
+	</sort>
+	<!-- End || Changes done for 6636 for release 3.12.0 -->
+
+	<sort userType="city_org" gridName="taxonomyTagging">
+		<column first="proposalTitle" same="true" firstColumnName="PROPOSAL_TITLE"
+			secondColumnName="ACTIVE_FLAG" default="ASC" />
+		<column first="providerName" same="true" firstColumnName="ORGANIZATION_LEGAL_NAME"
+			secondColumnName="ACTIVE_FLAG" default="ASC" />
+		<column first="procurementContractTitle" same="true"
+			firstColumnName="PROCUREMENT_TITLE" secondColumnName="ACTIVE_FLAG"
+			default="ASC" />
+		<column first="awardEpin" same="true" firstColumnName="AWARD_EPIN"
+			secondColumnName="ACTIVE_FLAG" default="ASC" />
+		<column first="approvalDate" same="false" firstColumnName="AWARD_APPROVAL_DATE"
+			secondColumnName="ACTIVE_FLAG" default="DESC" isFirstSortDate="true" />
+		<column first="competitionPoolTitle" same="true"
+			firstColumnName="pool_title" secondColumnName="ACTIVE_FLAG" default="ASC"
+			isFirstSortDate="true" />
+		<column first="isTagged" same="false" firstColumnName="ACTIVE_FLAG"
+			secondColumnName="AWARD_APPROVAL_DATE" default="ASC"
+			isSecondSortDate="true" />
+	</sort>
+
+	<!-- Start || Added for enhancement 6636 for Release 3.12.0 -->
+	<sort userType="agency_org" gridName="agencyTaskManagement">
+		<column first="dateCreated" same="false" firstColumnName="LaunchDate"
+			secondColumnName="TaskType" default="DESC" isFirstSortDate="true" />
+		<column first="taskName" same="false" firstColumnName="TaskType"
+			secondColumnName="LaunchDate" default="ASC" isSecondSortDate="true" />
+		<column first="procurementTitle" same="false" firstColumnName="ProcurementTitle"
+			secondColumnName="LaunchDate" default="ASC" isSecondSortDate="true" />
+		<column first="proposalId" same="false" firstColumnName="ProposalID"
+			secondColumnName="LaunchDate" default="ASC" isSecondSortDate="true" />
+		<column first="providerName" same="false" firstColumnName="ProviderName"
+			secondColumnName="LaunchDate" default="ASC" isSecondSortDate="true" />
+		<column first="assignedTo" same="false" firstColumnName="TaskOwnerName"
+			secondColumnName="LaunchDate" default="ASC" isSecondSortDate="true" />
+		<column first="status" same="false" firstColumnName="TaskStatus"
+			secondColumnName="LaunchDate" default="ASC" isSecondSortDate="true" />
+	</sort>
+
+	<sort userType="city_org" gridName="agencyTaskManagement">
+		<column first="dateCreated" same="false" firstColumnName="LaunchDate"
+			secondColumnName="TaskType" default="DESC" isFirstSortDate="true" />
+		<column first="taskName" same="false" firstColumnName="TaskType"
+			secondColumnName="LaunchDate" default="ASC" isSecondSortDate="true" />
+		<column first="procurementTitle" same="false" firstColumnName="ProcurementTitle"
+			secondColumnName="LaunchDate" default="ASC" isSecondSortDate="true" />
+		<column first="proposalId" same="false" firstColumnName="ProposalID"
+			secondColumnName="LaunchDate" default="ASC" isSecondSortDate="true" />
+		<column first="providerName" same="false" firstColumnName="ProviderName"
+			secondColumnName="LaunchDate" default="ASC" isSecondSortDate="true" />
+		<column first="assignedTo" same="false" firstColumnName="TaskOwnerName"
+			secondColumnName="LaunchDate" default="ASC" isSecondSortDate="true" />
+		<column first="status" same="false" firstColumnName="TaskStatus"
+			secondColumnName="LaunchDate" default="ASC" isSecondSortDate="true" />
+	</sort>
+
+	<sort userType="agency_org" gridName="agencyTaskInbox">
+		<column first="lastAssigned" same="false" firstColumnName="TaskAssignDate"
+			secondColumnName="TaskType" default="DESC" isFirstSortDate="true" />
+		<column first="taskName" same="false" firstColumnName="TaskType"
+			secondColumnName="TaskAssignDate" default="ASC" isSecondSortDate="true" />
+		<column first="procurementTitle" same="false" firstColumnName="ProcurementTitle"
+			secondColumnName="TaskAssignDate" default="ASC" isSecondSortDate="true" />
+		<column first="proposalId" same="false" firstColumnName="ProposalID"
+			secondColumnName="LaunchDate" default="ASC" isSecondSortDate="true" />
+		<column first="providerName" same="false" firstColumnName="ProviderName"
+			secondColumnName="TaskAssignDate" default="ASC" isSecondSortDate="true" />
+		<column first="dateCreated" same="false" firstColumnName="LaunchDate"
+			secondColumnName="TaskAssignDate" default="ASC" isFirstSortDate="true"
+			isSecondSortDate="true" />
+		<column first="status" same="false" firstColumnName="TaskStatus"
+			secondColumnName="TaskAssignDate" default="ASC" isSecondSortDate="true" />
+	</sort>
+	<!-- END || Added for enhancement 6636 for Release 3.12.0 -->
+	<sort userType="city_org,agency_org" gridName="groupProposalSummary">
+		<column first="evaluationGroupTitle" same="false"
+			firstColumnName="EVALUATION_GROUP_TITLE" secondColumnName="evgrp.status_id"
+			default="DESC" />
+		<column first="closingDate" same="true" firstColumnName="SUBMISSION_CLOSE_DATE"
+			secondColumnName="EVALUATION_GROUP_TITLE" default="DESC"
+			isFirstSortDate="true" />
+		<column first="providersSubmitted" same="true" firstColumnName="provider_count"
+			secondColumnName="EVALUATION_GROUP_TITLE" default="DESC" />
+		<column first="proposalsSubmitted" same="true" firstColumnName="proposal_count"
+			secondColumnName="EVALUATION_GROUP_TITLE" default="DESC" />
+		<column first="evaluationStatus" same="false" firstColumnName="evgrp.status_id"
+			secondColumnName="EVALUATION_GROUP_TITLE" default="ASC" />
+		<column first="evaluationsInProgress" same="true"
+			firstColumnName="Evaluation_InProgress" isFirstSortDate="true"
+			secondColumnName="EVALUATION_GROUP_TITLE" default="DESC" />
+		<column first="evaluationsComplete" same="true"
+			firstColumnName="Evaluation_Completed" isFirstSortDate="true"
+			secondColumnName="EVALUATION_GROUP_TITLE" default="DESC" />
+	</sort>
+
+	<sort userType="city_org,agency_org" gridName="proposalEvaluationSummary">
+		<column first="competitionPoolTitle" same="true"
+			firstColumnName="COMPETITION_POOL_TITLE" secondColumnName="grpcomp.status_id"
+			default="ASC" />
+		<column first="providersSubmitted" same="false"
+			firstColumnName="provider_count" secondColumnName="COMPETITION_POOL_TITLE"
+			default="DESC" />
+		<column first="proposalsSubmitted" same="false"
+			firstColumnName="proposal_count" secondColumnName="COMPETITION_POOL_TITLE"
+			default="DESC" />
+		<column first="evaluationStatus" same="true" firstColumnName="grpcomp.status_id"
+			secondColumnName="COMPETITION_POOL_TITLE" default="ASC" />
+		<column first="evaluationsInProgress" same="false"
+			firstColumnName="Evaluation_InProgress" isFirstSortDate="true"
+			secondColumnName="COMPETITION_POOL_TITLE" default="DESC" />
+		<column first="evaluationsComplete" same="false"
+			firstColumnName="Evalution_Completed" isFirstSortDate="true"
+			secondColumnName="COMPETITION_POOL_TITLE" default="DESC" />
+	</sort>
+
+	<sort userType="city_org,agency_org" gridName="evaluationGroupSummary">
+		<column first="evaluationGroupTitle" same="true"
+			firstColumnName="EVALUATION_GROUP_TITLE" secondColumnName="SUBMISSION_CLOSE_DATE"
+			default="DESC" />
+		<column first="submissionCloseDate" same="true"
+			firstColumnName="SUBMISSION_CLOSE_DATE" secondColumnName="EVALUATION_GROUP_TITLE"
+			default="DESC" isFirstSortDate="true" />
+		<column first="noOfAwards" same="true" firstColumnName="award_count"
+			secondColumnName="EVALUATION_GROUP_TITLE" default="DESC" />
+		<column first="awardAmount" same="true" firstColumnName="award_amount"
+			secondColumnName="EVALUATION_GROUP_TITLE" default="DESC" />
+	</sort>
+
+	<sort userType="city_org,agency_org" gridName="awardContractsSummary">
+		<column first="competitionPoolTitle" same="false"
+			firstColumnName="COMPETITION_POOL_TITLE" secondColumnName="awardCount"
+			default="ASC" isSecondSortDate="true" />
+		<column first="numberOfAwards" same="false" firstColumnName="awardCount"
+			secondColumnName="COMPETITION_POOL_TITLE" default="DESC"
+			isFirstSortDate="true" />
+		<column first="totalAwardAmount" same="false" firstColumnName="award_amount"
+			secondColumnName="COMPETITION_POOL_TITLE" default="DESC"
+			isFirstSortDate="true" />
+	</sort>
+
+	<sort userType="provider_org" gridName="selectionDetailsSummary">
+		<column first="competitionPoolTitle" same="true"
+			firstColumnName="COMPETITION_POOL_TITLE" secondColumnName="CONTRACT_STATUS"
+			default="ASC" />
+		<column first="awardEpin" same="true" firstColumnName="EXT_EPIN"
+			secondColumnName="COMPETITION_POOL_TITLE" default="ASC"
+			isFirstSortDate="true" />
+		<column first="contractNumber" same="true" firstColumnName="EXT_CT_NUMBER"
+			secondColumnName="COMPETITION_POOL_TITLE" default="ASC"
+			isFirstSortDate="true" />
+		<column first="amount" same="true" firstColumnName="CONTRACT_AMOUNT"
+			secondColumnName="COMPETITION_POOL_TITLE" default="ASC"
+			isFirstSortDate="true" />
+		<column first="contractStatus" same="true" firstColumnName="CONTRACT_STATUS"
+			secondColumnName="COMPETITION_POOL_TITLE" default="ASC" />
+	</sort>
+	<!-- R5 code starts here -->
+	<sort userType="city_org" gridName="proposalListMap">
+		<column first="agencyId" same="false" firstColumnName="AGENCY_ID"
+			secondColumnName="MODIFIED_DATE" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="true" />
+		<column first="procurementtitle" same="false" firstColumnName="PROCUREMENT_TITLE"
+			secondColumnName="MODIFIED_DATE" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="true" />
+		<column first="competitionPoolTitle" same="false"
+			firstColumnName="COMPETITION_POOL_TITLE" secondColumnName="MODIFIED_DATE"
+			default="ASC" isFirstSortDate="false" isSecondSortDate="true" />
+		<column first="proposalId" same="true" firstColumnName="PROPOSAL_ID"
+			secondColumnName="PROPOSAL_ID" default="ASC" isFirstSortDate="true"
+			isSecondSortDate="true" />
+		<column first="proposalTitle" same="false" firstColumnName="PROPOSAL_TITLE"
+			secondColumnName="MODIFIED_DATE" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="true" />
+		<column first="proposalStatusId" same="false" firstColumnName="PROPOSAL_STATUS"
+			secondColumnName="MODIFIED_DATE" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="true" />
+		<column first="modifiedDate" same="false" firstColumnName="MODIFIED_DATE"
+			secondColumnName="AGENCY_ID" default="DESC" isFirstSortDate="true"
+			isSecondSortDate="false" />
+	</sort>
+	<sort userType="agency_org" gridName="proposalListMap">
+		<column first="procurementtitle" same="false" firstColumnName="PROCUREMENT_TITLE"
+			secondColumnName="MODIFIED_DATE" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="true" />
+		<column first="competitionPoolTitle" same="false"
+			firstColumnName="COMPETITION_POOL_TITLE" secondColumnName="MODIFIED_DATE"
+			default="ASC" isFirstSortDate="false" isSecondSortDate="true" />
+		<column first="proposalId" same="true" firstColumnName="PROPOSAL_ID"
+			secondColumnName="PROPOSAL_ID" default="ASC" isFirstSortDate="true"
+			isSecondSortDate="true" />
+		<column first="proposalTitle" same="false" firstColumnName="PROPOSAL_TITLE"
+			secondColumnName="MODIFIED_DATE" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="true" />
+		<column first="proposalStatusId" same="false" firstColumnName="PROPOSAL_STATUS"
+			secondColumnName="MODIFIED_DATE" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="true" />
+		<column first="modifiedDate" same="false" firstColumnName="MODIFIED_DATE"
+			secondColumnName="PROCUREMENT_TITLE" default="DESC" isFirstSortDate="true"
+			isSecondSortDate="false" />
+	</sort>
+	<sort userType="city_org,provider_org,agency_org" gridName="returnedPaymentList">
+		<column first="checkNumber" same="false" firstColumnName="CHECK_NUMBER"
+			secondColumnName="RECEIVED_DATE" default="ASC" isFirstSortDate="true"
+			isSecondSortDate="true"/>
+		<column first="agencyTrackingNumber" same="false"
+			firstColumnName="AGENCY_TRACKING_NUMBER" secondColumnName="RECEIVED_DATE"
+			default="ASC" isFirstSortDate="true" isSecondSortDate="true" />
+		<column first="receivedDate" same="true" firstColumnName="RECEIVED_DATE"
+			secondColumnName="RECEIVED_DATE" default="ASC" isFirstSortDate="true"
+			isSecondSortDate="true" />
+		<column first="approvedBy" same="false" firstColumnName="APPROVED_BY"
+			secondColumnName="RECEIVED_DATE" default="ASC" isFirstSortDate="false"
+			isSecondSortDate="true" />
+		<column first="checkAmount" same="false" firstColumnName="CHECK_AMOUNT"
+			secondColumnName="RECEIVED_DATE" default="ASC" isFirstSortDate="true"
+			isSecondSortDate="true" />
+		<column first="checkStatusName" same="false" firstColumnName="STATUS"
+			secondColumnName="RECEIVED_DATE" default="DESC" isFirstSortDate="false"
+			isSecondSortDate="true" />
+	</sort>
+	
+	<!-- R5 code ends here -->
+</sort-master>

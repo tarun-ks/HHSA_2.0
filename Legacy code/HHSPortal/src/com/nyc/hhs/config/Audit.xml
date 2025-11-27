@@ -1,0 +1,8 @@
+<exception>
+	<Audit action="UnauthorizedAttempt">
+	    <messagecode>messagecode.UnauthorizedAttempt</messagecode>
+	    <contextind>true</contextind>
+	    <audittype>1</audittype>
+	    <logDifference>False</logDifference>
+	</Audit>
+</exception>

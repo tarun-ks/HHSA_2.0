@@ -1,0 +1,452 @@
+{
+  "version": "2.0.0",
+  "description": "Enterprise Workflow Notification Templates",
+  "notification_engine": {
+    "template_engine": "handlebars",
+    "supported_channels": ["email", "sms", "push", "in_app", "phone"],
+    "template_variables": true,
+    "conditional_templates": true,
+    "multi_language_support": true,
+    "template_versioning": true
+  },
+  "notification_templates": {
+    "workflow_notifications": {
+      "contract_submitted_for_review": {
+        "id": "contract_submitted_for_review",
+        "name": "Contract Submitted for Review",
+        "description": "Notification when contract is submitted for review",
+        "enabled": true,
+        "priority": "medium",
+        "channels": ["email", "in_app"],
+        "templates": {
+          "email": {
+            "subject": "Contract {{contract_id}} Submitted for Review",
+            "html_template": "<h2>Contract Review Required</h2><p>Contract <strong>{{contract_id}}</strong> has been submitted for review.</p><p><strong>Contract Details:</strong></p><ul><li>Contract Name: {{contract_name}}</li><li>Contract Value: {{contract_value}}</li><li>Contract Type: {{contract_type}}</li><li>Submitted By: {{submitted_by}}</li><li>Submission Date: {{submission_date}}</li></ul><p>Please review the contract and take appropriate action.</p><p><a href=\"{{review_url}}\">Review Contract</a></p>",
+            "text_template": "Contract {{contract_id}} has been submitted for review.\n\nContract Details:\n- Contract Name: {{contract_name}}\n- Contract Value: {{contract_value}}\n- Contract Type: {{contract_type}}\n- Submitted By: {{submitted_by}}\n- Submission Date: {{submission_date}}\n\nPlease review the contract and take appropriate action.\n\nReview URL: {{review_url}}"
+          },
+          "in_app": {
+            "title": "Contract Review Required",
+            "message": "Contract {{contract_id}} has been submitted for review",
+            "action_url": "{{review_url}}",
+            "icon": "contract",
+            "priority": "medium"
+          }
+        },
+        "variables": [
+          "contract_id",
+          "contract_name",
+          "contract_value",
+          "contract_type",
+          "submitted_by",
+          "submission_date",
+          "review_url"
+        ],
+        "recipients": ["{{references.user_roles.ACCO_STAFF.code}}"],
+        "conditions": [
+          {
+            "field": "workflow_state",
+            "operator": "equals",
+            "value": "pending_review"
+          }
+        ]
+      },
+      "contract_approved": {
+        "id": "contract_approved",
+        "name": "Contract Approved",
+        "description": "Notification when contract is approved",
+        "enabled": true,
+        "priority": "high",
+        "channels": ["email", "in_app", "sms"],
+        "templates": {
+          "email": {
+            "subject": "Contract {{contract_id}} Approved",
+            "html_template": "<h2>Contract Approved</h2><p>Contract <strong>{{contract_id}}</strong> has been approved and is ready for execution.</p><p><strong>Contract Details:</strong></p><ul><li>Contract Name: {{contract_name}}</li><li>Contract Value: {{contract_value}}</li><li>Contract Type: {{contract_type}}</li><li>Approved By: {{approved_by}}</li><li>Approval Date: {{approval_date}}</li></ul><p>The contract is now ready for execution.</p><p><a href=\"{{contract_url}}\">View Contract</a></p>",
+            "text_template": "Contract {{contract_id}} has been approved.\n\nContract Details:\n- Contract Name: {{contract_name}}\n- Contract Value: {{contract_value}}\n- Contract Type: {{contract_type}}\n- Approved By: {{approved_by}}\n- Approval Date: {{approval_date}}\n\nThe contract is now ready for execution.\n\nView Contract: {{contract_url}}"
+          },
+          "in_app": {
+            "title": "Contract Approved",
+            "message": "Contract {{contract_id}} has been approved and is ready for execution",
+            "action_url": "{{contract_url}}",
+            "icon": "check-circle",
+            "priority": "high"
+          },
+          "sms": {
+            "message": "Contract {{contract_id}} approved. Ready for execution. View: {{contract_url}}"
+          }
+        },
+        "variables": [
+          "contract_id",
+          "contract_name",
+          "contract_value",
+          "contract_type",
+          "approved_by",
+          "approval_date",
+          "contract_url"
+        ],
+        "recipients": ["{{references.user_roles.CONTRACT_OWNER.code}}"],
+        "conditions": [
+          {
+            "field": "workflow_state",
+            "operator": "equals",
+            "value": "approved"
+          }
+        ]
+      },
+      "contract_rejected": {
+        "id": "contract_rejected",
+        "name": "Contract Rejected",
+        "description": "Notification when contract is rejected",
+        "enabled": true,
+        "priority": "high",
+        "channels": ["email", "in_app"],
+        "templates": {
+          "email": {
+            "subject": "Contract {{contract_id}} Rejected",
+            "html_template": "<h2>Contract Rejected</h2><p>Contract <strong>{{contract_id}}</strong> has been rejected.</p><p><strong>Rejection Details:</strong></p><ul><li>Contract Name: {{contract_name}}</li><li>Rejected By: {{rejected_by}}</li><li>Rejection Date: {{rejection_date}}</li><li>Reason: {{rejection_reason}}</li></ul><p>Please review the feedback and resubmit if necessary.</p><p><a href=\"{{contract_url}}\">View Contract</a></p>",
+            "text_template": "Contract {{contract_id}} has been rejected.\n\nRejection Details:\n- Contract Name: {{contract_name}}\n- Rejected By: {{rejected_by}}\n- Rejection Date: {{rejection_date}}\n- Reason: {{rejection_reason}}\n\nPlease review the feedback and resubmit if necessary.\n\nView Contract: {{contract_url}}"
+          },
+          "in_app": {
+            "title": "Contract Rejected",
+            "message": "Contract {{contract_id}} has been rejected. Reason: {{rejection_reason}}",
+            "action_url": "{{contract_url}}",
+            "icon": "x-circle",
+            "priority": "high"
+          }
+        },
+        "variables": [
+          "contract_id",
+          "contract_name",
+          "rejected_by",
+          "rejection_date",
+          "rejection_reason",
+          "contract_url"
+        ],
+        "recipients": ["{{references.user_roles.CONTRACT_OWNER.code}}"],
+        "conditions": [
+          {
+            "field": "workflow_state",
+            "operator": "equals",
+            "value": "rejected"
+          }
+        ]
+      },
+      "contract_escalated": {
+        "id": "contract_escalated",
+        "name": "Contract Escalated",
+        "description": "Notification when contract is escalated",
+        "enabled": true,
+        "priority": "urgent",
+        "channels": ["email", "in_app", "sms", "phone"],
+        "templates": {
+          "email": {
+            "subject": "URGENT: Contract {{contract_id}} Escalated - Level {{escalation_level}}",
+            "html_template": "<h2>Contract Escalated</h2><p><strong>URGENT:</strong> Contract <strong>{{contract_id}}</strong> has been escalated to level {{escalation_level}}.</p><p><strong>Escalation Details:</strong></p><ul><li>Contract Name: {{contract_name}}</li><li>Current State: {{current_state}}</li><li>Escalation Level: {{escalation_level}}</li><li>Escalated To: {{escalated_to}}</li><li>Escalation Date: {{escalation_date}}</li><li>Reason: {{escalation_reason}}</li></ul><p><strong>Immediate action required.</strong></p><p><a href=\"{{contract_url}}\">Review Contract</a></p>",
+            "text_template": "URGENT: Contract {{contract_id}} has been escalated to level {{escalation_level}}.\n\nEscalation Details:\n- Contract Name: {{contract_name}}\n- Current State: {{current_state}}\n- Escalation Level: {{escalation_level}}\n- Escalated To: {{escalated_to}}\n- Escalation Date: {{escalation_date}}\n- Reason: {{escalation_reason}}\n\nImmediate action required.\n\nReview Contract: {{contract_url}}"
+          },
+          "in_app": {
+            "title": "Contract Escalated",
+            "message": "URGENT: Contract {{contract_id}} escalated to level {{escalation_level}}",
+            "action_url": "{{contract_url}}",
+            "icon": "alert-triangle",
+            "priority": "urgent"
+          },
+          "sms": {
+            "message": "URGENT: Contract {{contract_id}} escalated to level {{escalation_level}}. Review: {{contract_url}}"
+          },
+          "phone": {
+            "message": "This is an urgent notification. Contract {{contract_id}} has been escalated to level {{escalation_level}}. Please review immediately."
+          }
+        },
+        "variables": [
+          "contract_id",
+          "contract_name",
+          "current_state",
+          "escalation_level",
+          "escalated_to",
+          "escalation_date",
+          "escalation_reason",
+          "contract_url"
+        ],
+        "recipients": ["{{references.user_roles.ACCO_MANAGER.code}}", "{{references.user_roles.CONTRACT_OWNER.code}}"],
+        "conditions": [
+          {
+            "field": "escalation_triggered",
+            "operator": "equals",
+            "value": true
+          }
+        ]
+      },
+      "amendment_submitted": {
+        "id": "amendment_submitted",
+        "name": "Amendment Submitted",
+        "description": "Notification when amendment is submitted",
+        "enabled": true,
+        "priority": "medium",
+        "channels": ["email", "in_app"],
+        "templates": {
+          "email": {
+            "subject": "Amendment {{amendment_id}} Submitted for Approval",
+            "html_template": "<h2>Amendment Review Required</h2><p>Amendment <strong>{{amendment_id}}</strong> has been submitted for approval.</p><p><strong>Amendment Details:</strong></p><ul><li>Contract ID: {{contract_id}}</li><li>Amendment Type: {{amendment_type}}</li><li>Description: {{amendment_description}}</li><li>Submitted By: {{submitted_by}}</li><li>Submission Date: {{submission_date}}</li></ul><p>Please review the amendment and take appropriate action.</p><p><a href=\"{{amendment_url}}\">Review Amendment</a></p>",
+            "text_template": "Amendment {{amendment_id}} has been submitted for approval.\n\nAmendment Details:\n- Contract ID: {{contract_id}}\n- Amendment Type: {{amendment_type}}\n- Description: {{amendment_description}}\n- Submitted By: {{submitted_by}}\n- Submission Date: {{submission_date}}\n\nPlease review the amendment and take appropriate action.\n\nReview Amendment: {{amendment_url}}"
+          },
+          "in_app": {
+            "title": "Amendment Review Required",
+            "message": "Amendment {{amendment_id}} has been submitted for approval",
+            "action_url": "{{amendment_url}}",
+            "icon": "edit",
+            "priority": "medium"
+          }
+        },
+        "variables": [
+          "amendment_id",
+          "contract_id",
+          "amendment_type",
+          "amendment_description",
+          "submitted_by",
+          "submission_date",
+          "amendment_url"
+        ],
+        "recipients": ["{{references.user_roles.ACCO_MANAGER.code}}"],
+        "conditions": [
+          {
+            "field": "workflow_state",
+            "operator": "equals",
+            "value": "pending_approval"
+          }
+        ]
+      },
+      "document_uploaded": {
+        "id": "document_uploaded",
+        "name": "Document Uploaded",
+        "description": "Notification when document is uploaded",
+        "enabled": true,
+        "priority": "low",
+        "channels": ["email", "in_app"],
+        "templates": {
+          "email": {
+            "subject": "Document {{document_id}} Uploaded",
+            "html_template": "<h2>Document Uploaded</h2><p>Document <strong>{{document_name}}</strong> has been uploaded.</p><p><strong>Document Details:</strong></p><ul><li>Document ID: {{document_id}}</li><li>Document Type: {{document_type}}</li><li>File Size: {{file_size}}</li><li>Uploaded By: {{uploaded_by}}</li><li>Upload Date: {{upload_date}}</li></ul><p>The document is now available for review.</p><p><a href=\"{{document_url}}\">View Document</a></p>",
+            "text_template": "Document {{document_name}} has been uploaded.\n\nDocument Details:\n- Document ID: {{document_id}}\n- Document Type: {{document_type}}\n- File Size: {{file_size}}\n- Uploaded By: {{uploaded_by}}\n- Upload Date: {{upload_date}}\n\nThe document is now available for review.\n\nView Document: {{document_url}}"
+          },
+          "in_app": {
+            "title": "Document Uploaded",
+            "message": "Document {{document_name}} has been uploaded and is available for review",
+            "action_url": "{{document_url}}",
+            "icon": "upload",
+            "priority": "low"
+          }
+        },
+        "variables": [
+          "document_id",
+          "document_name",
+          "document_type",
+          "file_size",
+          "uploaded_by",
+          "upload_date",
+          "document_url"
+        ],
+        "recipients": ["{{references.user_roles.ACCO_STAFF.code}}"],
+        "conditions": [
+          {
+            "field": "workflow_state",
+            "operator": "equals",
+            "value": "uploaded"
+          }
+        ]
+      }
+    },
+    "escalation_notifications": {
+      "escalation_level_1": {
+        "id": "escalation_level_1",
+        "name": "Level 1 Escalation",
+        "description": "Notification for level 1 escalation",
+        "enabled": true,
+        "priority": "medium",
+        "channels": ["email", "in_app"],
+        "templates": {
+          "email": {
+            "subject": "Workflow Escalation - Level 1",
+            "html_template": "<h2>Workflow Escalation - Level 1</h2><p>The workflow <strong>{{workflow_name}}</strong> has been escalated to level 1.</p><p><strong>Escalation Details:</strong></p><ul><li>Workflow ID: {{workflow_id}}</li><li>Current State: {{current_state}}</li><li>Escalation Level: 1</li><li>Escalated To: {{escalated_to}}</li><li>Escalation Date: {{escalation_date}}</li><li>Reason: {{escalation_reason}}</li></ul><p>Please review and take action.</p><p><a href=\"{{workflow_url}}\">Review Workflow</a></p>",
+            "text_template": "Workflow Escalation - Level 1\n\nThe workflow {{workflow_name}} has been escalated to level 1.\n\nEscalation Details:\n- Workflow ID: {{workflow_id}}\n- Current State: {{current_state}}\n- Escalation Level: 1\n- Escalated To: {{escalated_to}}\n- Escalation Date: {{escalation_date}}\n- Reason: {{escalation_reason}}\n\nPlease review and take action.\n\nReview Workflow: {{workflow_url}}"
+          },
+          "in_app": {
+            "title": "Workflow Escalated - Level 1",
+            "message": "Workflow {{workflow_name}} has been escalated to level 1",
+            "action_url": "{{workflow_url}}",
+            "icon": "alert-circle",
+            "priority": "medium"
+          }
+        },
+        "variables": [
+          "workflow_id",
+          "workflow_name",
+          "current_state",
+          "escalated_to",
+          "escalation_date",
+          "escalation_reason",
+          "workflow_url"
+        ],
+        "recipients": ["assignee", "assignee.manager"],
+        "conditions": [
+          {
+            "field": "escalation_level",
+            "operator": "equals",
+            "value": 1
+          }
+        ]
+      },
+      "escalation_level_2": {
+        "id": "escalation_level_2",
+        "name": "Level 2 Escalation",
+        "description": "Notification for level 2 escalation",
+        "enabled": true,
+        "priority": "high",
+        "channels": ["email", "in_app", "sms"],
+        "templates": {
+          "email": {
+            "subject": "Workflow Escalation - Level 2",
+            "html_template": "<h2>Workflow Escalation - Level 2</h2><p>The workflow <strong>{{workflow_name}}</strong> has been escalated to level 2.</p><p><strong>Escalation Details:</strong></p><ul><li>Workflow ID: {{workflow_id}}</li><li>Current State: {{current_state}}</li><li>Escalation Level: 2</li><li>Escalated To: {{escalated_to}}</li><li>Escalation Date: {{escalation_date}}</li><li>Reason: {{escalation_reason}}</li></ul><p><strong>Immediate attention required.</strong></p><p><a href=\"{{workflow_url}}\">Review Workflow</a></p>",
+            "text_template": "Workflow Escalation - Level 2\n\nThe workflow {{workflow_name}} has been escalated to level 2.\n\nEscalation Details:\n- Workflow ID: {{workflow_id}}\n- Current State: {{current_state}}\n- Escalation Level: 2\n- Escalated To: {{escalated_to}}\n- Escalation Date: {{escalation_date}}\n- Reason: {{escalation_reason}}\n\nImmediate attention required.\n\nReview Workflow: {{workflow_url}}"
+          },
+          "in_app": {
+            "title": "Workflow Escalated - Level 2",
+            "message": "Workflow {{workflow_name}} has been escalated to level 2 - Immediate attention required",
+            "action_url": "{{workflow_url}}",
+            "icon": "alert-triangle",
+            "priority": "high"
+          },
+          "sms": {
+            "message": "Workflow {{workflow_name}} escalated to level 2. Immediate attention required. Review: {{workflow_url}}"
+          }
+        },
+        "variables": [
+          "workflow_id",
+          "workflow_name",
+          "current_state",
+          "escalated_to",
+          "escalation_date",
+          "escalation_reason",
+          "workflow_url"
+        ],
+        "recipients": ["assignee", "assignee.manager", "{{references.user_roles.ACCO_MANAGER.code}}"],
+        "conditions": [
+          {
+            "field": "escalation_level",
+            "operator": "equals",
+            "value": 2
+          }
+        ]
+      }
+    },
+    "system_notifications": {
+      "workflow_completed": {
+        "id": "workflow_completed",
+        "name": "Workflow Completed",
+        "description": "Notification when workflow is completed",
+        "enabled": true,
+        "priority": "medium",
+        "channels": ["email", "in_app"],
+        "templates": {
+          "email": {
+            "subject": "Workflow {{workflow_id}} Completed",
+            "html_template": "<h2>Workflow Completed</h2><p>The workflow <strong>{{workflow_name}}</strong> has been completed successfully.</p><p><strong>Completion Details:</strong></p><ul><li>Workflow ID: {{workflow_id}}</li><li>Completion Date: {{completion_date}}</li><li>Total Duration: {{total_duration}}</li><li>Final State: {{final_state}}</li></ul><p><a href=\"{{workflow_url}}\">View Workflow</a></p>",
+            "text_template": "Workflow Completed\n\nThe workflow {{workflow_name}} has been completed successfully.\n\nCompletion Details:\n- Workflow ID: {{workflow_id}}\n- Completion Date: {{completion_date}}\n- Total Duration: {{total_duration}}\n- Final State: {{final_state}}\n\nView Workflow: {{workflow_url}}"
+          },
+          "in_app": {
+            "title": "Workflow Completed",
+            "message": "Workflow {{workflow_name}} has been completed successfully",
+            "action_url": "{{workflow_url}}",
+            "icon": "check-circle",
+            "priority": "medium"
+          }
+        },
+        "variables": [
+          "workflow_id",
+          "workflow_name",
+          "completion_date",
+          "total_duration",
+          "final_state",
+          "workflow_url"
+        ],
+        "recipients": ["{{references.user_roles.CONTRACT_OWNER.code}}"],
+        "conditions": [
+          {
+            "field": "workflow_status",
+            "operator": "equals",
+            "value": "completed"
+          }
+        ]
+      },
+      "workflow_failed": {
+        "id": "workflow_failed",
+        "name": "Workflow Failed",
+        "description": "Notification when workflow fails",
+        "enabled": true,
+        "priority": "high",
+        "channels": ["email", "in_app", "sms"],
+        "templates": {
+          "email": {
+            "subject": "Workflow {{workflow_id}} Failed",
+            "html_template": "<h2>Workflow Failed</h2><p>The workflow <strong>{{workflow_name}}</strong> has failed.</p><p><strong>Failure Details:</strong></p><ul><li>Workflow ID: {{workflow_id}}</li><li>Failure Date: {{failure_date}}</li><li>Error Message: {{error_message}}</li><li>Failed State: {{failed_state}}</li></ul><p>Please review the error and take appropriate action.</p><p><a href=\"{{workflow_url}}\">View Workflow</a></p>",
+            "text_template": "Workflow Failed\n\nThe workflow {{workflow_name}} has failed.\n\nFailure Details:\n- Workflow ID: {{workflow_id}}\n- Failure Date: {{failure_date}}\n- Error Message: {{error_message}}\n- Failed State: {{failed_state}}\n\nPlease review the error and take appropriate action.\n\nView Workflow: {{workflow_url}}"
+          },
+          "in_app": {
+            "title": "Workflow Failed",
+            "message": "Workflow {{workflow_name}} has failed. Error: {{error_message}}",
+            "action_url": "{{workflow_url}}",
+            "icon": "x-circle",
+            "priority": "high"
+          },
+          "sms": {
+            "message": "Workflow {{workflow_name}} failed. Error: {{error_message}}. Review: {{workflow_url}}"
+          }
+        },
+        "variables": [
+          "workflow_id",
+          "workflow_name",
+          "failure_date",
+          "error_message",
+          "failed_state",
+          "workflow_url"
+        ],
+        "recipients": ["{{references.user_roles.ACCO_MANAGER.code}}", "{{references.user_roles.CONTRACT_OWNER.code}}"],
+        "conditions": [
+          {
+            "field": "workflow_status",
+            "operator": "equals",
+            "value": "failed"
+          }
+        ]
+      }
+    }
+  },
+  "template_management": {
+    "template_versioning": {
+      "enabled": true,
+      "version_strategy": "semantic",
+      "auto_increment": true
+    },
+    "template_validation": {
+      "enabled": true,
+      "validate_variables": true,
+      "validate_syntax": true,
+      "validate_channels": true
+    },
+    "template_testing": {
+      "enabled": true,
+      "test_data": "sample_data",
+      "preview_mode": true
+    }
+  },
+  "metadata": {
+    "created_at": "2024-01-01T00:00:00Z",
+    "created_by": "system",
+    "version": "2.0.0",
+    "description": "Enterprise workflow notification templates with advanced features",
+    "tags": ["notifications", "templates", "workflow", "email", "sms"],
+    "dependencies": [
+      "schema/references.json",
+      "workflow_definitions.json"
+    ]
+  }
+}

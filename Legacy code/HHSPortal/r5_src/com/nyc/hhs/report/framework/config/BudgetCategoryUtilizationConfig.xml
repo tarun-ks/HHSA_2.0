@@ -1,0 +1,25 @@
+<charts>
+		<chart width="500pt" height="500pt" id="budgetCategoryUtilization"
+		chart_design_id="budgetCategoryUtilizationScripted.rptdesign" 
+		export_design_id="export/budgetCategoryExport.rptdesign"
+		dashboard_chart_design_id="budgetCategoryUtilizationScripted.rptdesign"
+		 exportdata="true" exportformat="csv" datasource="scripted" sqlID="getBudgetCatUtilization_ForGrid" exportsqlID="getBudgetCatUtilization"  exporttablename="data"
+		emitterClass="com.nyc.hhs.report.extension.ExportCSVReport">
+		<report-params>
+			<param name="organizationId" scope="" target="ORGANIZATION_ID" />
+			<param name="fyYearId" scope="" target="fyYearId" />
+		</report-params>
+		<report-variables>
+			<variable name="reportList" scope="global" target="reportList" />
+		</report-variables>
+		<data-columns sqlID="getBudgetCatUtilization_ForGrid">
+					<column headingName="Budget Category" columnName="amountType" size="15%" />
+					<column headingName="FY Amount ($)" columnName="fyYearAmount" size="15%" />
+					<column headingName="Invoiced Amount ($)" columnName="amount" size="15%" />
+					<column headingName="Percent Utilized (%)" columnName="percentUtilized" size="15%" />
+					<column headingName="Over/Under (%)" columnName="overUnder" size="15%" />
+		</data-columns>
+		
+		<table-columns/>
+	</chart>
+</charts>

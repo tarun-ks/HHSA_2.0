@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
+  http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
+	version="2.0">
+	<description>
+    Create custom taglibrary to create navigation
+  </description>
+	<tlib-version>1.0</tlib-version>
+	<short-name>SM-Navigation</short-name>
+	<tag>
+		<description>It will display default value </description>
+		<name>navigationSM</name>
+		<tag-class>com.nyc.hhs.frameworks.common.NavigationSMTag</tag-class>
+		<body-content>JSP</body-content>
+		<attribute>
+			<name>screenName</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>procurementId</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>level</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+</taglib>

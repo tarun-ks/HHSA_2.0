@@ -1,0 +1,336 @@
+/* Conditional CSS - Changes will reflect only in Internet Explorer 7 */
+
+.taskButtons {margin-bottom:0}
+.alignRht .button {position: static !important}
+.taskButtons input, .buttonholder input, .button, .returnButton{
+	padding:4px;
+	width:auto;
+	overflow:visible
+}
+.taskfilter .graybtutton{
+	padding:2px 6px;
+	width:auto;
+	overflow:visible
+}
+.complianceWrapper .tasktopfilter .taskfilter,
+.complianceWrapper .tasktopfilter .taskreassign
+{
+	width:auto;
+	white-space: nowrap
+}
+.returnButton {
+	padding-left: 24px;
+	display:inline-block
+	}
+.taskButtons input {margin: 4px 0 2px 0}
+#documentValuePop {top: 30px}
+.linkReturnValut a{
+	padding-top: 14px;
+	padding-bottom: 14px !important
+}
+
+/* Fixes on Global header for icons and code resize panel */
+.toolbar ul{
+	float: right !important;
+	margin: 0 !important
+}
+.textresize{
+	text-align: right;
+	float:right;
+	margin-bottom:12px
+}
+.textresize ul {float: none}
+.textresize span{
+	width:auto;
+	float:right;
+	padding-right:4px
+}
+.accrodinWrapper h5{
+	margin: 8px 0.5% 8px 1% !important;
+	padding-bottom:8px
+}
+.accrodinWrapper {width: 100% !important}
+.wizardTabs {position:relative}
+.appnavbar {
+	float: left; 
+	width: 100%
+}
+.appnavbar ul li{
+	height: auto;
+	padding-top:0;
+}
+.appnavbar ul li a{
+	width:85%;
+	float:left;
+}
+.appnavbar ul li a{
+	float: left;
+	padding-bottom:9px;
+	padding-top:8px
+}
+.appnavbar .current {
+	background-color: #26b83f;
+	color:#fff;
+	cursor: default;
+	padding: 8px 20px 8px 28px
+}
+.button{
+	z-index: 10;
+	position: relative
+}
+.ui-dialog, .ui-widget, .ui-widget-content, .ui-corner-all, .ui-draggable{
+	width:200px;	
+}
+.complianceWrapper .ui-dialog, .ui-widget, .ui-widget-content, .ui-corner-all, .ui-draggable{
+	width:100%;	
+}
+.ui-button{
+	 width:auto;
+	 overflow:visible
+}
+#newTabs .container {min-height: 250px !important}
+.tabularCustomHead {position: relative}
+	.tabularCustomHead .floatRht {
+		right: 0
+		position: absolute
+	}
+	
+	.iconQuestion a, .iconQuestion2 a{
+		float:left;
+		height:16px
+	}
+
+li.liTreeClass{
+	float: left;
+	width:100%
+}
+li.liTreeClass .descriptionTreeClass{
+	float:left
+}
+.descriptionTreeClass input.button{
+	left:90%;
+	right:0
+}
+
+.hdng {width: 100%}
+.ui-accordion-content, .ui-helper-reset, .ui-widget-content, .ui-corner-bottom, .ui-accordion-content-active {
+	width:auto
+	}
+
+.customtabs ul li {top: 0px}
+.iconQuestion, .iconContact, .iconQuestion2 {margin-top:8px}
+.rgtCell #main-wrapper {width:100%}
+.rgtCell #main-wrapper .bodycontainer {
+	width:100%; 
+	padding:0;
+}
+.tabularWrapper { height: auto !important}
+.linkReturnValut a {background: url(../images/newIcons.png) no-repeat 4px -120px}
+.helpDocPop li a{
+	display:block;
+	float:left
+}
+	.helpDocPop li div{clear: both}
+.linkReturnVault a {line-height: 24px}
+.row {min-height:30px !important}
+.message-close {right:0}
+.failed, .passed {
+	float:left;
+	width:93%
+}
+.passed, .message-close {right:4px}
+#loginDiv .failed {float: none}
+.descriptionTreeClass .button {position: static}
+.ui-dialog {
+	width: 590px  !important; 
+	}
+.ui-dialog-content{
+	padding-left: 6px !important;
+	padding-right:0 !important;
+}
+.rdoBtn {border: none !important}
+.alert-box-sharedoc,.alert-box-unsharebyprovider, .alert-box, .alert-box-help, .tabularCustomHead {
+	line-height: 14px !important
+	}
+a.exit-panel {top:-6px !important}
+.selectedContainer h4 {
+	position: static !important;
+	float:left;
+}
+.selectedContainer ul {margin-top: auto}
+.alert-box-contact {clear:both}
+.nycgov_header ul li{
+	padding-right: 4px;
+	padding-left: 9px
+}
+.footer .fotterlinks ul li {padding: 0 10px 0 8px}
+.alert-box {width: 60%}
+.taxonomyLeftCell {min-height: 758px !important}
+.taxonomyTopButtons{
+	 width: 59%  !important; 
+	 overflow:hidden !important
+}
+.settingHeight {height:180px}
+.tabularContainer .failed{
+	float: none;
+	width: auto !important;
+	position: relative
+}
+
+/*  Workaround for float wrap in IE for CSS-based layouts */
+.wlp-bighorn-layout-flow-first,
+.wlp-bighorn-layout-border-west{
+    margin-right: -2px
+}
+.sort-default, .sort-ascending{
+	display: inline-block;
+	background-position-y: -4% 
+}
+.sort-default, .sort-ascending{
+	display: inline-block;
+	background-position-y: -4% 
+}
+.sort-descending{
+	display: inline-block;
+	background-position-y: 101% 
+}
+.ui-tabs-panel{
+	margin-top: 1px;
+}
+ol.helpWrapper ul li, ol.helpWrapper ol li{
+	float: none!important
+}
+.accContainer{
+	clear: both !important
+}
+
+.formfield #doctype{
+	width: auto 
+}
+.formfield .input [disabled]{
+	width:200px !important;
+}
+.ui-widget{
+	font-size:1em;
+}
+
+.autocomplete{
+	min-height: 37px;
+}
+
+/* Date validation for R2- Procurement Summary (procurementroadmap.jsp) */
+.dateValidateWrapper span.floatLft{
+	float:none
+}
+
+/* fixed issue of alignement on 'Proposal comments' popup over procurement -> proposal summary -> proposal document -> show comments */
+.alert-box-proposal-comments{
+	width:auto
+}
+.tabularContainer .formcontainer .row span.error{
+	width:27% 
+}
+.ui-pg-table td{
+	width: auto
+}
+
+.gridScroll{
+	position:relative;
+	overflow-x:auto;
+	overflow-y:hidden;
+	padding-bottom:16px
+}
+
+.ui-corner-all a.ui-corner-all{
+	width:auto
+}
+.liBorderNone{
+	border-top:none !important;
+	border-left:none !important;
+	border-right:none !important
+}
+.taskfilter select{
+  width:144px;
+  margin-right:4px;
+  margin-top:7px;
+  float:left
+}
+.formcontainerFinance .widthFull, #documentValuePop .widthFull{
+	width:100% !important
+}
+/* Below is fix for error on listing pages of finance module */
+.formfield .ieError7{
+	width:285px !important
+}
+.failedShow{
+	float:left;
+	width:93%
+}
+
+.agencySettingWrapper .lftContainer select, 
+.taxonomyTaggingWrapper .lftContainer select,
+.taxonomyTaggingWrapper .rhtContainer select,
+.agencySettingWrapper  .rhtContainer select {
+	height: 148px
+}
+
+/* Remove loading of R3 - jqgrid from accordions */
+.ui-jqgrid .loading {
+      display:none !important
+}
+td.ui-pg-button, .ui-pg-div{
+      white-space: nowrap
+}
+.clearHeight {
+      min-height:auto !important
+}
+
+
+/* added on 8Aug - to remove extra spacing on return link over task pages */
+div.linkReturnValut{
+	margin-top:-14px
+}
+
+/* R3- after opening accordions - form data - border beneath */
+.accordionWrapper .paymentFormWrapper .row{
+	min-height:35px !important
+}
+
+/* R3 - Wrapping of labels fonts in text resize(large font option */
+.paymentFormWrapper .row span.label{
+	word-wrap:break-word
+}
+
+/* R3- fixing issue of the gaps between table and no records */
+.clearHeight .tabularWrapper table{
+	float:none
+}
+.sub-notstarted{
+	display:inline-block
+}
+.ui-jqgrid-btable .tablediv .ui-jqgrid-view .ui-jqgrid-bdiv {
+	
+}.autocomplete{
+	min-height: 37px;
+}
+
+.tabularContainer .formcontainer .row span.error{
+	padding:0 !important;
+	margin:0 !important;
+	background:transparent;
+	height:auto;
+	line-height:auto;
+	font-size: 0px;
+}
+.tabularContainer .formcontainer .row span.error label.error{
+	font-size:12px;
+	line-height:auto
+}
+.popupWrapper .formcontainer .row span.error{
+	font-size: 1em;
+}
+
+	/*on Add-task button */
+.taskButtons input.add{
+	margin:0 0 2px 0
+}

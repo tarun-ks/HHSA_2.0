@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.AuditMapper">
+
+	<insert id="insertInGeneralAudit" parameterType="hashmap">
+		INSERT INTO GENERAL_AUDIT(ORGANIZATION_ID,EVENT_NAME,EVENT_TYPE,AUDIT_DATE,USER_ID,DATA,ENTITY_TYPE,ENTITY_ID,PROVIDER_VISIBILITY_FLAG,ENTITY_IDENTIFIER,EMAIL_ID,USER_TYPE)VALUES(#{orgId},#{eventName},#{eventType},systimestamp,(select USER_ID from STAFF_CITY_USER_DETAILS where lower(EMAIL_ID)=lower(#{userId})  
+		and USER_DN is not null and rownum =1 ),#{data},#{entityType},#{entityId},#{providerFlag},#{EntityIdentifier,jdbcType=VARCHAR},#{userId},(select USER_TYPE from STAFF_CITY_USER_DETAILS where lower(EMAIL_ID)=lower(#{userId}) and USER_DN is not null and rownum =1 ))
+	</insert>
+	
+	<insert id="insertInApplicationAudit" parameterType="hashmap">
+		INSERT INTO APPLICATION_AUDIT (ORGANIZATION_ID,APPLICATION_ID,EVENT_NAME,EVENT_TYPE,AUDIT_DATE,USER_ID,DATA,ENTITY_TYPE,ENTITY_ID,SECTION_ID,PROVIDER_VISIBILITY_FLAG,ENTITY_IDENTIFIER,EMAIL_ID,USER_TYPE)VALUES(#{orgId},#{appId},#{eventName},#{eventType},systimestamp,(select USER_ID from STAFF_CITY_USER_DETAILS where lower(EMAIL_ID)=lower(#{userId})  
+		and USER_DN is not null and rownum =1 ),#{data},#{entityType},#{entityId},#{sectionId},#{providerFlag},#{EntityIdentifier,jdbcType=VARCHAR},#{userId},(select USER_TYPE from STAFF_CITY_USER_DETAILS where lower(EMAIL_ID)=lower(#{userId}) and USER_DN is not null and rownum =1 ) )
+	</insert>
+	
+	<insert id="insertInApplicationAuditDocument" parameterType="hashmap">
+		INSERT INTO APPLICATION_AUDIT (ORGANIZATION_ID,APPLICATION_ID,EVENT_NAME,EVENT_TYPE,AUDIT_DATE,USER_ID,DATA,ENTITY_TYPE,ENTITY_ID,SECTION_ID,PROVIDER_VISIBILITY_FLAG,ENTITY_IDENTIFIER,EMAIL_ID,USER_TYPE)VALUES(#{orgId},#{appId},#{tnceventName},#{tnceventType},systimestamp,(select USER_ID from STAFF_CITY_USER_DETAILS where lower(EMAIL_ID)=lower(#{userId})  
+		and USER_DN is not null and rownum =1 ),#{tncdata},#{tncentityType},#{tncentityId},#{documentId},#{tncproviderFlag},#{tncEntityIdentifier,jdbcType=VARCHAR}, #{userId},(select USER_TYPE from STAFF_CITY_USER_DETAILS where lower(EMAIL_ID)=lower(#{userId}) and USER_DN is not null and rownum =1 ))
+	</insert>
+	
+</mapper>

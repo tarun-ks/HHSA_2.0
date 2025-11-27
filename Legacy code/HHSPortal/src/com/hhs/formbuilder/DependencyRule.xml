@@ -1,0 +1,219 @@
+<!--
+dependent will be termed as OR 
+dependent-on will be termed as AND
+-->
+
+<dependency-rules>
+	<dependency-rule formname="Basic" version="0" formid="">
+		<element name="ein" />
+		<element name="OLN" />
+		<element name="CS" />
+		<element name="entityType">
+			<dependent>
+				<dependent-on on="CS" value="For Profit" />
+			</dependent>
+		</element>
+		<element name="otherPleaseSpecify">
+			<dependent>
+				<dependent-on on="entityType" value="Other" />
+			</dependent>
+		</element>
+		<element name="Frommonth" />
+		<element name="Tomonth" />
+		<element name="Ministatement" />
+		<element name="Address1" />
+		<element name="city" />
+		<element name="state" />
+		<element name="Zipcode" />
+		<element name="phoneno" />
+		<element name="twittersm" />
+		<element name="twitter">
+			<dependent>
+				<dependent-on on="twittersm" value="twittersmvalue" />
+			</dependent>
+		</element>
+		<element name="facebookpage">
+			<dependent>
+				<dependent-on on="facebooksm" value="facebooksmvalue" />
+			</dependent>
+		</element>
+		<element name="ifOther">
+			<dependent>
+				<dependent-on on="othersm" value="othersmvalue" />
+			</dependent>
+		</element>
+	</dependency-rule>
+
+	<dependency-rule formname="Filings" version="0"><!-- corpStr -->
+		<element name="orgExempt">
+			<dependent>
+				<dependent-on on="corpStr" value="Non Profit" />
+			</dependent>
+		</element>
+		<element name="Religious_Organization">
+			<dependent>
+				<dependent-on on="orgExempt" value="Yes" />
+			</dependent>
+		</element>
+		<element name="other_exempt_explain">
+			<dependent>
+				<dependent-on on="other_exempt" value="other_exempt" />
+			</dependent>
+		</element>
+		<element name="org_reg_id">
+			<dependent>
+				<dependent-on on="orgExempt" value="No" />
+			</dependent>
+		</element>
+		<element name="Registration_Type">
+			<dependent>
+				<dependent-on on="orgExempt" value="No" />
+			</dependent>
+		</element>
+		<element name="org_reg_with_char">
+			<dependent>
+				<dependent-on on="orgExempt" value="No" />
+			</dependent>
+		</element>
+		<element name="char_ext">
+			<dependent>
+				<dependent-on on="org_reg_with_char" value="org_reg_with_char" />
+			</dependent>
+		</element>
+		<element name="irs">
+			<dependent>
+				<dependent-on on="corpStr" value="Non Profit" />
+			</dependent>
+		</element>
+		<element name="revoked_actions">
+			<dependent>
+				<dependent-on on="irs" value="No" />
+			</dependent>
+		</element>
+		<element name="curr_tax_filings" />
+		<element name="curr_tax_explain">
+			<dependent>
+				<dependent-on on="curr_tax_filings" value="No" />
+			</dependent>
+			<dependent>
+				<dependent-on on="curr_tax_filings" value="Exempt From Filing" />
+			</dependent>
+		</element>
+		<element name="irs_form">
+			<dependent>
+				<dependent-on on="irs" value="Yes" />
+				<dependent-on on="curr_tax_filings" value="No" />
+			</dependent>
+			<dependent>
+				<dependent-on on="irs" value="Yes" />
+				<dependent-on on="curr_tax_filings" value="Yes" />
+			</dependent>
+		</element>
+		<element name="select_completed_audit" />
+		<element name="completed_audit">
+			<dependent>
+				<dependent-on on="select_completed_audit" value="Yes" />
+			</dependent>
+		</element>
+		<element name="where_material_findings">
+			<dependent>
+				<dependent-on on="select_completed_audit" value="Yes" />
+			</dependent>
+		</element>
+		<element name="material_findings">
+			<dependent>
+				<dependent-on on="where_material_findings" value="Yes" />
+			</dependent>
+		</element>
+		<element name="no_material_findings">
+			<dependent>
+				<dependent-on on="select_completed_audit" value="No" />
+			</dependent>
+		</element>
+		<element name="other_material_findings">
+			<dependent>
+				<dependent-on on="no_material_findings" value="Other" />
+			</dependent>
+		</element>
+		<element name="a133_single_audit" />
+		<element name="where_a133_single_audit">
+			<dependent>
+				<dependent-on on="a133_single_audit" value="Yes" />
+			</dependent>
+		</element>
+		<element name="yes_a133_material_findings">
+			<dependent>
+				<dependent-on on="where_a133_single_audit" value="Yes" />
+			</dependent>
+		</element>
+	</dependency-rule>
+
+	<dependency-rule formname="Board" version="0">
+		<element name="bc_executive" />
+		<element name="min_board_meetings" />
+		<element name="con_bm" />
+		<element name="annual_budget" />
+		<element name="review_financials" />
+		<element name="other_rev_finance">
+			<dependent>
+				<dependent-on on="review_financials" value="Other" />
+			</dependent>
+		</element>
+		<element name="budget_cash_projection" />
+		<element name="cash_budget_other">
+			<dependent>
+				<dependent-on on="budget_cash_projection" value="Other" />
+			</dependent>
+		</element>
+		<element name="min_trainings" />
+	</dependency-rule>
+
+	<dependency-rule formname="Policies" version="0">
+		<element name="sign_check" />
+		<element name="indicate_sign_check">
+			<dependent>
+				<dependent-on on="sign_check" value="Yes" />
+			</dependent>
+		</element>
+		<element name="enter_amount">
+			<dependent>
+				<dependent-on on="indicate_sign_check" value="Above a specified amount" />
+			</dependent>
+		</element>
+		<element name="explain_amount">
+			<dependent>
+				<dependent-on on="sign_check" value="No" />
+			</dependent>
+		</element>
+		<element name="record_financial" />
+		<element name="financial_explain">
+			<dependent>
+				<dependent-on on="record_financial" value="No" />
+			</dependent>
+		</element>
+		<element name="acc_reconciled" />
+		<element name="elec_acc" />
+		<element name="payroll_system" />
+		<element name="ceo_policy" />
+		<element name="eec_policy" />
+		<element name="professional_dev" />
+		<element name="explain_profe_dev">
+			<dependent>
+				<dependent-on on="professional_dev" value="Other" />
+			</dependent>
+		</element>
+		<element name="min_training_annual" />
+		<element name="performance_evaluations" />
+		<element name="eval_explain">
+			<dependent>
+				<dependent-on on="performance_evaluations" value="Other" />
+			</dependent>
+		</element>
+		<element name="overall_performance" />
+		<element name="annual_per_explain">
+			<dependent>
+				<dependent-on on="overall_performance" value="Other" />
+			</dependent>
+		</element>
+	</dependency-rule>
+</dependency-rules>

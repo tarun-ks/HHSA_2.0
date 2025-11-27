@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.FileUploadMapper">
+
+	<resultMap id="result" type="com.nyc.hhs.model.Document">
+		<result property="documentId" column="DOCUMENT_ID" />
+		<result property="status" column="DOCUMENT_STATUS" />
+		<result property="docType" column="DOCUMENT_TYPE" />
+		<result property="docCategory" column="DOCUMENT_CATEGORY" />
+		<result property="formName" column="FORM_NAME" />
+		<result property="formVersion" column="FORM_VERSION" />
+		<result property="formId" column="FORM_ID" />
+		<result property="applicationId" column="BUSINESS_APPLICATION_ID" />
+		<result property="status" column="STATUS_ID" />
+		<result property="organizationId" column="ORGANIZATION_ID" />
+		<result property="formName" column="FORM_NAME" />
+		<result property="formVersion" column="FORM_VERSION" />
+		<result property="userId" column="USER_ID" />
+		<result property="serviceAppID" column="SERVICE_APPLICATION_ID" />
+		<result property="sectionId" column="SECTION_ID" />
+		<result property="msEntityId" column="ENTITY_ID" />
+		<result property="msEntityType" column="ENTITY_TYPE" />
+	</resultMap>
+
+	<resultMap id="resultProviderList" type="com.nyc.hhs.model.ProviderBean">
+		<result property="hiddenValue" column="ORGANIZATION_ID" />
+		<result property="displayValue" column="ORGANIZATION_LEGAL_NAME" />
+	</resultMap>
+
+	<resultMap id="docPropsResult" type="com.nyc.hhs.model.ProviderBean">
+		<result property="startMonth" column="START_MONTH" />
+		<result property="endMonth" column="END_MONTH" />
+		<result property="startYear" column="START_YEAR" />
+		<result property="endYear" column="END_YEAR" />
+	</resultMap>
+	<resultMap id="docPropsOrgResult" type="com.nyc.hhs.model.ProviderBean">
+		<result property="startMonth" column="ACCOUNTING_PERIOD_START_MONTH" />
+		<result property="endMonth" column="ACCOUNTING_PERIOD_END_MONTH" />
+	</resultMap>
+
+	<resultMap id="applicationstatusResult" type="java.lang.String">
+		<result property="count" column="count" javaType="string" />
+	</resultMap>
+
+	<resultMap id="resultNycAgencyList" type="com.nyc.hhs.model.ProviderBean">
+		<result property="hiddenValue" column="AGENCY_ID" />
+		<result property="displayValue" column="AGENCY_NAME" />
+	</resultMap>
+	<update id="updateDocumentDetails" parameterType="com.nyc.hhs.model.Document">
+		UPDATE DOCUMENT
+		SET DOCUMENT_STATUS =#{status}, DOCUMENT_ID =#{documentId} where
+		BUSINESS_APPLICATION_ID=#{applicationId} and DOCUMENT_TYPE =
+		#{docType}
+	</update>
+
+	<select id="selectFormDetails" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT * FROM ${TABLE} where
+		<choose>
+			<when test="TABLE != null and TABLE != 'ORGANIZATION'">
+				BUSINESS_APPLICATION_ID = #{asApplicationId}
+				and ORGANIZATION_ID = #{asOrgId}
+    </when>
+			<otherwise>
+				ORGANIZATION_ID = #{asOrgId}
+    </otherwise>
+		</choose>
+	</select>
+
+	<select id="selectDocumentDetails" parameterType="hashmap"
+		resultMap="result">
+		SELECT * FROM DOCUMENT where
+		BUSINESS_APPLICATION_ID=#{asApplicationId} AND
+		ORGANIZATION_ID=#{asOrgId} AND FORM_NAME=#{asFormName}
+		AND
+		FORM_VERSION=#{asFormVersion} ORDER BY DOCUMENT_TYPE ASC
+	</select>
+
+	<select id="getCeoCount" parameterType="hashmap" resultType="int">
+		select count(1) from STAFF_ORGANIZATION where organization_id=#{asOrgId}
+		and title=#{asCeo} and
+		(ACTIVE_FLAG = #{asIsActive} or member_status = #{asMemberStatus}) and rownum=1
+	</select>
+
+	<select id="getCfoCount" parameterType="hashmap" resultType="int">
+		select count(1) from STAFF_ORGANIZATION where organization_id=#{asOrgId}
+		and title=#{asCeo} and
+		(ACTIVE_FLAG = #{asIsActive} or member_status = #{asMemberStatus}) and rownum=1
+	</select>
+
+	<select id="getCeoName" parameterType="hashmap" resultType="String">
+		select sd.FIRST_NAME||' '||sd.LAST_NAME from staff_details sd, STAFF_ORGANIZATION som where
+		som.organization_id=#{asOrgId} and
+		som.staff_id = sd.staff_id and
+		som.title=#{asCeo} and
+		(som.ACTIVE_FLAG = #{asIsActive} or som.member_status = #{asMemberStatus}) and rownum=1
+	</select>
+
+	<select id="getCfoName" parameterType="hashmap" resultType="String">
+		select FIRST_NAME||' '||LAST_NAME from (
+		select sd.FIRST_NAME,sd.LAST_NAME from staff_details sd, STAFF_ORGANIZATION som where
+		som.organization_id='provider' and
+		som.staff_id = sd.staff_id and
+		som.title=#{asCfo} ORDER BY FIRST_NAME,LAST_NAME ASC) where rownum=1
+	</select>
+
+	<select id="getDocIdForDocType" parameterType="hashmap"
+		resultType="String">
+		select document_id from document where
+		business_application_id=#{aoApplicationId}
+		and organization_id = #{asOrganizationId} and
+		document_type=#{asDocumentType}
+	</select>
+
+	<select id="getDocIdForDocTypeService" parameterType="hashmap"
+		resultType="String">
+		select document_id from document where
+		business_application_id=#{aoApplicationId}
+		and organization_id = #{asOrganizationId} and
+		document_type=#{asDocumentType}
+		and service_application_id = #{asServiceAppId}
+		AND ENTITY_ID = #{asEntityId}
+	</select>
+
+	<select id="selectDocumentDetailsBasics" parameterType="hashmap"
+		resultMap="result">
+		SELECT * FROM DOCUMENT where ORGANIZATION_ID=#{asOrgId} AND
+		FORM_NAME=#{asFormName}
+		AND FORM_VERSION=#{asFormVersion} ORDER BY
+		DOCUMENT_TYPE ASC
+	</select>
+
+
+	<select id="selectDocumentDetailsServiceSummary" parameterType="hashmap"
+		resultMap="result">
+		SELECT * FROM DOCUMENT where
+		SERVICE_APPLICATION_ID=#{asServiceApplicationId} AND
+		ORGANIZATION_ID=#{asOrgId} AND
+		BUSINESS_APPLICATION_ID=#{asapplicationid}
+	</select>
+
+	<select id="getAgencies" resultMap="resultNycAgencyList">
+		SELECT AGENCY_ID,AGENCY_NAME
+		FROM NYC_AGENCY_DETAILS
+	</select>
+
+	<select id="getProvidersAjax" resultMap="resultProviderList">
+		SELECT
+		ORGANIZATION_ID,ORGANIZATION_LEGAL_NAME FROM ORGANIZATION WHERE
+		ORGANIZATION_ACTIVE_FLAG = 'true' 
+	</select>
+	<select id="getAccountingPeriod" parameterType="string"
+		resultMap="docPropsResult">
+		SELECT START_MONTH, END_MONTH,START_YEAR,END_YEAR from
+		DOC_LAPSING_RULES_MASTER WHERE ORGANIZATION_ID = #{aoProviderId} AND
+		UPLOAD_ORDER=1
+	</select>
+	<select id="getDocumentStatus" parameterType="string"
+		resultType="string">
+		SELECT app.APPLICATION_STATUS FROM BUSINESS_APPLICATION app
+		where app.APPLICATION_ID = (SELECT BUSINESS_APPLICATION_ID FROM
+		DOCUMENT where DOCUMENT_ID=#{aoDocumentId})
+	</select>
+	<insert id="getDocLapsingInsertStatus" parameterType="hashmap">
+		INSERT INTO
+		DOC_LAPSING_RULES_TRANS
+		(ORGANIZATION_ID,DOCUMENT_TYPE,CREATED_BY,CREATED_DATE,MODIFIED_BY,MODIFIED_DATE,START_MONTH,END_MONTH,START_YEAR,END_YEAR,DOCUMENT_ID,WORKFLOW_ID,PROC_STATUS,
+		IS_SHORT_FILING) VALUES
+		(#{providerId},#{docType},#{user},#{operationTime},#{user},#{operationTime},#{nextStartFiscalMonth},#{nextEndFiscalMonth},#{approvedForStartYear},#{approvedForEndYear},#{documentId},#{workflowId},#{procStatus},#{isShortFiling})
+	</insert>
+	<select id="checkExtension" parameterType="string" resultType="string">
+		SELECT DOCUMENT_TYPE FROM DOC_LAPSING_RULES_MASTER WHERE
+		ORGANIZATION_ID = #{asProviderId} AND UPLOAD_ORDER=1
+	</select>
+
+	<select id="getEndYearForChar500" parameterType="string"
+		resultType="string">
+		SELECT END_YEAR FROM DOC_LAPSING_RULES_MASTER WHERE
+		ORGANIZATION_ID = #{asProviderId} AND UPLOAD_ORDER=1
+	</select>
+	<select id="getAccountingPeriodForProviderFromOrg"
+		parameterType="string" resultMap="docPropsOrgResult">
+		SELECT ACCOUNTING_PERIOD_START_MONTH,
+		ACCOUNTING_PERIOD_END_MONTH from ORGANIZATION WHERE ORGANIZATION_ID =
+		#{aoProviderId}
+	</select>
+	<select id="checkApplicationStatus" parameterType="hashmap"
+		resultType="string">
+		SELECT DISTINCT STATUS from(SELECT DISTINCT STATUS FROM
+		(SELECT APPLICATION_STATUS AS STATUS FROM
+		(SELECT
+		APPLICATION_STATUS
+		FROM
+		BUSINESS_APPLICATION WHERE
+		BUSINESS_APPLICATION_ID IN (SELECT
+		BUSINESS_APPLICATION_ID FROM
+		DOCUMENT WHERE DOCUMENT_ID =
+		#{documentId}))
+		UNION ALL
+		(SELECT SERVICE_STATUS AS STATUS FROM
+		(SELECT
+		SERVICE_STATUS FROM
+		SERVICE_APPLICATION WHERE
+		SERVICE_APPLICATION_ID IN
+		(SELECT
+		SERVICE_APPLICATION_ID FROM
+		DOCUMENT WHERE DOCUMENT_ID =
+		#{documentId})))
+		UNION ALL
+		SELECT STATUS from SUPERSEDING_STATUS where
+		ENTITY_ID IN (SELECT
+		SERVICE_APPLICATION_ID FROM
+		DOCUMENT WHERE
+		DOCUMENT_ID = #{documentId}
+		UNION SELECT
+		BUSINESS_APPLICATION_ID FROM
+		DOCUMENT WHERE DOCUMENT_ID =
+		#{documentId})))
+	</select>
+	<update id="updateDocumentDetails1" parameterType="com.nyc.hhs.model.Document">
+		UPDATE
+		DOCUMENT SET DOCUMENT_STATUS =#{status}, DOCUMENT_ID
+		=#{documentId},DOCUMENT_TITLE=#{docName},
+		MODIFIED_BY=#{lastModifiedBy},MODIFIED_DATE=#{lastModifiedDate},CREATED_BY
+		=#{submissionBy} ,CREATED_DATE=#{submissionDate}
+		where
+		BUSINESS_APPLICATION_ID=#{applicationId} and
+		DOCUMENT_CATEGORY=#{docCategory} and DOCUMENT_TYPE = #{docType} and
+		FORM_NAME=#{formName}
+		and FORM_VERSION=#{formVersion}
+		and
+		ORGANIZATION_ID=#{organizationId}
+	</update>
+
+	<update id="updateDocumentDetailsBasics" parameterType="com.nyc.hhs.model.Document">
+		UPDATE
+		DOCUMENT SET DOCUMENT_STATUS =#{status}, DOCUMENT_ID
+		=#{documentId},DOCUMENT_TITLE=#{docName},
+		MODIFIED_BY=#{lastModifiedBy},MODIFIED_DATE=#{lastModifiedDate},CREATED_BY
+		=#{submissionBy} ,CREATED_DATE=#{submissionDate}
+		where
+		SECTION_ID=#{sectionId} and DOCUMENT_CATEGORY=#{docCategory} and
+		DOCUMENT_TYPE = #{docType} and FORM_NAME=#{formName}
+		and
+		FORM_VERSION=#{formVersion}
+		and ORGANIZATION_ID=#{organizationId}
+	</update>
+
+
+	<update id="updateDocumentDetails1ServiceSummary" parameterType="com.nyc.hhs.model.Document">
+		UPDATE DOCUMENT SET DOCUMENT_STATUS =#{status}, DOCUMENT_ID
+		=#{documentId},DOCUMENT_TITLE=#{docName},
+		MODIFIED_BY=#{lastModifiedBy},MODIFIED_DATE=#{lastModifiedDate},CREATED_BY
+		=#{submissionBy} ,CREATED_DATE=#{submissionDate}
+		where
+		SERVICE_APPLICATION_ID=#{serviceAppID} and
+		DOCUMENT_CATEGORY=#{docCategory} and DOCUMENT_TYPE = #{docType}
+		and
+		ORGANIZATION_ID=#{organizationId}
+		AND ENTITY_ID = #{msEntityId}
+	</update>
+	<update id="updateDocLapsingMasterDueDate" parameterType="hashmap">
+		UPDATE
+		DOC_LAPSING_RULES_MASTER SET DUE_DATE =#{dueDate},
+		DOCUMENT_TYPE=#{nextExpectedDocType},
+		START_MONTH
+		=#{nextStartFiscalMonth}, END_MONTH =#{nextEndFiscalMonth},START_YEAR
+		=#{nextStartFiscalYear}, END_YEAR
+		=#{nextEndFiscalYear},MODIFIED_BY=#{modifiedBy},MODIFIED_DATE=SYSDATE
+		where
+		ORGANIZATION_ID=#{providerId} AND UPLOAD_ORDER=1
+	</update>
+	<delete id="deleteShortFilingEntry" parameterType="string">
+		DELETE FROM
+		DOC_LAPSING_RULES_MASTER WHERE ORGANIZATION_ID=#{providerId} AND
+		UPLOAD_ORDER=1
+	</delete>
+	<update id="updateDocLapsingMaster" parameterType="string">
+		UPDATE
+		DOC_LAPSING_RULES_MASTER SET UPLOAD_ORDER=1 WHERE
+		ORGANIZATION_ID=#{providerId} AND UPLOAD_ORDER=2
+	</update>
+	<update id="updateDocumentModifiedInfo" parameterType="hashmap">
+		UPDATE
+		DOCUMENT SET MODIFIED_DATE=#{modifiedDate}, MODIFIED_BY =#{modifiedBy} , DOCUMENT_TITLE=#{DocumentTitle}
+		WHERE DOCUMENT_ID=#{documentId}
+	</update>
+
+	<select id="getDocTypeAndWorkFlowID" parameterType="map"
+		resultType="hashmap">
+		SELECT
+		DOCLAPS.DOCUMENT_TYPE,
+		DOCLAPS.IS_SHORT_FILING,
+		DOCLAPS.CREATED_DATE, DOCLAPS.WORKFLOW_ID , DOCLAPS.PROC_STATUS
+		FROM
+		DOC_LAPSING_RULES_TRANS
+		DOCLAPS WHERE
+		DOCLAPS.ORGANIZATION_ID = #{aoProviderId} AND DOCLAPS.PROC_STATUS !='Returned' ORDER BY
+		DOCLAPS.CREATED_DATE DESC
+		
+	</select>
+
+	<update id="updateProcStatusForTerminatedWobNo" parameterType="hashmap">
+		UPDATE DOC_LAPSING_RULES_TRANS SET
+		PROC_STATUS=#{procStatus},MODIFIED_BY=#{modifiedBy},MODIFIED_DATE=SYSDATE
+		WHERE
+		WORKFLOW_ID = #{workflowId}
+	</update>
+	<select id="getLawType" resultType="string">
+		<!-- SELECT REGISTRATION_TYPE FROM FILING_FORM WHERE ORGANIZATION_ID = 
+			#{asProviderId} AND STATUS_ID != 'Completed' -->
+		SELECT REGISTRATION_TYPE FROM (SELECT
+		REGISTRATION_TYPE,MODIFIED_DATE
+		FROM FILING_FORM WHERE
+		ORGANIZATION_ID = #{asProviderId} AND
+		REGISTRATION_TYPE IS NOT NULL ORDER BY rownum desc)
+		WHERE ROWNUM=1
+	</select>
+
+	<select id="getUserName" resultType="string" parameterType="String">
+		SELECT FIRST_NAME||' '||MIDDLE_INITIAL||' '||LAST_NAME AS PROVIDERNAME
+		FROM STAFF_DETAILS WHERE STAFF_ID=#{asUserId}
+	</select>
+	<select id="getDueDate" resultType="string">
+		SELECT DUE_DATE,
+		DOCUMENT_TYPE FROM DOC_LAPSING_RULES_MASTER WHERE
+		ORGANIZATION_ID=#{asProviderId} AND UPLOAD_ORDER=1
+	</select>
+	<select id="getApplicationSettings" resultType="string">
+		SELECT
+		SETTINGS_VALUE FROM APPLICATION_SETTINGS WHERE
+		COMPONENT_NAME=#{componentName} AND SETTINGS_NAME=#{contentName}
+	</select>
+
+	<update id="updateTermaAndConditionFlag">
+		UPDATE STAFF_DETAILS
+		SET
+		TERMS_CONDITIONS_ACCEPTED='NO' where 
+		STAFF_ID IN (SELECT DISTINCT STAFF_ID FROM STAFF_ORGANIZATION WHERE ACTIVE_FLAG = 'Yes')
+	</update>
+
+	<update id="updateDeletedDocumentDetails" parameterType="map">
+		UPDATE
+		DOCUMENT SET
+		DOCUMENT_ID='',DOCUMENT_STATUS=#{asStatus},MODIFIED_DATE=SYSDATE,
+		DOCUMENT_TITLE='' WHERE DOCUMENT_ID=#{asDocumentId}
+		
+	</update>
+
+	<select id="getApplicationStatus" parameterType="string"
+		resultType="string">
+		Select APPLICATION_STATUS from (SELECT APPLICATION_STATUS
+		from
+		BUSINESS_APPLICATION WHERE BUSINESS_APPLICATION_ID IN (SELECT
+		BUSINESS_APPLICATION_ID FROM DOCUMENT WHERE ORGANIZATION_ID =
+		#{asOrgId}) order by
+		modified_date desc) where rownum=1
+	</select>
+
+	<select id="getProviderStatusDetails" parameterType="string"
+		resultType="HashMap">
+		SELECT
+		APPLICATION_STATUS,BUSINESS_APPLICATION_ID,ORGANIZATION_STATUS,ORGANIZATION_LEGAL_NAME,EMAIL_ADDRESS
+		FROM (SELECT
+		BA.APPLICATION_STATUS,BA.BUSINESS_APPLICATION_ID,ORG.ORGANIZATION_STATUS,ORG.ORGANIZATION_LEGAL_NAME,ORG.EMAIL_ADDRESS
+		FROM BUSINESS_APPLICATION BA, ORGANIZATION ORG, superseding_status ss
+		WHERE
+		BA.ORGANIZATION_ID=ORG.ORGANIZATION_ID AND
+		ORG.ORGANIZATION_ID=#{asOrganizationId} AND ss.entity_id =
+		ba.business_application_id and
+		ss.status=#{asApplicationStatus} ORDER BY
+		BA.MODIFIED_DATE DESC) WHERE rownum=1
+	</select>
+
+	<select id="getProviderStatusDetailsBatch" parameterType="string"
+		resultType="HashMap">
+		SELECT
+		APPLICATION_STATUS,BUSINESS_APPLICATION_ID ,ORGANIZATION_STATUS,ORGANIZATION_LEGAL_NAME,EMAIL_ADDRESS,ORGANIZATION_ID FROM (SELECT
+		BA.APPLICATION_STATUS,BA.BUSINESS_APPLICATION_ID,ORG.ORGANIZATION_STATUS,ORG.ORGANIZATION_LEGAL_NAME,ORG.EMAIL_ADDRESS,ORG.ORGANIZATION_ID
+		FROM BUSINESS_APPLICATION BA, ORGANIZATION ORG, superseding_status ss,
+		service_application sa WHERE
+		BA.ORGANIZATION_ID=ORG.ORGANIZATION_ID AND
+		SA.ORGANIZATION_ID=ORG.ORGANIZATION_ID and
+		ORG.ORGANIZATION_ID=#{asOrganizationId} AND (ss.entity_id =
+		ba.business_application_id or ss.entity_id =
+		sa.service_application_id) and
+		ss.status=#{asApplicationStatus} ORDER BY
+		BA.MODIFIED_DATE DESC) WHERE rownum=1
+	</select>
+
+	<!-- Updated for Release 3.2.0, Defect 5641 -->
+	<select id="getProviderBRAppDetails" parameterType="hashmap"
+		resultType="string">
+		SELECT APPLICATION_STATUS FROM BUSINESS_APPLICATION WHERE
+		ORGANIZATION_ID=#{providerId}
+		
+		UNION
+		
+		SELECT PROC_STATUS AS APPLICATION_STATUS FROM DOC_LAPSING_RULES_TRANS WHERE
+		ORGANIZATION_ID=#{providerId} AND DOCUMENT_ID = #{documentId}
+		
+	</select>
+	<!-- The below query deleteDueDateReminderEntry is modified as part of release 2.6.0 for defect 5587  -->
+	<delete id="deleteDueDateReminderEntry" parameterType="string">
+		DELETE
+		FROM
+		DUE_DATE_REMINDER WHERE ORGANIZATION_ID=#{providerId} AND NOTIFICATION_EVENT_ID IN('NT022','NT023','NT024','NT035')
+	</delete>
+	<select id="getDocumentDetails" parameterType="string"
+		resultType="HashMap">
+		SELECT
+		ORGANIZATION_ID,USER_ID,SECTION_ID,BUSINESS_APPLICATION_ID,FORM_ID,FORM_NAME,FORM_VERSION,SERVICE_APPLICATION_ID
+		FROM DOCUMENT WHERE DOCUMENT_ID=#{asDolcumentId}
+	</select>
+
+	<update id="setDocIdWithSameDocNameService" parameterType="com.nyc.hhs.model.Document">
+		update document set document_id = #{documentId} where organization_id
+		= #{organizationId} and
+		business_application_id = #{applicationId} and SECTION_ID = #{sectionId}
+		and document_type = #{docType} and document_title = #{docName}
+		AND ENTITY_ID = #{msEntityId}
+	</update>
+	<update id="setDocIdWithSameDocName" parameterType="com.nyc.hhs.model.Document">
+		update document set document_id = #{documentId} where organization_id =
+		#{organizationId} and
+		business_application_id = #{applicationId} and SECTION_ID = #{sectionId} and form_name =
+		#{formName} and form_version = #{formVersion}
+		and document_type = #{docType} and document_title = #{docName}
+	</update>
+
+	<update id="updateOldDocumentId" parameterType="Map">
+		update document
+		set document_id = #{newDocumentId} where document_id =
+		#{oldDocumentId} AND organization_id=#{asOrgId}
+	</update>
+
+		
+	<select id="documentIdCount" parameterType="hashmap" resultType="int">
+		SELECT count(1) as COUNT FROM Document WHERE document_id=#{documentId}
+	</select>
+	<select id="getLinkedToObjectName" parameterType="string"
+		resultType="String">
+		SELECT DISTINCT OBJECT_NAME FROM VW_ATTACHED_DOCUMENTS WHERE DOCUMENT_IDENTIFIER_ID=#{asDocumentId}
+	</select>
+	
+	<!-- Updated for Release 3.5.0, QC 5630 -->
+	<!-- Updating Query for New Filling Issue after Release 4.0.2 , Adding Status id and application status check in query-->
+	<select id="getLinkedToObjectNameNotInDraft" parameterType="map"
+		resultType="String">
+		SELECT   DISTINCT OBJECT_NAME 
+		  FROM   VW_ATTACHED_DOCUMENTS 
+		 WHERE   DOCUMENT_IDENTIFIER_ID=#{asDocumentId}
+		   AND   (STATUS_ID NOT IN (#{proposalStatus},#{procurementStatus},#{defaultStatus},#{proposalStatusReturned}) OR APPLICATION_STATUS Not IN (#{applicationStatusDraft},#{filingStatus},#{applicationStatusRFR}))
+	</select>
+	
+	<select id="getLinkedToObjectNameInDraft" parameterType="string"
+		resultType="String">
+		SELECT   DISTINCT OBJECT_NAME 
+		  FROM   VW_ATTACHED_DOCUMENTS 
+		 WHERE   DOCUMENT_IDENTIFIER_ID=#{asDocumentId}
+		   AND   STATUS_ID = 17
+	</select>
+	<!-- Updated for Release 3.5.0, QC 5630 -->
+
+	<select id="checkServiceStatus" parameterType="hashmap"
+		resultType="string">
+		select service_status from service_application where service_application_id=(select service_application_id from document where document_id=#{documentId})
+	</select>
+	<select id="checkSectionStatus" parameterType="hashmap"
+		resultType="string">
+		select sc.section_status as status from section sc
+		where sc.section_id=(select doc.section_id from document doc where doc.document_id=#{documentId}) and
+		sc.business_application_id=(select doc.business_application_id from document doc where doc.document_id=#{documentId})
+	</select>
+	
+	<select id="statusDocumentIdCount" parameterType="hashmap" resultType="int">
+
+		Select count (*) from 
+		(select distinct ba.application_status STATUS, ba.business_application_id from business_application ba, document d where
+		d.document_id =#{documentId} and 
+		ba.BUSINESS_APPLICATION_ID = d.BUSINESS_APPLICATION_ID and 
+		d.section_id != 'servicessummary' and
+		ba.application_status in ('In Review' , 'Approved')
+		
+		UNION All
+		
+		select distinct sa.service_status STATUS, sa.SERVICE_APPLICATION_ID from Service_Application sa, document d where
+		d.document_id =#{documentId} and
+		sa.SERVICE_APPLICATION_ID = d.SERVICE_APPLICATION_ID and
+		d.section_id = 'servicessummary' and 
+		sa.service_status in ('In Review' , 'Approved'))
+	</select>
+	<!--Start Added in R5 -->
+	<select id="checkFilingStatusInDb" parameterType="string" resultType="string">
+		select proc_status from  (
+select * from doc_lapsing_rules_trans where organization_id = #{aoOrgId} order by created_date desc
+)
+where rownum=1 
+	</select>
+	<!--End Added in R5 -->
+</mapper>

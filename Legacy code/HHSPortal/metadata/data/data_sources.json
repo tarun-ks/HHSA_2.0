@@ -1,0 +1,664 @@
+{
+  "version": "1.0.0",
+  "description": "Complete Contract Management Data Sources - All lookup tables and reference data",
+  "data_sources": {
+    "organizations": {
+      "name": "organizations",
+      "display_name": "Organizations",
+      "description": "Agencies, providers, and city organizations",
+      "endpoint": "/api/organizations",
+      "method": "GET",
+      "parameters": {
+        "type": {
+          "type": "string",
+          "description": "Filter by organization type",
+          "enum": ["AGENCY", "PROVIDER", "CITY"],
+          "required": false
+        },
+        "is_active": {
+          "type": "boolean",
+          "description": "Filter by active status",
+          "default": true,
+          "required": false
+        }
+      },
+      "response_mapping": {
+        "value_field": "id",
+        "label_field": "name",
+        "description_field": "legal_name",
+        "additional_fields": {
+          "type": "type",
+          "ein_tin": "ein_tin",
+          "duns_number": "duns_number",
+          "phone": "phone",
+          "email": "email"
+        }
+      },
+      "caching": {
+        "enabled": true,
+        "ttl": 3600,
+        "refresh_on": ["organization_created", "organization_updated", "organization_deleted"]
+      },
+      "sample_data": [
+        {
+          "id": "550e8400-e29b-41d4-a716-446655440001",
+          "name": "Department of Parks and Recreation",
+          "legal_name": "New York City Department of Parks and Recreation",
+          "type": "AGENCY",
+          "ein_tin": "13-5562300",
+          "duns_number": "123456789",
+          "phone": "212-360-8111",
+          "email": "info@nycparks.org",
+          "is_active": true
+        },
+        {
+          "id": "550e8400-e29b-41d4-a716-446655440011",
+          "name": "JGW Machine Limited",
+          "legal_name": "JGW Machine Limited",
+          "type": "PROVIDER",
+          "ein_tin": "12-3456789",
+          "duns_number": "987654321",
+          "phone": "718-555-0101",
+          "email": "info@jgwmachine.com",
+          "is_active": true
+        }
+      ]
+    },
+    "programs": {
+      "name": "programs",
+      "display_name": "Programs",
+      "description": "Agency programs for contract categorization",
+      "endpoint": "/api/programs",
+      "method": "GET",
+      "parameters": {
+        "agency_id": {
+          "type": "uuid",
+          "description": "Filter by agency",
+          "required": false
+        },
+        "is_active": {
+          "type": "boolean",
+          "description": "Filter by active status",
+          "default": true,
+          "required": false
+        }
+      },
+      "response_mapping": {
+        "value_field": "id",
+        "label_field": "name",
+        "description_field": "description",
+        "additional_fields": {
+          "code": "code",
+          "agency_id": "agency_id"
+        }
+      },
+      "caching": {
+        "enabled": true,
+        "ttl": 3600,
+        "refresh_on": ["program_created", "program_updated", "program_deleted"]
+      },
+      "sample_data": [
+        {
+          "id": "750e8400-e29b-41d4-a716-446655440001",
+          "code": "MAINT_OPS",
+          "name": "Maintenance & Operations",
+          "description": "General maintenance and operations program",
+          "agency_id": "550e8400-e29b-41d4-a716-446655440001",
+          "is_active": true
+        },
+        {
+          "id": "750e8400-e29b-41d4-a716-446655440002",
+          "code": "FACILITIES_LOG",
+          "name": "Facilities and Logistics",
+          "description": "Facilities management and logistics program",
+          "agency_id": "550e8400-e29b-41d4-a716-446655440002",
+          "is_active": true
+        }
+      ]
+    },
+    "contract_types": {
+      "name": "contract_types",
+      "display_name": "Contract Types",
+      "description": "Types of contracts (CT1, CTR, CT2, etc.)",
+      "endpoint": "/api/contract-types",
+      "method": "GET",
+      "parameters": {
+        "is_active": {
+          "type": "boolean",
+          "description": "Filter by active status",
+          "default": true,
+          "required": false
+        }
+      },
+      "response_mapping": {
+        "value_field": "id",
+        "label_field": "name",
+        "description_field": "description",
+        "additional_fields": {
+          "code": "code"
+        }
+      },
+      "caching": {
+        "enabled": true,
+        "ttl": 7200,
+        "refresh_on": ["contract_type_created", "contract_type_updated", "contract_type_deleted"]
+      },
+      "sample_data": [
+        {
+          "id": "950e8400-e29b-41d4-a716-446655440001",
+          "code": "CT1",
+          "name": "General Contract (CT1)",
+          "description": "Standard general contract",
+          "is_active": true
+        },
+        {
+          "id": "950e8400-e29b-41d4-a716-446655440002",
+          "code": "CTR",
+          "name": "General Contract Revision (CTR)",
+          "description": "Contract revision or modification",
+          "is_active": true
+        },
+        {
+          "id": "950e8400-e29b-41d4-a716-446655440003",
+          "code": "CT2",
+          "name": "Professional Services Contract",
+          "description": "Professional services agreement",
+          "is_active": true
+        },
+        {
+          "id": "950e8400-e29b-41d4-a716-446655440004",
+          "code": "CT3",
+          "name": "Construction Contract",
+          "description": "Construction and building contract",
+          "is_active": true
+        },
+        {
+          "id": "950e8400-e29b-41d4-a716-446655440005",
+          "code": "CT4",
+          "name": "Consulting Contract",
+          "description": "Consulting services contract",
+          "is_active": true
+        },
+        {
+          "id": "950e8400-e29b-41d4-a716-446655440006",
+          "code": "AMENDMENT",
+          "name": "Amendment",
+          "description": "Contract amendment",
+          "is_active": true
+        },
+        {
+          "id": "950e8400-e29b-41d4-a716-446655440007",
+          "code": "RENEWAL",
+          "name": "Renewal",
+          "description": "Contract renewal",
+          "is_active": true
+        }
+      ]
+    },
+    "contract_statuses": {
+      "name": "contract_statuses",
+      "display_name": "Contract Statuses",
+      "description": "Contract lifecycle statuses with workflow management",
+      "endpoint": "/api/contract-statuses",
+      "method": "GET",
+      "parameters": {
+        "is_active": {
+          "type": "boolean",
+          "description": "Filter by active status",
+          "default": true,
+          "required": false
+        }
+      },
+      "response_mapping": {
+        "value_field": "id",
+        "label_field": "name",
+        "description_field": "description",
+        "additional_fields": {
+          "code": "code",
+          "sort_order": "sort_order",
+          "color": "color"
+        }
+      },
+      "caching": {
+        "enabled": true,
+        "ttl": 7200,
+        "refresh_on": ["contract_status_created", "contract_status_updated", "contract_status_deleted"]
+      },
+      "sample_data": [
+        {
+          "id": "a50e8400-e29b-41d4-a716-446655440001",
+          "code": "DRAFT",
+          "name": "Draft",
+          "description": "Contract is being created",
+          "sort_order": 1,
+          "color": "#6B7280",
+          "is_active": true
+        },
+        {
+          "id": "a50e8400-e29b-41d4-a716-446655440002",
+          "code": "PENDING_CONFIGURATION",
+          "name": "Pending Configuration",
+          "description": "Contract configuration required",
+          "sort_order": 2,
+          "color": "#F59E0B",
+          "is_active": true
+        },
+        {
+          "id": "a50e8400-e29b-41d4-a716-446655440003",
+          "code": "PENDING_COF",
+          "name": "Pending COF",
+          "description": "Certification of Funds required",
+          "sort_order": 3,
+          "color": "#F59E0B",
+          "is_active": true
+        },
+        {
+          "id": "a50e8400-e29b-41d4-a716-446655440004",
+          "code": "PENDING_SUBMISSION",
+          "name": "Pending Submission",
+          "description": "Contract ready for submission",
+          "sort_order": 4,
+          "color": "#3B82F6",
+          "is_active": true
+        },
+        {
+          "id": "a50e8400-e29b-41d4-a716-446655440005",
+          "code": "PENDING_APPROVAL",
+          "name": "Pending Approval",
+          "description": "Contract awaiting approval",
+          "sort_order": 5,
+          "color": "#3B82F6",
+          "is_active": true
+        },
+        {
+          "id": "a50e8400-e29b-41d4-a716-446655440006",
+          "code": "SENT_FOR_REGISTRATION",
+          "name": "Sent for Registration",
+          "description": "Contract submitted for registration",
+          "sort_order": 6,
+          "color": "#8B5CF6",
+          "is_active": true
+        },
+        {
+          "id": "a50e8400-e29b-41d4-a716-446655440007",
+          "code": "PENDING_REGISTRATION",
+          "name": "Pending Registration",
+          "description": "Contract pending registration",
+          "sort_order": 7,
+          "color": "#8B5CF6",
+          "is_active": true
+        },
+        {
+          "id": "a50e8400-e29b-41d4-a716-446655440008",
+          "code": "REGISTERED",
+          "name": "Registered",
+          "description": "Contract is registered and active",
+          "sort_order": 8,
+          "color": "#10B981",
+          "is_active": true
+        },
+        {
+          "id": "a50e8400-e29b-41d4-a716-446655440009",
+          "code": "IN_PROGRESS",
+          "name": "In Progress",
+          "description": "Contract is active and in progress",
+          "sort_order": 9,
+          "color": "#10B981",
+          "is_active": true
+        },
+        {
+          "id": "a50e8400-e29b-41d4-a716-446655440010",
+          "code": "SUSPENDED",
+          "name": "Suspended",
+          "description": "Contract is suspended",
+          "sort_order": 10,
+          "color": "#EF4444",
+          "is_active": true
+        },
+        {
+          "id": "a50e8400-e29b-41d4-a716-446655440011",
+          "code": "CLOSED",
+          "name": "Closed",
+          "description": "Contract is closed",
+          "sort_order": 11,
+          "color": "#6B7280",
+          "is_active": true
+        },
+        {
+          "id": "a50e8400-e29b-41d4-a716-446655440012",
+          "code": "CANCELLED",
+          "name": "Cancelled",
+          "description": "Contract is cancelled",
+          "sort_order": 12,
+          "color": "#EF4444",
+          "is_active": true
+        }
+      ]
+    },
+    "procurement_methods": {
+      "name": "procurement_methods",
+      "display_name": "Procurement Methods",
+      "description": "Methods used for contract procurement",
+      "endpoint": "/api/procurement-methods",
+      "method": "GET",
+      "parameters": {
+        "is_active": {
+          "type": "boolean",
+          "description": "Filter by active status",
+          "default": true,
+          "required": false
+        }
+      },
+      "response_mapping": {
+        "value_field": "id",
+        "label_field": "name",
+        "description_field": "description",
+        "additional_fields": {
+          "code": "code"
+        }
+      },
+      "caching": {
+        "enabled": true,
+        "ttl": 7200,
+        "refresh_on": ["procurement_method_created", "procurement_method_updated", "procurement_method_deleted"]
+      },
+      "sample_data": [
+        {
+          "id": "850e8400-e29b-41d4-a716-446655440001",
+          "code": "MICROPURCHASE",
+          "name": "Micropurchase",
+          "description": "Small value purchases under $10,000",
+          "is_active": true
+        },
+        {
+          "id": "850e8400-e29b-41d4-a716-446655440002",
+          "code": "AMENDMENT",
+          "name": "Amendment",
+          "description": "Contract modification or amendment",
+          "is_active": true
+        },
+        {
+          "id": "850e8400-e29b-41d4-a716-446655440003",
+          "code": "RFP",
+          "name": "Request for Proposal",
+          "description": "Competitive procurement process",
+          "is_active": true
+        },
+        {
+          "id": "850e8400-e29b-41d4-a716-446655440004",
+          "code": "IFB",
+          "name": "Invitation for Bid",
+          "description": "Sealed bid procurement process",
+          "is_active": true
+        },
+        {
+          "id": "850e8400-e29b-41d4-a716-446655440005",
+          "code": "SOLE_SOURCE",
+          "name": "Sole Source",
+          "description": "Single source procurement",
+          "is_active": true
+        },
+        {
+          "id": "850e8400-e29b-41d4-a716-446655440006",
+          "code": "EMERGENCY",
+          "name": "Emergency Procurement",
+          "description": "Emergency procurement process",
+          "is_active": true
+        }
+      ]
+    },
+    "contracts": {
+      "name": "contracts",
+      "display_name": "Contracts",
+      "description": "Existing contracts for parent contract selection",
+      "endpoint": "/api/contracts",
+      "method": "GET",
+      "parameters": {
+        "status": {
+          "type": "string",
+          "description": "Filter by contract status",
+          "enum": ["REGISTERED", "IN_PROGRESS"],
+          "required": false
+        },
+        "contract_type": {
+          "type": "string",
+          "description": "Filter by contract type",
+          "required": false
+        },
+        "search": {
+          "type": "string",
+          "description": "Search in contract title and ID",
+          "required": false
+        }
+      },
+      "response_mapping": {
+        "value_field": "id",
+        "label_field": "title",
+        "description_field": "contract_id",
+        "additional_fields": {
+          "contract_id": "contract_id",
+          "status": "status",
+          "amount": "current_contract_amount",
+          "start_date": "start_date",
+          "end_date": "end_date"
+        }
+      },
+      "caching": {
+        "enabled": true,
+        "ttl": 1800,
+        "refresh_on": ["contract_created", "contract_updated", "contract_deleted"]
+      }
+    },
+    "currencies": {
+      "name": "currencies",
+      "display_name": "Currencies",
+      "description": "Supported currencies for contract amounts",
+      "endpoint": "/api/currencies",
+      "method": "GET",
+      "response_mapping": {
+        "value_field": "code",
+        "label_field": "name",
+        "description_field": "symbol",
+        "additional_fields": {
+          "symbol": "symbol",
+          "decimal_places": "decimal_places"
+        }
+      },
+      "caching": {
+        "enabled": true,
+        "ttl": 86400
+      },
+      "sample_data": [
+        {
+          "code": "USD",
+          "name": "US Dollar",
+          "symbol": "$",
+          "decimal_places": 2
+        },
+        {
+          "code": "EUR",
+          "name": "Euro",
+          "symbol": "€",
+          "decimal_places": 2
+        },
+        {
+          "code": "GBP",
+          "name": "British Pound",
+          "symbol": "£",
+          "decimal_places": 2
+        }
+      ]
+    },
+    "amendment_statuses": {
+      "name": "amendment_statuses",
+      "display_name": "Amendment Statuses",
+      "description": "Statuses for contract amendments",
+      "endpoint": "/api/amendment-statuses",
+      "method": "GET",
+      "response_mapping": {
+        "value_field": "code",
+        "label_field": "name",
+        "description_field": "description",
+        "additional_fields": {
+          "color": "color",
+          "sort_order": "sort_order"
+        }
+      },
+      "caching": {
+        "enabled": true,
+        "ttl": 7200
+      },
+      "sample_data": [
+        {
+          "code": "DRAFT",
+          "name": "Draft",
+          "description": "Amendment being created",
+          "color": "#6B7280",
+          "sort_order": 1
+        },
+        {
+          "code": "SUBMITTED",
+          "name": "Submitted",
+          "description": "Amendment submitted for approval",
+          "color": "#3B82F6",
+          "sort_order": 2
+        },
+        {
+          "code": "UNDER_REVIEW",
+          "name": "Under Review",
+          "description": "Amendment under review",
+          "color": "#F59E0B",
+          "sort_order": 3
+        },
+        {
+          "code": "APPROVED",
+          "name": "Approved",
+          "description": "Amendment approved",
+          "color": "#10B981",
+          "sort_order": 4
+        },
+        {
+          "code": "REJECTED",
+          "name": "Rejected",
+          "description": "Amendment rejected",
+          "color": "#EF4444",
+          "sort_order": 5
+        },
+        {
+          "code": "IMPLEMENTED",
+          "name": "Implemented",
+          "description": "Amendment implemented",
+          "color": "#10B981",
+          "sort_order": 6
+        }
+      ]
+    },
+    "users": {
+      "name": "users",
+      "display_name": "Users",
+      "description": "System users for assignment and tracking",
+      "endpoint": "/api/users",
+      "method": "GET",
+      "parameters": {
+        "organization_id": {
+          "type": "uuid",
+          "description": "Filter by organization",
+          "required": false
+        },
+        "role": {
+          "type": "string",
+          "description": "Filter by user role",
+          "required": false
+        },
+        "is_active": {
+          "type": "boolean",
+          "description": "Filter by active status",
+          "default": true,
+          "required": false
+        }
+      },
+      "response_mapping": {
+        "value_field": "id",
+        "label_field": "full_name",
+        "description_field": "email",
+        "additional_fields": {
+          "first_name": "first_name",
+          "last_name": "last_name",
+          "email": "email",
+          "role": "role",
+          "organization_id": "organization_id"
+        }
+      },
+      "caching": {
+        "enabled": true,
+        "ttl": 1800,
+        "refresh_on": ["user_created", "user_updated", "user_deleted"]
+      }
+    }
+  },
+  "api_endpoints": {
+    "contracts": {
+      "list": {
+        "endpoint": "/api/contracts",
+        "method": "GET",
+        "description": "Get paginated list of contracts",
+        "parameters": {
+          "page": {"type": "integer", "default": 1, "description": "Page number"},
+          "limit": {"type": "integer", "default": 25, "description": "Items per page"},
+          "status": {"type": "string", "description": "Filter by status"},
+          "agency_id": {"type": "uuid", "description": "Filter by agency"},
+          "provider_id": {"type": "uuid", "description": "Filter by provider"},
+          "contract_type_id": {"type": "uuid", "description": "Filter by contract type"},
+          "search": {"type": "string", "description": "Search query"},
+          "sort": {"type": "string", "description": "Sort field and direction"},
+          "start_date_from": {"type": "date", "description": "Filter by start date from"},
+          "start_date_to": {"type": "date", "description": "Filter by start date to"},
+          "amount_from": {"type": "decimal", "description": "Filter by amount from"},
+          "amount_to": {"type": "decimal", "description": "Filter by amount to"}
+        }
+      },
+      "detail": {
+        "endpoint": "/api/contracts/{id}",
+        "method": "GET",
+        "description": "Get specific contract details"
+      },
+      "create": {
+        "endpoint": "/api/contracts",
+        "method": "POST",
+        "description": "Create new contract"
+      },
+      "update": {
+        "endpoint": "/api/contracts/{id}",
+        "method": "PUT",
+        "description": "Update existing contract"
+      },
+      "delete": {
+        "endpoint": "/api/contracts/{id}",
+        "method": "DELETE",
+        "description": "Delete contract"
+      },
+      "status_change": {
+        "endpoint": "/api/contracts/{id}/status",
+        "method": "PUT",
+        "description": "Change contract status"
+      },
+      "amendments": {
+        "list": {
+          "endpoint": "/api/contracts/{id}/amendments",
+          "method": "GET",
+          "description": "Get contract amendments"
+        },
+        "create": {
+          "endpoint": "/api/contracts/{id}/amendments",
+          "method": "POST",
+          "description": "Create new amendment"
+        }
+      },
+      "export": {
+        "endpoint": "/api/contracts/export",
+        "method": "GET",
+        "description": "Export contracts to various formats"
+      }
+    }
+  }
+}

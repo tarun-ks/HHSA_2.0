@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This "msie" classification is based on the "bighorn" skeleton and only 
+	adds a single CSS file for specialized layout workarounds. This configuration 
+	file specifies search paths that primarily point to the "bighorn" skeleton. -->
+<skeleton xmlns="http://www.bea.com/servers/portal/framework/laf/1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.bea.com/servers/portal/framework/laf/1.0.0 laf-skeleton-1_0_0.xsd">
+	<render-format>
+		<preset>HTML_4_01_TRANSITIONAL</preset>
+	</render-format>
+	<render-strategy>
+		<search-path>
+			<path-element>..</path-element>
+		</search-path>
+	</render-strategy>
+	<render-dependencies>
+		<html>
+			<links>
+				<search-path>
+					<path-element>.</path-element>
+					<path-element>../css</path-element>
+				</search-path>
+			</links>
+			<scripts>
+				<search-path>
+					<path-element>../js</path-element>
+				</search-path>
+				
+				<script src="jquery-1.7.2.min.js" type="text/javascript" />
+				<script src="jquery-ui-1.8.20.custom.min.js" type="text/javascript" />
+				<script src="jquery.allJS.min.js" type="text/javascript" />
+				<!--Start Added in R5 -->
+				<script src="dictionaryTypo.js" type="text/javascript" />
+				<script src="jquery.highlight-within-textarea.js" type="text/javascript" />
+				<!--End Added in R5 -->
+				<script src="util.js" type="text/javascript" />
+				<script src="utilR2.js" type="text/javascript" />
+			</scripts>
+		</html>
+	</render-dependencies>
+</skeleton>

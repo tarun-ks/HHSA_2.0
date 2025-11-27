@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+
+<!--
+	Note: This XML document is a Coherence Cache Configuration deployment 
+	descriptor that should be used by a Coherence*Extend proxy server.
+-->
+
+<!DOCTYPE cache-config SYSTEM "cache-config.dtd">
+
+<cache-config>
+
+	<caching-scheme-mapping>
+
+		<!--
+			Since this configuration file is for the Coherence*Extend proxy server,
+			store everyhing in the distributed cache scheme.
+		-->
+		<cache-mapping>
+			<cache-name>*</cache-name>
+			<scheme-name>extend-distributed-cache</scheme-name>
+		</cache-mapping>
+
+	</caching-scheme-mapping>
+
+	<caching-schemes>
+
+		<!--
+			Distributed caching scheme.
+			Since this is only being used to store taxonomy and provider list information,
+			we have set to to never expire since the data should never be removed from the cache. 
+		-->
+		<distributed-scheme>
+			<scheme-name>extend-distributed-cache</scheme-name>
+			<lease-granularity>member</lease-granularity>
+			<backing-map-scheme>
+				<local-scheme>
+					<high-units>{high-units 512m}</high-units>
+					<unit-calculator>BINARY</unit-calculator>
+					<expiry-delay>{expiry-delay 0}</expiry-delay>
+				</local-scheme>
+			</backing-map-scheme>
+			<autostart>true</autostart>
+		</distributed-scheme>
+
+		<!--
+			Proxy service schemes that allows remote clients to connect to the 
+			cluster over TCP/IP.
+			NOTE: Have currently added 2 proxy schemes with hardcoded (although overrideable)
+			ports since there is a single port opened on the PE servers for the DMX and AE/City.
+		-->
+		
+		<!-- DMZ -->
+		<proxy-scheme>
+			<service-name>ExtendTcpProxyServiceA</service-name>
+			<acceptor-config>
+				<tcp-acceptor>
+					<local-address>
+						<address system-property="tangosol.coherence.extend.address.a">localhost</address>
+						<port system-property="tangosol.coherence.extend.port.a">32774</port>
+					</local-address>
+				</tcp-acceptor>
+			</acceptor-config>
+			<autostart system-property="tangosol.coherence.extend.enabled">true</autostart>
+		</proxy-scheme>
+		
+		<!-- AE/City -->
+<!--		<proxy-scheme>-->
+<!--			<service-name>ExtendTcpProxyServiceB</service-name>-->
+<!--			<acceptor-config>-->
+<!--				<tcp-acceptor>-->
+<!--					<local-address>-->
+<!--						<address system-property="tangosol.coherence.extend.address.b">localhost</address>-->
+<!--						<port system-property="tangosol.coherence.extend.port.b">32774</port>-->
+<!--					</local-address>-->
+<!--				</tcp-acceptor>-->
+<!--			</acceptor-config>-->
+<!--			<autostart system-property="tangosol.coherence.extend.enabled">true</autostart>-->
+<!--		</proxy-scheme>-->
+
+<!--		 DMZ -->
+<!--		<proxy-scheme>-->
+<!--			<service-name>ExtendTcpProxyServiceC</service-name>-->
+<!--			<acceptor-config>-->
+<!--				<tcp-acceptor>-->
+<!--					<local-address>-->
+<!--						<address system-property="tangosol.coherence.extend.address.c">localhost</address>-->
+<!--						<port system-property="tangosol.coherence.extend.port.c">32773</port>-->
+<!--					</local-address>-->
+<!--				</tcp-acceptor>-->
+<!--			</acceptor-config>-->
+<!--			<autostart system-property="tangosol.coherence.extend.enabled">true</autostart>-->
+<!--		</proxy-scheme>-->
+<!--		-->
+<!--		 AE/City -->
+<!--		<proxy-scheme>-->
+<!--			<service-name>ExtendTcpProxyServiceD</service-name>-->
+<!--			<acceptor-config>-->
+<!--				<tcp-acceptor>-->
+<!--					<local-address>-->
+<!--						<address system-property="tangosol.coherence.extend.address.d">localhost</address>-->
+<!--						<port system-property="tangosol.coherence.extend.port.d">32772</port>-->
+<!--					</local-address>-->
+<!--				</tcp-acceptor>-->
+<!--			</acceptor-config>-->
+<!--			<autostart system-property="tangosol.coherence.extend.enabled">true</autostart>-->
+<!--		</proxy-scheme>-->
+
+	</caching-schemes>
+
+</cache-config>

@@ -1,0 +1,807 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.CommonMapper">
+	<resultMap id="masterStatusDetails" type="com.nyc.hhs.model.MasterStatusBean">
+		<result property="status" column="STATUS" />
+		<result property="processType" column="PROCESS_TYPE" />
+		<result property="statusId" column="STATUS_ID" />
+	</resultMap>
+	<select id="getMasterStatus" resultMap="masterStatusDetails">
+		Select STATUS_ID,
+		PROCESS_TYPE, STATUS from STATUS_MASTER_R2_R3
+	</select>
+
+	<resultMap type="com.nyc.hhs.model.ProcurementSummaryBean"
+		id="procurementProviderPortletCount">
+		<result property="rfpReleaseIn30Days" column="countPlannedforNext30Days" />
+		<result property="rfpDueDateIn30Days" column="countReleasedtillNext30Days" />
+		<result property="rfpWith1Draft" column="countDraftProposal" />
+		<result property="rfpEligibleForAward" column="countEligibleForAward" />
+		<!-- Start : R5 Added -->
+		<result property="proposalReturnRevision" column="countProposalReturnRevision" />
+		<!-- End : R5 Added -->
+	</resultMap>
+	<select id="fetchProcurementCountForProvHomePage" parameterType="Map"
+		resultMap="procurementProviderPortletCount">
+		Select
+		countPlannedforNext30Days,countReleasedtillNext30Days,
+		countDraftProposal,
+		countEligibleForAward,
+		<!-- Start : R5 Added -->
+		countProposalReturnRevision
+		<!-- End : R5 Added -->
+		from(select count (*) as countPlannedforNext30Days
+		from PROCUREMENT
+		pro,PROCUREMENT_PROVIDER procprov where
+		procprov.ORGANIZATION_ID=#{asOrgId} and
+		procprov.ELIGIBILITY_FLAG = 1
+		and
+		PRO.Upd_RFP_Release_Date &gt;= sysdate-1 and
+		PRO.Upd_RFP_Release_Date &lt;= sysdate+30 and
+		PRO.STATUS_ID=#{PROCUREMENT_PLANNED} and pro.procurement_id =
+		procprov.procurement_id  and pro.status_id!=#{PROCUREMENT_CLOSED} and pro.status_id!=#{PROCUREMENT_CANCELLED}
+		AND
+		procprov.PROVIDER_STATUS_ID=#{PROVIDER_ELIGIBLE_TO_PROPOSE})
+		,(select count (*) as
+		countReleasedtillNext30Days
+		from PROCUREMENT pro,PROCUREMENT_PROVIDER
+		procprov where
+		procprov.ORGANIZATION_ID=#{asOrgId} and
+		procprov.ELIGIBILITY_FLAG = 1
+		and
+		PRO.Upd_Proposal_Due_Date &gt;= sysdate-1 and
+		PRO.Upd_Proposal_Due_Date &lt;= sysdate+30 and
+		PRO.STATUS_ID=#{PROCUREMENT_RELEASED} AND
+		procprov.PROVIDER_STATUS_ID=#{PROVIDER_ELIGIBLE_TO_PROPOSE}  and pro.status_id!=#{PROCUREMENT_CLOSED} and pro.status_id!=#{PROCUREMENT_CANCELLED}
+		and	pro.procurement_id = procprov.procurement_id),
+		(select count (*) as countDraftProposal from PROCUREMENT pro,PROCUREMENT_PROVIDER procprov 
+		where procprov.ORGANIZATION_ID=#{asOrgId}
+		and pro.procurement_id = procprov.procurement_id and (procprov.provider_status_id = #{PROVIDER_DRAFT}
+		or procprov.provider_status_id = #{PROVIDER_SUBMITTED_PROPOSAL})and pro.status_id!=#{PROCUREMENT_CLOSED} and pro.status_id!=#{PROCUREMENT_CANCELLED}),
+		(select count (*) as countEligibleForAward
+		from PROCUREMENT
+		pro,PROCUREMENT_PROVIDER procprov where
+		procprov.ORGANIZATION_ID=#{asOrgId} and procprov.ELIGIBILITY_FLAG = 1
+		and procprov.provider_status_id=#{PROVIDER_SELECTED} and pro.status_id!=#{PROCUREMENT_CLOSED} and pro.status_id!=#{PROCUREMENT_CANCELLED}
+		and pro.procurement_id
+		= procprov.procurement_id),
+		<!-- Start : R5 Added -->
+		(SELECT COUNT (1) AS countProposalReturnRevision FROM PROPOSAL_CONFIG WHERE ORGANIZATION_ID =#{asOrgId} AND PROPOSAL_STATUS_ID = #{PROPOSAL_RETURNED_FOR_REVISION})
+		<!-- End : R5 Added -->
+	</select>
+
+	<resultMap type="com.nyc.hhs.model.ProcurementSummaryBean"
+		id="procurementPortletCount">
+		<result property="scheduledRFPWithIn10Days" column="countPlanned10" />
+		<result property="scheduledRFPWithIn60Days" column="countPlanned60" />
+		<result property="rfpInReleasedStatus" column="countReleased" />
+		<result property="proposalDueDateIn10Days" column="countRelease10" />
+		<result property="rfpWithProposalsReceived" column="countProposalsReceived" />
+		<result property="rfpWithEvaluationsComplete" column="countEvaluationsComplete" />
+		<result property="approveAwardTaskCount" column="countEligibleForAward" />
+	</resultMap>
+
+	<select id="fetchAccProcurementPortletCount" resultMap="procurementPortletCount"
+		parameterType="hashmap">
+		select countPlanned10, countPlanned60, countReleased, countRelease10,
+		countProposalsReceived, countEvaluationsComplete,
+		countEligibleForAward from (SELECT
+		Count(*) as countPlanned10
+		FROM
+		PROCUREMENT PRO,
+		STATUS_MASTER_R2_R3 ST where
+		PRO.Status_ID =
+		ST.Status_ID
+		AND
+		ST.STATUS =
+		'Planned' AND
+		PRO.Upd_RFP_Release_Date &gt;=
+		sysdate-1 and PRO.Upd_RFP_Release_Date &lt;= sysdate+10
+		<if test="userOrg != null">
+			AND PRO.Agency_ID = #{userOrg}
+		</if>
+		)Planned10,
+		(SELECT
+		Count(*) as countPlanned60
+		FROM PROCUREMENT PRO,
+		STATUS_MASTER_R2_R3 ST where
+		PRO.Status_ID =
+		ST.Status_ID
+		AND
+		ST.STATUS =
+		'Planned' AND
+		PRO.Upd_RFP_Release_Date &gt;= sysdate-1 and
+		PRO.Upd_RFP_Release_Date &lt;= sysdate+60
+		<if test="userOrg != null">
+			AND PRO.Agency_ID = #{userOrg}
+		</if>
+		) Planned60, (SELECT
+		Count(*) as countReleased
+		FROM PROCUREMENT PRO,
+		STATUS_MASTER_R2_R3 ST where
+		PRO.Status_ID =
+		ST.Status_ID
+		AND
+		ST.STATUS =
+		'Released'
+		<if test="userOrg != null">
+			AND PRO.Agency_ID = #{userOrg}
+		</if>
+		) Released,
+		(SELECT Count(*)
+		as countRelease10
+		FROM PROCUREMENT PRO,
+		STATUS_MASTER_R2_R3 ST where
+		PRO.Status_ID =
+		ST.Status_ID
+		AND
+		ST.STATUS =
+		'Released'
+		AND
+		PRO.Upd_Proposal_Due_Date &gt;= sysdate-1 and
+		PRO.Upd_Proposal_Due_Date &lt;= sysdate+10
+		<if test="userOrg != null">
+			AND PRO.Agency_ID = #{userOrg}
+		</if>
+		) Release10, (SELECT
+		Count(*)
+		as countProposalsReceived
+		FROM PROCUREMENT
+		PRO, STATUS_MASTER_R2_R3 ST where
+		PRO.Status_ID =
+		ST.Status_ID
+		AND
+		ST.STATUS =
+		'Proposals Received'
+		<if test="userOrg != null">
+			AND PRO.Agency_ID = #{userOrg}
+		</if>
+		)
+		ProposalsReceived, (SELECT
+		Count(*)
+		as countEvaluationsComplete
+		FROM
+		PROCUREMENT PRO, STATUS_MASTER_R2_R3 ST where PRO.Status_ID =
+		ST.Status_ID
+		AND
+		ST.STATUS = 'Evaluations Complete'
+		<if test="userOrg != null">
+			AND PRO.Agency_ID = #{userOrg}
+		</if>
+		) EvaluationsComplete,
+		(SELECT count(1) as countEligibleForAward from
+		PROCUREMENT PRO,STATUS_MASTER_R2_R3 ST where
+		PRO.STATUS_ID=ST.Status_ID and ST.Status='Selections Made'
+		<if test="userOrg != null">
+			AND PRO.Agency_ID = #{userOrg}
+		</if>
+		)proposalEligibleForAward
+	</select>
+
+	<resultMap type="com.nyc.hhs.model.FinancialSummaryBean" id="accFinancialCount">
+		<result property="pendingContractConfig" column="countContractPendingConfig" />
+		<result property="pendingContractCOF" column="countContractPendingCof" />
+		<result property="pendingContractRegistration" column="countContractPendingReg" />
+		<result property="pendingApprovalBugtAmd" column="countBudgetPendingApproval" />
+		<result property="pendingApprovalBugtMod" column="countModBudgetPendApproval" />
+		<result property="pendingApprovalInvoic" column="countInvPendingApproval" />
+		<result property="pendingApprovalPymets" column="countPaymentPendingApproval" />
+		<result property="paymentsFMSError" column="countPaymentWithError" />
+	</resultMap>
+	<select id="fetchAccFinancialsPortletCount" resultMap="accFinancialCount"
+		parameterType="string">
+		select countContractPendingConfig, countContractPendingCof,
+		countContractPendingReg,
+		countBudgetPendingApproval,
+		countModBudgetPendApproval, countInvPendingApproval,
+		countPaymentPendingApproval, countPaymentWithError
+		from(select Count(*)
+		as
+		countContractPendingConfig from contract con
+		where
+		con.status_id = #{CONTRACT_PENDING_CONFIGURATION}
+		and con.CONTRACT_TYPE_ID IN(1,3) and con.delete_flag != 1
+		<if test="userOrg != null">
+			AND con.Agency_ID = #{userOrg}
+		</if>
+		)ContractPendingConfig,
+		(select count(1) as
+		countContractPendingCof from
+		contract con
+		where
+		con.status_id = #{CONTRACT_PENDING_COF}
+		and con.CONTRACT_TYPE_ID IN(1,3) and con.delete_flag != 1
+		<if test="userOrg != null">
+			AND con.Agency_ID = #{userOrg}
+		</if>
+		)ContractPendingCof,
+		(select count(1) as countContractPendingReg
+		from
+		contract con where con.status_id = #{CONTRACT_PENDING_REGISTARTION}
+		and
+		con.CONTRACT_TYPE_ID IN(1,3) and con.delete_flag != 1
+		<if test="userOrg != null">
+			AND con.Agency_ID = #{userOrg}
+		</if>
+		)ContractPendingReg,
+		(select
+		SUM(count) as countBudgetPendingApproval
+		from(select Count(*)
+		as count
+		from
+		budget bud, budget_type budtyp
+		where
+		bud.budget_type_id
+		=
+		budtyp.budget_type_id
+		and budtyp.budget_type = #{CONTRACT_BUDGET}
+		and
+		bud.status_id = #{BUDGET_PENDING_APPROVAL} and bud.active_flag = 1
+		<if test="userOrg != null">
+			AND bud.Agency_ID = #{userOrg}
+		</if>
+		union
+		all
+		select count(1) as count from budget bud,
+		budget_type budtyp
+		where
+		bud.budget_type_id =
+		budtyp.budget_type_id
+		and
+		budtyp.budget_type = #{BUDGET_AMENDMENT}
+		and
+		bud.status_id = #{BUDGET_PENDING_APPROVAL} and bud.active_flag = 1
+		<if test="userOrg != null">
+			AND bud.Agency_ID = #{userOrg}
+		</if>
+		))
+		BudgetPending,
+		(select
+		SUM(count) as countModBudgetPendApproval
+		from(select count(1) as
+		count
+		from
+		budget bud, budget_type budtyp
+		where
+		bud.budget_type_id
+		=
+		budtyp.budget_type_id
+		and budtyp.budget_type = #{BUDGET_MODIFICATION}
+		and
+		bud.status_id = #{BUDGET_PENDING_APPROVAL} and bud.active_flag = 1
+		<if test="userOrg != null">
+			AND bud.Agency_ID = #{userOrg}
+		</if>
+		union
+		all
+		select count(1) as count from budget bud,
+		budget_type budtyp
+		where
+		bud.budget_type_id =
+		budtyp.budget_type_id
+		and
+		budtyp.budget_type = #{BUDGET_UPDATE}
+		and
+		bud.status_id = #{BUDGET_PENDING_APPROVAL} and bud.active_flag = 1
+		<if test="userOrg != null">
+			AND bud.Agency_ID = #{userOrg}
+		</if>
+		))
+		ModBudgetPendApproval,
+		(select count(1) as
+		countInvPendingApproval
+		from invoice inv where
+		inv.status_id = #{INVOICE_PENDING_APPROVAL} and inv.delete_flag != 1
+		<if test="userOrg != null">
+			AND inv.Agency_ID = #{userOrg}
+		</if>
+		)InvPendingApproval,(select count(1) as
+		countPaymentPendingApproval
+		from payment pay
+		where
+		pay.status_id = #{PAYMENT_PENDING_APPROVAL} and pay.delete_flag != 1
+		<if test="userOrg != null">
+			AND pay.Agency_ID = #{userOrg}
+		</if>
+		)PaymentPendingApproval,( select count(1) as
+		countPaymentWithError
+		from payment pay
+		where
+		pay.status_id = #{PAYMENT_PENDING_FMS_ACTION} and pay.delete_flag != 1
+		<if test="userOrg != null">
+			AND pay.Agency_ID = #{userOrg}
+		</if>
+		)PaymentWithError
+	</select>
+	<resultMap type="com.nyc.hhs.model.FinancialSummaryBean" id="providerFinancialCount">
+		<result property="contractPendingRegistration" column="countContractPendReg" />
+		<result property="activeBudgets" column="countBudgetActive" />
+		<result property="budgetPendingSubmission" column="countBudgetPendingSubmission" />
+		<result property="budgetPendingApproval" column="countBudgetPendingApproval" />
+		<result property="budgetReturnForRevision" column="countBudgetReturnedForRevision" />
+		<result property="modificationPendingSubmission" column="countBudgetModPendSub" />
+		<result property="modificationPendingApproval" column="countBudgetModPendingApproval" />
+		<result property="modificationReturnForRevision" column="countBudgetModReturnedforRev" />
+		<result property="invoicePendingSubmission" column="countInvPendingSubmission" />
+		<result property="invoicePendingApproval" column="countInvPendingApproval" />
+		<result property="invoiceReturnForRevision" column="countInvReturnedForRev" />
+	</resultMap>
+	<select id="fetchProviderFinancialCount" parameterType="Map"
+		resultMap="providerFinancialCount">
+		select countContractPendReg, countBudgetActive,
+		countBudgetPendingSubmission,
+		countBudgetPendingApproval,
+		countBudgetReturnedForRevision, countBudgetModPendSub,
+		countBudgetModPendingApproval, countBudgetModReturnedforRev,
+		countInvPendingSubmission,
+		countInvPendingApproval,
+		countInvReturnedForRev
+		from(select count(1) as
+		countContractPendReg from
+		contract con where
+		con.status_id = #{CONTRACT_PENDING_REGISTARTION}and
+		con.ORGANIZATION_ID=#{asOrgId} and
+		con.CONTRACT_TYPE_ID
+		IN(1,3) and con.delete_flag != 1)contractPendingRegistration,
+		(SELECT count(1) AS countBudgetActive
+		FROM budget bud
+		WHERE status_id     =#{BUDGET_ACTIVE}
+		AND budget_type_id  = #{TypeContractBudget}
+		AND ORGANIZATION_ID =#{asOrgId} and bud.active_flag = 1)budgetActive,
+		(
+		SELECT SUM(COUNT) AS countBudgetPendingSubmission
+		FROM
+		  (SELECT count(1) AS COUNT
+		  FROM budget bud
+		  WHERE budget_type_id   = #{TypeContractBudget}
+		  AND status_id          = #{BUDGET_PENDING_SUBMISSION}
+		  AND ORGANIZATION_ID=#{asOrgId} and bud.active_flag = 1
+		  UNION ALL
+		  SELECT count(1) AS COUNT
+		  FROM budget bud
+		  WHERE budget_type_id = 1
+		  AND status_id            = #{BUDGET_PENDING_SUBMISSION}
+		  AND ORGANIZATION_ID      =#{asOrgId} and bud.active_flag = 1
+		  ))budgetPendingSubmission,
+		(
+		SELECT SUM(COUNT) AS countBudgetPendingApproval
+		  FROM
+		  (SELECT count(1) AS COUNT
+		  FROM budget bud
+		  WHERE budget_type_id = #{TypeContractBudget}
+		  AND status_id        = #{BUDGET_PENDING_APPROVAL}
+		  AND ORGANIZATION_ID  =#{asOrgId} and bud.active_flag = 1
+		  UNION ALL
+		  SELECT count(1) AS COUNT
+		  FROM budget bud
+		  WHERE budget_type_id = 1
+		  AND status_id        = #{BUDGET_PENDING_APPROVAL}
+		  AND ORGANIZATION_ID  =#{asOrgId} and bud.active_flag = 1
+		  )
+		)budgetPendingApproval,
+		(
+			SELECT SUM(COUNT) AS countBudgetReturnedForRevision
+			FROM
+		  (SELECT count(1) AS COUNT
+		  FROM budget bud
+		  WHERE budget_type_id = #{TypeContractBudget}
+		  AND status_id        = #{BUDGET_RETURNED_FOR_REVISION}
+		  AND ORGANIZATION_ID  =#{asOrgId} and bud.active_flag = 1
+		  UNION ALL
+		  SELECT count(1) AS COUNT
+		  FROM budget bud
+		  WHERE budget_type_id = 1
+		  AND status_id        = #{BUDGET_RETURNED_FOR_REVISION}
+		  AND ORGANIZATION_ID  =#{asOrgId} and bud.active_flag = 1
+  		)
+		)budgetReturnedForRevision,
+		(
+		SELECT SUM(COUNT) AS countBudgetModPendSub
+		FROM
+		  (SELECT count(1) AS COUNT
+		  FROM budget bud
+		  WHERE budget_type_id= #{TypeBudgetModification}
+		  AND status_id       = #{BUDGET_PENDING_SUBMISSION}
+		  AND ORGANIZATION_ID =#{asOrgId} and bud.active_flag = 1
+		  UNION ALL
+		  SELECT count(1) AS COUNT
+		  FROM budget bud
+		  WHERE budget_type_id   = #{TypeBudgetUpdate}
+		  AND status_id      = #{BUDGET_PENDING_SUBMISSION}
+		  AND ORGANIZATION_ID=#{asOrgId} and bud.active_flag = 1
+		  )
+		)
+		budgetModPendingSubmisssion,
+		(
+		SELECT SUM(COUNT) AS countBudgetModPendingApproval
+		FROM
+		  (SELECT count(1) AS COUNT
+		  FROM budget bud
+		  WHERE budget_type_id= #{TypeBudgetModification}
+		  AND status_id       = #{BUDGET_PENDING_APPROVAL}
+		  AND ORGANIZATION_ID =#{asOrgId} and bud.active_flag = 1
+		  UNION ALL
+		  SELECT count(1) AS COUNT
+		  FROM budget bud
+		  WHERE budget_type_id = #{TypeBudgetUpdate}
+		  AND status_id        = #{BUDGET_PENDING_APPROVAL}
+		  AND ORGANIZATION_ID  =#{asOrgId} and bud.active_flag = 1
+		  ))
+		budgetModPendingApproval,
+		(
+				SELECT SUM(COUNT) AS countBudgetModReturnedforRev
+		FROM
+		  (SELECT count(1) AS COUNT
+		  FROM budget bud
+		  WHERE budget_type_id= #{TypeBudgetModification}
+		  AND status_id       = #{BUDGET_RETURNED_FOR_REVISION}
+		  AND ORGANIZATION_ID =#{asOrgId} and bud.active_flag = 1
+		  UNION ALL
+		  SELECT count(1) AS COUNT
+		  FROM budget bud
+		  WHERE budget_type_id = #{TypeBudgetUpdate}
+		  AND status_id        = #{BUDGET_RETURNED_FOR_REVISION}
+		  AND ORGANIZATION_ID  =#{asOrgId} and bud.active_flag = 1
+		  ))
+		budgetModReturnedforRev,
+		(select
+		count(*) as countInvPendingSubmission from invoice inv
+		where
+		inv.status_id = #{INVOICE_PENDING_SUBMISSION} and
+		inv.ORGANIZATION_ID=#{asOrgId} and inv.delete_flag != 1)
+		invPendingSubmission,
+		(select count(*)
+		as
+		countInvPendingApproval from
+		invoice inv
+		where
+		inv.status_id =
+		#{INVOICE_PENDING_APPROVAL} and
+		inv.ORGANIZATION_ID=#{asOrgId} and inv.delete_flag != 1)
+		invPendingApproval,
+		(select count(1) as
+		countInvReturnedForRev from
+		invoice inv
+		where
+		inv.status_id =
+		#{INVOICE_RETURNED_FOR_REVISION} and
+		inv.ORGANIZATION_ID=#{asOrgId} and inv.delete_flag != 1)
+		countInvReturnedForRev
+	</select>
+	<select id="getProcurementChangeControlWidget" parameterType="map"
+		resultType="hashmap">
+		SELECT P.LAST_PUBLISHED_DATE, P.LAST_MODIFIED_DATE, TRIM(C1.FIRST_NAME || ' '|| C1.LAST_NAME) AS MODIFIED_BY_USERID,
+		TRIM(C2.FIRST_NAME || ' '|| C2.LAST_NAME) AS LAST_PUBLISHED_USERID
+		FROM
+		PROCUREMENT P, CITY_USER_DETAILS C1, CITY_USER_DETAILS C2
+		WHERE
+		PROCUREMENT_ID = #{aiProcurementId}
+		AND P.MODIFIED_BY_USERID = C1.USER_ID(+)
+		AND LAST_PUBLISHED_USERID = C2.USER_ID(+)
+	</select>
+	<select id="getProcurementChangeControlWidgetDetailed" parameterType="map"
+		resultType="hashmap">
+		Select P.LAST_PUBLISHED_DATE, Trim(C2.First_Name || ' '|| C2.Last_Name) As LAST_PUBLISHED_USERID,
+	     data_table.Modified_Date LAST_MODIFIED_DATE, TRIM(C1.FIRST_NAME || ' '|| C1.LAST_NAME) AS MODIFIED_BY_USERID
+			From
+			Procurement P, City_User_Details C1, City_User_Details C2, (Select Nvl(Pa.Modified_Date, P.Modified_Date) Modified_Date,
+	      Nvl(Pa.Modified_By_Userid, P.Modified_By_Userid) Modified_By_Userid, p.Procurement_Id From 
+	       (Select Procurement_Id, Modified_Date, Modified_By_Userid From
+	        (Select Procurement_Id, ${modifiedDate} modified_date, ${modifiedBy} Modified_By_Userid From ${mainTable} Where Procurement_Id = #{aiProcurementId} Order By ${modifiedDate} Desc) Where Rownum =1) P,
+	      (Select Procurement_Id, Modified_Date, Modified_By_Userid From
+	        (select procurement_id, ${modifiedDate} modified_date, ${modifiedBy} Modified_By_Userid from ${addendumTable} where procurement_id = #{aiProcurementId} order by ${modifiedDate} desc) where rownum =1) Pa
+	      Where P.Procurement_Id = Pa.Procurement_Id(+)
+	      And P.Procurement_Id = #{aiProcurementId}) data_table
+			WHERE
+			p.PROCUREMENT_ID = #{aiProcurementId}
+		     and p.Procurement_Id = data_table.Procurement_Id(+)
+			AND data_table.MODIFIED_BY_USERID = C1.USER_ID(+)
+			AND LAST_PUBLISHED_USERID = C2.USER_ID(+)
+	</select>
+	<!--R6: EPIN Validation and typehead changes start -->
+	<select id="fetchEpinList" resultType="string">
+	SELECT PROCUREMENT_EPIN || ' - ' || UPPER(agency_division) 
+    FROM VW_PROCUREMENT_EPIN 
+    WHERE LOWER(PROCUREMENT_EPIN) 
+    like LOWER(#{asDataToSearch}) 
+    and PROCUREMENT_EPIN is not null
+	</select>
+	
+	<!--R6: EPIN Validation and typehead changes end -->
+
+	<!-- R6: EPIN Validation and typehead changes for filter in procurement tab start -->
+	<select id="fetchProcurementEpinList" resultType="string">
+		SELECT DISTINCT EPIN
+		FROM PROCUREMENT
+		WHERE lower(EPIN) like
+		LOWER(#{asDataToSearch}) AND EPIN is not null
+	</select>
+	<!--R6: EPIN Validation and typehead changes end -->
+
+	<select id="fetchContractEpinList" resultType="string">
+		SELECT DISTINCT EXT_EPIN
+		FROM   CONTRACT 
+		WHERE  EXT_EPIN IS NOT NULL 
+		  AND  LOWER(EXT_EPIN) LIKE LOWER(#{asDataToSearch})
+	</select>
+
+	<select id="fetchBudgetEpinList" resultType="string">
+		SELECT  DISTINCT EXT_EPIN
+		FROM    CONTRACT 
+		WHERE   EXT_EPIN IS NOT NULL 
+		AND     LOWER(EXT_EPIN) LIKE LOWER(#{asDataToSearch})
+	</select>
+	
+	<!-- Release 5 start change done for provider centric reports -->
+	<select id="fetchContractNoList" resultType="string">
+		SELECT
+		EXT_CT_NUMBER
+		FROM CONTRACT WHERE EXT_CT_NUMBER is not null AND lower(EXT_CT_NUMBER)
+		like #{asDataToSearch} group by EXT_CT_NUMBER
+	</select>
+	
+	<!-- Release 5 change done for provider centric reports -->
+	<select id="fetchContractTitleList" resultType="string">
+		SELECT
+		distinct CONTRACT_TITLE
+		FROM CONTRACT WHERE CONTRACT_TITLE is not null AND lower(CONTRACT_TITLE)
+		like #{asDataToSearch} and contract_type_id in (1,3) 
+		group by CONTRACT_TITLE
+	</select>
+	
+	
+	<select id="fetchProviderNameList" resultType="string">
+		SELECT
+		ORGANIZATION_LEGAL_NAME
+		FROM ORGANIZATION WHERE ORGANIZATION_LEGAL_NAME is not null AND lower(ORGANIZATION_LEGAL_NAME)
+		like #{asDataToSearch} group by ORGANIZATION_LEGAL_NAME
+	</select>
+	<!-- Release 5 stop change done for provider centric reports -->
+	
+	
+	<!-- Added query for Enhancement id 6400 release 3.4.0 -->
+	<select id="fetchAmendContractNoList" resultType="string">
+		SELECT
+		EXT_CT_NUMBER
+		FROM CONTRACT WHERE contract_type_id = '2' and 
+		EXT_CT_NUMBER is not null AND lower(EXT_CT_NUMBER)
+		like #{asDataToSearch} group by EXT_CT_NUMBER
+	</select>
+
+	<select id="fetchBudgetNoList" resultType="string">
+		SELECT
+		CT_NUMBER
+		FROM
+		BUDGET WHERE CT_NUMBER is not null AND lower(CT_NUMBER) like
+		#{asDataToSearch} group by CT_NUMBER
+	</select>
+
+	<update id="updateLastModifiedDetails" parameterType="map">
+		UPDATE
+		PROCUREMENT
+		set LAST_MODIFIED_USERID =
+		#{modifiedByUserId,jdbcType=VARCHAR},
+		LAST_MODIFIED_DATE =
+		sysdate,MODIFIED_BY_USERID=#{modifiedByUserId,jdbcType=VARCHAR}
+		WHERE
+		PROCUREMENT_ID=#{procurementId,jdbcType=VARCHAR}
+	</update>
+	
+<!-- changed query as part of build 3.1.0, enhancement id 5642-->
+<!-- Below Query modified as part of release 2.6.1 -->
+<!-- Query modified as a part of release 3.10.0 enhancement 5686 -->
+<!-- R6: Changes done as part of release6 to allow non APT epins -->
+	<select id="fetchRenewContractEpinList" resultType="string">
+	SELECT PROCUREMENT_AWARD_EPIN || ' - ' || UPPER(AGENCY_DIVISION)
+	FROM REF_APT_EPIN_MASTER
+	WHERE EPIN_TYPE in ('N','R')
+	AND lower(PROCUREMENT_AWARD_EPIN) LIKE #{asDataToSearch} 
+	AND REF_APT_EPIN_ID NOT IN
+	(SELECT REF_APT_EPIN_ID from
+	 vw_linked_epin_details where REF_APT_EPIN_ID is not null)
+	</select>
+
+	<!-- changed query as part of build 3.1.0, enhancement id 5642-->
+	<!-- Query modified as a part of release 3.10.0 enhancement 5686 -->
+	<!-- R6: Changes done as part of release6 to allow non APT epins -->
+	<select id="fetchAmendContractEpinList" resultType="string">
+	SELECT PROCUREMENT_AWARD_EPIN || ' - ' || UPPER(AGENCY_DIVISION)
+	FROM REF_APT_EPIN_MASTER
+	WHERE EPIN_TYPE = 'A'
+	AND
+	lower(PROCUREMENT_AWARD_EPIN) LIKE #{asDataToSearch}
+	AND REF_APT_EPIN_ID NOT IN
+	(SELECT REF_APT_EPIN_ID 
+	  from vw_linked_epin_details where
+	  REF_APT_EPIN_ID is not null)
+	</select>
+	
+	<select id="fetchAmendContractEpinListForListScreen" resultType="string">
+	     SELECT   DISTINCT  EXT_EPIN 
+	       FROM   CONTRACT 
+	      WHERE   CONTRACT_TYPE_ID = '2' 
+	        AND  LOWER(EXT_EPIN) LIKE LOWER(#{asDataToSearch})
+	</select>
+	
+<!-- changed query as part of build 3.1.0, enhancement id 5642-->
+<!-- Below Query modified as part of release 2.6.1, later also modified for build 3.1.0 enhancement id 5642-->
+<!-- Query modified as a part of release 3.10.0 enhancement 5686 -->
+<!-- Query modified as a part of release 3.10.0 enhancement 5686 -->
+<!-- R6: Changes done as part of release6 to allow non APT epins -->
+	<select id="fetchAddContractEpinList" resultType="string">
+ SELECT PROCUREMENT_AWARD_EPIN || ' - ' || UPPER(agency_division)
+		FROM REF_APT_EPIN_MASTER
+		WHERE EPIN_TYPE IN ('C','A','R','N')
+		AND lower(PROCUREMENT_AWARD_EPIN) LIKE #{asDataToSearch} 
+		AND REF_APT_EPIN_ID NOT IN
+    (select REF_APT_EPIN_ID from vw_linked_epin_details where REF_APT_EPIN_ID is not null)
+	</select>
+
+	<select id="getPaymentCtId" resultType="string">
+		SELECT distinct(CT_NUMBER) FROM
+		payment WHERE CT_NUMBER is not null AND lower(CT_NUMBER) like
+		#{asDataToSearch}
+	</select>
+	
+	<!-- R7.2.0 QC 8914 Action Drop-down to be stripped from following Actions -->
+	<select id="getReadOnlyActionsToExclude" resultType="string">
+		SELECT ACTION_EXCLUDED 
+		FROM
+		READ_ONLY_ACTIONS_EXCLUDED
+	</select>
+
+	<select id="getInvoiceCtId" resultType="string">
+	
+		select DISTINCT con.EXT_CT_NUMBER from contract con, invoice inv where 
+		EXT_CT_NUMBER is not null 
+		AND 
+		lower(EXT_CT_NUMBER) like #{asDataToSearch}
+		AND
+   		con.contract_id = inv.contract_id
+	</select>
+
+	<select id="getProviderWidgetDetils" parameterType="Map"
+		resultType="map">
+		Select NVL(ProcProv.status1, decode(st.status_id,
+		#{PROCUREMENT_PLANNED}, #{PROVIDER_SERVICE_APP_REQUIRED},
+		#{PROCUREMENT_RELEASED}, #{PROVIDER_SERVICE_APP_REQUIRED},
+		#{PROVIDER_NOT_APPLICABLE})) as Provider_Status,
+		decode(proc.STATUS_ID, 5, 4, proc.STATUS_ID) as STATUS_ID
+		from
+		Procurement proc
+		left join (select
+		abc.procurement_id, r2r3.status_id as
+		status1,
+		abc.organization_id as orgid
+		from
+		procurement_provider abc,procurement p,
+		status_master_r2_r3 r2r3 where
+		abc.provider_status_id = r2r3.status_id
+		and abc.organization_id = #{asProviderId}
+		  and ((p.status_id = 3 and (abc.eligibility_flag = 1 or (abc.provider_status_id not in (10,16)))) 
+                  or (p.status_id != 3 and (abc.eligibility_flag = 1 or abc.restrict_submit = 1)))
+		and p.procurement_id = abc.procurement_id
+		and abc.procurement_id = #{asProcurementId}) ProcProv
+		on
+		proc.procurement_id =
+		procprov.procurement_id
+		inner join
+		status_master_r2_r3 st
+		on
+		proc.status_id = st.status_id
+		where
+		Proc.Procurement_Id =
+		#{asProcurementId}
+	</select>
+	<!-- Updated for Release 3.2.0, Defect 6446, Modified check Linked to check in DOCUMENT table as well as Document View -->
+	<!-- Removing Union from Below Query as part of New Filling Check after 4.0.2, 
+	as initially we were fetching row count from Document Table,Lapsing Table and View.Now we put lapsing ,document union in View defination itself. -->
+	<select id="checkDocumentExistsInAnyTable" parameterType="string"
+		resultType="int">
+		Select COUNT(DOCUMENT_IDENTIFIER_ID) AS COUNT FROM VW_ATTACHED_DOCUMENTS WHERE
+		DOCUMENT_IDENTIFIER_ID=#{asDocumentId}
+	</select>
+
+	<delete id="removeLockedUser" parameterType="String">
+		DELETE FROM
+		LOCKED_SCREEN_DETAILS WHERE USER_SESSION_ID=#{asSessionId}
+	</delete>
+
+	<delete id="removeLockedUserById" parameterType="String">
+		DELETE FROM
+		LOCKED_SCREEN_DETAILS WHERE CREATED_BY_USERID = #{asUserId} and
+		CREATED_DATE &lt; systimestamp - interval '1' day
+	</delete>
+
+	<select id="checkLockFlagExist" parameterType="map" resultType="map">
+		Select USER_SESSION_ID, USER_NAME
+		from LOCKED_SCREEN_DETAILS
+		where
+		LOCKED_SCREEN_ID = #{lockId} and rownum =
+		1
+	</select>
+
+	<insert id="addLock">
+		INSERT INTO LOCKED_SCREEN_DETAILS
+		(LOCKED_SCREEN_ID,
+		USER_SESSION_ID, USER_NAME, CREATED_BY_USERID,
+		CREATED_DATE,
+		MODIFIED_BY_USERID, MODIFIED_DATE)
+		VALUES(#{lockId}, #{sessionId},
+		#{userName}, #{asUserId},
+		SYSTIMESTAMP, #{asUserId}, SYSTIMESTAMP)
+	</insert>
+	<select id="fetchProcuringAgenciesFromDB" resultType="map">
+	select substr(agency_name,instr(agency_name,'-')+2) as agency_name,agency_id from nyc_agency_details where active_flag=1 order by agency_name
+	</select>
+	
+	<select id="checkPdfCreated" parameterType="String" resultType="String">
+	SELECT STATUS FROM PDF_BATCH_DETAILS WHERE ENTITY_ID=#{asEntityId}
+	</select>
+	
+	<!--Release 3.6.0 Enhancement id 6516 -->
+	<resultMap type="com.nyc.hhs.model.QueueItemsDetailsBean" id="QueueItemConfigDetails">
+		<result property="queueType" column="COMPONENT_NAME" />
+		<result property="stuckSince" column="SETTINGS_VALUE" />
+	</resultMap>
+	<select id="getQueueItemDelayConfig" resultMap="QueueItemConfigDetails">
+	select COMPONENT_NAME,SETTINGS_VALUE from application_settings where SETTINGS_NAME = 'CheckInterval'
+	</select>
+	
+	
+<!-- /** [Start] R8.4.0 qc9492 XML files for approved amendments and mods */ -->
+	<resultMap type="com.nyc.hhs.model.BudgetXMLRegenBean" id="BudgetXMLData">
+		<result property="contractId" column="CONTRACT_ID" />
+		<result property="budgetId" column="BUDGET_ID" />
+		<result property="versionId" column="VERSION_ID" />
+		<result property="contractTypeId" column="CONTRACT_TYPE_ID" />
+		<result property="budgetTypeId" column="BUDGET_TYPE_ID" />
+		<result property="prevXMLDocId" column="PREV_XML_DOC_ID" />
+		<result property="curXMLDocId" column="CUR_XML_DOC_ID" />
+		<result property="approvedUserId" column="APPROVED_USER_ID" />
+		<result property="createdDate" column="CREATED_DATE" />
+		<result property="createdUserId" column="CREATED_USER_ID" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+		<result property="modifiedUserId" column="MODIFIED_USER_ID" />
+		<result property="budgetStartDate" column="BUDGET_START_DATE" />
+		<result property="budgetEndDate" column="BUDGET_END_DATE" />
+		<result property="contractStartDate" column="CONTRACT_START_DATE" />
+		<result property="contractEndDate" column="CONTRACT_END_DATE" />
+	</resultMap>
+	<select id="getBudgetForXMLRegen"  resultMap="BudgetXMLData">
+			select bxr.CONTRACT_ID, bxr.BUDGET_ID, bxr.VERSION_ID, bxr.CONTRACT_TYPE_ID, bxr.BUDGET_TYPE_ID,
+			       bxr.PREV_XML_DOC_ID, bxr.CUR_XML_DOC_ID, bxr.APPROVED_USER_ID, 
+			       bxr.CREATED_DATE, bxr.CREATED_USER_ID, bxr.MODIFIED_DATE, bxr.MODIFIED_USER_ID , bu.BUDGET_START_DATE , bu.BUDGET_END_DATE ,
+			        (select con.CONTRACT_START_DATE from CONTRACT con where con.CONTRACT_ID   =   bxr.CONTRACT_ID ) as CONTRACT_START_DATE ,
+			        (select con.CONTRACT_END_DATE from CONTRACT con where con.CONTRACT_ID   =   bxr.CONTRACT_ID ) as CONTRACT_END_DATE
+			from BUDGET_XML_REGEN bxr, budget bu
+			where bxr.UPDATE_FLAG = 0
+			and  bxr.VERSION_ID in ( select  distinct MAX(VERSION_ID)  over(partition by CONTRACT_ID,BUDGET_ID ) 
+			                          from   BUDGET_XML_REGEN  br
+			                          where   br.CONTRACT_ID = bxr.CONTRACT_ID
+			                          and     br.BUDGET_ID = bxr.BUDGET_ID
+			                       )
+	       and  bxr.BUDGET_ID = bu.BUDGET_ID
+	</select>
+
+	<update id="updateBudgetXMLGenWithDocId" parameterType="java.util.Map">
+		UPDATE BUDGET_XML_REGEN 
+		SET CUR_XML_DOC_ID = #{documentId} 
+		    , UPDATE_FLAG = 1
+		    , MODIFIED_DATE = SYSTIMESTAMP
+		    , MODIFIED_USER_ID = 'system'
+		WHERE   BUDGET_ID = #{budgetId}  
+		  AND   VERSION_ID = #{versionId}
+	</update>
+	
+<!-- /** [End] R8.4.0 qc9492 XML files for approved amendments and mods */ -->
+	
+	 <!-- Start R8.6.0 QC_9499 Multi-Tab Browsing letting Invoice and Advance tasks to be Approved Multiple times causing Duplicate Payments -->
+    <select id="getTokenFlagConfig" resultType="String">
+	 	SELECT SETTINGS_VALUE FROM APPLICATION_SETTINGS WHERE COMPONENT_NAME ='TokenSetting' AND SETTINGS_NAME = 'TokenFlag'
+	</select>
+   <!-- End R8.6.0 QC_9499 Multi-Tab Browsing letting Invoice and Advance tasks to be Approved Multiple times causing Duplicate Payments -->
+</mapper>

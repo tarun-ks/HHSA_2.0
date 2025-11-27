@@ -1,0 +1,16 @@
+# $Header: svn://prtl-dev-src1.nycnet/HHSA-repo/HHSA_Portal/branches/City-Dev/HHSPortal-9.7.10/HHSPortal/jenkins/jenkins_build/properties/props_varmap.yml 11260 2021-02-24 15:28:02Z jeffrey.wong $
+#
+# QC9583: variable mapping for build_stage_prod.properties.template and/or other property templates
+varname_map:
+  # in format of 
+  # template_var_name: pwdstate_var_name
+  # where template_var_name is withouth the "buildprops_" prefix.
+  # Dont's use period "." in the variable names or they may get misinterpreted
+  batchuser: CE_USER_ID_BATCH
+  batchpwd: CE_PASSWORD_BATCH
+  ldappwd: hhs-acceleratorserviceuser
+  componentuser: CE_USER_ID_COMPONENT
+  componentpwd: CE_PASSWORD_COMPONENT
+  appdbpwd: HHSA_APP
+  vwdbpwd: HHSA_VWDB
+  osdbpwd: HHSA_OS

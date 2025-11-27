@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.ApplicationInsertWorkFlowMapper">
+
+	<insert id="insertApplicationDetails" parameterType="com.nyc.hhs.model.ApplicationInsertWorkFlow">
+		INSERT INTO taskinformation (appid, workflowid,workflowstatus) VALUES (#{msApplicationID},#{msWobNumber},#{msStatus})
+	</insert>
+	
+	<update id="updateApplicationDetails" parameterType="com.nyc.hhs.model.ApplicationInsertWorkFlow">
+		UPDATE application SET STATUS =#{msStatus} where appid =#{msApplicationID}
+	</update>
+</mapper>

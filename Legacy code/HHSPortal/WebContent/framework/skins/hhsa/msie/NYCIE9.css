@@ -1,0 +1,74 @@
+/* Conditional CSS - Changes will reflect only in Internet Explorer 9 */
+ul.toolbarIcons{
+	float: right !important;
+}
+.iconQuestion-align{
+	 margin-top: 5px;
+}
+.tabularCustomHead{
+	position: relative;
+}
+	.tabularCustomHead .floatRht{
+		right: 0;
+		position: absolute;
+	}
+	.graphHelpText li{
+	margin-left:20px;
+}
+.rgtCell #main-wrapper {
+width:100%;
+}
+.fileoptions1-hoveralignment:hover{
+	width:90px !important;
+	height:auto;
+}
+.fileoptions1-hoveralignment-main:hover{
+	width:74px !important;
+	height:auto;
+}
+
+.rgtCell #main-wrapper .bodycontainer {
+width:100%; 
+padding:0;
+}
+.tabularWrapper {
+height: auto!important;
+}
+.rdoBtn{
+	border: none !important;
+}
+.wizardTabs ul li, .wizardTabs ul li.default, .wizardTabs ul li.last, .wizardTabber ul li {
+	padding-right:17px !important;
+}
+ .step2selectOrg-align{
+    padding-left:25px;
+    }
+.maintainanceWrapper .lftCell{
+		height:700px!important;
+		}
+/* taxonomyLeftCell class is used only for IE9 purpose */
+.maintainanceWrapper .taxonomyLeftCell {
+	height:780px!important;
+	}
+.wlp-bighorn-layout, .wlp-bighorn-layout-flow {
+	overflow:visible;
+}
+/*  Workaround for float wrap in IE for CSS-based layouts */
+.wlp-bighorn-layout-flow-first,
+.wlp-bighorn-layout-border-west{
+    margin-right: -2px;
+}
+/* .iconQuestion, .iconQuestion2{
+	margin-top:25px !important
+} */
+.gridScroll{
+	overflow-y:hidden;
+	display: inline-block;
+}
+
+.agencySettingWrapper .lftContainer select, 
+.taxonomyTaggingWrapper .lftContainer select,
+.taxonomyTaggingWrapper .rhtContainer select,
+.agencySettingWrapper  .rhtContainer select {
+	height: 150px;
+}

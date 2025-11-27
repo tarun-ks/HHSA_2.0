@@ -1,0 +1,64 @@
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ page isErrorPage="true" import="java.io.*" %>
+<%@page import="com.nyc.hhs.constants.ApplicationConstants" %>
+<html>
+<head>
+	<title>Exceptional Event Occurred!</title>
+	<style>
+	body, p { padding-left:30 }
+	pre { font-size:8pt }
+	#nyc_header_div{
+	display:none;
+	}
+	.breadcrumb {
+	display:none;
+	}
+	</style>
+	
+</head>
+<body>
+<div class="hhs_header">
+	<h1>Human Health Services Accelerator</h1>
+	<!-- toolbar start -->
+	<div class="toolbar">
+		<div class="textresize">Text Size:
+		   <ul>
+		        <li><a onclick="changemysize(this, 10);" href="javascript:void(0);"  title="Small Text Size" id="smallA">A</a></li>
+		        <li><a onclick="changemysize(this, 12);" href="javascript:void(0);"  title="Medium Text Size" id="mediumA" class="textmedium">A</a></li>
+		        <li><a onclick="changemysize(this, 14);" href="javascript:void(0);"  title="Large Text Size" id="largeA" class="textbig">A</a></li>
+		    </ul>
+		    <input type='hidden' name='aaaValueToSet' id='aaaValueToSet' value='${aaaValueToSet}' />
+		    <input type='hidden' name='urlForAAA' id='urlForAAA' value='${pageContext.servletContext.contextPath}/saveAAASize?next_action=aaaValueToSet' />
+		</div>
+		<%if(request.getAttribute("userDoesNotBelongToOrg")!=null){%>
+		<ul id="toolsIconUlID" class='toolbarIcons emptyClass'>
+			<li id="home_icon" class="homeicon active"><a href="javascript:void(0)" >Home</a>
+			</li>
+		     <li id="logout_icon" class="logouticon"><a  href="${pageContext.servletContext.contextPath}/portal/hhsweb.portal?_nfpb=true&_pageLabel=portlet_hhsweb_portal_login_page&_nfls=false&logout=logout&app_menu_name=logout_icon" title="Log Out">Logout</a></li>
+		</ul>
+		<%} %>
+	</div>
+	<!-- toolbar ends -->
+</div>
+ <div id="mymain">
+<%-- Exception Handler --%>
+	<%if(request.getAttribute("userExitInSession")!=null){ %>
+	<h2>Existing Session Detected</h2>
+	<div class='hrBold'></div>
+	<p>We have detected an existing session. Please close this tab or window and continue with your existing session.</p>
+	<%}else if(request.getAttribute("userDoesNotBelongToOrg")!=null){%>
+	<br /><h2>You are not authorized to view this page. Please contact your organization Administrator to request additional permissions.</h2>
+	<%}else{ %>
+	<h2>Existing Session Detected</h2>
+	<div class='hrBold'></div>
+	<p>We have detected an existing session for a different Organization. If you would like to continue, please click the 'Log Out' icon in your existing session and click the notification link again.<p>
+	<p>If you do not wish to log out of your existing session, please close this tab or window.</p>
+	<%} %>
+</div>
+
+</body>
+</html>
+
+

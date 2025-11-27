@@ -1,0 +1,412 @@
+{
+  "version": "2.0.0",
+  "description": "Workflow Assignment Rules - WF301-WF316 from System",
+  "assignment_rules": {
+    "role_based_assignment": {
+      "id": "role_based_assignment",
+      "name": "Role-Based Assignment",
+      "description": "Assignment rules based on system roles",
+      "version": "1.0.0",
+      "is_active": true,
+      "created_by": "system",
+      "created_at": "2024-01-01T00:00:00Z",
+      "rules": [
+        {
+          "id": "acco_manager_assignment",
+          "name": "ACCO Manager Assignment",
+          "description": "Assign workflow tasks to ACCO Manager for contract management",
+          "workflow_id": "WF301",
+          "state_id": "initiated",
+          "assignment_strategy": "role_based",
+          "assigned_to": "ACCO_MANAGER",
+          "conditions": [
+            {
+              "field": "contract.agency_id",
+              "operator": "equals",
+              "value": "{{user.agency_id}}"
+            }
+          ],
+          "priority": 1,
+          "is_active": true
+        },
+        {
+          "id": "finance_manager_assignment",
+          "name": "Finance Manager Assignment",
+          "description": "Assign workflow tasks to Finance Manager for CoF approval",
+          "workflow_id": "WF301",
+          "state_id": "pending_cof",
+          "assignment_strategy": "role_based",
+          "assigned_to": "FINANCE_MANAGER",
+          "conditions": [
+            {
+              "field": "contract.budget_amount",
+              "operator": "greater_than",
+              "value": "0"
+            }
+          ],
+          "priority": 1,
+          "is_active": true
+        },
+        {
+          "id": "acco_staff_assignment",
+          "name": "ACCO Staff Assignment",
+          "description": "Assign workflow tasks to ACCO Staff for contract configuration",
+          "workflow_id": "WF302",
+          "state_id": "configuration_started",
+          "assignment_strategy": "role_based",
+          "assigned_to": "ACCO_STAFF",
+          "conditions": [
+            {
+              "field": "contract.agency_id",
+              "operator": "equals",
+              "value": "{{user.agency_id}}"
+            }
+          ],
+          "priority": 1,
+          "is_active": true
+        },
+        {
+          "id": "finance_staff_assignment",
+          "name": "Finance Staff Assignment",
+          "description": "Assign workflow tasks to Finance Staff for budget review",
+          "workflow_id": "WF304",
+          "state_id": "pending_budget_review",
+          "assignment_strategy": "role_based",
+          "assigned_to": "FINANCE_STAFF",
+          "conditions": [
+            {
+              "field": "contract.budget_amount",
+              "operator": "greater_than",
+              "value": "0"
+            }
+          ],
+          "priority": 1,
+          "is_active": true
+        }
+      ]
+    },
+    "contract_type_assignment": {
+      "id": "contract_type_assignment",
+      "name": "Contract Type Assignment",
+      "description": "Assignment rules based on contract type from system",
+      "version": "1.0.0",
+      "is_active": true,
+      "created_by": "system",
+      "created_at": "2024-01-01T00:00:00Z",
+      "rules": [
+        {
+          "id": "procurement_contract_assignment",
+          "name": "Procurement Contract Assignment",
+          "description": "Assign procurement contracts to ACCO Manager",
+          "workflow_id": "WF301",
+          "state_id": "initiated",
+          "assignment_strategy": "contract_type_based",
+          "assigned_to": "ACCO_MANAGER",
+          "conditions": [
+            {
+              "field": "contract.contract_type_id",
+              "operator": "equals",
+              "value": "PROCUREMENT"
+            }
+          ],
+          "priority": 1,
+          "is_active": true
+        },
+        {
+          "id": "service_contract_assignment",
+          "name": "Service Contract Assignment",
+          "description": "Assign service contracts to ACCO Staff",
+          "workflow_id": "WF302",
+          "state_id": "configuration_started",
+          "assignment_strategy": "contract_type_based",
+          "assigned_to": "ACCO_STAFF",
+          "conditions": [
+            {
+              "field": "contract.contract_type_id",
+              "operator": "equals",
+              "value": "SERVICE"
+            }
+          ],
+          "priority": 1,
+          "is_active": true
+        },
+        {
+          "id": "consultant_contract_assignment",
+          "name": "Consultant Contract Assignment",
+          "description": "Assign consultant contracts to ACCO Manager",
+          "workflow_id": "WF303",
+          "state_id": "cof_initiated",
+          "assignment_strategy": "contract_type_based",
+          "assigned_to": "ACCO_MANAGER",
+          "conditions": [
+            {
+              "field": "contract.contract_type_id",
+              "operator": "equals",
+              "value": "CONSULTANT"
+            }
+          ],
+          "priority": 1,
+          "is_active": true
+        }
+      ]
+    },
+    "status_based_assignment": {
+      "id": "status_based_assignment",
+      "name": "Status-Based Assignment",
+      "description": "Assignment rules based on contract status from system",
+      "version": "1.0.0",
+      "is_active": true,
+      "created_by": "system",
+      "created_at": "2024-01-01T00:00:00Z",
+      "rules": [
+        {
+          "id": "draft_status_assignment",
+          "name": "Draft Status Assignment",
+          "description": "Assign draft contracts to ACCO Staff",
+          "workflow_id": "WF302",
+          "state_id": "configuration_started",
+          "assignment_strategy": "status_based",
+          "assigned_to": "ACCO_STAFF",
+          "conditions": [
+            {
+              "field": "contract.status_id",
+              "operator": "equals",
+              "value": "59"
+            }
+          ],
+          "priority": 1,
+          "is_active": true
+        },
+        {
+          "id": "pending_configuration_assignment",
+          "name": "Pending Configuration Assignment",
+          "description": "Assign pending configuration contracts to ACCO Manager",
+          "workflow_id": "WF302",
+          "state_id": "configuration_started",
+          "assignment_strategy": "status_based",
+          "assigned_to": "ACCO_MANAGER",
+          "conditions": [
+            {
+              "field": "contract.status_id",
+              "operator": "equals",
+              "value": "60"
+            }
+          ],
+          "priority": 1,
+          "is_active": true
+        },
+        {
+          "id": "pending_cof_assignment",
+          "name": "Pending CoF Assignment",
+          "description": "Assign pending CoF contracts to Finance Manager",
+          "workflow_id": "WF301",
+          "state_id": "pending_cof",
+          "assignment_strategy": "status_based",
+          "assigned_to": "FINANCE_MANAGER",
+          "conditions": [
+            {
+              "field": "contract.status_id",
+              "operator": "equals",
+              "value": "61"
+            }
+          ],
+          "priority": 1,
+          "is_active": true
+        },
+        {
+          "id": "pending_submission_assignment",
+          "name": "Pending Submission Assignment",
+          "description": "Assign pending submission contracts to ACCO Manager",
+          "workflow_id": "WF303",
+          "state_id": "cof_initiated",
+          "assignment_strategy": "status_based",
+          "assigned_to": "ACCO_MANAGER",
+          "conditions": [
+            {
+              "field": "contract.status_id",
+              "operator": "equals",
+              "value": "62"
+            }
+          ],
+          "priority": 1,
+          "is_active": true
+        }
+      ]
+    },
+    "workflow_specific_assignment": {
+      "id": "workflow_specific_assignment",
+      "name": "Workflow-Specific Assignment",
+      "description": "Assignment rules for specific workflows from system",
+      "version": "1.0.0",
+      "is_active": true,
+      "created_by": "system",
+      "created_at": "2024-01-01T00:00:00Z",
+      "rules": [
+        {
+          "id": "wf301_procurement_cof_assignment",
+          "name": "WF301 Procurement CoF Assignment",
+          "description": "Assign WF301 Procurement CoF workflow tasks",
+          "workflow_id": "WF301",
+          "state_id": "pending_cof",
+          "assignment_strategy": "workflow_specific",
+          "assigned_to": "FINANCE_MANAGER",
+          "conditions": [
+            {
+              "field": "workflow.workflow_id",
+              "operator": "equals",
+              "value": "WF301"
+            }
+          ],
+          "priority": 1,
+          "is_active": true
+        },
+        {
+          "id": "wf302_contract_configuration_assignment",
+          "name": "WF302 Contract Configuration Assignment",
+          "description": "Assign WF302 Contract Configuration workflow tasks",
+          "workflow_id": "WF302",
+          "state_id": "configuration_started",
+          "assignment_strategy": "workflow_specific",
+          "assigned_to": "ACCO_STAFF",
+          "conditions": [
+            {
+              "field": "workflow.workflow_id",
+              "operator": "equals",
+              "value": "WF302"
+            }
+          ],
+          "priority": 1,
+          "is_active": true
+        },
+        {
+          "id": "wf303_contract_cof_assignment",
+          "name": "WF303 Contract CoF Assignment",
+          "description": "Assign WF303 Contract CoF workflow tasks",
+          "workflow_id": "WF303",
+          "state_id": "pending_contract_cof",
+          "assignment_strategy": "workflow_specific",
+          "assigned_to": "FINANCE_MANAGER",
+          "conditions": [
+            {
+              "field": "workflow.workflow_id",
+              "operator": "equals",
+              "value": "WF303"
+            }
+          ],
+          "priority": 1,
+          "is_active": true
+        },
+        {
+          "id": "wf304_budget_review_assignment",
+          "name": "WF304 Budget Review Assignment",
+          "description": "Assign WF304 Budget Review workflow tasks",
+          "workflow_id": "WF304",
+          "state_id": "pending_budget_review",
+          "assignment_strategy": "workflow_specific",
+          "assigned_to": "FINANCE_MANAGER",
+          "conditions": [
+            {
+              "field": "workflow.workflow_id",
+              "operator": "equals",
+              "value": "WF304"
+            }
+          ],
+          "priority": 1,
+          "is_active": true
+        },
+        {
+          "id": "wf305_invoice_review_assignment",
+          "name": "WF305 Invoice Review Assignment",
+          "description": "Assign WF305 Invoice Review workflow tasks",
+          "workflow_id": "WF305",
+          "state_id": "pending_invoice_review",
+          "assignment_strategy": "workflow_specific",
+          "assigned_to": "FINANCE_MANAGER",
+          "conditions": [
+            {
+              "field": "workflow.workflow_id",
+              "operator": "equals",
+              "value": "WF305"
+            }
+          ],
+          "priority": 1,
+          "is_active": true
+        }
+      ]
+    }
+  },
+  "assignment_strategies": [
+    {
+      "id": "role_based",
+      "name": "Role-Based Assignment",
+      "description": "Assign tasks based on user roles",
+      "color": "#3B82F6",
+      "icon": "user-group"
+    },
+    {
+      "id": "contract_type_based",
+      "name": "Contract Type-Based Assignment",
+      "description": "Assign tasks based on contract type",
+      "color": "#10B981",
+      "icon": "document-text"
+    },
+    {
+      "id": "status_based",
+      "name": "Status-Based Assignment",
+      "description": "Assign tasks based on contract status",
+      "color": "#F59E0B",
+      "icon": "status"
+    },
+    {
+      "id": "workflow_specific",
+      "name": "Workflow-Specific Assignment",
+      "description": "Assign tasks based on specific workflow",
+      "color": "#8B5CF6",
+      "icon": "workflow"
+    }
+  ],
+  "assignment_conditions": [
+    {
+      "id": "field_equals",
+      "name": "Field Equals",
+      "description": "Check if field value equals specified value",
+      "operator": "equals"
+    },
+    {
+      "id": "field_greater_than",
+      "name": "Field Greater Than",
+      "description": "Check if field value is greater than specified value",
+      "operator": "greater_than"
+    },
+    {
+      "id": "field_less_than",
+      "name": "Field Less Than",
+      "description": "Check if field value is less than specified value",
+      "operator": "less_than"
+    },
+    {
+      "id": "field_in",
+      "name": "Field In",
+      "description": "Check if field value is in specified list",
+      "operator": "in"
+    },
+    {
+      "id": "field_not_null",
+      "name": "Field Not Null",
+      "description": "Check if field value is not null",
+      "operator": "not_null"
+    }
+  ],
+  "metadata": {
+    "created_at": "2024-01-01T00:00:00Z",
+    "created_by": "system",
+    "version": "2.0.0",
+    "description": "Workflow assignment rules from system",
+    "tags": ["assignment_rules", "workflow", "roles"],
+    "dependencies": [
+      "schema/objects.json",
+      "schema/references.json",
+      "security/roles.json"
+    ]
+  }
+}

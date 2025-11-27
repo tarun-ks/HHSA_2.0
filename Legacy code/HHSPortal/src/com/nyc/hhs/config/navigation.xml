@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<navigations>
+	<head name="application" targetpath="" defaultmenu="basics">
+		<menu name="basics" defaultmenu="questions" displayname="Basics">
+			<menu name="questions" displayname="Questions" targetpath="" previousaction="#" nextaction="documentlist"  open_transaction="retrieve_questionanswer" save_transaction="save_questionanswer" />
+			<menu name="documentlist" displayname="Documents" targetpath="" previousaction="questions" nextaction="geography"  open_transaction="documentlist_DB" save_transaction="" />
+			<menu name="geography" displayname="Geography" targetpath="" previousaction="documentlist" nextaction="languages"  open_transaction="BasicGeographyView" save_transaction="BasicGeographySave" />
+			<menu name="languages" displayname="Languages" targetpath="" previousaction="geography" nextaction="populations"  open_transaction="BasicLanguageView" save_transaction="basicLanguageSave" />
+			<menu name="populations" displayname="Populations" targetpath="" previousaction="languages" nextaction="menu__filings"  open_transaction="BasicPopulationView" save_transaction="BasicPopulationViewSave" />
+		</menu>
+		<menu name="filings" defaultmenu="questions" displayname="Filings">
+			<menu name="questions" displayname="Questions" targetpath="" previousaction="basics_populations" nextaction="documentlist"  open_transaction="retrieve_questionanswer" save_transaction="save_questionanswer" />
+			<menu name="documentlist" displayname="Documents" targetpath="" previousaction="questions" nextaction="menu__board"  open_transaction="documentlist_DB" save_transaction="" />
+			<!--  Added in release 5 for module Proposal Activity History -->
+			<menu name="filingsManageOrganization" displayname="Filings" targetpath="" previousaction="" nextaction=""  open_transaction="fetchOrganizationFilingsAuditView" save_transaction="" />
+			<!--End Added in R5 -->
+		</menu>
+		<menu name="board" defaultmenu="questions" displayname="Board">
+			<menu name="questions" displayname="Questions" targetpath="" previousaction="filings_documentlist" nextaction="documentlist"  open_transaction="retrieve_questionanswer" save_transaction="save_questionanswer" />
+			<menu name="documentlist" displayname="Documents" targetpath="" previousaction="questions" nextaction="menu__policies"  open_transaction="documentlist_DB" save_transaction="" />
+		</menu>
+		<menu name="policies" defaultmenu="questions" displayname="Policies">
+			<menu name="questions" displayname="Questions" targetpath="" previousaction="board_documentlist" nextaction="menu__businessapplicationsummary"  open_transaction="retrieve_questionanswer" save_transaction="save_questionanswer" />
+		</menu>
+		<menu name="businessapplicationsummary" defaultmenu="applicationsummary" displayname="Business Application Summary">
+			<menu name="applicationsummary" displayname="Business Application Summary" targetpath="" previousaction="policies_questions" nextaction="#"  open_transaction="business_application_summary_test" save_transaction="#" />
+			<menu name="apphistorycomments" displayname="Application History &amp; Comments" targetpath="" previousaction="" nextaction=""  open_transaction="#" save_transaction="#" />
+		</menu>
+		<menu name="servicessummary" defaultmenu="summary" displayname="Services Summary">
+			<menu name="summary" displayname="#" targetpath="" previousaction="summary" nextaction="similarservice"  open_transaction="ServiceSummaryView" save_transaction="#" removeService="RemoveServiceSummary"/>
+			<menu name="addservice" displayname="#" targetpath="" previousaction="summary" nextaction="similarservice"  open_transaction="getSelectedService" save_transaction="aoInsertUpdateDeleteExecution" />
+			<menu name="similarservice" displayname="#" targetpath="" previousaction="summary" nextaction="summary"  open_transaction="RelatedServices" save_transaction="aoInsertUpdateDeleteExecution" />
+			<menu name="searchservice" displayname="#" targetpath="" previousaction="summary" nextaction="#"  open_transaction="" save_transaction="#" />
+			<menu name="questions" displayname="Questions" targetpath="" previousaction="#" nextaction="documentlist"  open_transaction="showServiceQuestion" save_transaction="saveServiceQuestion" />
+			<menu name="documentlist" displayname="Documents" targetpath="" previousaction="questions" nextaction="specialization"  open_transaction="documentlist_SeriveSummary_DB" save_transaction="" />
+			<menu name="specialization" displayname="Specialization" targetpath="" previousaction="documentlist" nextaction="servicesetting"  open_transaction="SpecializationView" save_transaction="SpecializationSave" />
+			<menu name="servicesetting" displayname="Service Setting" targetpath="" previousaction="specialization" nextaction="summary"  open_transaction="ServiceSettingView" save_transaction="ServiceSettingSave" />
+		</menu>
+		<menu name="applicationsubmission" defaultmenu="applicationsubmission" displayname="Submit">
+			<menu name="applicationsubmission" displayname="applicationsubmission" targetpath="" previousaction="#" nextaction="#"  open_transaction="#" save_transaction="#" />
+		</menu>
+	</head>
+	<head name="document vault" targetpath="">
+	
+	</head>
+	<head name="organization information" targetpath="">
+	
+	</head>
+</navigations>

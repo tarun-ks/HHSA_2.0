@@ -1,0 +1,686 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.RFPReleaseMapper">
+
+	<select id="fetchEpinValue" parameterType="string" resultType="string">
+		SELECT EPIN
+		FROM PROCUREMENT
+		WHERE PROCUREMENT_ID =
+		#{asProcId,jdbcType=VARCHAR}
+	</select>
+
+	<resultMap id="elementIdList" type="com.nyc.hhs.model.RFPReleaseBean">
+		<result property="elementId" column="ELEMENT_ID" />
+	</resultMap>
+	<select id="fetchElementId" parameterType="java.lang.String"
+		resultMap="elementIdList">
+		SELECT ELEMENT_ID FROM PROCUREMENT_SERVICES WHERE
+		PROCUREMENT_ID = #{asProcId,jdbcType=VARCHAR}
+	</select>
+
+	<resultMap type="com.nyc.hhs.model.RFPReleaseBean" id="evaluationCriteria">
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<collection property="loEvaluationCriteriaBeanList"
+			ofType="com.nyc.hhs.model.EvaluationCriteriaBean">
+			<result property="scoreSeqNumber" column="SCORE_SEQ_NUM" />
+			<result property="scoreFlag" column="SCORE_FLAG" />
+			<result property="scoreCriteria" column="SCORE_CRITERIA" />
+			<result property="maximumScore" column="MAXIMUM_SCORE" />
+		</collection>
+	</resultMap>
+
+
+    <select id="listOfRFPdocuments" parameterType="java.util.HashMap"
+    resultType="String">
+		SELECT rd.DOCUMENT_IDENTIFIER_ID FROM RFP_DOCUMENT rd,
+		evaluation_pool_mapping epm, evaluation_group eg
+		WHERE rd.PROCUREMENT_ID =#{procurementId}
+		AND rd.RFP_DOC_FLAG='1'
+		AND RD.VERSION_NUMBER &lt;= EG.VERSION_NUMBER_RFP_DOC
+		AND EPM.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		AND EPM.EVALUATION_GROUP_ID = EG.EVALUATION_GROUP_ID
+	</select>
+
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<select id="fetchEvaluationCriteria" parameterType="java.lang.String"
+		resultMap="evaluationCriteria">
+		select PROCUREMENT_ID, SCORE_SEQ_NUM, SCORE_FLAG,
+		SCORE_CRITERIA,MAXIMUM_SCORE from evaluation_criteria
+		where procurement_id = #{procurementId,jdbcType=VARCHAR}
+	    and version_number = (select max(version_number) from evaluation_criteria
+      	where procurement_id = #{procurementId,jdbcType=VARCHAR})
+      	and SCORE_FLAG = '1'
+		ORDER BY
+		SCORE_FLAG DESC, SCORE_SEQ_NUM
+	</select>
+	
+	<delete id="deleteEvaluationCriteria" parameterType="com.nyc.hhs.model.EvaluationCriteriaBean">
+		DELETE FROM EVALUATION_CRITERIA
+		WHERE 
+		PROCUREMENT_ID = #{procurementId,jdbcType=VARCHAR}
+		and SCORE_SEQ_NUM = #{scoreSeqNumber,jdbcType=VARCHAR}
+	</delete>
+	
+	<delete id="deleteAddendumEvaluationCriteria" parameterType="com.nyc.hhs.model.EvaluationCriteriaBean">
+		DELETE FROM PRCRMNT_ADDM_EVALUATE_CRITERIA
+		WHERE 
+		PROCUREMENT_ID = #{procurementId,jdbcType=VARCHAR}
+		and SCORE_SEQ_NUM = #{scoreSeqNumber,jdbcType=VARCHAR}
+	</delete>
+
+	<resultMap id="rfpPreRequisitesList" type="com.nyc.hhs.model.RFPReleaseBean">
+		<result property="reqDocTypeCount" column="requiredDocumentCount" />
+		<result property="reqDocCount" column="rfpDocumentCount" />
+		<result property="evaluationCriteriaCount" column="evalCriteriaCount" />
+		<result property="competitionPoolCount" column="competitionPoolCount" />
+		<result property="duplicatePoolCount" column="duplicatePoolCount" />
+	</resultMap>
+	<select id="fetchRfpPreRequisites" parameterType="java.lang.String"
+		resultMap="rfpPreRequisitesList">
+		select * from (select count(procurement_document_type) requiredDocumentCount from
+			procurement_document_config where
+			procurement_id = #{asProcId,jdbcType=VARCHAR} and required_flag = '1') requiredDocCount,
+		(select count(document_identifier_id) rfpDocumentCount from 
+			PRCRMNT_ADDM_RFP_DOCUMENT where procurement_id = #{asProcId,jdbcType=VARCHAR}) documentCount, 
+		(select count(evaluation_criteria_id) evalCriteriaCount from
+			evaluation_criteria where procurement_id = #{asProcId,jdbcType=VARCHAR}) criteriaCount,
+		(select count(COMPETITION_POOL_TITLE) competitionPoolCount from
+			COMPETITION_POOL where procurement_id = #{asProcId,jdbcType=VARCHAR}) competitionPoolCount,
+		(select count(1) duplicatePoolCount from (
+  			select count(COMPETITION_POOL_TITLE) duplicatePoolCount from
+			COMPETITION_POOL where procurement_id = #{asProcId,jdbcType=VARCHAR}
+			group by competition_pool_title
+			having count(competition_pool_title)>1)) 
+	</select>
+	<!-- Updated for 8403 -->
+	<select id="fetchProcCertOfFunds" parameterType="java.lang.String"
+		resultType="int">
+		select count(1) as count from PROCUREMENT_FINANCIALS
+		PCOF, status_master_r2_r3 STAT where 
+		PCOF.PCOF_STATUS_ID = 52 and pcof.procurement_id = #{asProcId,jdbcType=VARCHAR}
+		<!-- Start: Added for 8403 -->
+		and PCOF.VERSION_NUMBER = (select PCOF_PSR_VERSION_NUMBER from procurement where procurement_id = #{asProcId,jdbcType=VARCHAR})
+		<!-- End: Added for 8403 -->
+	</select>
+
+	<!--<update id="updateRfpVersion" parameterType="java.lang.String">
+
+	</update>
+	-->
+	
+	<resultMap id="releasedRfpDates" type="com.nyc.hhs.model.RFPReleaseBean">
+		<result property="lastPublishedDate" column="LAST_PUBLISHED_DATE" />
+		<result property="lastModifiedDate" column="MODIFIED_DATE" />
+	</resultMap>
+	<select id="fetchRfpDates" parameterType="java.lang.String"
+		resultMap="releasedRfpDates">
+		SELECT
+		proc.LAST_PUBLISHED_DATE,
+		rfp.MODIFIED_DATE
+		FROM
+		PROCUREMENT proc
+		INNER JOIN RFP_DOCUMENT rfp
+		ON rfp.PROCUREMENT_ID =
+		proc.STATUS_ID
+		AND
+		rfp.PROCUREMENT_ID = #{asProcId,jdbcType=VARCHAR}
+	</select>
+
+	<select id="getProcurementStatus" parameterType="String"
+		resultType="String">
+		select STATUS_ID from PROCUREMENT
+		where procurement_id =
+		#{asProcurementId, jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getProcurementPrevStatus" parameterType="String"
+		resultType="String">
+		select PREV_STATUS_ID from PROCUREMENT
+		where procurement_id =
+		#{asProcurementId, jdbcType=VARCHAR}
+	</select>
+
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<insert id="saveEvaluationCriteria" parameterType="com.nyc.hhs.model.EvaluationCriteriaBean">
+		INSERT INTO
+		EVALUATION_CRITERIA
+		(EVALUATION_CRITERIA_ID,PROCUREMENT_ID,
+		SCORE_SEQ_NUM,SCORE_FLAG,SCORE_CRITERIA,
+		MAXIMUM_SCORE,CREATED_DATE,
+		CREATED_BY_USERID,
+		MODIFIED_DATE,MODIFIED_BY_USERID,version_number)
+		VALUES(
+		SEQ_EVALUATION_CRITERIA_ID.NEXTVAL,#{procurementId},
+		#{scoreSeqNumber,
+		jdbcType=INTEGER},#{scoreFlag, jdbcType=CHAR},
+		trim(#{scoreCriteria,jdbcType=VARCHAR}),
+		#{maximumScore, jdbcType=INTEGER},
+		SYSDATE,#{createdByUserId,
+		jdbcType=VARCHAR},SYSDATE,#{modifiedByUserId, jdbcType=VARCHAR},1)
+	</insert>
+
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<update id="updateEvaluationCriteria" parameterType="com.nyc.hhs.model.EvaluationCriteriaBean">
+		UPDATE
+		EVALUATION_CRITERIA 
+		SET SCORE_FLAG = #{scoreFlag, jdbcType=CHAR},
+		SCORE_CRITERIA = trim(#{scoreCriteria,jdbcType=VARCHAR}),
+		MAXIMUM_SCORE = #{maximumScore, jdbcType=INTEGER}, 
+		MODIFIED_DATE = SYSDATE,
+		MODIFIED_BY_USERID = #{modifiedByUserId, jdbcType=VARCHAR}
+		WHERE
+		PROCUREMENT_ID = #{procurementId} AND SCORE_SEQ_NUM = #{scoreSeqNumber, jdbcType=INTEGER}
+	</update>
+
+	<insert id="saveAddendumEvaluationCriteria" parameterType="com.nyc.hhs.model.EvaluationCriteriaBean">
+		INSERT INTO PRCRMNT_ADDM_EVALUATE_CRITERIA
+		(ADDM_EVALUATION_CRITERIA_ID,PROCUREMENT_ID,
+		SCORE_SEQ_NUM,SCORE_FLAG,SCORE_CRITERIA,
+		MAXIMUM_SCORE,CREATED_DATE,
+		CREATED_BY_USERID,
+		MODIFIED_DATE,MODIFIED_BY_USERID)
+		VALUES(
+		SEQ_EVALUATION_CRITERIA_ID.NEXTVAL,#{procurementId},
+		#{scoreSeqNumber,
+		jdbcType=INTEGER},#{scoreFlag, jdbcType=CHAR},
+		trim(#{scoreCriteria,jdbcType=VARCHAR}),#{maximumScore, jdbcType=INTEGER},
+		SYSDATE,#{createdByUserId,
+		jdbcType=VARCHAR},SYSDATE,#{modifiedByUserId, jdbcType=VARCHAR})
+	</insert>
+
+	<update id="updateAddendumEvaluationCriteria" parameterType="com.nyc.hhs.model.EvaluationCriteriaBean">
+		UPDATE PRCRMNT_ADDM_EVALUATE_CRITERIA SET SCORE_FLAG = #{scoreFlag,
+		jdbcType=CHAR},
+		SCORE_CRITERIA = trim(#{scoreCriteria,jdbcType=VARCHAR}),
+		MAXIMUM_SCORE = #{maximumScore,
+		jdbcType=INTEGER}, MODIFIED_DATE =
+		SYSDATE,
+		MODIFIED_BY_USERID =
+		#{modifiedByUserId, jdbcType=VARCHAR}
+		WHERE
+		PROCUREMENT_ID =
+		#{procurementId}
+		AND SCORE_SEQ_NUM =
+		#{scoreSeqNumber,
+		jdbcType=INTEGER}
+	</update>
+
+	<select id="fetchAddendumEvaluationCriteria" parameterType="java.lang.String"
+		resultMap="evaluationCriteria">
+		SELECT PROCUREMENT_ID, SCORE_SEQ_NUM, SCORE_FLAG,
+		SCORE_CRITERIA,MAXIMUM_SCORE
+		FROM PRCRMNT_ADDM_EVALUATE_CRITERIA
+		WHERE
+		PROCUREMENT_ID = #{asProcurementId,jdbcType=VARCHAR}
+		and SCORE_FLAG = '1' ORDER BY
+		SCORE_FLAG DESC, SCORE_SEQ_NUM
+	</select>
+
+	<delete id="deleteProcAddendunData" parameterType="java.lang.String">
+		DELETE FROM
+		PROCUREMENT_ADDENDUM
+		WHERE PROCUREMENT_ID = #{procurementId,
+		jdbcType=VARCHAR}
+	</delete>
+
+	<!-- Modified as part of Release 3.1.0 for Enhancement 6024 -->
+	<!-- changed in build 2.6.0, defect id 5667 -->
+	<insert id="insertRfpDocumentData" parameterType="java.util.HashMap">
+		INSERT
+		INTO RFP_DOCUMENT
+		  (
+		    RFP_DOCUMENT_ID,
+		    PROCUREMENT_ID,
+		    DOCUMENT_IDENTIFIER_ID,
+		    DOCUMENT_CATEGORY,
+		    DOCUMENT_TYPE,
+		    STATUS_ID,
+		    RFP_DOC_FLAG,
+		    CREATED_DATE,
+		    CREATED_BY_USERID,
+		    MODIFIED_DATE,
+		    MODIFIED_BY_USERID,
+		    DOC_DELETE_FLAG,
+			VERSION_NUMBER
+		  )
+		  (SELECT SEQ_RFP_DOC_ID.NEXTVAL,
+		      PROCUREMENT_ID,
+		      DOCUMENT_IDENTIFIER_ID,
+		      DOCUMENT_CATEGORY,
+		      DOCUMENT_TYPE,
+		      #{docSubmittedStatus},
+		      '1',
+		      CREATED_DATE,
+		      CREATED_BY_USERID,
+		      MODIFIED_DATE,
+		      MODIFIED_BY_USERID,
+		      '0',
+			  (select nvl(max(VERSION_NUMBER),0)+1 
+				from RFP_DOCUMENT where PROCUREMENT_ID=#{procurementId, jdbcType=VARCHAR})
+		    FROM PRCRMNT_ADDM_RFP_DOCUMENT
+		    WHERE PROCUREMENT_ID = #{procurementId, jdbcType=VARCHAR}
+		  )
+	</insert>
+
+
+	<delete id="deleteRfpDocAddendunData" parameterType="java.lang.String">
+		DELETE FROM
+		PRCRMNT_ADDM_RFP_DOCUMENT
+		WHERE PROCUREMENT_ID = #{procurementId,
+		jdbcType=VARCHAR}
+	</delete>
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<select id="getMaxVersionProcurementQuesitons" parameterType="java.lang.String"
+		resultType="int">
+		select nvl(max(version_number),0) from PRCRMNT_QUESTION_MAPPING
+		where procurement_id = #{asProcurementId}
+	</select>
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<select id="getMaxVersionProcurementDocuments" parameterType="java.lang.String"
+		resultType="int">
+		select nvl(max(version_number),0) from PRCRMNT_DOCUMENT_MAPPING
+		where procurement_id = #{asProcurementId}
+	</select>
+
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<insert id="insertProcQuestionConfig" parameterType="java.lang.String">
+		INSERT INTO
+		PROCUREMENT_QUESTION_CONFIG (PROCUREMENT_QN_ID, PROCUREMENT_ID, MODIFIED_DATE, MODIFIED_BY_USERID, 
+		CUSTOM_QUESTION_TEXT, CREATED_DATE,
+		CREATED_BY_USERID)
+   		
+   		(select SEQ_PROC_QUESTION_CONFIG_ID.NEXTVAL, 
+    	PAQC.PROCUREMENT_ID, PAQC.MODIFIED_DATE, PAQC.MODIFIED_BY_USERID, PAQC.CUSTOM_QUESTION_TEXT, PAQC.CREATED_DATE,
+		PAQC.CREATED_BY_USERID
+	      from 
+	        (SELECT
+	        PROCUREMENT_ID, PROCUREMENT_QN_ID, CUSTOM_QUESTION_TEXT
+	        FROM
+	        PRCRMNT_ADDM_QUESTION_CONFIG
+	        WHERE PROCUREMENT_ID = #{procurementId,jdbcType=VARCHAR} 
+	        and
+	        (PROCUREMENT_ID, PROCUREMENT_QN_ID, CUSTOM_QUESTION_TEXT) not in
+	        (SELECT
+	        PQC.PROCUREMENT_ID, PQC.PROCUREMENT_QN_ID, PQC.CUSTOM_QUESTION_TEXT
+	        FROM
+	        PROCUREMENT_QUESTION_CONFIG PQC
+	        WHERE PROCUREMENT_ID = #{procurementId,jdbcType=VARCHAR})) diffTable, PRCRMNT_ADDM_QUESTION_CONFIG PAQC
+	      WHERE 
+	        paqc.PROCUREMENT_ID = #{procurementId,jdbcType=VARCHAR}
+	        and paqc.PROCUREMENT_ID = diffTable.PROCUREMENT_ID
+	        and (    (diffTable.PROCUREMENT_QN_ID is null and diffTable.CUSTOM_QUESTION_TEXT = PAQC.CUSTOM_QUESTION_TEXT) or 
+	                 (diffTable.PROCUREMENT_QN_ID is not null and diffTable.PROCUREMENT_QN_ID = PAQC.PROCUREMENT_QN_ID)
+	            )
+	        )
+	</insert>
+
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<insert id="insertQuestionMappingReleaseAddendum" parameterType="com.nyc.hhs.model.ProposalQuestionAnswerBean">
+		INSERT INTO
+		PRCRMNT_QUESTION_MAPPING (PRCRMNT_QUESTION_MAPPING_ID, QUESTION_SEQUENCE_NUMBER, 
+		MODIFIED_BY_USERID, MODIFIED_DATE, CREATED_DATE, CREATED_BY_USERID, PROCUREMENT_ID, VERSION_NUMBER,
+		PROCUREMENT_QN_ID)
+   		values
+   		(SEQ_PROC_QUESTION_MAPPING_ID.NEXTVAL, #{questionSeqNo}, #{modifiedBy}, systimestamp, systimestamp, 
+   			#{createdBy}, #{procurementId}, #{versionNo}, 
+				(<if test="procurementQnId != null">
+					select PROCUREMENT_QN_ID
+		        	from  PROCUREMENT_QUESTION_CONFIG
+		        	where 
+					PROCUREMENT_QN_ID = #{procurementQnId} 
+					and CUSTOM_QUESTION_TEXT = #{questionText} 
+					and PROCUREMENT_ID = #{procurementId}
+				</if>
+ 				<if test="procurementQnId == null">
+ 					select max(PROCUREMENT_QN_ID)
+		        	from  PROCUREMENT_QUESTION_CONFIG
+		        	where
+ 					CUSTOM_QUESTION_TEXT = #{questionText} 
+					and PROCUREMENT_ID = #{procurementId}
+ 				</if>)
+ 				)
+	</insert>
+
+	<delete id="deleteAddendumQuestionConfig" parameterType="java.lang.String">
+		DELETE
+		FROM PRCRMNT_ADDM_QUESTION_CONFIG
+		WHERE PROCUREMENT_ID =
+		#{procurementId,
+		jdbcType=VARCHAR}
+	</delete>
+
+	<delete id="deleteProcAddendumDocument" parameterType="java.lang.String">
+		DELETE
+		FROM PRCRMNT_ADDM_DOCUMENT
+		WHERE PROCUREMENT_ID =
+		#{procurementId,
+		jdbcType=VARCHAR}
+	</delete>
+
+	<!--<delete id="deleteEvaluationCriteriaData" parameterType="java.lang.String">
+		DELETE
+		EVALUATION_CRITERIA
+		WHERE PROCUREMENT_ID=#{procurementId,jdbcType=VARCHAR}
+		AND exists (
+		SELECT
+		PROCUREMENT_ID from PRCRMNT_ADDM_EVALUATE_CRITERIA
+		where
+		PROCUREMENT_ID = #{procurementId,
+		jdbcType=VARCHAR}
+		)
+	</delete>
+	
+	-->
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<select id="getMaxVersionEvalCriteria" parameterType="java.lang.String"
+		resultType="int">
+		select max(version_number) from EVALUATION_CRITERIA
+		where procurement_id = #{asProcurementId}
+	</select>
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<insert id="insertEvaluationCriteria" parameterType="java.lang.String">
+		INSERT INTO
+		EVALUATION_CRITERIA (EVALUATION_CRITERIA_ID, PROCUREMENT_ID, SCORE_SEQ_NUM,
+			SCORE_FLAG, SCORE_CRITERIA, MAXIMUM_SCORE, CREATED_DATE,
+			CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID, 
+			VERSION_NUMBER)
+		(SELECT
+		SEQ_EVALUATION_CRITERIA_ID.NEXTVAL, PROCUREMENT_ID, SCORE_SEQ_NUM,
+		SCORE_FLAG, SCORE_CRITERIA, MAXIMUM_SCORE, CREATED_DATE,
+		CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID, #{nextVersion}
+		FROM
+		PRCRMNT_ADDM_EVALUATE_CRITERIA
+		WHERE PROCUREMENT_ID = #{procurementId,
+		jdbcType=VARCHAR})
+	</insert>
+
+	<delete id="deleteAddendumEvalCriteria" parameterType="java.lang.String">
+		DELETE
+		FROM PRCRMNT_ADDM_EVALUATE_CRITERIA
+		WHERE PROCUREMENT_ID =
+		#{procurementId, jdbcType=VARCHAR}
+	</delete>
+
+	<delete id="deleteProcAddendumService" parameterType="java.lang.String">
+		DELETE
+		FROM
+		PRCRMNT_ADDM_SERVICES
+		WHERE PROCUREMENT_ID =
+		#{procurementId,
+		jdbcType=VARCHAR}
+	</delete>
+
+	<!--<insert id="insertNewAppProviders" parameterType="java.lang.String">
+		INSERT INTO
+		PROCUREMENT_PROVIDER (ACTIVE_FLAG, CREATED_BY_USERID, CREATED_DATE,
+		ELIGIBILITY_FLAG, LAST_UPDATE_DATE,
+		MODIFIED_BY_USERID, MODIFIED_DATE,
+		ORGANIZATION_ID, PROCUREMENT_ID, PROCUREMENT_PROVIDER_ID,
+		PROVIDER_STATUS_ID) 
+		SELECT '1', #{userId}, systimestamp, '1', systimestamp, #{userId}, systimestamp,
+		orgDetails.ORGANIZATION_ID, #{procId},
+		SEQ_PROCUREMENT_PROVIDER_ID.NEXTVAL, #{eligibleToPropose}
+		FROM
+		(SELECT distinct org.ORGANIZATION_ID
+			FROM
+			SERVICE_APPLICATION saa, ORGANIZATION org, BUSINESS_APPLICATION br,
+			(select * from SUPERSEDING_STATUS where (entity_id,TIMESTAMP) in 
+		    	(select entity_id, max(TIMESTAMP) from SUPERSEDING_STATUS  where ENTITY_TYPE='Service Application' group by entity_id) 
+		  		) ss,
+		  	(select * from SUPERSEDING_STATUS where (entity_id,TIMESTAMP) in 
+				(select entity_id, max(TIMESTAMP) from SUPERSEDING_STATUS  where ENTITY_TYPE='Business Application' group by entity_id) 
+		        ) ssba
+			WHERE
+			saa.ELEMENT_ID IN (SELECT ELEMENT_ID FROM PROCUREMENT_SERVICES WHERE PROCUREMENT_ID = #{procId})
+			and saa.SERVICE_APPLICATION_ID = ss.ENTITY_ID(+)
+			and br.BUSINESS_APPLICATION_ID = ssba.ENTITY_ID(+)
+			and (ss.STATUS = 'Conditionally Approved' OR (ss.STATUS is null and saa.SERVICE_STATUS IN ('Approved')))
+			and (ssba.STATUS = 'Conditionally Approved' OR (ssba.STATUS is null and br.APPLICATION_STATUS IN ('Approved')))
+			and br.BUSINESS_APPLICATION_ID = saa.BUSINESS_APPLICATION_ID
+			and org.ORGANIZATION_ID = br.ORGANIZATION_ID
+			and org.ORGANIZATION_ID = saa.ORGANIZATION_ID
+			group
+			by org.ORGANIZATION_ID, org.ORGANIZATION_LEGAL_NAME
+			having count(0) >= (SELECT count(ps.ELEMENT_ID) FROM PROCUREMENT_SERVICES ps, procurement p WHERE ps.PROCUREMENT_ID = #{procId} and
+				p.procurement_id = #{procId}
+				and p.service_filter = '0')
+				
+			Minus
+			
+			Select distinct org.ORGANIZATION_ID
+			From
+			ORGANIZATION org, PROCUREMENT_PROVIDER pro, SERVICE_APPLICATION saa, procurement p,
+			(select * from SUPERSEDING_STATUS where (entity_id,TIMESTAMP) in 
+	    		(select entity_id, max(TIMESTAMP) from SUPERSEDING_STATUS  where ENTITY_TYPE='Service Application' group by entity_id) 
+	   			) ss
+			where
+			pro.procurement_id = #{procId}
+			and pro.procurement_id = p.procurement_id
+			and saa.SERVICE_APPLICATION_ID = ss.ENTITY_ID(+)
+			and pro.ORGANIZATION_ID = org.ORGANIZATION_ID
+			and saa.ORGANIZATION_ID = org.ORGANIZATION_ID
+			and ((p.SERVICE_FILTER='1' and saa.ELEMENT_ID IN (SELECT ELEMENT_ID FROM PROCUREMENT_SERVICES WHERE PROCUREMENT_ID = #{procId})) or (p.SERVICE_FILTER='0'))
+			and (ss.STATUS = 'Conditionally Approved' OR (ss.STATUS is null and saa.SERVICE_STATUS IN ('Approved')))) orgDetails
+	</insert>
+
+	--><update id="updateAppProviders" parameterType="hashmap">
+		update
+		procurement_provider set active_flag = '1',
+		modified_by_userid = #{userId},
+		modified_date = systimestamp
+		where
+		procurement_id = #{procId}
+		and eligibility_flag = '1'
+		and active_flag = '0'
+	</update>
+	<!-- QC 8676 R 6.2 RFP Eligibility fix 
+	 saveApprovedProvidersServices and saveApprovedProviders
+	 include in selection of eligible Providers and Services all BA that are currently active, not only the latest one
+	 use
+	 where EXPIRATION_DATE > SYSDATE)
+				where rank in(1, 2)
+	 instead of
+	 where EXPIRATION_DATE is not NULL)
+				where rank = 1 
+	-->
+	<insert id="saveApprovedProviders" parameterType="hashmap">
+		insert into
+		PROCUREMENT_PROVIDER (ACTIVE_FLAG, CREATED_BY_USERID, CREATED_DATE,
+		ELIGIBILITY_FLAG, LAST_UPDATE_DATE,
+		MODIFIED_BY_USERID, MODIFIED_DATE,
+		ORGANIZATION_ID, PROCUREMENT_ID,
+		PROCUREMENT_PROVIDER_ID,
+		PROVIDER_STATUS_ID)
+		Select
+		#{activeFlag}, #{userId}, systimestamp, '1',
+		systimestamp, #{userId},
+		systimestamp, orgDetails.ORGANIZATION_ID,
+		#{procurementId},SEQ_PROCUREMENT_PROVIDER_ID.nextval,
+		#{proposalStatusId}
+		From
+		(SELECT distinct org.ORGANIZATION_ID
+		FROM
+		SERVICE_APPLICATION saa, ORGANIZATION org, (select ORGANIZATION_ID, business_application_id, APPLICATION_STATUS from (select ORGANIZATION_ID, business_application_id,
+				RANK() OVER (PARTITION BY ORGANIZATION_ID ORDER BY CREATED_DATE desc) rank, APPLICATION_STATUS
+				from BUSINESS_APPLICATION
+				where EXPIRATION_DATE > sysdate)
+				where rank in(1, 2)) br ,
+		(select * from SUPERSEDING_STATUS where (entity_id,TIMESTAMP) in 
+		    (select entity_id, max(TIMESTAMP) from SUPERSEDING_STATUS  where ENTITY_TYPE='Service Application' group by entity_id) 
+		   ) ss,
+		(select * from SUPERSEDING_STATUS where (entity_id,TIMESTAMP) in 
+			(select entity_id, max(TIMESTAMP) from SUPERSEDING_STATUS  where ENTITY_TYPE='Business Application' group by entity_id) 
+	       ) ssba
+			where
+			saa.ELEMENT_ID IN (SELECT ELEMENT_ID FROM PROCUREMENT_SERVICES WHERE PROCUREMENT_ID = #{procurementId})
+			and saa.SERVICE_APPLICATION_ID = ss.ENTITY_ID(+)
+			and br.BUSINESS_APPLICATION_ID = ssba.ENTITY_ID(+)
+			and (ss.STATUS = 'Conditionally Approved' OR (ss.STATUS is null and saa.SERVICE_STATUS IN ('Approved')))
+			and (ssba.STATUS = 'Conditionally Approved' OR (ssba.STATUS is null and br.APPLICATION_STATUS IN ('Approved')))
+			and br.BUSINESS_APPLICATION_ID = saa.BUSINESS_APPLICATION_ID
+			and org.ORGANIZATION_ID = br.ORGANIZATION_ID
+			and org.ORGANIZATION_ID =  saa.ORGANIZATION_ID
+			and org.organization_status in ('Approved', 'Conditionally Approved')
+			group by
+			org.ORGANIZATION_ID
+			having count(0) >= (SELECT count(ps.ELEMENT_ID) FROM PROCUREMENT_SERVICES ps, procurement p
+			WHERE
+			ps.PROCUREMENT_ID = #{procurementId} and p.procurement_id = #{procurementId} and p.service_filter = '0')) orgDetails
+	</insert>
+	
+	<insert id="saveApprovedProvidersServices" parameterType="hashmap">
+		insert into PROCUREMENT_PROVIDER_SERVICE(PROC_PROV_SERV_ID, PROCUREMENT_PROVIDER_ID, SERVICE_APPLICATION_ID, ELEMENT_ID,
+				CREATED_BY, MODIFIED_BY, CREATED_DATE, MODIFIED_DATE)
+				(
+					SELECT SEQ_PROC_PROVIDER_SERVICE.nextval, pp.PROCUREMENT_PROVIDER_ID, saa.SERVICE_APPLICATION_ID, Saa.ELEMENT_ID, 
+					#{userId}, #{userId}, systimestamp, systimestamp
+					from 
+					SERVICE_APPLICATION saa, ORGANIZATION org, (select ORGANIZATION_ID, business_application_id, APPLICATION_STATUS from (select ORGANIZATION_ID, business_application_id,
+							RANK() OVER (PARTITION BY ORGANIZATION_ID ORDER BY CREATED_DATE desc) rank, APPLICATION_STATUS
+							from BUSINESS_APPLICATION
+							where EXPIRATION_DATE > sysdate)
+							where rank in(1, 2)) br ,
+					(select * from SUPERSEDING_STATUS where (entity_id,TIMESTAMP) in 
+					    (select entity_id, max(TIMESTAMP) from SUPERSEDING_STATUS  where ENTITY_TYPE='Service Application' group by entity_id) 
+					   ) ss,
+					(select * from SUPERSEDING_STATUS where (entity_id,TIMESTAMP) in 
+						(select entity_id, max(TIMESTAMP) from SUPERSEDING_STATUS  where ENTITY_TYPE='Business Application' group by entity_id) 
+				       ) ssba,
+				    procurement_provider pp, procurement p
+				    where
+				    	p.status_id = 3
+				    	and p.service_filter = 1
+				    	and p.procurement_id = pp.procurement_id
+				    	and p.PROCUREMENT_ID = #{procurementId}
+				    	and pp.organization_id = org.ORGANIZATION_ID
+					    and saa.ELEMENT_ID IN (SELECT ELEMENT_ID FROM PROCUREMENT_SERVICES WHERE PROCUREMENT_ID = #{procurementId})
+						and saa.SERVICE_APPLICATION_ID = ss.ENTITY_ID(+)
+						and br.BUSINESS_APPLICATION_ID = ssba.ENTITY_ID(+)
+						and (ss.STATUS = 'Conditionally Approved' OR (ss.STATUS is null and saa.SERVICE_STATUS IN ('Approved')))
+						and (ssba.STATUS = 'Conditionally Approved' OR (ssba.STATUS is null and br.APPLICATION_STATUS IN ('Approved')))
+						and br.BUSINESS_APPLICATION_ID = saa.BUSINESS_APPLICATION_ID
+						and org.ORGANIZATION_ID = br.ORGANIZATION_ID
+						and org.ORGANIZATION_ID =  saa.ORGANIZATION_ID
+						and org.organization_status in ('Approved', 'Conditionally Approved')
+				)
+	</insert>
+	
+
+	<update id="updateRFPdocumentStatus" parameterType="hashmap">
+		update
+		rfp_document set status_id = #{documentStatus},
+		modified_by_userid=#{userId},
+		modified_date = sysdate
+		where
+		procurement_id = #{procId}
+	</update>
+	
+	<resultMap id="rfpDocumentDetails" type="com.nyc.hhs.model.ExtendedDocument">
+		<result property="documentType" column="DOCUMENT_TYPE" />
+		<result property="statusId" column="STATUS_ID" />
+	</resultMap>
+	<select id="checkRfpDocumentType" parameterType="java.lang.String"
+		resultMap="rfpDocumentDetails">
+		SELECT STATUS_ID, DOCUMENT_TYPE 
+		FROM PRCRMNT_ADDM_RFP_DOCUMENT
+		WHERE PROCUREMENT_ID = #{asProcId}
+	</select>
+
+	<!-- added in build 2.6.0, defect id 5667 -->
+	<delete id="hardDeleteRfpDocumentDetails" parameterType="String">
+		DELETE FROM 
+		RFP_DOCUMENT WHERE PROCUREMENT_ID = #{asProcId} AND DOC_DELETE_FLAG = '1'
+	</delete>
+	<insert id="insertGroupCompetitionMapping" parameterType="com.nyc.hhs.model.RFPReleaseBean">
+		INSERT INTO EVALUATION_POOL_MAPPING
+		(EVALUATION_POOL_MAPPING_ID,PROCUREMENT_ID,EVALUATION_GROUP_ID,
+		COMPETITION_POOL_ID, CREATED_BY_USERID,CREATED_DATE,
+		MODIFIED_DATE, MODIFIED_BY_USERID, STATUS_ID) 
+		(select SEQ_EVALUATION_POOL_ID.NEXTVAL, EG.PROCUREMENT_ID, EG.EVALUATION_GROUP_ID, CC.COMPETITION_POOL_ID,
+		#{createdByUserId}, systimestamp, systimestamp, #{modifiedByUserId}, #{evalGroupStatus} 
+		from (select procurement_id, evaluation_group_id from 
+			(select procurement_id, evaluation_group_id 
+				from EVALUATION_GROUP 
+				where procurement_id = #{procurementId}
+				order by created_date desc) 
+			where rownum = 1) EG, 
+		COMPETITION_POOL CC
+		where EG.PROCUREMENT_ID = CC.PROCUREMENT_ID
+		and CC.PROCUREMENT_ID = #{procurementId})
+	</insert>
+	
+	<!-- [Start] R6.3 QC6627 add ability to create new competition pool and delete during addendum. -->
+	<insert id="insertGroupCompetitionAddendumMapping" parameterType="com.nyc.hhs.model.RFPReleaseBean">
+		INSERT INTO EVALUATION_POOL_MAPPING
+		( EVALUATION_POOL_MAPPING_ID,PROCUREMENT_ID,EVALUATION_GROUP_ID, COMPETITION_POOL_ID, 
+          CREATED_BY_USERID,CREATED_DATE,	MODIFIED_DATE, MODIFIED_BY_USERID, STATUS_ID  ) 
+		(select  SEQ_EVALUATION_POOL_ID.NEXTVAL, EG.PROCUREMENT_ID, EG.EVALUATION_GROUP_ID, CC.COMPETITION_POOL_ID ,
+		         #{createdByUserId}, systimestamp, systimestamp, #{modifiedByUserId}, #{evalGroupStatus} 
+          from  (  select  procurement_id, evaluation_group_id 
+                     from  (select   procurement_id, evaluation_group_id 
+				             from   EVALUATION_GROUP 
+				             where   procurement_id  =  #{procurementId}
+				            order  by  created_date desc
+                            ) 
+			        where rownum = 1
+                 ) EG, 
+		         COMPETITION_POOL CC
+		where EG.PROCUREMENT_ID = CC.PROCUREMENT_ID
+		and   CC.PROCUREMENT_ID = #{procurementId}
+		and   CC.COMPETITION_POOL_ID not in ( select COMPETITION_POOL_ID from EVALUATION_POOL_MAPPING where PROCUREMENT_ID = #{procurementId} )
+       )
+	</insert>
+    <!-- [End] R6.3 QC6627 add ability to create new competition pool and delete during addendum. -->
+
+
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<insert id="insertProcDocumentConfigMapping" parameterType="com.nyc.hhs.model.ExtendedDocument">
+		INSERT
+		INTO PRCRMNT_DOCUMENT_MAPPING(PRCRMNT_DOCUMENT_MAPPING_ID,PROCUREMENT_DOCUMENT_ID,PROCUREMENT_ID
+		,PROCUREMENT_DOC_SEQ_NUM,VERSION_NUMBER,MODIFIED_BY_USERID
+		,MODIFIED_DATE,CREATED_DATE,CREATED_BY_USERID) 
+		VALUES(SEQ_PROC_DOCUMENT_MAPPING_ID.NEXTVAL,
+		<if test="procurementDocumentId == null">
+			SEQ_PROC_DOC_CONFIG_ID.CURRVAL,
+		</if>
+		<if test="procurementDocumentId != null">
+			#{procurementDocumentId},
+		</if>
+		#{procurementId,jdbcType=VARCHAR},
+		#{documentSeqNumber,jdbcType=VARCHAR},
+		#{versionNo},
+		#{createdBy,jdbcType=VARCHAR},
+		#{createdSqlDate},
+		#{modifiedSqlDate},
+		#{lastModifiedById,jdbcType=VARCHAR})
+	</insert>
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	   <!--Modified as a part of release 3.6.0 for enhancement request 6485-->
+	<insert id="insertProcDocumentConfig" parameterType="com.nyc.hhs.model.ExtendedDocument">
+		INSERT INTO
+			PROCUREMENT_DOCUMENT_CONFIG (PROCUREMENT_DOCUMENT_ID,
+			PROCUREMENT_ID, PROCUREMENT_DOCUMENT_TYPE, REQUIRED_FLAG,
+			CREATED_DATE, CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID, CUSTOM_LABEL)
+		values (SEQ_PROC_DOC_CONFIG_ID.NEXTVAL, #{procurementId, jdbcType=VARCHAR}, #{documentType},
+		#{requiredFlag}, #{createdSqlDate}, #{createdBy,jdbcType=VARCHAR}, #{modifiedSqlDate}, #{lastModifiedById,jdbcType=VARCHAR},#{customLabelName,jdbcType=VARCHAR})
+	</insert>
+	
+	
+	<select id="checkEvaluationInProgress" parameterType="java.util.Map" resultType="int">
+		select count(1) as EVALPROGRESSCOUNT from evaluation_status es, PRCRMNT_ADDM_EVALUATE_CRITERIA paec , PROPOSAL_CONFIG pc
+		where es.procurement_id = paec.procurement_id
+		and es.procurement_id = pc.procurement_id
+		and es.proposal_id = pc.proposal_id
+		and es.procurement_id = #{procurementId} and (es.proc_status_id is null or es.proc_status_id != #{procurementStatusId} or pc.PROC_REVIEW_STATUS_ID = 22)
+	</select>
+	
+</mapper>

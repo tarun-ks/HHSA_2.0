@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- R 8.0.0 QC 9330 keep Jenkins build.xml inside HHSPortal.
+			copy build.xml to Jenkins before build	
+WARNING: Eclipse auto-generated file.
+                   Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again.
+        /var/lib/jenkins/workspace/HHSPortal/Build/build.xml
+        
+-->
+<project basedir="." default="build" name="HHSPortal">
+	<property environment="env" />
+	<property file="build.properties"/>
+	<property file="${user.home}/build_stage_prod.properties" />
+	<property name="target" value="1.6" />
+	<property name="source" value="1.6" />
+	<property name="artifacts_path" value="${build_path}/${SVN_BUILD_NUMBER}/${ENV_NAME}/Artifacts" />
+
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+		<classpath>
+			<pathelement location="/opt/apptier/apache-ant-1.10.2/lib/ant-contrib-1.0b3.jar" />
+		</classpath>
+	</taskdef>
+
+	<path id="WebLogic System Libraries.libraryclasspath">
+		<fileset dir="${MODULES}">
+			<include name="com.bea.core.apache_1.3.0.1.jar" />
+			<include name="javax.xml.rpc_1.2.1.jar" />
+			<include name="wls-api.jar" />
+		</fileset>
+	</path>
+
+	<path id="Web App Libraries.libraryclasspath">
+		<fileset dir="${LIBDIR}"/>
+	</path>
+
+	<path id="Shared Library [p13n-app-lib-base].libraryclasspath">
+		<fileset dir="${SHAREDLIB}">
+			<include name="p13n_app.jar" />
+			<include name="p13n_system.jar" />
+			<include name="netuix_servlet.jar" />
+		</fileset>
+	</path>
+
+	<path id="HHSPortal.classpath">
+		<pathelement location="build/classes" />
+		<path refid="WebLogic System Libraries.libraryclasspath" />
+		<path refid="Web App Libraries.libraryclasspath" />
+		<path refid="Shared Library [p13n-app-lib-base].libraryclasspath" />
+	</path>
+
+	<target name="init">
+		<delete dir="tmp_src" />
+		<antcall target="clean"/>
+
+		<mkdir dir="tmp_src" />
+		<copy includeemptydirs="false" todir="tmp_src">
+			<fileset dir="./HHSPortal/src">
+				<exclude name="**/*.launch" />
+			</fileset>
+			<fileset dir="./HHSPortal/r2_src">
+				<exclude name="**/*.launch" />
+				<exclude name="hss_coherence*.xml" />
+			</fileset>
+			<fileset dir="./HHSPortal/src_p8component">
+				<exclude name="**/*.launch" />
+			</fileset>
+			<fileset dir="./HHSPortal/r5_src">
+				<exclude name="**/*.launch" />
+			</fileset>
+		</copy>
+
+		<echo message="copy src" />
+		<mkdir dir="build/classes" />
+		<replace dir="tmp_src" value="HHSPortal-${SVN_BUILD_NUMBER}">
+			<include name="**/hhsservices*.properties"/>
+			<exclude name="**/hhsservices*DESCRIPTION.properties"/>
+			<replacetoken>@PROP_BUILD_NO@</replacetoken>
+		</replace>
+
+		<!-- define folder for artifacts based on environment -->
+
+		<condition property="stagingenv">
+			<equals arg1="${ENV_NAME}" arg2="STG" />
+		</condition>
+
+		<condition property="prdenv">
+			<equals arg1="${ENV_NAME}" arg2="PRD" />
+		</condition>
+
+		<condition property="uatenv">
+			<equals arg1="${ENV_NAME}" arg2="UAT" />
+		</condition>
+
+		<condition property="devenv">
+			<equals arg1="${ENV_NAME}" arg2="DEV" />
+		</condition>
+
+		<condition property="dev2env">
+			<equals arg1="${ENV_NAME}" arg2="DV2" />
+		</condition>
+
+		<condition property="dev3env">
+			<equals arg1="${ENV_NAME}" arg2="DV3" />
+		</condition>
+
+		<condition property="test2env">
+			<equals arg1="${ENV_NAME}" arg2="TS2" />
+		</condition>
+
+		<condition property="testenv">
+			<equals arg1="${ENV_NAME}" arg2="TST" />
+		</condition>
+
+		<condition property="trnenv">
+			<equals arg1="${ENV_NAME}" arg2="TRN" />
+		</condition>
+
+		<antcall target="CopyProductionPasswords"/>
+
+		<!--<antcall target="CopyUATWeblogicXml"/>
+		<antcall target="CopyDev2WeblogicXml"/>
+		<antcall target="CopyDev3WeblogicXml"/>
+		<antcall target="CopyDevWeblogicXml"/>
+		<antcall target="CopyTRNWeblogicXml"/>
+		<antcall target="CopyTest2WeblogicXml"/>
+		<antcall target="CopyTestWeblogicXml"/>
+		<antcall target="CopySTGWeblogicXml"/>
+		<antcall target="CopyPRDWeblogicXml"/>
+		-->
+		<copy includeemptydirs="false" todir="build/classes">
+			<fileset dir="tmp_src">
+				<exclude name="**/*.launch" />
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+
+	</target>
+
+	<target name="CopyProductionPasswords" if="${stagingenv}">
+		<echo message="============= Copy Prod Passwords ======================" />
+		<replace dir="tmp_src" value="${CE_USER_ID_BATCH}">
+			<include name="**/hhsservices-prod-batch.properties"/>
+			<replacetoken>@CE_USER_ID_BATCH@</replacetoken>
+		</replace>
+		<replace dir="tmp_src" value="${CE_PASSWORD_BATCH}">
+			<include name="**/hhsservices-prod-batch.properties"/>
+			<replacetoken>@CE_PASSWORD_BATCH@</replacetoken>
+		</replace>
+		<replace dir="tmp_src" value="${CE_USER_ID_COMPONENT}">
+			<include name="**/hhsservices-prod-component.properties"/>
+			<replacetoken>@CE_USER_ID_COMPONENT@</replacetoken>
+		</replace>
+		<replace dir="tmp_src" value="${CE_PASSWORD_COMPONENT}">
+			<include name="**/hhsservices-prod-component.properties"/>
+			<replacetoken>@CE_PASSWORD_COMPONENT@</replacetoken>
+		</replace>
+		<replace dir="tmp_src" value="${LDAP_ADMIN_PASSWORD}">
+			<include name="**/hhsservices-prod-batch.properties"/>
+			<replacetoken>@LDAP_ADMIN_PASSWORD@</replacetoken>
+		</replace>
+
+		<replace dir="tmp_src" value="${USERNAME_DB}">
+			<include name="**/BatchSqlMapConfig.xml"/>
+			<replacetoken>@USERNAME_DB@</replacetoken>
+		</replace>
+		<replace dir="tmp_src" value="${PASSWORD_DB}">
+			<include name="**/BatchSqlMapConfig.xml"/>
+			<replacetoken>@PASSWORD_DB@</replacetoken>
+		</replace>
+
+		<replace dir="tmp_src" value="${USERNAME_FILENET}">
+			<include name="**/FilenetSqlMapConfigR2.xml"/>
+			<replacetoken>@USERNAME_FILENET@</replacetoken>
+		</replace>
+		<replace dir="tmp_src" value="${PASSWORD_FILENET}">
+			<include name="**/FilenetSqlMapConfigR2.xml"/>
+			<replacetoken>@PASSWORD_FILENET@</replacetoken>
+		</replace>
+
+	</target>
+
+	<target name="CopyStaticContent" if="${STATIC_CONTENT}">
+
+		<echo message= "copy Static Content to ${artifacts_path} " />
+		<mkdir dir="${artifacts_path}/staticContent/HHSPortal/css" />
+		<mkdir dir="${artifacts_path}/staticContent/HHSPortal/forms" />
+		<mkdir dir="${artifacts_path}/staticContent/HHSPortal/framework" />
+		<mkdir dir="${artifacts_path}/staticContent/HHSPortal/img" />
+		<mkdir dir="${artifacts_path}/staticContent/HHSPortal/js" />
+		<mkdir dir="${artifacts_path}/staticContent/HHSPortal/r2" />
+		<mkdir dir="${artifacts_path}/staticContent/HHSPortal/r5" />
+		<mkdir dir="${artifacts_path}/staticContent/HHSPortal/resources" />
+
+		<copy includeemptydirs="false" todir="${artifacts_path}/staticContent/HHSPortal/css" overwrite="true">
+			<fileset dir="./HHSPortal/WebContent/css"/>
+		</copy>
+		<copy includeemptydirs="false" todir="${artifacts_path}/staticContent/HHSPortal/forms" overwrite="true">
+			<fileset dir="./HHSPortal/WebContent/forms"/>
+		</copy>
+		<copy includeemptydirs="false" todir="${artifacts_path}/staticContent/HHSPortal/framework" overwrite="true">
+			<fileset dir="./HHSPortal/WebContent/framework"/>
+		</copy>
+		<copy includeemptydirs="false" todir="${artifacts_path}/staticContent/HHSPortal/img" overwrite="true">
+			<fileset dir="./HHSPortal/WebContent/img"/>
+		</copy>
+		<copy includeemptydirs="false" todir="${artifacts_path}/staticContent/HHSPortal/js" overwrite="true">
+			<fileset dir="./HHSPortal/WebContent/js"/>
+		</copy>
+		<copy includeemptydirs="false" todir="${artifacts_path}/staticContent/HHSPortal/r2" overwrite="true">
+			<fileset dir="./HHSPortal/WebContent/r2"/>
+		</copy>
+		<copy includeemptydirs="false" todir="${artifacts_path}/staticContent/HHSPortal/r5" overwrite="true">
+			<fileset dir="./HHSPortal/WebContent/r5"/>
+		</copy>
+		<copy includeemptydirs="false" todir="${artifacts_path}/staticContent/HHSPortal/resources" overwrite="true">
+			<fileset dir="./HHSPortal/WebContent/resources"/>
+		</copy>
+
+	</target>
+
+	<target name="CopyUATWeblogicXml" if="${uatenv}">
+		<delete file="./HHSPortal/WebContent/WEB-INF/weblogic.xml"/>
+		<copy todir="./HHSPortal/WebContent/WEB-INF">
+			<fileset dir="${uatweblogicpath}">
+				<include name="weblogic.xml" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="CopyTestWeblogicXml" if="${testenv}">
+		<delete file="./HHSPortal/WebContent/WEB-INF/weblogic.xml"/>
+		<copy todir="./HHSPortal/WebContent/WEB-INF">
+			<fileset dir="${lowerenvpath}">
+				<include name="weblogic.xml" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="CopyTest2WeblogicXml" if="${test2env}">
+		<delete file="./HHSPortal/WebContent/WEB-INF/weblogic.xml"/>
+		<copy todir="./HHSPortal/WebContent/WEB-INF">
+			<fileset dir="${lowerenvpath}">
+				<include name="weblogic.xml" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="CopyDevWeblogicXml" if="${devenv}">
+		<delete file="./HHSPortal/WebContent/WEB-INF/weblogic.xml"/>
+		<copy  todir="./HHSPortal/WebContent/WEB-INF">
+			<fileset dir="${lowerenvpath}">
+				<include name="weblogic.xml" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="CopyDev2WeblogicXml" if="${dev2env}">
+		<delete file="./HHSPortal/WebContent/WEB-INF/weblogic.xml"/>
+		<copy todir="./HHSPortal/WebContent/WEB-INF">
+			<fileset dir="${lowerenvpath}">
+				<include name="weblogic.xml" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="CopyDev3WeblogicXml" if="${dev3env}">
+		<delete file="./HHSPortal/WebContent/WEB-INF/weblogic.xml"/>
+		<copy todir="./HHSPortal/WebContent/WEB-INF">
+			<fileset dir="${lowerenvpath}">
+				<include name="weblogic.xml" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="CopyTRNWeblogicXml" if="${trnenv}">
+		<delete file="./HHSPortal/WebContent/WEB-INF/weblogic.xml"/>
+		<copy todir="./HHSPortal/WebContent/WEB-INF">
+			<fileset dir="${lowerenvpath}">
+				<include name="weblogic.xml" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="CopySTGWeblogicXml" if="${stagingenv}">
+		<delete file="./HHSPortal/WebContent/WEB-INF/weblogic.xml"/>
+		<copy todir="./HHSPortal/WebContent/WEB-INF">
+			<fileset dir="${stgweblogicpath}">
+				<include name="weblogic.xml" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="CopyPRDWeblogicXml" if="${prdenv}">
+		<delete file="./HHSPortal/WebContent/WEB-INF/weblogic.xml"/>
+		<copy todir="./HHSPortal/WebContent/WEB-INF">
+			<fileset dir="${stgweblogicpath}">
+				<include name="weblogic.xml" />
+			</fileset>
+		</copy>
+	</target>
+
+
+
+	<target name="clean">
+		<delete dir="build/classes" />
+	</target>
+
+	<target depends="clean" name="cleanall" />
+	<target depends="build-subprojects,build-project" name="build" />
+	<target name="build-subprojects" />
+
+	<target depends="init" name="build-project">
+		<echo message="${ant.project.name}: ${ant.file}" />
+		<javac debug="on" debuglevel="${debuglevel}" destdir="build/classes" source="${source}" target="${target}" encoding="iso-8859-1">
+			<src path="tmp_src" />
+			<classpath refid="HHSPortal.classpath" />
+		</javac>
+
+
+		<antcall target="build-artifacts"/>
+
+	</target>
+
+	<target name="build-artifacts">
+		<echo message="----------------build artifact folder for ${artifacts_path}-------------------" />
+		<echo>"Static Content :: ${STATIC_CONTENT}</echo>
+		<!-- Test if a directory called "${artifacts_path}" is present -->
+		<if>
+			<available file="${artifacts_path}" type="dir" />
+			<then>
+				<echo message="Directory ${artifacts_path} exists" />
+				<!-- rename Acrtifacts dir -->
+				<loadfile property="last_number" srcfile="${artifacts_path}/artifacts_build_number.txt"/>
+				<echo message="The last saved artifact number is ${last_number}"/>
+				<move todir="${artifacts_path}_${last_number}">
+					<fileset dir="${artifacts_path}"/>
+				</move>
+				<echo message="Artifacts has been renamed to ${artifacts_path}_${last_number}"/>
+
+			</then>
+			<else>
+				<echo message="Directory ${artifacts_path} does not exist" />
+				<property name="last_number" value="0" />
+			</else>
+		</if>
+
+		<!-- store the latest artifacts build number -->
+		<math result="result" operand1="${last_number}" operation="+" operand2="1" datatype="int"/>
+
+		<echo message="Incremented artifacts last_number = ${result}"/>
+
+		<echo file="${artifacts_path}/artifacts_build_number.txt" append="true">${result}</echo>
+		<echo file="${artifacts_path}/artifacts_source.txt" append="true">${env.SVN_FULL_PATH}</echo>
+
+		<mkdir dir="${artifacts_path}" />
+		<mkdir dir="${artifacts_path}/war" />
+
+		<war destfile="${artifacts_path}/war/HHSPortal.war" webxml="./HHSPortal/WebContent/WEB-INF/web.xml">
+			<fileset dir="./HHSPortal/WebContent" />
+			<classes dir="build/classes" />
+		</war>
+
+		<ear destfile="${artifacts_path}/HHSPortalEAR_${SVN_BUILD_NUMBER}_${BUILD_NUMBER}.ear" appxml="${hhsportalear_path}/META-INF/application.xml">
+			<metainf dir="${hhsportalear_path}/META-INF" />
+			<fileset dir="${artifacts_path}/war" includes="HHSPortal.war" />
+
+			<zipfileset dir="${hhsportalear_path}/APP-INF" prefix="APP-INF">
+			</zipfileset>
+		</ear>
+
+		<antcall target="build-coherence-artifacts"/>
+		<!--<antcall target="build-HHSBatch-jar"/>
+		<antcall target="build-HHSComponent-jar"/>
+		-->
+		<antcall target="CopyStaticContent"/> 
+		<!-- remove war file from artifacts directory -->
+		<delete dir="${artifacts_path}/war" />
+
+	</target>
+
+	<!--
+        Target that builds a HHSCoherenceConfig.jar file for coherence server configurations
+        and the CoherenceExtendServer.tar file which contains the libraries required to deploy
+        the Coherence*Extends proxy server.
+        -->
+	<target name="build-coherence-artifacts" description="Build HHSCoherenceConfig.jar and CoherenceExtendServer.tar">
+		<!-- Generate the /temp_build directory -->
+		<delete dir="build/classes/coherence_config" />
+		<mkdir dir="build/classes/coherence_config" />
+
+		<!-- Copy Coherence config files -->
+		<copy todir="build/classes/coherence_config">
+			<fileset dir="${coherencepath}">
+				<include name="hhs-coherence-cache-config-*.xml" />
+			</fileset>
+		</copy>
+
+		<!-- Generate the Coherence server configurations tar file -->
+
+		<jar destfile="${artifacts_path}/HHSCoherenceConfig.jar" basedir="build/classes/coherence_config" />
+		<delete dir="build/classes/coherence_config" />
+
+		<!-- Generate the tar with the files required by the Coherence Extends proxy server -->
+		<tar destfile="${artifacts_path}/CoherenceExtendServer.tar">
+			<tarfileset dir="${LIBDIR}">
+				<include name="coherence.jar" />
+			</tarfileset>
+			<tarfileset dir="${artifacts_path}">
+				<include name="HHSCoherenceConfig.jar" />
+			</tarfileset>
+		</tar>
+
+
+	</target>
+
+	<target name="tar_creation">
+		<tar destfile="${artifacts_path}/CoherenceExtendServer.tar">
+			<tarfileset dir="${LIBDIR}">
+				<include name="coherence.jar" />
+			</tarfileset>
+			<tarfileset dir="${artifacts_path}">
+				<include name="HHSCoherenceConfig.jar" />
+			</tarfileset>
+		</tar>
+	</target>
+
+	<target name="build-HHSBatch-jar" description="Build Batch Jar">
+		<jar destfile="${artifacts_path}/HHS_Batch.jar" basedir="build/classes" excludes="log4j.*" />
+	</target>
+
+	<target name="build-HHSComponent-jar" description="Build Component Jar">
+		<jar destfile="${artifacts_path}/HHS_Component.jar" basedir="build/classes" excludes="log4j.*" />
+	</target>
+
+	<target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects" />
+
+	<target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
+		<copy todir="${ant.library.dir}">
+			<fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar" />
+		</copy>
+		<unzip dest="${ant.library.dir}">
+			<patternset includes="jdtCompilerAdapter.jar" />
+			<fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar" />
+		</unzip>
+	</target>
+
+	<target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+		<property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter" />
+		<antcall target="build" />
+	</target>
+
+</project>

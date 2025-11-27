@@ -1,0 +1,28 @@
+<charts>
+		<chart width="500pt" height="500pt" id="advanceRecoupment"
+		chart_design_id="advanceRecoupmentScripted.rptdesign" 
+		export_design_id="export/advanceExport.rptdesign"
+		dashboard_chart_design_id="advanceRecoupmentScripted.rptdesign"
+		 exportdata="true" exportformat="csv" datasource="scripted" sqlID="getAdvRecoupmentChart" exportsqlID="getAdvRecoupment" exporttablename="data"
+		emitterClass="com.nyc.hhs.report.extension.ExportCSVReport">
+		<report-params>
+			<param name="organizationId" scope="" target="ORGANIZATION_ID" />
+			<param name="fyYearId" scope="" target="fyYearId" />
+		</report-params>
+		<report-variables>
+			<variable name="reportList" scope="global" target="reportList" />
+		</report-variables>
+		<data-columns sqlID="getAdvRecoupment_ForGrid">
+					<column headingName="Agency" columnName="agencyName" size="5%" userType="provider_org,city_org"/>
+					<column headingName="Provider" columnName="provider" size="5%" userType="agency_org,city_org"/>
+					<column headingName="CT#" columnName="ctNumber" size="15%" userType=""/>
+					<column headingName="Contract Title" columnName="contractTitle" size="30%" userType=""/>
+					<column headingName="Description" columnName="desc" size="20%" userType=""/>
+					<column headingName="Advance Amount ($)" columnName="advanceAmount" size="10%" userType=""/>
+					<column headingName="Advance Recouped ($)" columnName="recoupedAmount" size="10%" userType=""/>
+					<column headingName="Percent Recouped (%)" columnName="percentRecouped" size="10%" userType=""/>
+		</data-columns>
+		
+		<table-columns/>
+	</chart>
+</charts>

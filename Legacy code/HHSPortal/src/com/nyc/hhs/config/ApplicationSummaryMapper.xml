@@ -1,0 +1,1243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.ApplicationSummaryMapper">
+
+	<resultMap id="resultAnswer" type="com.nyc.hhs.model.ApplicationSummary">
+		<result property="msBusinessAppId" column="BUSINESS_APPLICATION_ID" />
+		<result property="msServiceAppId" column="SERVICE_APPLICATION_ID" />
+		<result property="msApplicationId" column="APPLICATION_ID" />
+		<result property="msAppName" column="SERVICE_NAME" />
+		<result property="msServiceElementId" column="ELEMENT_ID" />
+		<result property="msAppStatus" column="APP_STATUS"></result>
+		<result property="msAppSubmittedBy" column="SUBMITTED_BY"></result>
+		<result property="mdAppSubmissionDate" column="SUBMISSION_DATE"></result>				
+		<result property="mdAppStartDate" column="START_DATE" />
+		<result property="mdAppExpirationDate" column="EXPIRATION_DATE" />
+		<result property="msAppType" column="TYPE" />		
+		<result property="mdRequestDate" column="REQUESTOR_DATE" />
+  		<result property="msRequester" column="Requestor_By" />
+		<result property="msWithdrawanAppId" column="BUSINESS_APPLICATION_ID" />
+		<result property="msId" column="ID" />
+		<result property="msWithdrawanStatus" column="WITHDRAWN_STATUS" />
+		<result property="msStatusId" column="STATUS_ID" />
+		<result property="msWorkflowId" column="WORKFLOW_ID" />
+		<result property="statusSetBy" column="NAME" />
+		<result property="applicationCreatedDate" column="CREATED_DATE" />
+		<result property="cityUserEffectiveDate" column="CITY_STATUS_SET_DATE" />
+	</resultMap>
+	
+	<resultMap id="resultAnswerHistory" type="com.nyc.hhs.model.ApplicationSummary">
+		<result property="msAppStatus" column="STATUS"></result>
+		<result property="msAppSubmittedBy" column="PROVIDERNAME"></result>
+		<result property="mdAppSubmissionDate" column="AUDIT_DATE"></result>				
+		<result property="msComments" column="DATA"></result>
+		<result property="msSection" column="SECTION"></result>
+	</resultMap>
+	
+	<resultMap id="providerDetails" type="com.nyc.hhs.model.ApplicationSummary">
+		<result property="msProviderStatus" column="ORGANIZATION_STATUS"></result>
+		<!-- [R4.1:add-on]Add ORGANIZATION_EXPIRATION_DATE  -->
+		<result property="msExpirationDate" column="ORGANIZATION_EXPIRATION_DATE"></result>
+		<!-- [R4.1:add-on]Add ORGANIZATION_EXPIRATION_DATE  -->
+	</resultMap>
+	
+	<resultMap id="numberOfBusinessApp" type="com.nyc.hhs.model.ApplicationSummary">
+		<result property="topBusinessAppId" column="BUSINESS_APPLICATION_ID"></result>
+		<result property="createdDate" column="CREATED_DATE"></result>
+		<result property="msAppStatus" column="APPLICATION_STATUS"></result>
+	</resultMap>
+	
+	<select id="selectAppInfo" parameterType="hashmap" resultMap="resultAnswer">
+			select * from (	
+			select 'Business Application' SERVICE_NAME,'SERVICE ELEMENT ID' ELEMENT_ID,NULL SERVICE_APPLICATION_ID,b.APPLICATION_ID,b.APPLICATION_STATUS AS  APP_STATUS,b.SUBMITTED_BY ,
+					b.SUBMISSION_DATE ,b.START_DATE ,b.EXPIRATION_DATE ,'Business' Type, B.BUSINESS_APPLICATION_ID,
+					c.SUBMITTED_BY AS Requestor_By, c.SUBMISSION_DATE AS REQUESTOR_DATE,c.WITHDRAWN_STATUS,B.BUSINESS_APPLICATION_ID ID, 
+        	b.STATUS_ID,b.WORKFLOW_ID,b.city_status_set_by, TRIM(NVL(CUD.FIRST_NAME,'')||' '||NVL(CUD.LAST_NAME,'')) NAME,
+          	b.created_date AS Created_Date,b.CITY_STATUS_SET_DATE
+			FROM 	BUSINESS_APPLICATION b, business_withdrawal c, 
+			 		  CITY_USER_DETAILS CUD
+			WHERE 	b.ORGANIZATION_ID = #{asOrgId}
+       		AND c.BUSINESS_APPLICATION_ID(+)=b.BUSINESS_APPLICATION_ID
+       		AND CUD.USER_ID(+)=B.CITY_STATUS_SET_BY
+
+			union
+
+			SELECT t.element_name AS SERVICE_NAME,t.element_id AS ELEMENT_ID,s.SERVICE_APPLICATION_ID,s.APPLICATION_ID, s.SERVICE_STATUS AS  APP_STATUS,s.SUBMITTED_BY ,s.SUBMISSION_DATE ,
+					s.START_DATE,s.EXPIRATION_DATE ,'Service' Type,s.BUSINESS_APPLICATION_ID, D.SUBMITTED_BY AS Requestor_By, 
+          	D.SUBMISSION_DATE AS REQUESTOR_DATE,
+					D.WITHDRAWN_STATUS,E.BUSINESS_APPLICATION_ID ID,s.STATUS_ID,s.WORKFLOW_ID,s.city_status_set_by, TRIM(NVL(CUD.FIRST_NAME,'')||' '||NVL(CUD.LAST_NAME,'')) NAME
+			,s.CREATED_DATE AS Created_Date,s.CITY_STATUS_SET_DATE
+			FROM  BUSINESS_APPLICATION E, TAXONOMY_MASTER t, SERVICE_APPLICATION s, SERVICE_WITHDRAWAL D , CITY_USER_DETAILS CUD
+			WHERE  s.ORGANIZATION_ID = #{asOrgId}
+      		AND D.SERVICE_APPLICATION_ID(+)=s.SERVICE_APPLICATION_ID
+				AND E.BUSINESS_APPLICATION_ID=s.BUSINESS_APPLICATION_ID 
+				AND s.ELEMENT_ID = t.ELEMENT_ID
+        	AND CUD.USER_ID(+)=S.CITY_STATUS_SET_BY
+			order by SUBMISSION_DATE DESC,SERVICE_NAME DESC	
+			)SUMMARY order by ID,TYPE,SUBMISSION_DATE DESC 
+	</select>
+	
+	<insert id="insertBusinessAppInfo" parameterType="hashmap">
+		INSERT INTO BUSINESS_APPLICATION (APPLICATION_ID,BUSINESS_APPLICATION_ID,ORGANIZATION_ID,STATUS_ID,USER_ID,REPORTING_MODIFIED_BY,REPORTING_MODIFIED_DATE) 
+		VALUES
+		(#{asAppId},#{asBusinessAppId},#{asOrgId},#{asStatusId},#{asUserID},#{asUserID},SYSTIMESTAMP)
+	</insert>	
+	
+	<!-- insert into audit table -->
+	<insert id="insertIntoAuditTable" parameterType="map">
+		INSERT INTO APPLICATION_AUDIT (ORGANIZATION_ID,APPLICATION_ID,EVENT_NAME,EVENT_TYPE,AUDIT_DATE,EMAIL_ID,DATA,ENTITY_TYPE,ENTITY_ID,SECTION_ID,PROVIDER_VISIBILITY_FLAG,ENTITY_IDENTIFIER,USER_ID,USER_TYPE)
+		VALUES(#{asOrgId},#{asAppId},#{eventName},#{eventType},systimestamp,#{emailId},#{comments},#{entityType},#{entityId},#{sectionId, jdbcType=VARCHAR},#{providerVisibilityFlag},#{entityIdentifier},#{asUserID},#{City})
+	</insert>
+	
+	<!-- insert into super seding table in case of suspend and conditionally approved-->
+	<insert id="insertIntoSuperSedingTable" parameterType="map">
+		INSERT INTO SUPERSEDING_STATUS (ENTITY_TYPE,ENTITY_ID,EVENT,FLAG,STATUS,TIMESTAMP,USER_ID,ORGANIZATION_ID,REQUEST_ID,SUPERSEDING_STATUS_ID,CREATED_BY,CREATED_DATE,MODIFIED_BY,MODIFIED_DATE,REPORTING_MODIFIED_BY,REPORTING_MODIFIED_DATE)
+		VALUES(#{entityType},#{entityId},#{event},#{flag},#{asStatus},#{auditDate},#{asUserID},#{asOrgId},#{requestId, jdbcType=VARCHAR},SEQ_SUPERSEDING_STATUS_ID.NEXTVAL,#{asUserID},SYSDATE,#{asUserID},SYSDATE,#{asUserID},SYSTIMESTAMP)
+	</insert>
+	
+	<!-- insert into print view generation table in case of suspend -->
+	<insert id="insertIntoPrintViewGeneration" parameterType="map">
+		INSERT INTO PRINT_VIEW_GENERATION (SEQUENCE_ID,PRINT_VIEW_ID,ORGANIZATION_ID,TASK_TYPE,PROC_STATUS,CREATED_DATE,CREATED_BY,MODIFIED_DATE,MODIFIED_BY,IS_PRINT_GENERATED)
+		VALUES(SEQ_PRINT_VIEW_GEN.NEXTVAL,#{entityId},#{asOrgId},#{entityType},#{asStatus},#{asCreatedDate},#{asUserID},#{asModifiedDate},#{asUserID},0)
+	</insert>
+		
+	<update id="updatePrintViewGeneration" parameterType="map" >
+		UPDATE PRINT_VIEW_GENERATION SET TASK_TYPE = #{entityType}, PROC_STATUS = #{asStatus}, CREATED_DATE = #{asCreatedDate},
+		CREATED_BY = #{asUserID}, MODIFIED_DATE = #{asModifiedDate}, MODIFIED_BY = #{asUserID}, IS_PRINT_GENERATED = 0
+		WHERE PRINT_VIEW_ID = #{entityId} AND ORGANIZATION_ID = #{asOrgId}
+	</update>
+	
+	<!-- update into business application table by expiration date-->
+	<update id="updateBusinessAppExpirationDate" parameterType="map">
+	   UPDATE BUSINESS_APPLICATION SET EXPIRATION_DATE = null, CITY_STATUS_SET_BY=#{asUserID},CITY_STATUS_SET_DATE=#{auditDate},
+	   REPORTING_MODIFIED_BY=#{asUserID}, REPORTING_MODIFIED_DATE=SYSTIMESTAMP
+	   WHERE BUSINESS_APPLICATION_ID = #{entityId} AND ORGANIZATION_ID=#{asOrgId}
+	</update>
+	
+	<!-- update into business application table by expiration date
+	     Rel 4.1.0 QC 8280 Begin. Update OrgExp Date as well anytime BusApp expiry date is set -->
+	<update id="bussAppExpDateConditionallyApprove" parameterType="map">
+	{
+	call 
+		BEGIN
+			   UPDATE BUSINESS_APPLICATION SET EXPIRATION_DATE = #{next90Days},
+			   START_DATE=#{startDate},
+			   CITY_STATUS_SET_BY=#{asUserID},CITY_STATUS_SET_DATE=#{auditDate},
+			   REPORTING_MODIFIED_BY=#{asUserID}, REPORTING_MODIFIED_DATE=SYSTIMESTAMP
+			   WHERE BUSINESS_APPLICATION_ID = #{entityId} AND ORGANIZATION_ID=#{asOrgId};
+			   
+			   UPDATE ORGANIZATION SET ORGANIZATION_EXPIRATION_DATE = #{next90Days},
+			   REPORTING_MODIFIED_DATE=SYSTIMESTAMP, REPORTING_MODIFIED_BY= #{asUserID} 
+			   WHERE ORGANIZATION_ID = #{asOrgId};
+		END
+    }
+	</update>
+	<!--  Rel 4.1.0 QC 8280 Begin. -->
+	
+	<!-- update into business application table by expiration date-->
+	<update id="serviceAppExpDateConditionallyApprove" parameterType="map">
+	   UPDATE SERVICE_APPLICATION SET EXPIRATION_DATE = NVL((SELECT EXPIRATION_DATE FROM BUSINESS_APPLICATION WHERE BUSINESS_APPLICATION_ID = 
+	   			#{asAppId} AND ORGANIZATION_ID=#{asOrgId} and application_status != 'Approved'),SYSDATE+90),
+	   			START_DATE = NVL((SELECT START_DATE FROM BUSINESS_APPLICATION WHERE BUSINESS_APPLICATION_ID = 
+	   			#{asAppId} AND ORGANIZATION_ID=#{asOrgId} and application_status != 'Approved'),SYSDATE),
+	   			CITY_STATUS_SET_DATE = NVL((SELECT CITY_STATUS_SET_DATE FROM BUSINESS_APPLICATION WHERE BUSINESS_APPLICATION_ID = 
+	   			#{asAppId} AND ORGANIZATION_ID=#{asOrgId}),#{auditDate}),
+	   			CITY_STATUS_SET_BY=#{asUserID},REPORTING_MODIFIED_BY=#{asUserID},REPORTING_MODIFIED_DATE=SYSTIMESTAMP
+	   			WHERE SERVICE_APPLICATION_ID = #{entityId} AND ORGANIZATION_ID=#{asOrgId}
+	</update>
+	
+	<update id="serviceAppExpDateSuspend" parameterType="map">
+	   UPDATE SERVICE_APPLICATION SET CITY_STATUS_SET_BY=#{asUserID},CITY_STATUS_SET_DATE=#{auditDate},REPORTING_MODIFIED_BY=#{asUserID},REPORTING_MODIFIED_DATE=SYSTIMESTAMP
+	   WHERE SERVICE_APPLICATION_ID = #{entityId} AND ORGANIZATION_ID=#{asOrgId}
+	</update>
+	
+	<!-- update into SERVICE_APPLICATION table -->
+	<update id="updateServiceApplicationTable" parameterType="map">
+	   UPDATE SERVICE_APPLICATION SET MODIFIED_BY = #{modifiedBy}, MODIFIED_DATE=SYSDATE,SERVICE_STATUS=#{asStatus},REPORTING_MODIFIED_BY=#{modifiedBy},REPORTING_MODIFIED_DATE=SYSTIMESTAMP
+	   WHERE BUSINESS_APPLICATION_ID = #{asAppId} AND ORGANIZATION_ID=#{asOrgId} AND ELEMENT_ID=#{loServiceElementId}
+	</update>
+	
+	<!-- update into BUSINESS_APPLICATION table -->
+	<update id="updateBusinessApplicationTable" parameterType="map">
+	   UPDATE BUSINESS_APPLICATION SET MODIFIED_BY = #{modifiedBy}, MODIFIED_DATE=SYSDATE,APPLICATION_STATUS=#{asStatus},
+	   REPORTING_MODIFIED_BY=#{modifiedBy}, REPORTING_MODIFIED_DATE=SYSTIMESTAMP
+	   WHERE BUSINESS_APPLICATION_ID = #{asAppId} AND ORGANIZATION_ID=#{asOrgId}
+	</update>
+	
+	
+	
+	<!-- GET HISTORY FROM AUDIT TABLE -->
+	<select id="getApplicationSummaryHistory" parameterType="map" resultMap="resultAnswerHistory">
+	   	select * from (select audit1.event_name AS STATUS,audit1.entity_identifier as SECTION,
+		    	TRIM(NVL(SD.FIRST_NAME,'')||' '||NVL(sd.middle_initial,'') ||' '||NVL(SD.LAST_NAME,'')) AS PROVIDERNAME,
+				audit1.audit_date AUDIT_DATE ,audit1.data
+				from Application_Audit audit1,staff_details sd where audit1.ORGANIZATION_ID=#{asOrgId} and audit1.ENTITY_ID=#{asAppId}
+			    and sd.staff_id = audit1.USER_ID and audit1.user_type = #{providerType}
+	    	UNION
+		       	select audit1.event_name AS STATUS,audit1.entity_identifier as SECTION,
+		        TRIM(NVL(city_details.FIRST_NAME,'')||' '||NVL(city_details.LAST_NAME,''))  AS PROVIDERNAME,
+				audit1.audit_date AUDIT_DATE ,audit1.data
+				from Application_Audit audit1,city_user_details city_details where audit1.ORGANIZATION_ID=#{asOrgId} and audit1.ENTITY_ID=#{asAppId}
+		    	and city_details.user_id = audit1.USER_ID and audit1.user_type = #{cityType} and audit1.event_name!=#{lsSnapshot})
+		ORDER BY AUDIT_DATE DESC
+	</select>
+	
+	<select id="getApplicationServiceHistory" parameterType="map" resultMap="resultAnswerHistory">
+		select * from (select audit1.event_name AS STATUS,audit1.entity_identifier as SECTION,
+	    	TRIM(NVL(SD.FIRST_NAME,'')||' '||NVL(sd.middle_initial,'') ||' '||NVL(SD.LAST_NAME,'')) AS PROVIDERNAME,
+			audit1.audit_date AUDIT_DATE ,audit1.data
+			from Application_Audit audit1,staff_details sd where audit1.ORGANIZATION_ID=#{asOrgId} and (audit1.ENTITY_ID in 
+	    	(select to_char(SA_WITHDRAWAL_ID) from SERVICE_WITHDRAWAL where SERVICE_APPLICATION_ID=#{asAppId})
+		    or audit1.ENTITY_ID=#{asAppId})
+		    and sd.staff_id = audit1.USER_ID and audit1.user_type = #{providerType}
+    	UNION
+	       	select audit1.event_name AS STATUS,audit1.entity_identifier as SECTION,
+	        TRIM(NVL(city_details.FIRST_NAME,'')||' '||NVL(city_details.LAST_NAME,''))  AS PROVIDERNAME,
+			audit1.audit_date AUDIT_DATE ,audit1.data
+			from Application_Audit audit1,city_user_details city_details where audit1.ORGANIZATION_ID=#{asOrgId} and (audit1.ENTITY_ID in 
+	    	(select to_char(SA_WITHDRAWAL_ID) from SERVICE_WITHDRAWAL where SERVICE_APPLICATION_ID=#{asAppId})
+		    or audit1.ENTITY_ID=#{asAppId})
+	    	and city_details.user_id = audit1.USER_ID and audit1.user_type =#{cityType})
+		ORDER BY AUDIT_DATE DESC
+	</select>
+	
+	<!-- GET PROVIDER DETAILS FROM ORGANIZATION -->
+	<select id="getProviderData" parameterType="String" resultMap="providerDetails">
+		select   ORGANIZATION_STATUS,  
+		<!-- Start [R4.1:add-on]Add ORGANIZATION_EXPIRATION_DATE  -->		
+		         case when to_char(ORGANIZATION_EXPIRATION_DATE, 'mm/dd/yyyy') = '12/31/2999'
+                      then null 
+                      else ORGANIZATION_EXPIRATION_DATE 
+                 end as ORGANIZATION_EXPIRATION_DATE  
+		<!-- End   [R4.1:add-on]Add ORGANIZATION_EXPIRATION_DATE  -->                 
+		  from   ORGANIZATION
+	     where   ORGANIZATION_ID=#{asOrgId} and rownum = 1
+	</select>
+	
+	<!-- CODE FOR SUMMARY SERVICE QUESTION CONTRACT  -->
+	
+		<resultMap id="result1" type="com.nyc.hhs.model.ContractDetails">
+	    <result property="msContractID" column="CONTRACT_ID" />
+		<result property="msContractType" column="FUNDER_TYPE" />
+		<result property="msContractNYCAgency" column="NYC_AGENCY" />
+		<result property="msContractFunderName" column="FUNDER_NAME" />
+		<result property="msContractRefFirstName" column="REF_FIRST_NAME" />
+		<result property="msContractRefMidName" column="REF_MID_NAME" />
+		<result property="msContractRefLastName" column="REF_LAST_NAME" />
+		<result property="msContractRefTitle" column="REF_TITLE" />
+		<result property="msContractRefPhone" column="REF_PHONE" />
+		<result property="msContractRefEmail" column="REF_EMAIL" />		
+		<result property="msContractDescription" column="DESCRIPTION" />
+		<result property="msContractStartDate" column="START_DATE" />
+		<result property="msContractEndDate" column="END_DATE" />
+		<result property="msContractBudget" column="BUDGET" />
+		<result property="msOrgId" column="ORGANIZATION_ID" />
+		<result property="msContractDetailsId" column="CONTRACT_DETAILS_ID" />
+	</resultMap>
+	 
+	<resultMap id="nycAgency" type="com.nyc.hhs.model.NYCAgency">
+	    <result property="msNYCAgencyName" column="AGENCY_NAME" />
+	</resultMap>
+   
+	<select id="getContractById" parameterType="Map" resultMap="result1">
+		SELECT * FROM CONTRACT_DETAILS WHERE CONTRACT_DETAILS_ID = #{asContractId}
+	</select>
+	
+	<select id="getAllContract" parameterType="String" resultMap="result1">
+		SELECT * FROM CONTRACT_DETAILS WHERE ORGANIZATION_ID = #{asOrgId}
+	</select>
+	
+	<select id="getAllNYCAgency" parameterType="String" resultMap="nycAgency">
+		SELECT AGENCY_NAME FROM NYC_AGENCY_DETAILS
+	</select>
+	
+	<delete id="deleteSelectedContract" parameterType="String">
+		DELETE FROM CONTRACT_DETAILS WHERE CONTRACT_ID = #{contractId}
+	</delete>
+	
+	<delete id="deleteContractMapping" parameterType="Map">
+		DELETE FROM CONTRACT_SERVICE_MAPPING WHERE CONTRACT_DETAILS_ID = #{contractId}
+		and ORGANIZATION_ID = #{asOrgId}
+		and SERVICE_APPLICATION_ID = #{asServiceAppId}
+		and BUSINESS_APPLICATION_ID = #{asBusinessAppId}
+	</delete>
+	   
+		
+	
+	<!-- CODE FOR SUMMARY SERVICE QUESTION STAFF  -->
+	<resultMap id="result2" type="com.nyc.hhs.model.StaffDetails">
+	    <result property="msStaffFirstName" column="FIRST_NAME" />
+		<result property="msStaffMidInitial" column="MIDDLE_INITIAL" />
+		<result property="msStaffLastName" column="LAST_NAME" />
+		<result property="msStaffTitle" column="TITLE" />
+		<result property="msStaffPhone" column="PHONE" />
+		<result property="msStaffEmail" column="EMAIL" />	
+		<result property="msStaffId" column="STAFF_ID" />
+		<result property="msStaffActiveFlag" column="ACTIVE_FLAG" />
+		<result property="msMemberStatus" column="MEMBER_STATUS" />
+		<result property="msNYCUserId" column="NYC_USER_ID" />
+		<result property="msUserStatus" column="USER_STATUS" />
+		<result property="msMemberInactiveDate" column="MEMBER_INACTIVE_DATE" />
+		<result property="msPermissionLevel" column="PERMISSION_LEVEL" />
+		<result property="msPermissionType" column="PERMISSION_TYPE" />
+		<result property="msAdminPermission" column="ADMIN_PERMISSION" />
+		<result property="msTermConditionStatus" column="TERMS_CONDITIONS_ACCEPTED" />
+		<result property="msUserDN" column="USER_DN" />
+		<result property="msName" column="MEMBER_NOTIFICATION_NAME" />
+		<result property="msOrgId" column="ORGANIZATION_ID" />
+	</resultMap>
+  
+	<select id="getStaffById" parameterType="Map" resultMap="result2">
+		SELECT SD.FIRST_NAME, SD.MIDDLE_INITIAL, SD.LAST_NAME, SOM.TITLE, SD.PHONE, SD.EMAIL, SD.STAFF_ID, SOM.ACTIVE_FLAG,
+		SOM.MEMBER_STATUS, SD.NYC_USER_ID, SOM.USER_STATUS, SOM.MEMBER_INACTIVE_DATE, SOM.PERMISSION_LEVEL, 
+		SOM.PERMISSION_TYPE,SOM.ADMIN_PERMISSION, SD.TERMS_CONDITIONS_ACCEPTED, SD.USER_DN, SOM.ORGANIZATION_ID
+		FROM STAFF_DETAILS SD, STAFF_ORGANIZATION SOM
+		WHERE SOM.ORGANIZATION_ID = #{orgId} AND
+		SOM.STAFF_ID = #{msStaffId} AND
+ 		SOM.STAFF_ID = SD.STAFF_ID 
+	</select>
+	
+	 
+	<select id="getAllStaff" parameterType="String" resultMap="result2">
+		
+		<!-- SELECT * FROM STAFF_DETAILS WHERE ORGANIZATION_ID = #{asOrgId} -->
+		
+		SELECT SD.FIRST_NAME, SD.MIDDLE_INITIAL, SD.LAST_NAME, SOM.TITLE, SD.PHONE, SD.EMAIL, SD.STAFF_ID, SOM.ACTIVE_FLAG,
+		SOM.MEMBER_STATUS, SD.NYC_USER_ID, SOM.USER_STATUS, SOM.MEMBER_INACTIVE_DATE, SOM.PERMISSION_LEVEL, 
+		SOM.ADMIN_PERMISSION, SD.TERMS_CONDITIONS_ACCEPTED, SD.USER_DN, SOM.ORGANIZATION_ID
+ 		FROM STAFF_DETAILS SD, STAFF_ORGANIZATION SOM 
+ 		WHERE SOM.ORGANIZATION_ID = #{asOrgId} AND
+ 		SOM.STAFF_ID = SD.STAFF_ID
+	</select>
+ 
+	
+	<delete  id="linkMemberToUser" parameterType="com.nyc.hhs.model.StaffDetails">
+		DELETE FROM STAFF_ORGANIZATION WHERE STAFF_ID = #{memberAsUser} AND ORGANIZATION_ID = #{msOrgId}   		
+	</delete >
+	
+	<select id="getAdminCountToDeactivate" parameterType="Map" resultType="int">
+		select count(1) from STAFF_ORGANIZATION where admin_permission=#{asAdminPermission} and active_flag=#{asActiveFlag}
+			 and user_status=#{asUserStatus} and ORGANIZATION_ID=#{asOrgId}
+	</select>
+	
+	<select id="getMemberTitles" parameterType="Map" resultType="map">
+		SELECT * FROM MEMBER_TITLE ORDER BY MEMBER_ID 
+	</select>
+	
+	 
+	
+	<select id="getRecentlyAddedStaffId" parameterType="String" resultMap="result2">
+		SELECT SEQ_STAFF_ID.currval STAFF_ID FROM DUAL
+	</select>
+
+	
+	
+ 
+	<!-- To retrieve contract details for Grid- -->
+	<select id="getContractListForGrid" parameterType="Map" resultMap="result1">
+		SELECT CD.* FROM CONTRACT_DETAILS CD, CONTRACT_SERVICE_MAPPING CSM 
+		WHERE CD.CONTRACT_DETAILS_ID = CSM.CONTRACT_DETAILS_ID
+		AND CSM.ORGANIZATION_ID = CD.ORGANIZATION_ID
+		AND CSM.SERVICE_APPLICATION_ID = #{asServiceAppId}
+		AND CSM.BUSINESS_APPLICATION_ID = #{asAppId}
+	</select>
+	
+	<resultMap id="result3" type="com.nyc.hhs.model.ServiceQuestions">
+		<result property="msQuestion1" column="QUESTION1" />
+			<result property="msQuestion2" column="QUESTION2" />
+				<result property="msQuestion3" column="QUESTION3" />
+	</resultMap>
+	
+	<select id="getQuestionDetailList" parameterType="Map" resultMap="result3">
+		SELECT QUESTION1,QUESTION2,QUESTION3 FROM SERVICE_QUESTIONS
+		WHERE ORGANIZATION_ID = #{asOrgId}
+		AND SERVICE_APPLICATION_ID = #{asServiceAppId}
+		AND BUSINESS_APPLICATION_ID = #{asBusinessAppid}
+	</select>
+	
+	<select id="getStaffListForGrid" parameterType="Map" resultMap="result2">
+		SELECT SD.FIRST_NAME, SD.MIDDLE_INITIAL, SD.LAST_NAME, SOM.TITLE, SD.PHONE, SD.EMAIL, SD.STAFF_ID, SOM.ACTIVE_FLAG, SOM.MEMBER_STATUS, SD.NYC_USER_ID, SOM.USER_STATUS, SOM.MEMBER_INACTIVE_DATE, SOM.PERMISSION_LEVEL, 
+		SOM.PERMISSION_TYPE,SOM.ADMIN_PERMISSION, SD.TERMS_CONDITIONS_ACCEPTED, SD.USER_DN, SOM.ORGANIZATION_ID, mt.member_notification_name  
+		FROM STAFF_DETAILS SD, STAFF_ORGANIZATION SOM, STAFF_SERVICE_MAPPING SSM,member_title mt
+		WHERE 
+		SSM.ORGANIZATION_ID = #{asOrgId} AND 
+		SOM.ORGANIZATION_ID = SSM.ORGANIZATION_ID AND
+		SOM.STAFF_ID = SD.STAFF_ID AND
+		SD.STAFF_ID = SSM.STAFF_ID AND 
+		SSM.SERVICE_APPLICATION_ID = #{asServiceAppId} AND 
+		SSM.BUSINESS_APPLICATION_ID = #{asAppId} and 
+		SOM.title=mt.MEMBER_ID
+	</select> 
+	
+	<delete id="deleteSelectedStaff" parameterType="String">
+		DELETE FROM STAFF_DETAILS WHERE STAFF_ID = #{staffId}
+	</delete> 
+	
+  <delete id="deleteStaffMapping" parameterType="map">
+  	DELETE FROM STAFF_SERVICE_MAPPING WHERE STAFF_ID = #{staffId}
+  		and ORGANIZATION_ID = #{asOrgId}
+		and SERVICE_APPLICATION_ID = #{asServiceAppId}
+		and BUSINESS_APPLICATION_ID = #{asBusinessAppId}
+  </delete> 
+  <!--business appid is appid in document  -->
+	 <insert id="insertServiceQuesInfo" parameterType="HashMap">		
+		INSERT INTO DOCUMENT (ORGANIZATION_ID,USER_ID,SECTION_ID,BUSINESS_APPLICATION_ID,DOCUMENT_CATEGORY,DOCUMENT_TYPE,DOCUMENT_STATUS,
+		SERVICE_APPLICATION_ID,DOCUMENT_IDENTIFIER_ID,CREATED_BY,CREATED_DATE,MODIFIED_BY,MODIFIED_DATE)
+		VALUES(#{asOrgId},#{asUserId},#{asSectionId},
+		#{asAppId},#{asDocCat},#{asDocType},#{asDocStatus},#{asServiceAppID},SEQ_DOCUMENT_IDENTIFIER_ID.NEXTVAL,#{asUserId},SYSDATE,#{asUserId},SYSDATE)
+	</insert>
+	
+	<insert id="insertServiceQuesInQuestion" parameterType="HashMap">		
+		INSERT INTO SERVICE_QUESTIONS (QUESTION1,QUESTION2,QUESTION3,BUSINESS_APPLICATION_ID,ORGANIZATION_ID,SERVICE_APPLICATION_ID,USER_ID,SERVICE_STATUS,MODIFIED_BY,MODIFIED_DATE,CREATED_BY,CREATED_DATE)
+		VALUES(#{asQues1},#{asQues2},#{asQues3},#{asBusinessAppId},#{asOrgId},#{asServiceAppID},#{asUserId},#{asServiceStatus},#{asModifiedBy},#{asModifiedDate},#{asModifiedBy},#{asModifiedDate})
+	</insert>
+	
+			
+	<delete id="deleteServiceQuesInQuestion" parameterType="HashMap">
+		DELETE FROM SERVICE_QUESTIONS  WHERE BUSINESS_APPLICATION_ID=#{asBusinessAppId} and ORGANIZATION_ID=#{asOrgId} and SERVICE_APPLICATION_ID=#{asServiceAppID}
+	</delete>
+	
+	<delete id="deleteServiceQuesInSubSection" parameterType="HashMap">
+		DELETE FROM SUB_SECTION_SUMMARY  WHERE BUSINESS_APPLICATION_ID=#{asBusinessAppId} and ORGANIZATION_ID=#{asOrgId} and SERVICE_APPLICATION_ID=#{asServiceAppID}
+	</delete>
+			
+	<insert id="insertServiceQuesInSubSectionSummary" parameterType="HashMap">		
+		INSERT INTO SUB_SECTION_SUMMARY (BUSINESS_APPLICATION_ID,USER_ID,ORGANIZATION_ID,SERVICE_APPLICATION_ID,
+		MODIFIED_BY,MODIFIED_DATE,SUB_SECTION_STATUS,SECTION_ID,SUB_SECTION_ID,CREATED_BY, CREATED_DATE,SUB_SECTION_SUMMARY_ID)
+		VALUES(#{asBusinessAppId},#{modifiedBy},#{asOrgId},#{asServiceAppID},#{modifiedBy},#{modifiedDate},
+		#{asSubSectionStatus},#{asSectionId},#{asSubSectionId},#{modifiedBy},#{modifiedDate},SEQ_SUB_SECTION_SUMMARY_ID.NEXTVAL)
+	</insert>
+	
+	<update id="updateServiceQuesInDocument" parameterType="HashMap">
+		UPDATE DOCUMENT SET DOCUMENT_TYPE= #{asDocType}, 
+		DOCUMENT_CATEGORY = #{asDocCat},
+		DOCUMENT_STATUS = #{asDocStatus},
+		DOCUMENT_TITLE = null,
+		DOCUMENT_ID = null
+		WHERE ORGANIZATION_ID=#{asOrgId} and SECTION_ID=#{asSectionId} and BUSINESS_APPLICATION_ID=#{asBusinessAppId} and SERVICE_APPLICATION_ID=#{asServiceAppID}
+	</update>
+		
+	<update id="updateServiceQuesInQuestion" parameterType="HashMap">
+		UPDATE SERVICE_QUESTIONS SET QUESTION1=#{asQues1},QUESTION2=#{asQues2},QUESTION3=#{asQues3},USER_ID=#{asUserId},SERVICE_STATUS=#{asServiceStatus},MODIFIED_BY=#{asModifiedBy},MODIFIED_DATE=#{asModifiedDate}
+		WHERE ORGANIZATION_ID=#{asOrgId} and BUSINESS_APPLICATION_ID=#{asBusinessAppId} and SERVICE_APPLICATION_ID=#{asServiceAppID}
+	</update>
+
+	<update id="updateServiceQuesInSubSectionSummary" parameterType="HashMap">
+		UPDATE SUB_SECTION_SUMMARY SET SUB_SECTION_STATUS=#{asSubSectionStatus}
+		WHERE ORGANIZATION_ID=#{asOrgId} and BUSINESS_APPLICATION_ID=#{asBusinessAppId} and SERVICE_APPLICATION_ID=#{asServiceAppID} and SECTION_ID=#{asSectionId} and SUB_SECTION_ID=#{asSubSectionId}
+	</update>
+	
+	<update id="updateBusinessApp" parameterType="Map">
+		UPDATE BUSINESS_APPLICATION SET WORKFLOW_ID = #{workflowId}   
+ 		WHERE  ORGANIZATION_ID = #{orgId}
+  		AND BUSINESS_APPLICATION_ID = #{businessAppId}
+  		AND APPLICATION_ID = #{ApplicationID}    		
+	</update>
+		
+	<update id="updateBusinessApplication" parameterType="Map">
+		UPDATE BUSINESS_APPLICATION SET APPLICATION_STATUS = #{applicationStatus}    
+ 		WHERE  ORGANIZATION_ID = #{orgId}
+ 		AND BUSINESS_APPLICATION_ID = #{businessAppId}
+	</update>
+	
+	
+	
+	<select id="getOrgMemberListForGrid" parameterType="Map" resultMap="result2">
+		SELECT SD.FIRST_NAME, SD.MIDDLE_INITIAL, SD.LAST_NAME, SOM.TITLE, SD.PHONE, SD.EMAIL, SD.STAFF_ID, SOM.ACTIVE_FLAG,
+		SOM.MEMBER_STATUS, SD.NYC_USER_ID, SOM.USER_STATUS, SOM.MEMBER_INACTIVE_DATE, SOM.PERMISSION_LEVEL, 
+		SOM.ADMIN_PERMISSION, SD.TERMS_CONDITIONS_ACCEPTED, SD.USER_DN, SOM.ORGANIZATION_ID
+ 		FROM STAFF_DETAILS SD, STAFF_ORGANIZATION SOM 
+ 		WHERE SOM.ORGANIZATION_ID = #{orgId} AND
+ 		SOM.STAFF_ID = SD.STAFF_ID
+ 		order by lower(SD.FIRST_NAME) ASC ,lower(SD.LAST_NAME) ASC	
+	</select>
+	
+	<select id="getStaffCount" parameterType="HashMap" resultType="int">
+		select count(1) from staff_service_mapping where business_application_id=#{asBusinessAppId} and service_application_id=#{asServiceAppId} and organization_id=#{asOrgId}
+	</select>
+	
+	<select id="getContractCount" parameterType="HashMap" resultType="int">
+		select count(1) from CONTRACT_SERVICE_MAPPING where business_application_id=#{asBusinessAppId} and service_application_id=#{asServiceAppId} and organization_id=#{asOrgId}
+	</select>
+	
+	
+	<resultMap id="withdrawlId" type="com.nyc.hhs.model.WithdrawRequestDetails">
+		<result property="msBAwithdrawlId" column="BA_WITHDRAWAL_ID" />			
+	</resultMap>
+	
+	<select id="getBAWithdrawlId" parameterType="String" resultMap="withdrawlId">
+        SELECT SEQ_BA_WITHDRAWL_ID.currval BA_WITHDRAWAL_ID FROM DUAL 
+    </select>
+    
+    <resultMap id="parentAppId" type="com.nyc.hhs.model.WithdrawRequestDetails">
+     <result property="msAppId" column="APPLICATION_ID" />     
+ </resultMap>
+ 
+ <select id="getParentApplicationId" parameterType="Map" resultMap="parentAppId">
+  SELECT distinct (APPLICATION_ID) from BUSINESS_APPLICATION WHERE BUSINESS_APPLICATION_ID = #{businessAppId} 
+ </select>
+ 
+     
+    <resultMap id="serviceParentAppId" type="com.nyc.hhs.model.WithdrawRequestDetails">
+     <result property="msAppId" column="BUSINESS_APPLICATION_ID" />     
+ </resultMap>
+    
+<select id="getServiceParentApplicationId" parameterType="Map" resultMap="serviceParentAppId">
+  SELECT distinct(BUSINESS_APPLICATION_ID) from SERVICE_APPLICATION WHERE SERVICE_APPLICATION_ID = #{asServiceAppId} 
+ </select>
+ 
+ <resultMap id="SAwithdrawlId" type="com.nyc.hhs.model.WithdrawRequestDetails">
+		<result property="msBAwithdrawlId" column="SA_WITHDRAWAL_ID" />			
+	</resultMap>
+ 
+<select id="getSAWithdrawlId" parameterType="String" resultMap="SAwithdrawlId">
+        SELECT SEQ_SA_WITHDRAWAL_ID.CURRVAL SA_WITHDRAWAL_ID FROM DUAL 
+    </select> 
+    
+
+    
+    
+    <update id="updateServiceApplication" parameterType="Map">
+        UPDATE SERVICE_APPLICATION SET SERVICE_STATUS = #{serviceStatus}   
+         WHERE  ORGANIZATION_ID = #{orgId}
+         AND SERVICE_APPLICATION_ID = #{lsServiceAppId}
+    </update>
+    
+    <update id="updateServiceAppForBusinessWithdrawal" parameterType="Map">
+        UPDATE SERVICE_APPLICATION SET SERVICE_STATUS = #{applicationStatus}   
+         WHERE  ORGANIZATION_ID = #{orgId}
+         AND BUSINESS_APPLICATION_ID = #{businessAppId}
+    </update>
+    
+    <update id="updateServiceApplicationForSubmission" parameterType="Map">
+        UPDATE SERVICE_APPLICATION SET WORKFLOW_ID = #{workflowId}, SERVICE_STATUS = #{serviceStatus}, 
+        SUBMITTED_BY = #{sunmittedBy},REPORTING_MODIFIED_BY=#{sunmittedBy},REPORTING_MODIFIED_DATE=SYSTIMESTAMP,
+        SUBMISSION_DATE = SYSDATE, MODIFIED_BY = #{sunmittedBy}, MODIFIED_DATE = SYSDATE    
+         WHERE  ORGANIZATION_ID = #{orgId}
+         AND SERVICE_APPLICATION_ID = #{lsServiceAppId}
+    </update>
+    
+    
+<insert id="insertApplicationAudit" parameterType="Map">
+        INSERT INTO APPLICATION_AUDIT (ORGANIZATION_ID, APPLICATION_ID, EVENT_NAME, EVENT_TYPE, AUDIT_DATE, 
+        USER_ID, DATA, ENTITY_TYPE, ENTITY_ID, SECTION_ID, PROVIDER_VISIBILITY_FLAG)
+        VALUES(#{orgId, jdbcType=VARCHAR},#{lsParentAppId, jdbcType=VARCHAR},
+        #{eventName, jdbcType=VARCHAR},#{eventType, jdbcType=VARCHAR},systimestamp,
+        #{sunmittedBy, jdbcType=VARCHAR},#{comments, jdbcType=VARCHAR},#{entityType, jdbcType=VARCHAR},
+        #{entityId, jdbcType=VARCHAR},#{lsServiceAppId, jdbcType=VARCHAR},
+        #{asProviderVisibilityFlag, jdbcType=VARCHAR})
+</insert>
+
+<resultMap id="serviceApplicationIds" type="com.nyc.hhs.model.WithdrawRequestDetails">
+		<result property="msAppId" column="SERVICE_APPLICATION_ID" />
+		<result property="msProviderName" column="ELEMENT_NAME" />			
+	</resultMap>
+	
+	<select id="getServiceApplicationIds" parameterType="Map" resultMap="serviceApplicationIds">
+        SELECT SA.SERVICE_APPLICATION_ID, TM.ELEMENT_NAME FROM SERVICE_APPLICATION SA, TAXONOMY_MASTER TM 
+        WHERE SA.BUSINESS_APPLICATION_ID = #{businessAppId} AND SA.ELEMENT_ID = TM.ELEMENT_ID 
+    </select> 
+    
+    <resultMap id="serviceName" type="com.nyc.hhs.model.WithdrawRequestDetails">
+		<result property="msProviderName" column="ELEMENT_NAME" />			
+	</resultMap>
+    
+    <select id="getServiceName" parameterType="Map" resultMap="serviceName">
+        SELECT TM.ELEMENT_NAME FROM TAXONOMY_MASTER TM, SERVICE_APPLICATION SA   
+        WHERE SA.SERVICE_APPLICATION_ID = #{lsServiceAppId} AND SA.ELEMENT_ID = TM.ELEMENT_ID 
+    </select>
+    
+    <insert id="insertSuperSedingData" parameterType="Map">
+        INSERT INTO SUPERSEDING_STATUS (ENTITY_TYPE, ENTITY_ID, EVENT, FLAG, STATUS, 
+        TIMESTAMP, USER_ID, ORGANIZATION_ID, REQUEST_ID,SUPERSEDING_STATUS_ID,REPORTING_MODIFIED_BY,REPORTING_MODIFIED_DATE)
+        VALUES
+        (#{entityType, jdbcType=VARCHAR},#{entityId, jdbcType=VARCHAR},
+        #{event, jdbcType=VARCHAR},#{flag, jdbcType=VARCHAR},#{status, jdbcType=VARCHAR},
+        #{timeStamp},#{sunmittedBy, jdbcType=VARCHAR},#{orgId, jdbcType=VARCHAR},
+        #{requestId, jdbcType=VARCHAR},SEQ_SUPERSEDING_STATUS_ID.NEXTVAL,#{sunmittedBy, jdbcType=VARCHAR},SYSTIMESTAMP)
+	</insert>
+    
+
+	
+    
+    <insert id="insertNewAccountingPeriod" parameterType="Map">        
+        INSERT INTO DOC_LAPSING_RULES_MASTER (ORGANIZATION_ID,DUE_DATE,DOCUMENT_TYPE,START_MONTH,
+        END_MONTH,START_YEAR,END_YEAR,UPLOAD_ORDER, CREATED_DATE, CREATED_BY, MODIFIED_DATE, MODIFIED_BY) 
+        VALUES
+        (#{providerId, jdbcType=VARCHAR},#{DUE_DATE},#{DOCUMENT_TYPE, jdbcType=VARCHAR},
+        #{START_MONTH, jdbcType=VARCHAR}, #{END_MONTH, jdbcType=VARCHAR},#{START_YEAR, jdbcType=VARCHAR},#{END_YEAR, jdbcType=VARCHAR},
+         #{uploadOrder, jdbcType=VARCHAR}, SYSDATE, #{userId, jdbcType=VARCHAR}, SYSDATE, #{userId, jdbcType=VARCHAR})        
+    </insert>
+    
+    <delete id="deleteExistingAccountingPeriod" parameterType="Map">
+		DELETE FROM DOC_LAPSING_RULES_MASTER WHERE ORGANIZATION_ID = #{providerId}
+	</delete>
+    
+     
+      <delete id="deleteServiceQuesInDocument" parameterType="Map">
+		DELETE FROM DOCUMENT WHERE ORGANIZATION_ID = #{asOrgId} AND BUSINESS_APPLICATION_ID=#{asAppId} AND SERVICE_APPLICATION_ID=#{asServiceAppID}
+	</delete>
+    
+    
+    <resultMap id="checkCEOOfficerId" type="com.nyc.hhs.model.StaffDetails">
+     <result property="msStaffTitle" column="TITLE" />     
+ </resultMap>
+ 
+ <select id="checkCEOOfficer" parameterType="Map" resultMap="checkCEOOfficerId">
+ 	 SELECT distinct(TITLE) FROM STAFF_ORGANIZATION WHERE ORGANIZATION_ID=#{asOrgId} AND TITLE=#{asCEOId} AND MEMBER_STATUS!='Inactive' AND ACTIVE_FLAG!='Inactive'
+ </select>
+	
+	<delete id="deleteContractMappingOnQuestionSave" parameterType="Map">
+  	DELETE FROM CONTRACT_SERVICE_MAPPING WHERE ORGANIZATION_ID = #{asOrgId} AND SERVICE_APPLICATION_ID = #{asServiceAppID} AND BUSINESS_APPLICATION_ID = #{asAppId}
+  </delete>
+  
+  <delete id="deleteStaffMappingOnQuestionSave" parameterType="Map">
+  	DELETE FROM STAFF_SERVICE_MAPPING WHERE ORGANIZATION_ID = #{asOrgId} AND SERVICE_APPLICATION_ID = #{asServiceAppID} AND BUSINESS_APPLICATION_ID = #{asAppId}
+  </delete>
+  <resultMap id="serviceIds" type="com.nyc.hhs.model.WithdrawRequestDetails">
+     <result property="msAppId" column="SERVICE_APPLICATION_ID" />     
+ </resultMap>
+ <select id="getDraftServiceApplicationId" parameterType="Map" resultMap="serviceIds">
+  SELECT SERVICE_APPLICATION_ID FROM SERVICE_APPLICATION WHERE BUSINESS_APPLICATION_ID = #{businessAppId} AND LOWER(SERVICE_STATUS) = #{businessAppStatus} 
+ </select>
+  
+ <select id="getCfoEntry" parameterType="Map" resultMap="checkCEOOfficerId">
+ 	SELECT distinct(s.TITLE) FROM STAFF_ORGANIZATION s , MEMBER_TITLE m 
+	where  m.MEMBER_ID = s.title and s.ORGANIZATION_ID = #{asOrgId}
+	and m.MEMBER_NAME= #{asTitle} and rownum = 1
+ </select>
+
+	<select id="getApprovedProviderStatus" parameterType="String" resultType="int">
+	 	select count(1) from organization where organization_status = #{asProviderStatus}
+	 </select>
+ 
+ <select id="getDraftReviewRevisionProviderStatus" parameterType="Map" resultType="map">
+	select count(org.organization_id) count, bapp.application_status from organization org, business_application bapp 
+	where org.organization_id = bapp.organization_id and bapp.application_status in (#{asDraftStatus},#{asInReviewStatus},#{asReturnedStatus}) 
+	group by bapp.application_status
+ </select>
+ 
+ <resultMap id="providerStatus" type="com.nyc.hhs.model.WithdrawRequestDetails">
+		<result property="msProviderStatus" column="ORGANIZATION_STATUS" />			
+	</resultMap>
+	
+ <select id="getProviderStatus" parameterType="String" resultMap="providerStatus">
+	SELECT ORGANIZATION_STATUS FROM ORGANIZATION   
+	WHERE ORGANIZATION_ID = #{asOrgId}
+ </select>
+ 
+ 
+ <select id="getBussAppUpdatedStatus" parameterType="Map" resultType="map">
+   SELECT * FROM
+   (SELECT * FROM SUPERSEDING_STATUS WHERE  ENTITY_ID=#{bussAppId} AND ORGANIZATION_ID = #{asOrdId} ORDER BY TIMESTAMP DESC)
+   WHERE ROWNUM =1
+	
+ </select>
+ 	
+  <select id="getServiceAppUpdatedStatus" parameterType="Map" resultType="map">
+	SELECT * FROM
+   (SELECT * FROM SUPERSEDING_STATUS WHERE  ENTITY_ID=#{serviceAppId} AND ORGANIZATION_ID = #{asOrdId} ORDER BY TIMESTAMP DESC)
+   WHERE ROWNUM =1
+ </select>
+ 
+ <select id="displayApplicationHistoryInfo" parameterType="Map" resultType="map">
+  	SELECT AA.EVENT_NAME,AA.EVENT_TYPE, AA.DATA, TO_CHAR(AA.AUDIT_DATE, 'MM/DD/YYYY') as AUDIT_DATE ,
+  	 AA.ENTITY_IDENTIFIER,b.FIRST_NAME||' '||b.LAST_NAME as USER_ID,AA.EMAIL_ID, AA.ENTITY_TYPE, AA.USER_TYPE
+	FROM APPLICATION_AUDIT AA   
+	INNER JOIN staff_city_user_details b ON AA.user_id = b.user_id 
+	WHERE  
+	AA.ORGANIZATION_ID = #{orgId}
+ 	AND AA.APPLICATION_ID = #{businessAppId}
+ 	AND (AA.EVENT_NAME in (#{asProvStatusChanged}, #{asProvStatusCondApp}, #{asTermsCond}, #{asBappSubm}, #{asSnapShot}) OR AA.ENTITY_IDENTIFIER in (#{asBappWith},#{asBappWithCity}))
+ 	AND AA.PROVIDER_VISIBILITY_FLAG = 'true'
+ 	ORDER BY AA.AUDIT_DATE desc
+ </select>
+ 
+ <select id="displayServiceApplicationHistoryInfo" parameterType="Map" resultType="map">
+ 	SELECT a.EVENT_NAME, a.DATA, TO_CHAR(a.AUDIT_DATE, 'MM/DD/YYYY') as AUDIT_DATE , a.ENTITY_IDENTIFIER, a.EMAIL_ID  ,a.USER_TYPE,
+ 	b.FIRST_NAME||' '||b.LAST_NAME as USER_ID
+	FROM APPLICATION_AUDIT  a
+	INNER JOIN staff_city_user_details b ON a.user_id = b.user_id 
+	WHERE  
+	a.ORGANIZATION_ID = #{orgId}
+	AND a.PROVIDER_VISIBILITY_FLAG = #{providerFlag}
+ 	AND (a.SECTION_ID = #{serviceAppId} or a.ENTITY_ID = #{serviceAppId}) 
+ 	AND a.PROVIDER_VISIBILITY_FLAG = 'true'
+  	ORDER BY a.AUDIT_DATE desc
+ </select>
+ 
+ <update id="updateOrganizationTable" parameterType="map">
+   UPDATE ORGANIZATION SET ORGANIZATION_STATUS = #{orgStatus},
+               				REPORTING_MODIFIED_BY= #{userId},
+            				REPORTING_MODIFIED_DATE=SYSTIMESTAMP 
+   WHERE ORGANIZATION_ID = #{orgId}
+</update>
+	
+ <select id="fetchOrganizationStatus" parameterType="String" resultType="String">
+	SELECT ORGANIZATION_STATUS   
+	FROM ORGANIZATION   
+	WHERE  
+	ORGANIZATION_ID = #{asOrgId}
+ </select>
+ 
+ <select id="fetchBussAppWithdrawStatus" parameterType="String" resultType="String">
+	SELECT WITHDRAWN_STATUS   
+	FROM BUSINESS_WITHDRAWAL   
+	WHERE  
+	BUSINESS_APPLICATION_ID = #{asBusinessAppId} AND rownum = 1
+ </select>
+ 
+  <select id="serviceBusAppWithdrwStatus" parameterType="String" resultType="String">
+	SELECT bw.WITHDRAWN_STATUS FROM service_application sw, BUSINESS_WITHDRAWAL bw 
+    WHERE  sw.business_application_id = bw.business_application_id and
+    sw.SERVICE_APPLICATION_ID = #{asServiceAppId} AND rownum = 1
+ </select>
+ 
+ <select id="fetchServiceAppWithdrawStatus" parameterType="String" resultType="String">
+	SELECT WITHDRAWN_STATUS   
+	FROM SERVICE_WITHDRAWAL   
+	WHERE  
+	SERVICE_APPLICATION_ID = #{asServiceAppId} AND rownum = 1
+ </select>
+ 
+ <update id="updateOrgAccountingPeriod" parameterType="map">
+	   UPDATE ORGANIZATION SET ACCOUNTING_PERIOD_START_MONTH = #{newStartMonth}, ACCOUNTING_PERIOD_END_MONTH = #{newEndMonth},
+	   						   REPORTING_MODIFIED_BY= #{userId},
+            				   REPORTING_MODIFIED_DATE=SYSTIMESTAMP 	   
+	   WHERE ORGANIZATION_ID = #{providerId}
+	</update>
+	
+ <select id="fetchServiceAppStatus" parameterType="String" resultType="String">
+	SELECT SERVICE_STATUS   
+	FROM SERVICE_APPLICATION   
+	WHERE  
+	SERVICE_APPLICATION_ID = #{asServiceAppId}
+ </select>
+ 
+ <select id="fetchServiceWorkFlowId" parameterType="String" resultType="String">
+	SELECT WORKFLOW_ID   
+	FROM SERVICE_APPLICATION   
+	WHERE  
+	SERVICE_APPLICATION_ID = #{asServiceAppId}
+ </select>
+ 
+ <update id="updateServiceApplicationForReSubmission" parameterType="Map">
+        UPDATE SERVICE_APPLICATION SET SERVICE_STATUS = #{serviceStatus}, SUBMITTED_BY = #{sunmittedBy}, 
+        SUBMISSION_DATE = SYSDATE, MODIFIED_BY = #{sunmittedBy}, MODIFIED_DATE = SYSDATE, REPORTING_MODIFIED_BY=#{sunmittedBy},REPORTING_MODIFIED_DATE=SYSTIMESTAMP          
+         WHERE  ORGANIZATION_ID = #{orgId}
+         AND SERVICE_APPLICATION_ID = #{lsServiceAppId}
+    </update>
+    
+   <select id="checkStaffMapping" parameterType="Map" resultType="String">
+	SELECT STAFF_ID   
+	FROM STAFF_SERVICE_MAPPING   
+	WHERE  
+	SERVICE_APPLICATION_ID = #{msServiceAppId} AND STAFF_ID = #{msStaffId} 
+	and ORGANIZATION_ID = #{msOrgId} and BUSINESS_APPLICATION_ID = #{msAppId}
+ </select>
+ 
+ <select id="checkContractMapping" parameterType="Map" resultType="String">
+	SELECT CONTRACT_DETAILS_ID   
+	FROM CONTRACT_SERVICE_MAPPING   
+	WHERE  
+	CONTRACT_DETAILS_ID = #{msContractDetailsId} and ORGANIZATION_ID = #{msOrgId}
+	and SERVICE_APPLICATION_ID = #{msServiceAppId}
+	and BUSINESS_APPLICATION_ID = #{msAppId}
+ </select>
+ 
+ 	
+	
+ <select id="numberOfBrAppAgainstOrg" parameterType="Map" resultMap="numberOfBusinessApp">
+	SELECT BUSINESS_APPLICATION_ID,CREATED_DATE,APPLICATION_STATUS
+	FROM BUSINESS_APPLICATION   
+	WHERE ORGANIZATION_ID = #{orgId} order by created_date DESC
+ </select>
+ 
+ <select id="fetchAccReqInfo" parameterType="String" resultType="map">
+ 	SELECT DLRM.START_MONTH startMonth, DLRM.START_YEAR startYear, DLRM.END_MONTH endMonth, DLRM.END_YEAR endYear, DLRT.PROC_STATUS fillingStatus, DLRT.WORKFLOW_ID  
+	FROM DOC_LAPSING_RULES_MASTER DLRM LEFT JOIN  
+	(SELECT * from DOC_LAPSING_RULES_TRANS 
+	WHERE ORGANIZATION_ID =  #{asOrgId} AND  
+  	CREATED_DATE IN (SELECT MAX(CREATED_DATE) AS SUBMITTED_DATE FROM DOC_LAPSING_RULES_TRANS  
+    WHERE ORGANIZATION_ID =  #{asOrgId})) DLRT   
+	ON DLRM.ORGANIZATION_ID = DLRT.ORGANIZATION_ID   
+	WHERE DLRM.ORGANIZATION_ID  = #{asOrgId}   
+  </select>
+ 
+ 
+	
+	<select id="fetchAppStatus" parameterType="String" resultType="String">
+	SELECT APPLICATION_STATUS    
+	FROM BUSINESS_APPLICATION   
+	WHERE  
+	BUSINESS_APPLICATION_ID = #{asBussAppId}
+ </select>
+ 
+ <select id="getServiceComments" parameterType="Map" resultType="map">
+ 	SELECT a.DATA, CAST(a.AUDIT_DATE AS date) as AUDIT_DATE, a.EMAIL_ID ,a.USER_TYPE,
+	b.FIRST_NAME||' '||b.LAST_NAME as USER_ID
+	FROM APPLICATION_AUDIT  a
+	INNER JOIN staff_city_user_details b ON a.user_id = b.user_id 
+	WHERE  
+	a.ORGANIZATION_ID = #{orgId}   
+ 	AND a.SECTION_ID = #{serviceAppId}  AND a.EVENT_NAME =#{providerComments} AND a.USER_TYPE = #{userType} 
+  	ORDER BY a.EVENT_TYPE, a.AUDIT_DATE desc
+ </select>
+ 
+ 	<insert id="insertBusinessWithdrawlRequest" parameterType="Map">		
+		INSERT INTO BUSINESS_WITHDRAWAL (ORGANIZATION_ID, SUBMISSION_DATE, SUBMITTED_BY, COMMENTS, 
+		WITHDRAWN_STATUS,BUSINESS_APPLICATION_ID, BA_WITHDRAWAL_ID, WORKFLOW_ID, CREATED_DATE, CREATED_BY, MODIFIED_DATE, MODIFIED_BY) 
+		VALUES
+		(#{orgId, jdbcType=VARCHAR},#{subDate},#{sunmittedBy, jdbcType=VARCHAR},#{comments, jdbcType=VARCHAR},#{withdrawlStatus, jdbcType=VARCHAR},#{businessAppId}, SEQ_BA_WITHDRAWL_ID.NEXTVAL,
+		 #{workflowId, jdbcType=VARCHAR},#{subDate},#{sunmittedBy, jdbcType=VARCHAR},#{subDate},#{sunmittedBy, jdbcType=VARCHAR})		
+	</insert>
+	
+	<update id="updateBusinessIfExists" parameterType="Map">		
+		updaTE  BUSINESS_WITHDRAWAL SET  SUBMISSION_DATE=#{subDate}, SUBMITTED_BY=#{sunmittedBy, jdbcType=VARCHAR}, COMMENTS=#{comments, jdbcType=VARCHAR}, 
+		WITHDRAWN_STATUS=#{withdrawlStatus, jdbcType=VARCHAR},BUSINESS_APPLICATION_ID=#{businessAppId}, BA_WITHDRAWAL_ID=SEQ_BA_WITHDRAWL_ID.NEXTVAL, WORKFLOW_ID=#{workflowId, jdbcType=VARCHAR}, CREATED_DATE=#{subDate}, CREATED_BY=#{sunmittedBy, jdbcType=VARCHAR}, MODIFIED_DATE=#{subDate}, MODIFIED_BY =#{sunmittedBy, jdbcType=VARCHAR}
+		WHERE ORGANIZATION_ID = #{orgId, jdbcType=VARCHAR}
+	</update>
+
+	<!-- update into BUSINESS_WITHDRAWN table -->
+	<update id="updateWithdrawnTable" parameterType="map">
+	   UPDATE BUSINESS_WITHDRAWAL SET SUBMITTED_BY = #{modifiedBy}, SUBMISSION_DATE=#{modifiedDate},WITHDRAWN_STATUS=#{asStatus},
+	   COMMENTS=#{comments}, MODIFIED_DATE = SYSDATE, MODIFIED_BY = #{modifiedBy}    
+	   WHERE BUSINESS_APPLICATION_ID = #{asAppId} AND ORGANIZATION_ID=#{asOrgId}
+	</update>
+	
+	<update id="updateBusinessWithdrawlRequest" parameterType="Map">
+		UPDATE BUSINESS_WITHDRAWAL SET WORKFLOW_ID = #{workflowId}, MODIFIED_DATE = SYSDATE, MODIFIED_BY = #{sunmittedBy}      
+ 		WHERE  BA_WITHDRAWAL_ID = #{BAWithdrawlId}
+	</update>
+	
+	<insert id="insertServiceWithdrawlRequest" parameterType="Map">        
+        INSERT INTO SERVICE_WITHDRAWAL (ORGANIZATION_ID, SUBMISSION_DATE, SUBMITTED_BY, COMMENTS, 
+        SERVICE_APPLICATION_ID, WITHDRAWN_STATUS, BUSINESS_APPLICATION_ID, SA_WITHDRAWAL_ID, WORKFLOW_ID,
+        CREATED_DATE, CREATED_BY, MODIFIED_DATE, MODIFIED_BY) 
+        VALUES
+        (#{orgId, jdbcType=VARCHAR},#{subDate},#{sunmittedBy, jdbcType=VARCHAR},#{comments, jdbcType=VARCHAR}, 
+        #{asServiceAppId, jdbcType=VARCHAR}, #{withdrawlStatus, jdbcType=VARCHAR},#{businessAppId, jdbcType=VARCHAR}, 
+        SEQ_SA_WITHDRAWAL_ID.NEXTVAL, #{workflowId, jdbcType=VARCHAR},#{subDate},#{sunmittedBy, jdbcType=VARCHAR},#{subDate},#{sunmittedBy, jdbcType=VARCHAR})        
+    </insert>
+    
+    
+    <update id="UpdateServiceIfExist" parameterType="Map">        
+        update SERVICE_WITHDRAWAL set  SUBMISSION_DATE=#{subDate}, SUBMITTED_BY=#{sunmittedBy, jdbcType=VARCHAR}, COMMENTS=#{comments, jdbcType=VARCHAR}, 
+        SERVICE_APPLICATION_ID=#{asServiceAppId, jdbcType=VARCHAR}, WITHDRAWN_STATUS= #{withdrawlStatus, jdbcType=VARCHAR}, BUSINESS_APPLICATION_ID=#{businessAppId, jdbcType=VARCHAR},
+        SA_WITHDRAWAL_ID=SEQ_SA_WITHDRAWAL_ID.NEXTVAL, WORKFLOW_ID=#{workflowId, jdbcType=VARCHAR},
+        CREATED_DATE=#{subDate}, CREATED_BY=#{sunmittedBy, jdbcType=VARCHAR}, MODIFIED_DATE=#{subDate}, MODIFIED_BY =#{sunmittedBy, jdbcType=VARCHAR}
+		where ORGANIZATION_ID = #{orgId, jdbcType=VARCHAR} AND SERVICE_APPLICATION_ID=#{asServiceAppId, jdbcType=VARCHAR}
+	</update>
+    
+    
+    <update id="updateServiceWithdrawlRequest" parameterType="Map">
+        UPDATE SERVICE_WITHDRAWAL SET WORKFLOW_ID = #{workflowId}, MODIFIED_DATE = SYSDATE, MODIFIED_BY = #{sunmittedBy}  
+         WHERE  SA_WITHDRAWAL_ID = #{BAWithdrawlId}
+    </update>
+    
+    <insert id="insertContract" parameterType="com.nyc.hhs.model.ContractDetails">		
+		INSERT INTO CONTRACT_DETAILS (CONTRACT_ID, FUNDER_TYPE, NYC_AGENCY, 
+		FUNDER_NAME, REF_FIRST_NAME, REF_MID_NAME,REF_LAST_NAME,
+		REF_TITLE,REF_PHONE,REF_EMAIL, DESCRIPTION, START_DATE, 
+		END_DATE, BUDGET, ORGANIZATION_ID, CREATED_DATE, CREATED_BY, MODIFIED_DATE, MODIFIED_BY,CONTRACT_DETAILS_ID) 
+		VALUES(#{msContractID, jdbcType=VARCHAR},#{msContractType, jdbcType=VARCHAR},#{msContractNYCAgency, jdbcType=VARCHAR},#{msContractFunderName, jdbcType=VARCHAR},
+		#{msContractRefFirstName, jdbcType=VARCHAR},#{msContractRefMidName,jdbcType=VARCHAR, jdbcType=VARCHAR},#{msContractRefLastName, jdbcType=VARCHAR},#{msContractRefTitle, jdbcType=VARCHAR},
+		#{msContractRefPhone, jdbcType=VARCHAR},#{msContractRefEmail, jdbcType=VARCHAR},#{msContractDescription, jdbcType=VARCHAR},#{msContractStartDate},
+		#{msContractEndDate},#{msContractBudget, jdbcType=VARCHAR},#{msOrgId, jdbcType=VARCHAR}, SYSDATE, #{msCreatedBy, jdbcType=VARCHAR}, SYSDATE, #{msCreatedBy, jdbcType=VARCHAR},SEQ_CONTRACT_DETAILS_ID.NEXTVAL)
+	</insert>
+	
+	<update id="updateContract" parameterType="com.nyc.hhs.model.ContractDetails">
+		UPDATE CONTRACT_DETAILS SET FUNDER_TYPE = #{msContractType}, 
+		NYC_AGENCY = #{msContractNYCAgency, jdbcType=VARCHAR}, FUNDER_NAME = #{msContractFunderName, jdbcType=VARCHAR}, 
+		REF_FIRST_NAME = #{msContractRefFirstName, jdbcType=VARCHAR},	REF_MID_NAME = #{msContractRefMidName,jdbcType=VARCHAR}, 
+		REF_LAST_NAME = #{msContractRefLastName, jdbcType=VARCHAR}, REF_TITLE = #{msContractRefTitle, jdbcType=VARCHAR}, 
+		REF_PHONE = #{msContractRefPhone, jdbcType=VARCHAR},
+		REF_EMAIL = #{msContractRefEmail, jdbcType=VARCHAR},DESCRIPTION = #{msContractDescription, jdbcType=VARCHAR}, 
+		START_DATE = #{msContractStartDate}, END_DATE = #{msContractEndDate}, CONTRACT_ID =  #{msContractID}, 
+		BUDGET = #{msContractBudget, jdbcType=VARCHAR}, MODIFIED_DATE = SYSDATE, MODIFIED_BY = #{msCreatedBy, jdbcType=VARCHAR}  
+		WHERE  CONTRACT_DETAILS_ID = #{msContractDetailsId, jdbcType=VARCHAR}
+	</update>
+	
+	<insert id="insertContractMapping" parameterType="HashMap">		
+		INSERT INTO CONTRACT_SERVICE_MAPPING (ORGANIZATION_ID, SERVICE_APPLICATION_ID, 
+		BUSINESS_APPLICATION_ID, CONTRACT_ADDED_ON, CREATED_DATE, CREATED_BY, MODIFIED_DATE, MODIFIED_BY, CONTRACT_DETAILS_ID) 
+		VALUES(#{msOrgId},#{msServiceAppId},#{msAppId},#{msContractAddedOn}, SYSDATE, #{msCreatedBy, jdbcType=VARCHAR}, SYSDATE, #{msCreatedBy, jdbcType=VARCHAR}, #{msContractDetailsId, jdbcType=VARCHAR} )
+	</insert>
+	
+	<update id="updateContractMapping" parameterType="HashMap">		
+		UPDATE CONTRACT_SERVICE_MAPPING SET ORGANIZATION_ID = #{msOrgId}, 
+		SERVICE_APPLICATION_ID = #{msServiceAppId}, BUSINESS_APPLICATION_ID = #{msAppId}, CONTRACT_ADDED_ON = #{msContractAddedOn},
+		MODIFIED_DATE = SYSDATE, MODIFIED_BY = #{msCreatedBy, jdbcType=VARCHAR} 
+		WHERE CONTRACT_DETAILS_ID = #{msContractDetailsId, jdbcType=VARCHAR}
+		AND SERVICE_APPLICATION_ID = #{msServiceAppId, jdbcType=VARCHAR}		
+	</update>
+	
+	<select id="getStaffIdSequence" resultType="string">
+		SELECT SEQ_STAFF_ID.NEXTVAL from dual
+	</select>
+	
+	<insert id="insertStaff" parameterType="com.nyc.hhs.model.StaffDetails">		
+		INSERT INTO STAFF_DETAILS (FIRST_NAME, MIDDLE_INITIAL, LAST_NAME,  
+		PHONE, EMAIL, STAFF_ID, CREATED_DATE, CREATED_BY, MODIFIED_DATE, MODIFIED_BY) 
+		VALUES
+		(#{msStaffFirstName, jdbcType=VARCHAR},#{msStaffMidInitial, jdbcType=VARCHAR},#{msStaffLastName, jdbcType=VARCHAR},
+		#{msStaffPhone, jdbcType=VARCHAR},#{msStaffEmail, jdbcType=VARCHAR},
+		#{msStaffId}, SYSDATE, #{msCreatedBy, jdbcType=VARCHAR}, SYSDATE, #{msCreatedBy, jdbcType=VARCHAR} )		
+	</insert>
+	
+	<insert id="insertStaffOrgMapping" parameterType="com.nyc.hhs.model.StaffDetails">		
+		INSERT INTO STAFF_ORGANIZATION (STAFF_ORGANIZATION_ID, 
+		TITLE, STAFF_ID, ACTIVE_FLAG, MEMBER_STATUS, ORGANIZATION_ID,USER_STATUS, 
+		CREATED_DATE, CREATED_BY_USER_ID, MODIFIED_DATE, MODIFIED_BY_USER_ID, IS_BASE_ORGANIZATION) 
+		VALUES
+		(SEQ_STAFF_ORGANIZATION_ID.NEXTVAL,#{msStaffTitle, jdbcType=VARCHAR}, #{msStaffId},#{msStaffActiveFlag, jdbcType=VARCHAR},
+		#{msMemberStatus, jdbcType=VARCHAR}, #{msOrgId, jdbcType=VARCHAR},#{msUserStatus, jdbcType=VARCHAR}, 
+		SYSDATE, #{msCreatedBy, jdbcType=VARCHAR}, SYSDATE, #{msCreatedBy, jdbcType=VARCHAR}, '1')		
+	</insert>
+	
+<!-- Query modified as a part of release 3.2.0 defect 5650 -->	
+	<update id="updateStaff" parameterType="com.nyc.hhs.model.StaffDetails">
+		UPDATE STAFF_DETAILS SET 
+		FIRST_NAME = #{msStaffFirstName, jdbcType=VARCHAR}, 
+		MIDDLE_INITIAL = #{msStaffMidInitial, jdbcType=VARCHAR}, 
+		LAST_NAME = #{msStaffLastName, jdbcType=VARCHAR}, 
+		EMAIL = #{msStaffEmail, jdbcType=VARCHAR}, 
+		PHONE = #{msStaffPhone, jdbcType=VARCHAR}, 
+		MODIFIED_DATE = SYSDATE, MODIFIED_BY = #{msCreatedBy, jdbcType=VARCHAR}
+		<!--
+		<if test="mbMutiAccount==false">
+			,USER_DN=#{msUserDN, jdbcType=VARCHAR}
+		</if>
+		-->
+		WHERE STAFF_ID = #{msStaffId}    		
+	</update>
+	
+<!-- Query added as a part of release 3.2.0 defect 5650 -->		
+	<update id="deactivateUser" parameterType="com.nyc.hhs.model.StaffDetails">
+		UPDATE STAFF_DETAILS SET 
+		MODIFIED_DATE = SYSDATE, MODIFIED_BY = #{msCreatedBy, jdbcType=VARCHAR}
+		<if test="mbMutiAccount==false">
+			,USER_DN=#{msUserDN, jdbcType=VARCHAR}
+		</if>
+		WHERE STAFF_ID = #{msStaffId}    		
+	</update>
+	
+<!-- Query added as a part of release 3.2.0 defect 5650 -->		
+	<update id="updateMemberStaff" parameterType="com.nyc.hhs.model.StaffDetails">
+		UPDATE STAFF_DETAILS SET 
+		FIRST_NAME = #{msStaffFirstName, jdbcType=VARCHAR}, 
+		MIDDLE_INITIAL = #{msStaffMidInitial, jdbcType=VARCHAR},
+		LAST_NAME = #{msStaffLastName, jdbcType=VARCHAR}, 
+		EMAIL = #{msStaffEmail, jdbcType=VARCHAR}, 
+		PHONE = #{msStaffPhone, jdbcType=VARCHAR}, 
+		NYC_USER_ID=#{msNYCUserId, jdbcType=VARCHAR},
+		TERMS_CONDITIONS_ACCEPTED=#{msTermConditionStatus, jdbcType=VARCHAR},
+		 
+		<if test="msUserDN != null">
+			USER_DN=#{msUserDN, jdbcType=VARCHAR},
+		</if>
+		
+		MODIFIED_DATE = SYSDATE, MODIFIED_BY = #{msCreatedBy, jdbcType=VARCHAR}
+		WHERE STAFF_ID = #{msStaffId}    		
+	</update>
+	
+	<insert id="insertStaffMapping" parameterType="Map">		
+		INSERT INTO STAFF_SERVICE_MAPPING (STAFF_ID, ORGANIZATION_ID, SERVICE_APPLICATION_ID, 
+		BUSINESS_APPLICATION_ID, STAFF_ADDED_ON, CREATED_DATE, CREATED_BY, MODIFIED_DATE, MODIFIED_BY) 
+		VALUES(#{msStaffId},#{msOrgId},#{msServiceAppId},#{msAppId},#{msStaffAddedOn},
+		SYSDATE, #{msCreatedBy, jdbcType=VARCHAR}, SYSDATE, #{msCreatedBy, jdbcType=VARCHAR} )
+	</insert>
+	
+	<insert id="insertOrgNameChange" parameterType="Map">        
+        INSERT INTO ORGANIZATION_NAME_CHANGE (CURRENT_ORG_LEGAL_NAME,PROPOSED_ORG_LEGAL_NAME,COMMENTS,MODIFIED_DATE,
+        MODIFIED_BY,WORKFLOW_ID,PROC_STATUS,REQUEST_ID,ORGANIZATION_ID, CREATED_DATE, CREATED_BY) 
+        VALUES
+        (#{asCurrentOrgLegalName, jdbcType=VARCHAR},#{asProposedOrgLegalName, jdbcType=VARCHAR},#{asNewLegalNameReason, jdbcType=VARCHAR},
+        #{LaunchDate}, #{userId, jdbcType=VARCHAR},#{asWorkflowId, jdbcType=VARCHAR},#{asProcStatus, jdbcType=VARCHAR},
+         #{ApplicationID, jdbcType=VARCHAR},#{asorgId, jdbcType=VARCHAR}, SYSDATE, #{userId, jdbcType=VARCHAR})        
+    </insert>
+    
+<!-- <update id="denyUserRequestProfile" parameterType="Map">
+		UPDATE STAFF_DETAILS SET ACTIVE_FLAG = #{inActive}, 
+		MODIFIED_DATE = SYSDATE, MODIFIED_BY = #{lsStaffId, jdbcType=VARCHAR}   
+ 		WHERE  ORGANIZATION_ID = #{asOrgId}
+ 		AND STAFF_ID = #{lsStaffId}
+	</update>
+ -->    	
+	
+	<delete id="denyUserRequestProfile" parameterType="Map">
+		DELETE FROM STAFF_ORGANIZATION  
+ 		WHERE  ORGANIZATION_ID = #{asOrgId}
+ 		AND STAFF_ID = #{lsStaffId}
+	</delete>
+		
+	<update id="updateServiceStaffDetails" parameterType="com.nyc.hhs.model.StaffDetails">
+		UPDATE STAFF_DETAILS SET 
+		FIRST_NAME = #{msStaffFirstName, jdbcType=VARCHAR}, 
+		MIDDLE_INITIAL = #{msStaffMidInitial, jdbcType=VARCHAR}, 
+		LAST_NAME = #{msStaffLastName, jdbcType=VARCHAR}, 
+		EMAIL = #{msStaffEmail, jdbcType=VARCHAR}, 
+		PHONE = #{msStaffPhone, jdbcType=VARCHAR}, 
+		MODIFIED_DATE = SYSDATE, 
+		MODIFIED_BY = #{msCreatedBy, jdbcType=VARCHAR}
+		WHERE STAFF_ID = #{msStaffId}    		
+	</update>
+	
+	<update id="updateServiceStaffOrgMappingDetails" parameterType="com.nyc.hhs.model.StaffDetails">
+		UPDATE STAFF_ORGANIZATION SET 
+		TITLE = #{msStaffTitle, jdbcType=VARCHAR}, 
+		MODIFIED_DATE = SYSDATE, 
+		MODIFIED_BY_USER_ID = #{msCreatedBy, jdbcType=VARCHAR}
+		WHERE STAFF_ID = #{msStaffId} AND ORGANIZATION_ID =  #{msOrgId}    		
+	</update>
+	
+	<select id="getDeactivatedService" parameterType="Map" resultType="String">
+		SELECT DISTINCT ENTITY_ID FROM SUPERSEDING_STATUS WHERE ENTITY_ID IN (
+		SELECT SERVICE_APPLICATION_ID FROM SERVICE_APPLICATION 
+		WHERE SERVICE_APPLICATION_ID = #{serviceAppId} 
+		AND LOWER(SERVICE_STATUS) IN 
+		<foreach item="item" index="index" collection="serviceStatuses"
+        	open="(" separator="," close=")">
+          	#{item}
+    	</foreach>
+		) AND STATUS = #{deactivated}
+	</select>
+	
+	<select id="getDeactivatedServiceForApp" parameterType="Map" resultType="String">
+		SELECT DISTINCT ENTITY_ID FROM SUPERSEDING_STATUS WHERE ENTITY_ID IN (
+		SELECT SERVICE_APPLICATION_ID FROM SERVICE_APPLICATION 
+		WHERE BUSINESS_APPLICATION_ID = #{businessAppId} 
+		AND LOWER(SERVICE_STATUS) IN 
+		<foreach item="item" index="index" collection="serviceStatuses"
+        	open="(" separator="," close=")">
+          	#{item}
+    	</foreach>
+		) AND STATUS = #{deactivated}
+	</select>
+	
+	<select id="getRecentlyAddedContractId" resultType="String">
+		SELECT SEQ_CONTRACT_DETAILS_ID.currval CONTRACT_ID FROM DUAL
+	</select>
+	
+	<select id="checkExistingContractId" parameterType="Map" resultType="String">
+		SELECT CONTRACT_DETAILS_ID FROM CONTRACT_DETAILS WHERE CONTRACT_ID = #{asContractId} 
+		AND DESCRIPTION = #{contractDescription} AND (FUNDER_NAME = #{contractFunderName} OR NYC_AGENCY = #{contractNYCAgency}) 
+	</select>
+	
+	<select id="getAllApplicationsOfProvider" parameterType="String" resultType="map">
+	   SELECT BUSINESS_APPLICATION_ID, EXPIRATION_DATE FROM 
+	   BUSINESS_APPLICATION WHERE ORGANIZATION_ID = #{asOrgId} ORDER BY CREATED_DATE 
+ </select>
+
+	<select id="recacheTaxonomy" parameterType="Map" resultType="map">
+	   SELECT COMPONENT_NAME,SETTINGS_NAME,SETTINGS_VALUE FROM APPLICATION_SETTINGS WHERE 
+	   		COMPONENT_NAME IN (#{taxonomy},#{recacheFlag})
+ 	</select>
+ 	
+ 	<update id="updateRecacheTaxonomyFlag" parameterType="Map">
+		UPDATE APPLICATION_SETTINGS SET SETTINGS_VALUE = #{flagValueFalse} WHERE COMPONENT_NAME = #{updateFlag}
+	</update> 
+	
+	<select id="getCityUserName" parameterType="String" resultType="String">
+	   SELECT FIRST_NAME || ' ' || LAST_NAME as name FROM CITY_USER_DETAILS WHERE 
+	   		USER_ID = #{asUserId}
+ 	</select>
+ 	
+ 	<select id="getSupersedingandExpiry" parameterType="Map" resultType="map">
+   		SELECT STATUS as SUPERSEDING_STATUS, EXPIRATION_DATE from
+		(SELECT BUSINESS_APPLICATION.EXPIRATION_DATE, SUPERSEDING_STATUS.STATUS FROM BUSINESS_APPLICATION
+		FULL OUTER JOIN SUPERSEDING_STATUS ON BUSINESS_APPLICATION.business_application_id = SUPERSEDING_STATUS.ENTITY_ID
+		where business_application_id = #{bussAppId} AND BUSINESS_APPLICATION.organization_id = #{asOrdId} ORDER BY SUPERSEDING_STATUS.TIMESTAMP DESC)
+		WHERE ROWNUM =1
+ 	</select>
+ 	
+ 	<select id="getDeletedServiceName" parameterType="Map" resultType="map">
+	  SELECT connect_by_root element_id as leaf, element_id, element_name 
+		 FROM   TAXONOMY_MASTER b  
+		 CONNECT BY prior parent_id=element_id and element_name not IN ('Function','Service Area')
+		 start with element_id =#{lsElementId} order by element_id
+ 	</select>
+ 	
+ 	 <select id="getSupersedingStatus" parameterType="string" resultType="string">
+	  (select STATUS from SUPERSEDING_STATUS where (entity_id,TIMESTAMP) in 
+      (select entity_id, max(TIMESTAMP) from SUPERSEDING_STATUS  
+      where ENTITY_TYPE='Service Application' and ENTITY_ID=#{asServiceAppId} group by entity_id) 
+     )
+ 	</select>
+ 	
+ 	<resultMap id="resultAnswerSA" type="com.nyc.hhs.model.ApplicationSummary">
+		<result property="msServiceAppId" column="SERVICE_APPLICATION_ID" />
+		<result property="msSuperSedingEntityType" column="Entity_Type" />
+		<result property="msSuperSedingStatus" column="STATUS" />
+		<result property="msServiceElementId" column="ELEMENT_ID" />
+		<result property="msAppStatus" column="SERVICE_STATUS"></result>
+		<result property="msSuperSedingEntityId" column="ENTITY_ID"></result>
+	</resultMap>
+		
+ 	<select id="selectAppInfoByOrgId" parameterType="hashmap" resultMap="resultAnswerSA">
+ 	SELECT sup.Entity_Type,sup.STATUS , sa.SERVICE_APPLICATION_ID APPLICATION_ID, sa.SERVICE_STATUS ,sup.ENTITY_ID
+  				from SERVICE_APPLICATION sa, SUPERSEDING_STATUS sup
+ 		 		where sup.ENTITY_ID(+)=sa.SERVICE_APPLICATION_ID AND 
+    		 	sa.BUSINESS_APPLICATION_ID=#{asBrAppId} AND 
+     		 	sa.ORGANIZATION_ID = #{asOrgId}
+    </select> 
+    	
+<!-- Query added as a part of release 3.2.0 defect 5650 -->	    
+    <update id="updateMemberStaffOrgMapping" parameterType="com.nyc.hhs.model.StaffDetails">
+		UPDATE STAFF_ORGANIZATION SET 
+		TITLE = #{msStaffTitle, jdbcType=VARCHAR}, 
+		ACTIVE_FLAG = #{msStaffActiveFlag, jdbcType=VARCHAR}, 
+		MEMBER_STATUS = #{msMemberStatus, jdbcType=VARCHAR}, 
+		<!-- ORGANIZATION_ID =  #{msOrgId, jdbcType=VARCHAR}, -->
+		USER_STATUS=#{msUserStatus, jdbcType=VARCHAR},
+		MEMBER_INACTIVE_DATE=#{msMemberInactiveDate, jdbcType=VARCHAR},
+		PERMISSION_LEVEL=#{msPermissionLevel, jdbcType=VARCHAR},
+		PERMISSION_TYPE=#{msPermissionType, jdbcType=VARCHAR},
+		ADMIN_PERMISSION=#{msAdminPermission, jdbcType=VARCHAR},
+		MODIFIED_DATE = SYSDATE, MODIFIED_BY_USER_ID = #{msCreatedBy, jdbcType=VARCHAR}
+		WHERE STAFF_ID = #{msStaffId} AND ORGANIZATION_ID =  #{msOrgId}    		
+	</update>
+    
+    <select id="getStaffCountToDelete" parameterType="com.nyc.hhs.model.StaffDetails" resultType="int">
+		select count(1) from STAFF_ORGANIZATION where staff_id = #{memberAsUser}
+	</select>
+
+<!-- Query added as a part of release 3.2.0 defect 5650 -->	 	
+	<update  id="linkMemberToUserDeleteAllStaff" parameterType="com.nyc.hhs.model.StaffDetails">
+		UPDATE STAFF_DETAILS SET USER_DN=null,MODIFIED_DATE = SYSDATE, MODIFIED_BY = #{msCreatedBy, jdbcType=VARCHAR}
+		WHERE STAFF_ID = #{memberAsUser}   		
+	</update >
+	
+	<select id="getStaffCountToDeleteDenyUserRequestProfile" parameterType="com.nyc.hhs.model.StaffDetails" resultType="int">
+		select count(1) from STAFF_ORGANIZATION where staff_id = #{lsStaffId}
+	</select>
+	
+	<delete id="denyUserRequestProfileDeleteAllStaff" parameterType="Map">
+		DELETE FROM STAFF_DETAILS  
+ 		WHERE STAFF_ID = #{lsStaffId}
+	</delete>	
+	
+	<select id="getStaffCountToSkipUserdnUpdate" parameterType="com.nyc.hhs.model.StaffDetails" resultType="int">
+		select count(1) from STAFF_ORGANIZATION where staff_id = #{msStaffId, jdbcType=VARCHAR} and user_status = 'Yes' and active_flag = 'Yes'
+	</select> 	
+ 	
+ 	<!-- Start : R5 Added -->
+ 	<select id="getBussAppExpiringDate" parameterType="hashmap" resultType="string">
+		SELECT max(TO_CHAR(EXPIRATION_DATE,'MM/DD/YYYY')) as expiration_date
+		FROM business_application
+		WHERE organization_id  = #{userOrgId, jdbcType=VARCHAR}
+		AND application_status = 'Approved'
+ 	</select>
+ 	<select id="getServiceAppExpiringDate" parameterType="hashmap" resultType="string"> 
+ 		select min(to_char(expiration_date,'MM/DD/YYYY')) from (
+			select max(expiration_date) as expiration_date, element_id
+			from service_application
+			where organization_id  = #{userOrgId, jdbcType=VARCHAR}
+			and service_status = #{Approved, jdbcType=VARCHAR}
+			group by element_id)all_data
+			where all_data.expiration_date &lt; SYSDATE + 180
+			and all_data.expiration_date &gt;= SYSDATE
+ 	</select>
+ 	
+ 	
+ 	<select id="getContractRestrictionCountDeactivatedUser" parameterType="com.nyc.hhs.model.StaffDetails" resultType="int">
+		SELECT COUNT(countStaffUser)
+		   FROM
+		  (
+		  SELECT COUNT(DECODE(staff_id,#{msStaffId},NULL,staff_id)) countStaffUser,
+		    contract_id
+		     FROM
+		    (
+		    SELECT s.staff_id,
+		      c.contract_id
+		       FROM contract c,
+		      staff_organization s
+		      WHERE c.organization_id = s.organization_id
+		    AND permission_level      = 'Level 2'
+		    AND PERMISSION_TYPE      IN ('F','FP')
+		   and s.organization_id in (select organization_id from staff_organization where staff_id = #{msStaffId})
+		    minus
+		     SELECT s.staff_id,
+		      c.contract_id
+		       FROM contract_restriction c,
+		      staff_organization s
+		      WHERE c.staff_id    = s.staff_id
+		    AND permission_level  = 'Level 2'
+		    AND PERMISSION_TYPE  IN ('F','FP')
+		    and s.organization_id in (select organization_id from staff_organization where staff_id = #{msStaffId} )
+		    )
+		   
+		 GROUP BY contract_id
+		  )  
+		  WHERE  countStaffUser = 0
+ 	</select>
+	<!-- End : R5 Added --> 
+	
+	<!--  Start SAML QC 9165 R 7.8.0 -->
+ 
+	<resultMap id="allStaffDetailsList" type="com.nyc.hhs.model.StaffDetails">
+	    <result property="msStaffFirstName" column="FIRST_NAME" />
+		<result property="msStaffMidInitial" column="MIDDLE_INITIAL" />
+		<result property="msStaffLastName" column="LAST_NAME" />
+		<result property="msStaffPhone" column="PHONE" />
+		<result property="msStaffEmail" column="EMAIL" />	
+		<result property="msStaffId" column="STAFF_ID" />
+		<result property="msStaffActiveFlag" column="ACTIVE_FLAG" />
+		<result property="msMemberStatus" column="MEMBER_STATUS" />
+		<result property="msNYCUserId" column="NYC_USER_ID" />
+		<result property="msUserStatus" column="USER_STATUS" />
+		<result property="msUserDN" column="USER_DN" />
+		<result property="msOrgId" column="ORGANIZATION_ID" />
+		<result property="msOrganisationName" column="ORGANIZATION_LEGAL_NAME" />
+	</resultMap>
+	
+	
+	<select id="getAllActiveOrgStaff" resultMap="allStaffDetailsList">
+	
+	 SELECT   sd.FIRST_NAME, sd.MIDDLE_INITIAL, 
+	 		  sd.LAST_NAME, sd.EMAIL, SD.STAFF_ID, 
+	 		  sd.USER_DN, sd.NYC_USER_ID, sd.PHONE,
+              som.ACTIVE_FLAG, som.MEMBER_STATUS, 
+              som.USER_STATUS, som.ORGANIZATION_ID, 
+			  org.ORGANIZATION_LEGAL_NAME
+	 FROM STAFF_DETAILS sd, STAFF_ORGANIZATION som, ORGANIZATION org
+	 WHERE
+      		sd.STAFF_ID = som.STAFF_ID  
+      		and org.ORGANIZATION_ID = som.ORGANIZATION_ID
+      		and sd.USER_DN is NOT null
+      		and sd.NYC_USER_ID is NOT null 
+      		and som.MEMBER_STATUS='Active' 
+      		and som.ACTIVE_FLAG = 'Yes'
+      		
+	</select>
+	
+	<update id="updateStaffOrganizationUserStatus" parameterType="com.nyc.hhs.model.StaffDetails">
+		UPDATE STAFF_ORGANIZATION 
+		SET 
+			USER_STATUS = #{msUserStatus, jdbcType=VARCHAR}, 
+			ACTIVE_FLAG = #{msStaffActiveFlag, jdbcType=VARCHAR},
+			MODIFIED_DATE = SYSDATE, 
+			MODIFIED_BY_USER_ID = #{msModifiedBy, jdbcType=VARCHAR}
+		WHERE 
+			STAFF_ID = #{msStaffId} 
+			<!-- AND ORGANIZATION_ID =  #{msOrgId} -->    		
+	</update>
+	
+	<select id="getSettingsValue" parameterType="String" resultType="String">
+	   SELECT SETTINGS_VALUE 
+	   FROM APPLICATION_SETTINGS 
+	   WHERE COMPONENT_NAME = #{componentName}
+	</select>
+	
+	<update id="updateSettingsValue" parameterType="HashMap">
+		update APPLICATION_SETTINGS
+		set SETTINGS_VALUE = #{lastSuccessfulUpdateDate}
+		where SETTINGS_NAME = #{componentName}
+	</update>
+
+	<!--  End SAML QC 9165 R 7.8.0 -->
+ 	
+</mapper>

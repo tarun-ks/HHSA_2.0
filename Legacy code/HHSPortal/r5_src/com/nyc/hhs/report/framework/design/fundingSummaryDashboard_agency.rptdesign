@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.23" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 3.7.2.v20120213 Build &lt;3.7.2.v20120214-1408></property>
+    <property name="units">in</property>
+    <property name="iconFile">/templates/blank_report.gif</property>
+    <property name="layoutPreference">auto layout</property>
+    <property name="bidiLayoutOrientation">ltr</property>
+    <property name="imageDPI">96</property>
+    <parameters>
+        <scalar-parameter name="fyYearId" id="112">
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+    </parameters>
+    <data-sources>
+        <script-data-source name="Data Source" id="7"/>
+    </data-sources>
+    <data-sets>
+        <script-data-set name="fundingSummaryProviderData" id="8">
+            <list-property name="resultSetHints">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">providerCount</property>
+                    <property name="dataType">integer</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">programCount</property>
+                    <property name="dataType">integer</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">registeredContractCount</property>
+                    <property name="dataType">integer</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
+                    <property name="name">totalCityBudget</property>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">totalAmmendAmount</property>
+                    <property name="dataType">float</property>
+                </structure>
+            </list-property>
+            <list-property name="columnHints">
+                <structure>
+                    <property name="columnName">providerCount</property>
+                    <text-property name="displayName">providerCount</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">programCount</property>
+                    <text-property name="displayName">programCount</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">registeredContractCount</property>
+                    <text-property name="displayName">registeredContractCount</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">totalCityBudget</property>
+                    <text-property name="displayName">totalCityBudget</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">totalAmmendAmount</property>
+                    <text-property name="displayName">totalAmmendAmount</text-property>
+                </structure>
+            </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">providerCount</property>
+                        <property name="dataType">integer</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">programCount</property>
+                        <property name="dataType">integer</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">registeredContractCount</property>
+                        <property name="dataType">integer</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">totalCityBudget</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">totalAmmendAmount</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <property name="dataSource">Data Source</property>
+            <method name="open"><![CDATA[var request = reportContext.getHttpServletRequest();
+var session = request.getSession();
+aMap = session.getAttribute("reportList");
+dataIterator = aMap.iterator();]]></method>
+            <method name="fetch"><![CDATA[if (dataIterator.hasNext()) {
+	   dataObject = dataIterator.next();
+       row["providerCount"] = dataObject.getProviderCount();
+       row["programCount"] = dataObject.getProgramCount();
+       row["registeredContractCount"] = dataObject.getRegisteredContractCount();
+       row["totalCityBudget"] = dataObject.getCityBudgetAmount();
+       row["totalAmmendAmount"] = dataObject.getPendingAmendAmount();
+       return true;
+}
+return false; ]]></method>
+        </script-data-set>
+    </data-sets>
+    <styles>
+        <style name="report" id="4">
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontSize">10pt</property>
+        </style>
+        <style name="crosstab-cell" id="5">
+            <property name="borderBottomColor">#CCCCCC</property>
+            <property name="borderBottomStyle">solid</property>
+            <property name="borderBottomWidth">1pt</property>
+            <property name="borderLeftColor">#CCCCCC</property>
+            <property name="borderLeftStyle">solid</property>
+            <property name="borderLeftWidth">1pt</property>
+            <property name="borderRightColor">#CCCCCC</property>
+            <property name="borderRightStyle">solid</property>
+            <property name="borderRightWidth">1pt</property>
+            <property name="borderTopColor">#CCCCCC</property>
+            <property name="borderTopStyle">solid</property>
+            <property name="borderTopWidth">1pt</property>
+        </style>
+        <style name="crosstab" id="6">
+            <property name="borderBottomColor">#CCCCCC</property>
+            <property name="borderBottomStyle">solid</property>
+            <property name="borderBottomWidth">1pt</property>
+            <property name="borderLeftColor">#CCCCCC</property>
+            <property name="borderLeftStyle">solid</property>
+            <property name="borderLeftWidth">1pt</property>
+            <property name="borderRightColor">#CCCCCC</property>
+            <property name="borderRightStyle">solid</property>
+            <property name="borderRightWidth">1pt</property>
+            <property name="borderTopColor">#CCCCCC</property>
+            <property name="borderTopStyle">solid</property>
+            <property name="borderTopWidth">1pt</property>
+        </style>
+        <style name="fundingSummaryDashBoardNumber" id="77">
+            <property name="fontFamily">"Verdana"</property>
+            <property name="fontSize">24pt</property>
+            <property name="fontWeight">bold</property>
+            <property name="color">#3550A4</property>
+            <property name="textAlign">center</property>
+        </style>
+        <style name="fundingSummaryDashBoardCurr" id="78">
+            <property name="fontFamily">"Verdana"</property>
+            <property name="fontSize">12pt</property>
+            <property name="fontWeight">bold</property>
+            <property name="color">#3550A4</property>
+            <structure name="numberFormat">
+                <property name="category">Currency</property>
+                <property name="pattern">$#,##0.00;$(#,##0.00){RoundingMode=HALF_UP}</property>
+                <property name="locale">en_US</property>
+            </structure>
+            <property name="textAlign">center</property>
+        </style>
+        <style name="fundingSummaryDashBoardLabel" id="79">
+            <property name="fontFamily">"Verdana"</property>
+            <property name="textAlign">center</property>
+        </style>
+        <style name="fundingSummaryDashBoardDiv" id="80">
+            <property name="marginTop">3pt</property>
+            <property name="marginLeft">3pt</property>
+            <property name="marginBottom">3pt</property>
+            <property name="marginRight">3pt</property>
+            <property name="paddingTop">1pt</property>
+            <property name="paddingBottom">1pt</property>
+        </style>
+        <style name="fundingSummaryInfoNum" id="89">
+            <property name="fontFamily">"Verdana"</property>
+            <property name="fontSize">12pt</property>
+            <property name="fontWeight">bold</property>
+            <property name="marginTop">10pt</property>
+            <property name="marginLeft">5pt</property>
+            <property name="paddingTop">1pt</property>
+            <property name="paddingLeft">3pt</property>
+        </style>
+    </styles>
+    <page-setup>
+        <simple-master-page name="Simple MasterPage" id="2">
+            <property name="rightMargin">0in</property>
+        </simple-master-page>
+    </page-setup>
+    <body>
+        <grid id="9">
+            <property name="borderBottomColor">#C0C0C0</property>
+            <property name="borderBottomStyle">solid</property>
+            <property name="borderBottomWidth">thin</property>
+            <property name="borderLeftColor">#C0C0C0</property>
+            <property name="borderLeftStyle">solid</property>
+            <property name="borderLeftWidth">thin</property>
+            <property name="borderRightColor">#C0C0C0</property>
+            <property name="borderRightStyle">solid</property>
+            <property name="borderRightWidth">thin</property>
+            <property name="borderTopColor">#C0C0C0</property>
+            <property name="borderTopStyle">solid</property>
+            <property name="borderTopWidth">thin</property>
+            <property name="height">1in</property>
+            <column id="10">
+                <property name="width">9in</property>
+            </column>
+            <column id="11">
+                <property name="width">2.59375in</property>
+                <property name="backgroundColor">#E6E7E8</property>
+            </column>
+            <row id="12">
+                <property name="height">2.2604166666666665in</property>
+                <cell id="13">
+                    <property name="paddingLeft">7pt</property>
+                    <text id="227">
+                        <property name="style">fundingSummaryDashBoardDiv</property>
+                        <property name="fontFamily">"Verdana"</property>
+                        <property name="fontSize">14pt</property>
+                        <property name="fontWeight">bold</property>
+                        <property name="marginLeft">0pt</property>
+                        <property name="marginRight">0pt</property>
+                        <property name="paddingLeft">1pt</property>
+                        <property name="paddingRight">1pt</property>
+                        <property name="textAlign">left</property>
+                        <property name="contentType">html</property>
+                        <text-property name="content"><![CDATA[Funding Summary]]></text-property>
+                    </text>
+                    <grid id="195">
+                        <property name="style">fundingSummaryDashBoardDiv</property>
+                        <property name="borderBottomColor">#C0C0C0</property>
+                        <property name="borderBottomStyle">solid</property>
+                        <property name="borderBottomWidth">thin</property>
+                        <property name="marginTop">20pt</property>
+                        <property name="marginLeft">20pt</property>
+                        <property name="marginBottom">auto</property>
+                        <property name="canShrink">true</property>
+                        <property name="height">0.3in</property>
+                        <column id="196">
+                            <property name="width">2in</property>
+                        </column>
+                        <column id="197">
+                            <property name="width">2in</property>
+                        </column>
+                        <column id="198">
+                            <property name="width">2in</property>
+                        </column>
+                        <row id="199">
+                            <property name="height">0.8854166666666666in</property>
+                            <cell id="200">
+                                <property name="borderRightColor">#C0C0C0</property>
+                                <property name="borderRightStyle">solid</property>
+                                <property name="borderRightWidth">thin</property>
+                                <data id="228">
+                                    <property name="style">fundingSummaryDashBoardNumber</property>
+                                    <property name="dataSet">fundingSummaryProviderData</property>
+                                    <list-property name="boundDataColumns">
+                                        <structure>
+                                            <property name="name">providerCount</property>
+                                            <expression name="expression" type="javascript">dataSetRow["providerCount"]</expression>
+                                            <property name="dataType">integer</property>
+                                            <property name="allowExport">true</property>
+                                        </structure>
+                                        <structure>
+                                            <property name="name">programCount</property>
+                                            <expression name="expression" type="javascript">dataSetRow["programCount"]</expression>
+                                            <property name="dataType">integer</property>
+                                        </structure>
+                                        <structure>
+                                            <property name="name">registeredContractCount</property>
+                                            <expression name="expression" type="javascript">dataSetRow["registeredContractCount"]</expression>
+                                            <property name="dataType">integer</property>
+                                        </structure>
+                                        <structure>
+                                            <property name="name">totalCityBudget</property>
+                                            <expression name="expression" type="javascript">dataSetRow["totalCityBudget"]</expression>
+                                            <property name="dataType">float</property>
+                                        </structure>
+                                        <structure>
+                                            <property name="name">totalAmmendAmount</property>
+                                            <expression name="expression" type="javascript">dataSetRow["totalAmmendAmount"]</expression>
+                                            <property name="dataType">float</property>
+                                        </structure>
+                                    </list-property>
+                                    <method name="onCreate"><![CDATA[this.helpText="Count of Providers with Pending Registration or Registered Contracts tied to a Fiscal Year Budget.";
+]]></method>
+                                    <method name="onRender"><![CDATA[if(row["providerCount"] ==null)
+this.setDisplayValue(0);
+]]></method>
+                                    <property name="resultSetColumn">providerCount</property>
+                                </data>
+                                <text id="231">
+                                    <property name="style">fundingSummaryDashBoardLabel</property>
+                                    <property name="fontWeight">bold</property>
+                                    <property name="contentType">html</property>
+                                    <text-property name="content"><![CDATA[Providers]]></text-property>
+                                </text>
+                            </cell>
+                            <cell id="209">
+                                <property name="borderRightColor">#C0C0C0</property>
+                                <property name="borderRightStyle">solid</property>
+                                <property name="borderRightWidth">thin</property>
+                                <data id="229">
+                                    <property name="style">fundingSummaryDashBoardNumber</property>
+                                    <property name="dataSet">fundingSummaryProviderData</property>
+                                    <list-property name="boundDataColumns">
+                                        <structure>
+                                            <property name="name">programCount</property>
+                                            <expression name="expression" type="javascript">dataSetRow["programCount"]</expression>
+                                            <property name="dataType">integer</property>
+                                        </structure>
+                                        <structure>
+                                            <property name="name">registeredContractCount</property>
+                                            <expression name="expression" type="javascript">dataSetRow["registeredContractCount"]</expression>
+                                            <property name="dataType">integer</property>
+                                        </structure>
+                                        <structure>
+                                            <property name="name">totalCityBudget</property>
+                                            <expression name="expression" type="javascript">dataSetRow["totalCityBudget"]</expression>
+                                            <property name="dataType">float</property>
+                                        </structure>
+                                        <structure>
+                                            <property name="name">totalAmmendAmount</property>
+                                            <expression name="expression" type="javascript">dataSetRow["totalAmmendAmount"]</expression>
+                                            <property name="dataType">float</property>
+                                        </structure>
+                                    </list-property>
+                                    <method name="onCreate"><![CDATA[this.helpText="Count of Programs associated with Pending Registration or Registered Contracts with a Fiscal Year Budget.";]]></method>
+                                    <method name="onRender"><![CDATA[if(row["programCount"] ==null)
+this.setDisplayValue(0);]]></method>
+                                    <property name="resultSetColumn">programCount</property>
+                                </data>
+                                <text id="232">
+                                    <property name="style">fundingSummaryDashBoardLabel</property>
+                                    <property name="fontWeight">bold</property>
+                                    <property name="contentType">html</property>
+                                    <text-property name="content"><![CDATA[Programs]]></text-property>
+                                </text>
+                            </cell>
+                            <cell id="218">
+                                <data id="230">
+                                    <property name="style">fundingSummaryDashBoardNumber</property>
+                                    <property name="dataSet">fundingSummaryProviderData</property>
+                                    <list-property name="boundDataColumns">
+                                        <structure>
+                                            <property name="name">programCount</property>
+                                            <expression name="expression" type="javascript">dataSetRow["programCount"]</expression>
+                                            <property name="dataType">integer</property>
+                                        </structure>
+                                        <structure>
+                                            <property name="name">registeredContractCount</property>
+                                            <expression name="expression" type="javascript">dataSetRow["registeredContractCount"]</expression>
+                                            <property name="dataType">integer</property>
+                                        </structure>
+                                        <structure>
+                                            <property name="name">totalCityBudget</property>
+                                            <expression name="expression" type="javascript">dataSetRow["totalCityBudget"]</expression>
+                                            <property name="dataType">float</property>
+                                        </structure>
+                                        <structure>
+                                            <property name="name">totalAmmendAmount</property>
+                                            <expression name="expression" type="javascript">dataSetRow["totalAmmendAmount"]</expression>
+                                            <property name="dataType">float</property>
+                                        </structure>
+                                    </list-property>
+                                    <method name="onCreate"><![CDATA[this.helpText="Count of Pending Registration and Registered Contracts with a Fiscal Year Budget.";
+]]></method>
+                                    <method name="onRender"><![CDATA[if(row["registeredContractCount"] ==null)
+this.setDisplayValue(0);
+]]></method>
+                                    <property name="resultSetColumn">registeredContractCount</property>
+                                </data>
+                                <text id="233">
+                                    <property name="style">fundingSummaryDashBoardLabel</property>
+                                    <property name="fontWeight">bold</property>
+                                    <property name="contentType">html</property>
+                                    <text-property name="content"><![CDATA[Total Contracts]]></text-property>
+                                </text>
+                            </cell>
+                        </row>
+                    </grid>
+                    <grid id="237">
+                        <property name="style">fundingSummaryDashBoardDiv</property>
+                        <property name="marginTop">5pt</property>
+                        <property name="marginLeft">20pt</property>
+                        <property name="marginBottom">0pt</property>
+                        <property name="height">0.25in</property>
+                        <property name="width">6.197916666666667in</property>
+                        <column id="238">
+                            <property name="width">3.1354166666666665in</property>
+                        </column>
+                        <column id="239">
+                            <property name="width">3.0625in</property>
+                        </column>
+                        <row id="240">
+                            <property name="height">0.7083333333333334in</property>
+                            <cell id="241">
+                                <property name="borderRightColor">#C0C0C0</property>
+                                <property name="borderRightStyle">solid</property>
+                                <property name="borderRightWidth">thin</property>
+                                <property name="paddingTop">10pt</property>
+                                <property name="paddingBottom">10pt</property>
+                                <data id="259">
+                                    <property name="style">fundingSummaryDashBoardCurr</property>
+                                    <structure name="numberFormat">
+                                        <property name="category">Custom</property>
+                                        <property name="pattern">¤###,##0.00;(¤###,##0.00)</property>
+                                        <property name="locale">en_US</property>
+                                    </structure>
+                                    <property name="dataSet">fundingSummaryProviderData</property>
+                                    <list-property name="boundDataColumns">
+                                        <structure>
+                                            <property name="name">programCount</property>
+                                            <expression name="expression" type="javascript">dataSetRow["programCount"]</expression>
+                                            <property name="dataType">integer</property>
+                                        </structure>
+                                        <structure>
+                                            <property name="name">registeredContractCount</property>
+                                            <expression name="expression" type="javascript">dataSetRow["registeredContractCount"]</expression>
+                                            <property name="dataType">integer</property>
+                                        </structure>
+                                        <structure>
+                                            <property name="name">totalCityBudget</property>
+                                            <expression name="expression" type="javascript">dataSetRow["totalCityBudget"]</expression>
+                                            <property name="dataType">float</property>
+                                        </structure>
+                                        <structure>
+                                            <property name="name">totalAmmendAmount</property>
+                                            <expression name="expression" type="javascript">dataSetRow["totalAmmendAmount"]</expression>
+                                            <property name="dataType">float</property>
+                                        </structure>
+                                    </list-property>
+                                    <method name="onCreate"><![CDATA[this.helpText="Value of Contract Budgets in Pending Submission, Pending Approval, Returned for Revision, Approved, and Active statuses.";]]></method>
+                                    <method name="onRender"><![CDATA[if(row["totalCityBudget"] ==null)
+this.setDisplayValue(0);
+]]></method>
+                                    <property name="resultSetColumn">totalCityBudget</property>
+                                </data>
+                                <text id="260">
+                                    <property name="style">fundingSummaryDashBoardLabel</property>
+                                    <property name="fontWeight">bold</property>
+                                    <property name="contentType">auto</property>
+                                    <text-property name="content"><![CDATA[Total Fiscal Year City Budget]]></text-property>
+                                </text>
+                            </cell>
+                            <cell id="250">
+                                <property name="paddingTop">10pt</property>
+                                <property name="paddingBottom">10pt</property>
+                                <data id="261">
+                                    <property name="style">fundingSummaryDashBoardCurr</property>
+                                    <structure name="numberFormat">
+                                        <property name="category">Custom</property>
+                                        <property name="pattern">¤###,##0.00;(¤###,##0.00)</property>
+                                        <property name="locale">en_US</property>
+                                    </structure>
+                                    <property name="dataSet">fundingSummaryProviderData</property>
+                                    <list-property name="boundDataColumns">
+                                        <structure>
+                                            <property name="name">programCount</property>
+                                            <expression name="expression" type="javascript">dataSetRow["programCount"]</expression>
+                                            <property name="dataType">integer</property>
+                                        </structure>
+                                        <structure>
+                                            <property name="name">registeredContractCount</property>
+                                            <expression name="expression" type="javascript">dataSetRow["registeredContractCount"]</expression>
+                                            <property name="dataType">integer</property>
+                                        </structure>
+                                        <structure>
+                                            <property name="name">totalCityBudget</property>
+                                            <expression name="expression" type="javascript">dataSetRow["totalCityBudget"]</expression>
+                                            <property name="dataType">float</property>
+                                        </structure>
+                                        <structure>
+                                            <property name="name">totalAmmendAmount</property>
+                                            <expression name="expression" type="javascript">dataSetRow["totalAmmendAmount"]</expression>
+                                            <property name="dataType">float</property>
+                                        </structure>
+                                    </list-property>
+                                    <method name="onCreate"><![CDATA[this.helpText="Value of positive Amendment Budgets in Pending Submission, Pending Approval, Returned for Revision, and Approved status and negative Amendment Budgets in Pending Submission, Pending Approval, and Returned for Revision status.";
+]]></method>
+                                    <method name="onRender"><![CDATA[if(row["totalAmmendAmount"] ==null)
+this.setDisplayValue(0);]]></method>
+                                    <property name="resultSetColumn">totalAmmendAmount</property>
+                                </data>
+                                <text id="262">
+                                    <property name="style">fundingSummaryDashBoardLabel</property>
+                                    <property name="fontWeight">bold</property>
+                                    <property name="contentType">html</property>
+                                    <text-property name="content"><![CDATA[Total Amendments Pending]]></text-property>
+                                </text>
+                            </cell>
+                        </row>
+                    </grid>
+                </cell>
+                <cell id="14">
+                    <text-data id="234">
+                        <property name="style">fundingSummaryInfoNum</property>
+                        <property name="fontFamily">"Verdana"</property>
+                        <property name="fontWeight">bold</property>
+                        <property name="marginTop">20pt</property>
+                        <property name="marginLeft">10pt</property>
+                        <property name="paddingLeft">0pt</property>
+                        <property name="paddingBottom">5pt</property>
+                        <expression name="valueExpr">params["fyYearId"].value</expression>
+                        <property name="contentType">html</property>
+                    </text-data>
+                    <text id="235">
+                        <property name="marginTop">5pt</property>
+                        <property name="marginLeft">10pt</property>
+                        <property name="paddingLeft">0pt</property>
+                        <property name="contentType">html</property>
+                        <text-property name="content"><![CDATA[Fiscal Year]]></text-property>
+                    </text>
+                    <text id="236">
+                        <property name="marginTop">70pt</property>
+                        <property name="marginLeft">14pt</property>
+                        <property name="marginBottom">0pt</property>
+                        <property name="paddingBottom">0pt</property>
+                        <property name="paddingRight">16pt</property>
+                        <property name="contentType">html</property>
+                        <text-property name="content"><![CDATA[<input class="button reportButton" onclick="viewDetailedReport('fundingSummary_agency');" type="button" value="VIEW DETAILED REPORT"/>]]></text-property>
+                    </text>
+                </cell>
+            </row>
+        </grid>
+    </body>
+    <property name="pageVariables">
+        <variable-element name="fiscalYear">
+            <expression name="value" type="javascript">2016</expression>
+            <property name="type">page</property>
+        </variable-element>
+    </property>
+</report>

@@ -1,0 +1,746 @@
+{
+  "version": "1.0.0",
+  "description": "Complete Contract Management Permission System",
+  "permissions": {
+    "contract": {
+      "create": {
+        "id": "contract:create",
+        "name": "Create Contract",
+        "description": "Create new contracts",
+        "resource": "contract",
+        "action": "create",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"],
+          "contract_status": null
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF"]
+      },
+      "view": {
+        "id": "contract:view",
+        "name": "View Contract",
+        "description": "View contract details and information",
+        "resource": "contract",
+        "action": "read",
+        "conditions": {
+          "organization_access": "based_on_role",
+          "contract_ownership": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "PROGRAM_MANAGER", "PROGRAM_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROVIDER_MANAGER", "PROVIDER_STAFF", "PROVIDER_ADMIN"]
+      },
+      "edit": {
+        "id": "contract:edit",
+        "name": "Edit Contract",
+        "description": "Edit contract details and information",
+        "resource": "contract",
+        "action": "update",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"],
+          "contract_status": ["DRAFT", "PENDING_CONFIGURATION"],
+          "contract_ownership": "agency_or_created_by"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF"]
+      },
+      "delete": {
+        "id": "contract:delete",
+        "name": "Delete Contract",
+        "description": "Delete contracts",
+        "resource": "contract",
+        "action": "delete",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"],
+          "contract_status": ["DRAFT"],
+          "contract_ownership": "agency_or_created_by"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_ADMIN_STAFF"]
+      },
+      "approve": {
+        "id": "contract:approve",
+        "name": "Approve Contract",
+        "description": "Approve contracts in workflow",
+        "resource": "contract",
+        "action": "approve",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"],
+          "contract_status": ["PENDING_COF", "PENDING_APPROVAL"],
+          "approval_level": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER"]
+      },
+      "change_status": {
+        "id": "contract:change_status",
+        "name": "Change Contract Status",
+        "description": "Change contract status in workflow",
+        "resource": "contract",
+        "action": "update",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"],
+          "status_transition": "based_on_role",
+          "contract_ownership": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER"]
+      },
+      "create_amendment": {
+        "id": "contract:create_amendment",
+        "name": "Create Amendment",
+        "description": "Create contract amendments",
+        "resource": "contract",
+        "action": "create_amendment",
+        "conditions": {
+          "contract_status": ["REGISTERED", "IN_PROGRESS"],
+          "contract_ownership": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "PROVIDER_MANAGER"]
+      },
+      "export": {
+        "id": "contract:export",
+        "name": "Export Contract",
+        "description": "Export contract data",
+        "resource": "contract",
+        "action": "export",
+        "conditions": {
+          "contract_access": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "PROGRAM_MANAGER", "FINANCE_MANAGER", "FINANCE_STAFF"]
+      },
+      "view_financials": {
+        "id": "contract:view_financials",
+        "name": "View Financial Information",
+        "description": "View contract financial details",
+        "resource": "contract",
+        "action": "read",
+        "conditions": {
+          "contract_access": "based_on_role",
+          "financial_access": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROVIDER_MANAGER"]
+      }
+    },
+    "amendment": {
+      "create": {
+        "id": "amendment:create",
+        "name": "Create Amendment",
+        "description": "Create contract amendments",
+        "resource": "amendment",
+        "action": "create",
+        "conditions": {
+          "contract_status": ["REGISTERED", "IN_PROGRESS"],
+          "contract_ownership": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "PROVIDER_MANAGER"]
+      },
+      "view": {
+        "id": "amendment:view",
+        "name": "View Amendment",
+        "description": "View amendment details",
+        "resource": "amendment",
+        "action": "read",
+        "conditions": {
+          "contract_access": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "PROGRAM_MANAGER", "PROGRAM_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROVIDER_MANAGER", "PROVIDER_STAFF", "PROVIDER_ADMIN"]
+      },
+      "edit": {
+        "id": "amendment:edit",
+        "name": "Edit Amendment",
+        "description": "Edit amendment details",
+        "resource": "amendment",
+        "action": "update",
+        "conditions": {
+          "amendment_status": ["DRAFT", "SUBMITTED"],
+          "amendment_ownership": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "PROVIDER_MANAGER"]
+      },
+      "approve": {
+        "id": "amendment:approve",
+        "name": "Approve Amendment",
+        "description": "Approve contract amendments",
+        "resource": "amendment",
+        "action": "approve",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"],
+          "amendment_status": ["SUBMITTED", "UNDER_REVIEW"],
+          "approval_level": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER"]
+      },
+      "delete": {
+        "id": "amendment:delete",
+        "name": "Delete Amendment",
+        "description": "Delete contract amendments",
+        "resource": "amendment",
+        "action": "delete",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"],
+          "amendment_status": ["DRAFT"],
+          "amendment_ownership": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_ADMIN_STAFF", "PROVIDER_ADMIN"]
+      }
+    },
+    "organization": {
+      "view": {
+        "id": "organization:view",
+        "name": "View Organization",
+        "description": "View organization information",
+        "resource": "organization",
+        "action": "read",
+        "conditions": {
+          "organization_access": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "PROGRAM_MANAGER", "PROGRAM_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROVIDER_MANAGER", "PROVIDER_STAFF", "PROVIDER_ADMIN"]
+      },
+      "edit": {
+        "id": "organization:edit",
+        "name": "Edit Organization",
+        "description": "Edit organization information",
+        "resource": "organization",
+        "action": "update",
+        "conditions": {
+          "organization_type": ["AGENCY", "PROVIDER", "CITY"],
+          "organization_ownership": "own_organization"
+        },
+        "required_roles": ["ACCO_ADMIN_STAFF", "PROVIDER_ADMIN"]
+      }
+    },
+    "user": {
+      "view": {
+        "id": "user:view",
+        "name": "View User",
+        "description": "View user information",
+        "resource": "user",
+        "action": "read",
+        "conditions": {
+          "user_access": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "PROGRAM_MANAGER", "PROGRAM_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROVIDER_MANAGER", "PROVIDER_STAFF", "PROVIDER_ADMIN"]
+      },
+      "edit": {
+        "id": "user:edit",
+        "name": "Edit User",
+        "description": "Edit user information",
+        "resource": "user",
+        "action": "update",
+        "conditions": {
+          "organization_type": ["AGENCY", "PROVIDER", "CITY"],
+          "user_ownership": "own_organization"
+        },
+        "required_roles": ["ACCO_ADMIN_STAFF", "PROVIDER_ADMIN"]
+      }
+    },
+    "workflow": {
+      "launch": {
+        "id": "workflow:launch",
+        "name": "Launch Workflow",
+        "description": "Launch FileNet Process Engine workflows",
+        "resource": "workflow",
+        "action": "create",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"],
+          "contract_status": ["DRAFT", "PENDING_CONFIGURATION", "PENDING_SUBMISSION", "PENDING_COF", "PENDING_APPROVAL"],
+          "workflow_type": "based_on_contract_status"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_ADMIN_STAFF", "WORKFLOW_ADMIN", "SYSTEM_ADMIN"]
+      },
+      "view": {
+        "id": "workflow:view",
+        "name": "View Workflow",
+        "description": "View workflow instances and definitions",
+        "resource": "workflow",
+        "action": "read",
+        "conditions": {
+          "workflow_access": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROGRAM_MANAGER", "PROGRAM_STAFF", "PROVIDER_MANAGER", "PROVIDER_STAFF", "PROVIDER_ADMIN", "WORKFLOW_ADMIN", "DOCUMENT_MANAGER", "SYSTEM_ADMIN"]
+      },
+      "assign": {
+        "id": "workflow:assign",
+        "name": "Assign Workflow",
+        "description": "Assign workflow tasks to users",
+        "resource": "workflow",
+        "action": "update",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"],
+          "workflow_ownership": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_ADMIN_STAFF", "WORKFLOW_ADMIN", "SYSTEM_ADMIN"]
+      },
+      "complete": {
+        "id": "workflow:complete",
+        "name": "Complete Workflow",
+        "description": "Complete workflow tasks",
+        "resource": "workflow",
+        "action": "update",
+        "conditions": {
+          "workflow_assignment": "assigned_to_user_or_role",
+          "workflow_status": ["PENDING", "IN_PROGRESS"]
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROVIDER_MANAGER", "PROVIDER_STAFF", "PROVIDER_ADMIN", "WORKFLOW_ADMIN", "DOCUMENT_MANAGER", "SYSTEM_ADMIN"]
+      },
+      "terminate": {
+        "id": "workflow:terminate",
+        "name": "Terminate Workflow",
+        "description": "Terminate workflow instances",
+        "resource": "workflow",
+        "action": "delete",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"],
+          "workflow_ownership": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_ADMIN_STAFF", "WORKFLOW_ADMIN", "SYSTEM_ADMIN"]
+      },
+      "configure": {
+        "id": "workflow:configure",
+        "name": "Configure Workflow",
+        "description": "Configure workflow definitions and properties",
+        "resource": "workflow",
+        "action": "update",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"]
+        },
+        "required_roles": ["WORKFLOW_ADMIN", "SYSTEM_ADMIN"]
+      },
+      "monitor": {
+        "id": "workflow:monitor",
+        "name": "Monitor Workflow",
+        "description": "Monitor workflow performance and analytics",
+        "resource": "workflow",
+        "action": "read",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"]
+        },
+        "required_roles": ["WORKFLOW_ADMIN", "SYSTEM_ADMIN"]
+      },
+      "escalate": {
+        "id": "workflow:escalate",
+        "name": "Escalate Workflow",
+        "description": "Escalate workflow tasks and instances",
+        "resource": "workflow",
+        "action": "update",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"],
+          "workflow_ownership": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_ADMIN_STAFF", "WORKFLOW_ADMIN", "SYSTEM_ADMIN"]
+      }
+    },
+    "document": {
+      "upload": {
+        "id": "document:upload",
+        "name": "Upload Document",
+        "description": "Upload documents to the system",
+        "resource": "document",
+        "action": "create",
+        "conditions": {
+          "document_access": "based_on_role",
+          "contract_status": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "PROVIDER_MANAGER", "PROVIDER_STAFF", "PROVIDER_ADMIN", "WORKFLOW_ADMIN", "DOCUMENT_MANAGER", "SYSTEM_ADMIN"]
+      },
+      "view": {
+        "id": "document:view",
+        "name": "View Document",
+        "description": "View document details and metadata",
+        "resource": "document",
+        "action": "read",
+        "conditions": {
+          "document_access": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROGRAM_MANAGER", "PROGRAM_STAFF", "PROVIDER_MANAGER", "PROVIDER_STAFF", "PROVIDER_ADMIN", "WORKFLOW_ADMIN", "DOCUMENT_MANAGER", "SYSTEM_ADMIN"]
+      },
+      "download": {
+        "id": "document:download",
+        "name": "Download Document",
+        "description": "Download document files",
+        "resource": "document",
+        "action": "read",
+        "conditions": {
+          "document_access": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROGRAM_MANAGER", "PROGRAM_STAFF", "PROVIDER_MANAGER", "PROVIDER_STAFF", "PROVIDER_ADMIN", "WORKFLOW_ADMIN", "DOCUMENT_MANAGER", "SYSTEM_ADMIN"]
+      },
+      "edit": {
+        "id": "document:edit",
+        "name": "Edit Document",
+        "description": "Edit document metadata and properties",
+        "resource": "document",
+        "action": "update",
+        "conditions": {
+          "document_access": "based_on_role",
+          "document_ownership": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "PROVIDER_MANAGER", "PROVIDER_STAFF", "PROVIDER_ADMIN", "WORKFLOW_ADMIN", "DOCUMENT_MANAGER", "SYSTEM_ADMIN"]
+      },
+      "delete": {
+        "id": "document:delete",
+        "name": "Delete Document",
+        "description": "Delete documents from the system",
+        "resource": "document",
+        "action": "delete",
+        "conditions": {
+          "document_access": "based_on_role",
+          "document_ownership": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_ADMIN_STAFF", "PROVIDER_ADMIN", "WORKFLOW_ADMIN", "DOCUMENT_MANAGER", "SYSTEM_ADMIN"]
+      },
+      "approve": {
+        "id": "document:approve",
+        "name": "Approve Document",
+        "description": "Approve documents in workflow",
+        "resource": "document",
+        "action": "approve",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"],
+          "document_status": ["PENDING_REVIEW", "SUBMITTED"],
+          "document_ownership": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "DOCUMENT_MANAGER", "SYSTEM_ADMIN"]
+      },
+      "categorize": {
+        "id": "document:categorize",
+        "name": "Categorize Document",
+        "description": "Categorize and classify documents",
+        "resource": "document",
+        "action": "update",
+        "conditions": {
+          "document_access": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "DOCUMENT_MANAGER", "SYSTEM_ADMIN"]
+      },
+      "version": {
+        "id": "document:version",
+        "name": "Version Document",
+        "description": "Create new versions of documents",
+        "resource": "document",
+        "action": "create",
+        "conditions": {
+          "document_access": "based_on_role",
+          "document_ownership": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "PROVIDER_MANAGER", "PROVIDER_STAFF", "PROVIDER_ADMIN", "DOCUMENT_MANAGER", "SYSTEM_ADMIN"]
+      },
+      "archive": {
+        "id": "document:archive",
+        "name": "Archive Document",
+        "description": "Archive documents for long-term storage",
+        "resource": "document",
+        "action": "update",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"],
+          "document_access": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_ADMIN_STAFF", "DOCUMENT_MANAGER", "SYSTEM_ADMIN"]
+      },
+      "restore": {
+        "id": "document:restore",
+        "name": "Restore Document",
+        "description": "Restore archived documents",
+        "resource": "document",
+        "action": "update",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"],
+          "document_access": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_ADMIN_STAFF", "DOCUMENT_MANAGER", "SYSTEM_ADMIN"]
+      },
+      "export": {
+        "id": "document:export",
+        "name": "Export Document",
+        "description": "Export document data and metadata",
+        "resource": "document",
+        "action": "export",
+        "conditions": {
+          "document_access": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROGRAM_MANAGER", "DOCUMENT_MANAGER", "SYSTEM_ADMIN"]
+      }
+    },
+    "notification": {
+      "send": {
+        "id": "notification:send",
+        "name": "Send Notification",
+        "description": "Send notifications to users",
+        "resource": "notification",
+        "action": "create",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"],
+          "notification_type": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_ADMIN_STAFF", "WORKFLOW_ADMIN", "SYSTEM_ADMIN"]
+      },
+      "view": {
+        "id": "notification:view",
+        "name": "View Notification",
+        "description": "View notification history and templates",
+        "resource": "notification",
+        "action": "read",
+        "conditions": {
+          "notification_access": "based_on_role"
+        },
+        "required_roles": ["ACCO_MANAGER", "ACCO_STAFF", "ACCO_ADMIN_STAFF", "FINANCE_MANAGER", "FINANCE_STAFF", "PROGRAM_MANAGER", "PROGRAM_STAFF", "PROVIDER_MANAGER", "PROVIDER_STAFF", "PROVIDER_ADMIN", "WORKFLOW_ADMIN", "DOCUMENT_MANAGER", "SYSTEM_ADMIN"]
+      },
+      "configure": {
+        "id": "notification:configure",
+        "name": "Configure Notification",
+        "description": "Configure notification templates and settings",
+        "resource": "notification",
+        "action": "update",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"]
+        },
+        "required_roles": ["WORKFLOW_ADMIN", "SYSTEM_ADMIN"]
+      }
+    },
+    "system": {
+      "admin": {
+        "id": "system:admin",
+        "name": "System Administration",
+        "description": "System administration functions",
+        "resource": "system",
+        "action": "admin",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"]
+        },
+        "required_roles": ["ACCO_ADMIN_STAFF", "SYSTEM_ADMIN"]
+      },
+      "configure": {
+        "id": "system:configure",
+        "name": "System Configuration",
+        "description": "Configure system settings and parameters",
+        "resource": "system",
+        "action": "update",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"]
+        },
+        "required_roles": ["SYSTEM_ADMIN"]
+      },
+      "monitor": {
+        "id": "system:monitor",
+        "name": "System Monitoring",
+        "description": "Monitor system performance and health",
+        "resource": "system",
+        "action": "read",
+        "conditions": {
+          "organization_type": ["AGENCY", "CITY"]
+        },
+        "required_roles": ["WORKFLOW_ADMIN", "SYSTEM_ADMIN"]
+      }
+    }
+  },
+  "permission_groups": {
+    "contract_management": {
+      "name": "Contract Management",
+      "description": "Core contract management permissions",
+      "permissions": [
+        "contract:create",
+        "contract:view",
+        "contract:edit",
+        "contract:delete",
+        "contract:approve",
+        "contract:change_status",
+        "contract:create_amendment",
+        "contract:export",
+        "contract:view_financials"
+      ]
+    },
+    "amendment_management": {
+      "name": "Amendment Management",
+      "description": "Contract amendment permissions",
+      "permissions": [
+        "amendment:create",
+        "amendment:view",
+        "amendment:edit",
+        "amendment:approve",
+        "amendment:delete"
+      ]
+    },
+    "organization_management": {
+      "name": "Organization Management",
+      "description": "Organization management permissions",
+      "permissions": [
+        "organization:view",
+        "organization:edit"
+      ]
+    },
+    "user_management": {
+      "name": "User Management",
+      "description": "User management permissions",
+      "permissions": [
+        "user:view",
+        "user:edit"
+      ]
+    },
+    "workflow_management": {
+      "name": "Workflow Management",
+      "description": "FileNet Process Engine workflow permissions",
+      "permissions": [
+        "workflow:launch",
+        "workflow:view",
+        "workflow:assign",
+        "workflow:complete",
+        "workflow:terminate",
+        "workflow:configure",
+        "workflow:monitor",
+        "workflow:escalate"
+      ]
+    },
+    "document_management": {
+      "name": "Document Management",
+      "description": "Document management and FileNet P8 replacement permissions",
+      "permissions": [
+        "document:upload",
+        "document:view",
+        "document:download",
+        "document:edit",
+        "document:delete",
+        "document:approve",
+        "document:categorize",
+        "document:version",
+        "document:archive",
+        "document:restore",
+        "document:export"
+      ]
+    },
+    "notification_management": {
+      "name": "Notification Management",
+      "description": "Notification and communication permissions",
+      "permissions": [
+        "notification:send",
+        "notification:view",
+        "notification:configure"
+      ]
+    },
+    "system_administration": {
+      "name": "System Administration",
+      "description": "System administration permissions",
+      "permissions": [
+        "system:admin",
+        "system:configure",
+        "system:monitor"
+      ]
+    }
+  },
+  "access_control": {
+    "organization_based": {
+      "AGENCY": {
+        "can_access": ["AGENCY", "CITY"],
+        "can_manage": ["AGENCY"],
+        "can_view_financials": ["AGENCY", "CITY"]
+      },
+      "PROVIDER": {
+        "can_access": ["PROVIDER"],
+        "can_manage": ["PROVIDER"],
+        "can_view_financials": ["PROVIDER"]
+      },
+      "CITY": {
+        "can_access": ["AGENCY", "PROVIDER", "CITY"],
+        "can_manage": ["AGENCY", "PROVIDER", "CITY"],
+        "can_view_financials": ["AGENCY", "PROVIDER", "CITY"]
+      }
+    },
+    "role_based": {
+      "ACCO_MANAGER": {
+        "contract_access": "all",
+        "organization_access": "all",
+        "financial_access": "all",
+        "workflow_permissions": "full"
+      },
+      "ACCO_STAFF": {
+        "contract_access": "agency_only",
+        "organization_access": "agency_only",
+        "financial_access": "agency_only",
+        "workflow_permissions": "limited"
+      },
+      "FINANCE_MANAGER": {
+        "contract_access": "all",
+        "organization_access": "all",
+        "financial_access": "all",
+        "workflow_permissions": "approval_only"
+      },
+      "PROGRAM_MANAGER": {
+        "contract_access": "program_only",
+        "organization_access": "agency_only",
+        "financial_access": "program_only",
+        "workflow_permissions": "view_only"
+      },
+      "PROVIDER_MANAGER": {
+        "contract_access": "provider_only",
+        "organization_access": "provider_only",
+        "financial_access": "provider_only",
+        "workflow_permissions": "amendment_only"
+      }
+    }
+  },
+  "permission_conditions": {
+    "contract_ownership": {
+      "agency_or_created_by": {
+        "description": "User must be from the same agency or be the creator",
+        "expression": "{{user.organization_id}} === {{contract.agency_id}} || {{user.id}} === {{contract.created_by}}"
+      },
+      "provider_only": {
+        "description": "User must be from the provider organization",
+        "expression": "{{user.organization_id}} === {{contract.provider_id}}"
+      }
+    },
+    "amendment_ownership": {
+      "creator_or_agency": {
+        "description": "User must be the creator or from the agency",
+        "expression": "{{user.id}} === {{amendment.created_by}} || {{user.organization_id}} === {{contract.agency_id}}"
+      }
+    },
+    "organization_ownership": {
+      "own_organization": {
+        "description": "User must be from the same organization",
+        "expression": "{{user.organization_id}} === {{organization.id}}"
+      }
+    },
+    "user_ownership": {
+      "own_organization": {
+        "description": "User must be from the same organization",
+        "expression": "{{user.organization_id}} === {{target_user.organization_id}}"
+      }
+    }
+  },
+  "permission_validation": {
+    "contract_access": {
+      "all": {
+        "description": "Access to all contracts",
+        "validation": "true"
+      },
+      "agency_only": {
+        "description": "Access only to contracts from user's agency",
+        "validation": "{{user.organization_id}} === {{contract.agency_id}}"
+      },
+      "provider_only": {
+        "description": "Access only to contracts where user is the provider",
+        "validation": "{{user.organization_id}} === {{contract.provider_id}}"
+      },
+      "program_only": {
+        "description": "Access only to contracts in user's program",
+        "validation": "{{user.organization_id}} === {{contract.agency_id}} && {{user.program_id}} === {{contract.program_id}}"
+      }
+    },
+    "financial_access": {
+      "all": {
+        "description": "Access to all financial information",
+        "validation": "true"
+      },
+      "agency_only": {
+        "description": "Access only to financial information for user's agency",
+        "validation": "{{user.organization_id}} === {{contract.agency_id}}"
+      },
+      "provider_only": {
+        "description": "Access only to financial information for user's provider organization",
+        "validation": "{{user.organization_id}} === {{contract.provider_id}}"
+      },
+      "program_only": {
+        "description": "Access only to financial information for user's program",
+        "validation": "{{user.organization_id}} === {{contract.agency_id}} && {{user.program_id}} === {{contract.program_id}}"
+      },
+      "none": {
+        "description": "No access to financial information",
+        "validation": "false"
+      }
+    }
+  }
+}

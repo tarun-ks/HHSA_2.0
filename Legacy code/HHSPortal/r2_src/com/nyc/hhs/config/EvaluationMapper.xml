@@ -1,0 +1,3137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.EvaluationMapper">
+	<resultMap type="com.nyc.hhs.model.EvaluationBean" id="evaluationResults">
+		<result property="proposalTitle" column="PROPOSAL_TITLE" />
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<result property="proposalId" column="PROPOSAL_ID" />
+		<result property="organizationName" column="ORGANIZATION_LEGAL_NAME" />
+		<result property="evaluationScore" column="EVALUATION_SCORE" />
+		<result property="proposalStatus" column="STATUS" />
+		<result property="awardAmount" column="AWARD_AMOUNT" />
+		<result property="scoreCriteria" column="SCORE_CRITERIA" />
+		<result property="maximumScore" column="MAXIMUM_SCORE" />
+		<result property="score" column="SCORE" />
+		<result property="scoreSeqNum" column="SCORE_SEQ_NUM" />
+		<result property="evalutionsInProgress" column="Evaluation_InProgress" />
+		<result property="evalutionsCompleted" column="Evalution_Completed" />
+		<result property="proposalStatusId" column="PROPOSAL_STATUS_ID" />
+		<result property="userRole" column="userRole" />
+		<result property="sendEvaluationStatus" column="SEND_EVLUATION_STATUS" />
+		<result property="submissionCloseDate" column="SUBMISSION_CLOSE_DATE" />
+		<result property="updProposalDueDate" column="UPD_PROPOSAL_DUE_DATE" />
+		<result property="evaluationStatusId" column="EVALUATION_STATUS_ID" />
+		<result property="rowNum" column="rn" />
+		<result property="sentEvalStatusNonResponsive" column="EVALUATION_SENT" />
+		<result property="generalComments" column="INTERNAL_COMMENT" />
+		<result property="comments" column="COMMENTS" />
+		<result property="isOpenEndedRFP" column="IS_OPEN_ENDED_RFP" />
+		<result property="evaluationPoolMappingId" column="EVALUATION_POOL_MAPPING_ID" />
+		<result property="evalPoolMappingStatus" column="EVAL_POOL_MAPPING_STATUS" />
+		<!-- R5: Start -->
+		<result property="scoreChangeType" column="SCORE_CHANGE_TYPE" />
+		<result property="commentChangeFlag" column="COMMENT_CHANGE_FLAG" />
+		<result property="generalCommentChangeFlag" column="GEN_COMMENT_CHANGE_FLAG" />
+		<result property="generalScoreChangeType" column="GEN_SCORE_CHANGE_TYPE" />
+		<result property="versionNumber" column="VERSION_NUMBER" />
+		<!-- R5: Ends -->
+	</resultMap>
+
+	<resultMap type="com.nyc.hhs.model.ProposalFilterBean" id="proposalcomments">
+		<result property="userComment" column="provider_comment" />
+		<result property="auditDate" column="audit_date" />
+		<result property="agencyName" column="AGENCY_NAME" />
+	</resultMap>
+
+    <!-- Query modified as a part of release 3.3.0 defect 6463 -->
+    <!-- Updated in R5 -->
+	<select id="fetchEvaluationResultsSelections" parameterType="com.nyc.hhs.model.EvaluationFilterBean"
+		resultMap="evaluationResultsAndSelection">
+		select * from (
+                           select prop.*, decode(app.organization_id, null, 'no', 'yes') as appStatus from 
+           (
+                           select contract_type_id,  decode(negotiation_status,null,'no','yes') is_negotiation, 
+                           decode(negotiation_status, 176, 'yes',179, 'yes', 175, 'yes', null, 'no', 'no') Negotiation_Pending, proposal_id, PROPOSAL_TITLE, ORGANIZATION_LEGAL_NAME, organization_id, 
+                           evaluation_score, status, PROPOSAL_STATUS_ID,rn,userRole, procurementId, evaluationPoolMappingId, modified_flag,
+                           <if test="awardReviewStatus != null">
+                           #{awardReviewStatus} as awardReviewStatus,
+                           </if>
+                             <if test="awardReviewStatusId != null">
+                           #{awardReviewStatusId} as awardReviewStatusId,
+                           </if> 
+                           award_amount
+                          from 
+                           (select ct.contract_type_id, results.negotiation_status,results.proposal_id,config.PROPOSAL_TITLE,org.ORGANIZATION_LEGAL_NAME ,
+                          results.evaluation_score, org.organization_id,
+                           status.status,
+                           decode(status, 'Selected', results.award_amount, -1) as award_amount,
+                           config.PROC_REVIEW_STATUS_ID as PROPOSAL_STATUS_ID,rownum rn,
+                           #{userRole} as userRole,#{procurementId} as procurementId,#{evaluationPoolMappingId} as evaluationPoolMappingId,
+                           
+                             <if test="awardReviewStatus != null">
+                           #{awardReviewStatus} as awardReviewStatus,
+                           </if>
+                             <if test="awardReviewStatusId != null">
+                           #{awardReviewStatusId} as awardReviewStatusId,
+                           </if>
+                           results.modified_flag
+           from EVALUATION_RESULTS results,proposal_config config,
+           organization org,status_master_r2_r3 status, contract ct 
+         
+           where 
+           config.proposal_id=results.proposal_id(+) and ct.EVALUATION_POOL_MAPPING_ID(+)=#{evaluationPoolMappingId} and
+           ct.status_id(+) != 69 and
+           org.organization_id = config.ORGANIZATION_ID and config.organization_id=ct.ORGANIZATION_ID(+) and
+           status.status_id = config.PROC_REVIEW_STATUS_ID
+           and results.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId} 
+           <if test="proposalTitle != null">
+                                                           and  lower(config.PROPOSAL_TITLE) LIKE
+                                                           lower(#{proposalTitle}) 
+                                           </if> 
+                                           <if test="organizationName != null">
+                                                           and  lower(org.ORGANIZATION_LEGAL_NAME) LIKE
+                                                           lower(#{organizationName}) 
+                                           </if>
+           and 
+           results.PROPOSAL_ID in (select pc.PROPOSAL_ID from proposal_config pc, evaluation_pool_mapping epm where pc.procurement_id = #{procurementId,jdbcType=VARCHAR}
+                                                                                           and pc.evaluation_group_id = epm.evaluation_group_id
+                                                                                           and pc.competition_pool_id = epm.competition_pool_id
+                                                                                           and epm.evaluation_pool_mapping_id =  #{evaluationPoolMappingId,jdbcType=VARCHAR} 
+                                                                                                           <if test="proposalStatusList != null">
+                                                                                                                           and pc.PROC_REVIEW_STATUS_ID in
+                                                                                           <foreach item="items" index="index" collection="proposalStatusList"
+                                                                                                           open="(" separator="," close=")">
+                                                                                                           #{items}
+                                                                                           </foreach> 
+                                                                           </if> 
+                                                                            )
+         )
+                                <if test="scoreRangeFrom != null or awardAmountFrom != null">
+                 where
+                 </if>
+                                <if test="scoreRangeFrom != null">
+                 evaluation_score between #{scoreRangeFrom} and #{scoreRangeTo}
+                 </if>
+                 <if test="scoreRangeFrom != null and awardAmountFrom != null">
+                  and 
+                 </if>
+                  <if test="awardAmountFrom != null">
+                  award_amount between #{awardAmountFrom} and #{awardAmountTo}
+                 </if>
+         ) prop, 
+                                 
+                                (select distinct organization_id from contract 
+                                where procurement_id = #{procurementId,jdbcType=VARCHAR} 
+                                and evaluation_pool_mapping_id = #{evaluationPoolMappingId,jdbcType=VARCHAR} 
+                                and status_id not in(58,69,165) and contract_type_id != 6) app 
+                where 
+                prop.organization_id = app.organization_id(+) 
+                order by
+         <choose>
+                                                <when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+                                                <otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+                                </choose>
+                                <if test="secondSort != null">
+                                                <choose>
+                                                                <when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+                                                                <otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+                                                </choose>
+                                </if>
+                                )
+         where rn BETWEEN #{startNode}  AND  #{endNode}
+	</select>
+
+	<resultMap type="com.nyc.hhs.model.EvaluationBean" id="evaluationResultsAndSelection">
+                <result property="proposalTitle" column="PROPOSAL_TITLE" />
+                <result property="proposalId" column="PROPOSAL_ID" />
+                <result property="organizationName" column="ORGANIZATION_LEGAL_NAME" />
+                <result property="evaluationScore" column="EVALUATION_SCORE" />
+                <result property="proposalStatus" column="STATUS" />
+                <result property="awardAmount" column="AWARD_AMOUNT" />
+                <result property="proposalStatusId" column="PROPOSAL_STATUS_ID" />
+                <result property="userRole" column="userRole" />
+                <result property="procurementId" column="procurementId" />
+                <result property="awardReviewStatus" column="awardReviewStatus" />	
+                <result property="awardReviewStatusId" column="awardReviewStatusId" />
+                <result property="modifiedFlag" column="modified_flag" />
+                <result property="rowNum" column="rn" />
+                <result property="approvedStatus" column="appStatus" />
+                <result property="isPendingNegotiationFlag" column="negotiation_pending" />
+                <result property="isNegotiationFlag" column="is_negotiation" />
+                <result property="statusId" column="contract_type_id" />
+        </resultMap>
+	<select id="fetchEvaluationResultsCount" parameterType="com.nyc.hhs.model.EvaluationFilterBean"
+		resultType="int">
+		select count(*)
+                from EVALUATION_RESULTS results,proposal_config config,
+                organization org,status_master_r2_r3 status
+                where 
+                config.proposal_id=results.proposal_id(+) and 
+                org.organization_id = config.ORGANIZATION_ID and 
+                status.status_id = config.PROPOSAL_STATUS_ID 
+                and results.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId} and
+                results.PROPOSAL_ID in (select PROPOSAL_ID from proposal_config where procurement_id = #{procurementId,jdbcType=VARCHAR}
+                 <if test="proposalStatusList != null">
+					and PROC_REVIEW_STATUS_ID in
+				<foreach item="items" index="index" collection="proposalStatusList"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach> 
+			</if> 
+                )
+                  <if test="scoreRangeFrom != null">
+                 and results.evaluation_score between #{scoreRangeFrom} and #{scoreRangeTo}
+                 </if>
+                  <if test="awardAmountFrom != null">
+                  and results.award_amount between #{awardAmountFrom} and #{awardAmountTo}
+                 </if>
+                <if test="proposalTitle != null">
+				and  lower(config.PROPOSAL_TITLE) LIKE
+				lower(#{proposalTitle}) 
+			</if> 
+			<if test="organizationName != null">
+				and  lower(org.ORGANIZATION_LEGAL_NAME) LIKE
+				lower(#{organizationName}) 
+			</if>
+	</select>
+
+	<resultMap id="proposalDetails" type="com.nyc.hhs.model.EvaluationBean">
+		<result property="organizationName" column="ORGANIZATION_LEGAL_NAME" />
+		<result property="proposalTitle" column="PROPOSAL_TITLE" />
+		<result property="score" column="EVALUATION_SCORE" />
+		<result property="awardAmount" column="AWARD_AMOUNT" />
+		<result property="comments" column="INTERNAL_COMMENT" />
+	</resultMap>
+
+	<select id="fetchReqProposalDetails" parameterType="java.lang.String"
+		resultMap="proposalDetails">
+		SELECT ORGANIZATION_LEGAL_NAME,
+	    PROPOSAL_TITLE,
+	    EVALUATION_SCORE,
+	    AWARD_AMOUNT,
+	    INTERNAL_COMMENT
+		FROM
+	    (SELECT org.ORGANIZATION_LEGAL_NAME,
+	    pc.PROPOSAL_TITLE,
+	    er.EVALUATION_SCORE,
+	    er.AWARD_AMOUNT,
+	    uc.INTERNAL_COMMENT,
+	    uc.MODIFIED_DATE
+	    FROM ORGANIZATION org,
+	    PROPOSAL_CONFIG pc,
+	    EVALUATION_RESULTS er,
+	    (SELECT INTERNAL_COMMENT,
+	    ENTITY_ID,
+	    MODIFIED_DATE
+	    FROM USER_COMMENT
+	    WHERE ENTITY_TYPE='Selection Comments'
+	    ) uc
+	    WHERE pc.PROPOSAL_ID   = #{asProposalId,jdbcType=VARCHAR}
+	    AND pc.PROPOSAL_ID     = er.PROPOSAL_ID
+	    AND pc.ORGANIZATION_ID = org.ORGANIZATION_ID
+	    AND pc.PROPOSAL_ID     = uc.ENTITY_ID(+)
+	    ORDER BY uc.MODIFIED_DATE DESC
+	    )
+		WHERE ROWNUM = 1
+   		
+	</select>
+
+	<update id="updateSelectedProposalAwardAmount" parameterType="com.nyc.hhs.model.EvaluationBean">
+    	UPDATE EVALUATION_RESULTS er
+    	SET er.AWARD_AMOUNT = #{awardAmount,jdbcType=VARCHAR}
+    	WHERE er.PROPOSAL_ID = #{proposalId,jdbcType=VARCHAR}
+	</update>
+	
+	<update id="updateSelectedProposalComments" parameterType="com.nyc.hhs.model.EvaluationBean">
+		UPDATE USER_COMMENT uc
+	    SET uc.INTERNAL_COMMENT = #{comments, jdbcType=VARCHAR},
+	    MODIFIED_DATE = sysdate, MODIFIED_BY_USERID = #{modifiedByUserId}
+	    WHERE uc.ENTITY_TYPE = 'Selection Comments'
+	    AND uc.ENTITY_ID = #{proposalId,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- Below Query modified for enhancement 3.1.0 :6204 -->
+	<update id="updateProposalReviewStatus" parameterType="map">
+		UPDATE PROPOSAL_CONFIG pc
+    	SET pc.PROC_REVIEW_STATUS_ID = #{proposalStatusId,jdbcType=VARCHAR}
+    		,pc.LAST_UPDATE_DATE = systimestamp
+		WHERE pc.PROPOSAL_ID = #{proposalId,jdbcType=VARCHAR}
+	</update>
+	
+	<update id="updateNotSelectedProposalAwardAmount" parameterType="com.nyc.hhs.model.EvaluationBean">
+		UPDATE EVALUATION_RESULTS er
+    	SET er.AWARD_AMOUNT = '0'
+    	WHERE er.PROPOSAL_ID = #{proposalId,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- Below Query modified for enhancement 3.1.0 :6204 -->
+	<update id="updateNotSelectedProposalStatus" parameterType="com.nyc.hhs.model.EvaluationBean">
+		UPDATE PROPOSAL_CONFIG pc
+    	SET pc.PROPOSAL_STATUS_ID= #{proposalStatusId,jdbcType=VARCHAR}, PC.LAST_UPDATE_DATE = systimestamp
+		WHERE pc.PROPOSAL_ID = #{proposalId,jdbcType=VARCHAR}
+	</update>
+	
+	<select id="fetchProposalCount" parameterType="com.nyc.hhs.model.EvaluationBean" resultType="Integer">
+	select count(1) from (
+		select rownum as rn, ORGANIZATION_LEGAL_NAME,PROPOSAL_TITLE,proposal_id,proposal_status_id,status,userRole,SEND_EVLUATION_STATUS,
+		    procurement_id,Evalution_Completed,Evaluation_InProgress, SUBMISSION_CLOSE_DATE, EVALUATION_SENT from (
+		select distinct a.ORGANIZATION_LEGAL_NAME,a.PROPOSAL_TITLE,a.proposal_id,a.proposal_status_id,st.status,
+    a.userRole,a.SEND_EVLUATION_STATUS,
+		    a.procurement_id,
+		    decode(a.proposal_status_id, 25, -1, a.Evalution_Completed) as Evalution_Completed, decode(a.proposal_status_id, 25, -1, a.Evaluation_InProgress) as Evaluation_InProgress, 
+		    a.SUBMISSION_CLOSE_DATE, a.EVALUATION_SENT from 
+        (select org.ORGANIZATION_LEGAL_NAME, pc.PROPOSAL_TITLE, 
+                pc.proposal_id, decode(pc.proposal_status_id, 21, 20, 22, 20, 23, 20, 24, 20, pc.proposal_status_id) as proposal_status_id,
+                #{userRole}  as userRole ,pc.procurement_id , eg.SUBMISSION_CLOSE_DATE, epm.EVALUATION_SENT, 
+                decode
+                ((select trunc((count(*)+2)/3) from 
+                evaluation_status evr where evr.proposal_id = pc.proposal_id), 0, 'NO', 1, 'YES','YES')
+                as SEND_EVLUATION_STATUS,
+        (select count(evr.status_id) from evaluation_status evr where evr.proposal_id = pc.proposal_id and evr.status_id ='104'
+         and pc.proposal_status_id != 25) as Evalution_Completed, 
+        (select count(evr.status_id) from evaluation_status evr where evr.proposal_id = pc.proposal_id 
+              and evr.status_id in('41', '42')  and pc.proposal_status_id != 25) as Evaluation_InProgress,
+        er.EVALUATION_STATUS_ID from proposal_config pc, ORGANIZATION org , 
+        evaluation_status er, evaluation_pool_mapping epm, evaluation_group eg
+        where pc.procurement_id =#{procurementId,jdbcType=VARCHAR} and org.organization_id = pc.organization_id and
+         pc.proposal_id=er.proposal_id(+) 
+         and epm.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+         and pc.evaluation_group_id = epm.evaluation_group_id 
+      	 and eg.evaluation_group_id = epm.evaluation_group_id 
+         and epm.COMPETITION_POOL_id = pc.COMPETITION_POOL_id
+         and pc.PROPOSAL_STATUS_ID != 17
+         	<if test="proposalTitle != null">
+			and  lower(pc.PROPOSAL_TITLE) LIKE
+			lower(#{proposalTitle}) 
+		</if>
+		<if test="organizationName != null">
+			and  lower(org.ORGANIZATION_LEGAL_NAME) LIKE  
+			lower(#{organizationName}) 
+		</if>
+		<if test="proposalStatusList != null">
+			and pc.PROPOSAL_STATUS_ID in
+			<foreach item="items" index="index" collection="proposalStatusList"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach> 
+		</if>
+		
+		) a, status_master_r2_r3 st
+         where 
+         st.status_id = a.proposal_status_id
+		) 
+	) 
+		<if test="evaluationStatusList != null">
+			 where (
+			<if test="notStartedStatus != null">
+			 Evalution_Completed &lt;= 0 
+			</if>
+			<if test="notStartedStatus != null and inProgressStatus != null">
+			  or
+			</if>
+			<if test="inProgressStatus != null">
+			(Evalution_Completed &gt; 0 and Evaluation_InProgress &gt; 0) 
+			</if>
+			<if test="(notStartedStatus != null or inProgressStatus != null) and completedStatus != null">
+			  or
+			</if>
+			<if test="completedStatus != null">
+			(Evaluation_InProgress &lt;= 0 and Evalution_Completed &gt; 0) 
+			</if>
+			)  
+		</if>
+	</select>
+	<!-- Start || Changes done for enhancement 6577 for Release 3.10.0 -->
+	<select id="fetchEvaluationDetails" parameterType="com.nyc.hhs.model.EvaluationBean" resultMap="evaluationResults">
+		select rn, ORGANIZATION_LEGAL_NAME,PROPOSAL_TITLE,proposal_id,proposal_status_id,status,userRole,SEND_EVLUATION_STATUS,
+		    procurement_id,Evalution_Completed,Evaluation_InProgress, SUBMISSION_CLOSE_DATE, EVALUATION_SENT, EVALUATION_POOL_MAPPING_ID, EVAL_POOL_MAPPING_STATUS from (
+		select rownum as rn, ORGANIZATION_LEGAL_NAME,PROPOSAL_TITLE,proposal_id,proposal_status_id,status,userRole,SEND_EVLUATION_STATUS,
+		    procurement_id,Evalution_Completed,Evaluation_InProgress, SUBMISSION_CLOSE_DATE, EVALUATION_SENT, EVALUATION_POOL_MAPPING_ID, EVAL_POOL_MAPPING_STATUS from (
+		select distinct a.ORGANIZATION_LEGAL_NAME,a.PROPOSAL_TITLE,a.proposal_id,a.proposal_status_id,st.status,
+    a.userRole,a.SEND_EVLUATION_STATUS,
+		    a.procurement_id,
+		    decode(a.proposal_status_id, 25, -1, a.Evalution_Completed) as Evalution_Completed, decode(a.proposal_status_id, 25, -1, a.Evaluation_InProgress) as Evaluation_InProgress, 
+		    a.SUBMISSION_CLOSE_DATE, a.EVALUATION_SENT, a.EVALUATION_POOL_MAPPING_ID, a.EVAL_POOL_MAPPING_STATUS from 
+        (select org.ORGANIZATION_LEGAL_NAME, pc.PROPOSAL_TITLE, 
+                pc.proposal_id, decode(pc.proposal_status_id, 21, 20, 22, 20, 23, 20, 24, 20, pc.proposal_status_id) as proposal_status_id,
+                #{userRole}  as userRole ,pc.procurement_id , eg.SUBMISSION_CLOSE_DATE, epm.EVALUATION_SENT, 
+                decode
+                ((select trunc((count(*)+2)/3) from 
+                evaluation_status evr where evr.proposal_id = pc.proposal_id), 0, 'NO', 1, 'YES','YES')
+                as SEND_EVLUATION_STATUS,
+        (select count(evr.status_id) from evaluation_status evr where evr.proposal_id = pc.proposal_id and evr.status_id ='104'
+         and pc.proposal_status_id != 25 and pc.proposal_status_id != 166) as Evalution_Completed, 
+        (select count(evr.status_id) from evaluation_status evr where evr.proposal_id = pc.proposal_id 
+              and evr.status_id in('41', '42')  and pc.proposal_status_id != 25 and pc.proposal_status_id != 166) as Evaluation_InProgress,
+        er.EVALUATION_STATUS_ID, epm.EVALUATION_POOL_MAPPING_ID, epm.STATUS_ID as EVAL_POOL_MAPPING_STATUS
+        from proposal_config pc, ORGANIZATION org , 
+        evaluation_status er, evaluation_pool_mapping epm, evaluation_group eg
+        where 
+        pc.procurement_id =#{procurementId,jdbcType=VARCHAR}
+        and epm.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		and pc.evaluation_group_id = epm.evaluation_group_id 
+    	and eg.evaluation_group_id = epm.evaluation_group_id 	
+		and epm.COMPETITION_POOL_id = pc.COMPETITION_POOL_id 
+        and org.organization_id = pc.organization_id 
+        and pc.proposal_id=er.proposal_id(+) 
+        and pc.PROPOSAL_STATUS_ID != 17
+         	<if test="proposalTitle != null">
+			and  lower(pc.PROPOSAL_TITLE) LIKE
+			lower(#{proposalTitle}) 
+		</if>
+		<if test="organizationName != null">
+			and  lower(org.ORGANIZATION_LEGAL_NAME) LIKE  
+			lower(#{organizationName}) 
+		</if>
+		<if test="proposalStatusList != null">
+			and pc.PROPOSAL_STATUS_ID in
+			<foreach item="items" index="index" collection="proposalStatusList"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach> 
+		</if>
+		) a, status_master_r2_r3 st
+         where 
+         st.status_id = a.proposal_status_id
+		) 
+		order by <choose>
+			<when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+			<otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+		</choose>
+		<if test="secondSort != null">
+			<choose>
+				<when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+				<otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+			</choose>
+		</if>) 
+		<if test="evaluationStatusList != null or paginationEnable != null">
+		where 
+		</if>
+		<if test="evaluationStatusList != null">
+			 (
+			<if test="notStartedStatus != null">
+			 Evalution_Completed &lt;= 0 
+			</if>
+			<if test="notStartedStatus != null and inProgressStatus != null">
+			  or
+			</if>
+			<if test="inProgressStatus != null">
+			(Evalution_Completed &gt; 0 and Evaluation_InProgress &gt; 0) 
+			</if>
+			<if test="(notStartedStatus != null or inProgressStatus != null) and completedStatus != null">
+			  or
+			</if>
+			<if test="completedStatus != null">
+			 (Evaluation_InProgress &lt;= 0 and Evalution_Completed &gt; 0) 
+			</if>
+			) and 
+		</if>
+		<if test="paginationEnable != null">
+		 	rn BETWEEN #{startNode}  AND  #{endNode}
+		</if>
+	</select>
+	<!-- End || Changes done for enhancement 6577 for Release 3.10.0 -->
+	
+	<select id="fetchEvaluationCriteria" parameterType="java.lang.String">
+	</select>
+
+	<select id="fetchEvaluationComments" parameterType="java.lang.String">
+	</select>
+	
+	<!-- R5 Starts : updated -->
+	<select id="fetchAccoComments" parameterType="java.util.Map"
+		resultType="java.util.Map">
+        SELECT ACCO_COMMENTS as INTERNAL_COMMENT 
+		FROM EVALUATION_VERSION_ARCHIVE 
+		WHERE PROPOSAL_ID = #{proposalId} AND CANCEL_FLAG = 0
+		order by version_number
+	</select>
+	<!-- R5 Ends : updated -->
+	
+	<select id="fetchAwardReviewComments" parameterType="java.lang.String"
+		resultType="java.util.Map">
+		SELECT TO_CHAR(MODIFIED_DATE,'MM/DD/yyyy') AS MODIFIED_DATE,
+		INTERNAL_COMMENT
+		FROM USER_COMMENT
+		WHERE ENTITY_TYPE = 'Award'
+		AND ENTITY_ID = #{evaluationPoolMappingId}
+		AND ROWNUM = 1
+		ORDER BY MODIFIED_DATE DESC
+	</select>
+	
+	<!--<select id="fetchOrganizationNameEvalResults" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		SELECT ORG.ORGANIZATION_LEGAL_NAME FROM EVALUATION_RESULTS
+		EVAL,
+		ORGANIZATION
+		ORG WHERE EVAL.ORGANIZATION_ID = ORG.ORGANIZATION_ID
+		AND EVAL.PROCUREMENT_ID =
+		#{procurementId}
+	</select>
+
+	--><select id="fetchProcurementValue" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT ESTIMATED_PROCUREMENT_VALUE FROM PROCUREMENT where PROCUREMENT_ID =#{asProcurementId,jdbcType=VARCHAR} 
+	</select>
+
+	<select id="fetchAwardAmount" parameterType="java.util.Map" resultType="map">
+		SELECT SUM(ER.AWARD_AMOUNT) AS awardAmt ,
+		COUNT(distinct(pc.ORGANIZATION_ID)) AS awardCount
+		FROM EVALUATION_RESULTS ER,
+		proposal_config PC, evaluation_pool_mapping epm
+		WHERE ER.proposal_id = PC.proposal_id
+	  	and epm.evaluation_pool_mapping_id = er.evaluation_pool_mapping_id
+	  	and epm.evaluation_group_id = pc.evaluation_group_id
+	  	and epm.competition_pool_id = pc.competition_pool_id
+	 	AND epm.evaluation_pool_mapping_id = #{evaluationPoolMappingId}
+		AND PC.PROC_REVIEW_STATUS_ID = #{STATUS_ID}
+	</select>
+
+	<select id="fetchFinalizeProcurementCount" parameterType="java.lang.String" resultType="int">
+		SELECT COUNT(DISTINCT(pc.organization_id))
+		FROM proposal_config PC, evaluation_pool_mapping epm
+		WHERE epm.evaluation_group_id = pc.evaluation_group_id
+        and epm.competition_pool_id = pc.competition_pool_id
+        AND epm.evaluation_pool_mapping_id = #{evaluationPoolMappingId}
+	    AND PC.PROC_REVIEW_STATUS_ID = 23
+	</select>
+	
+	<update id="updateProcurementStatus" parameterType="java.util.Map">
+		UPDATE
+		PROCUREMENT
+		set STATUS_ID = #{asStatusId}
+		WHERE
+		PROCUREMENT_ID=#{asProcurementId,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- Below Query modified for enhancement 3.1.0 :6204 -->
+	<update id="updateproposalstatusnonresponsive" parameterType="java.util.Map">
+		update proposal_config set proposal_status_id= #{proposalStatusId}, PROC_REVIEW_STATUS_ID= #{proposalStatusId},
+		LAST_UPDATE_DATE = systimestamp where PROPOSAL_ID = #{asProposalId}
+	</update>
+
+  	<!-- Start || Changes made for enhancement 6574 for Release 3.10.0 -->
+    <select id="fetchUpdatedContracts" parameterType="java.util.Map" resultType="string">
+		select distinct con.contract_id from contract con, evaluation_results eval, proposal_config pc where 
+		con.EVALUATION_POOL_MAPPING_ID = eval.EVALUATION_POOL_MAPPING_ID
+		and con.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		and eval.modified_flag='1' and eval.proposal_id = pc.proposal_id 
+		and pc.organization_id = con.organization_id
+	</select>
+	<!-- End || Changes made for enhancement 6574 for Release 3.10.0 --> 
+
+  	<!-- Start || Changes made for enhancement 6577 for Release 3.10.0 -->
+    <select id="fetchContractsForCancellingTasks" parameterType="hashmap" resultType="string">
+		select distinct contract_id from contract where 
+		EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId} and STATUS_ID not in (62,67,68)
+	</select>
+	<select id="fetchRegOrClosedContractsCount" parameterType="hashmap" resultType="int">
+		select count(contract_id) from contract where 
+		EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId} and STATUS_ID in (62,68)
+	</select>
+	<!-- End || Changes made for enhancement 6577 for Release 3.10.0 --> 
+	
+	<update id="updateAwardReviewStatus" parameterType="java.util.Map">
+		UPDATE
+		AWARD
+		set AWARD_REVIEW_STATUS_ID = #{awardStatusId}
+		WHERE
+		PROCUREMENT_ID=#{asProcurementId,jdbcType=VARCHAR}
+		and evaluation_pool_mapping_id = #{evaluationPoolMappingId}
+	</update>
+	
+	<update id="insertAwardReviewStatus" parameterType="java.util.Map">
+		insert into AWARD(AWARD_ID, PROCUREMENT_ID,  
+		AWARD_REVIEW_STATUS_ID, CREATED_DATE, CREATED_BY_USERID, 
+		MODIFIED_DATE, MODIFIED_BY_USERID, evaluation_pool_mapping_id)
+		values (SEQ_AWARD_ID.NEXTVAL, #{asProcurementId,jdbcType=VARCHAR}, #{awardStatusId,jdbcType=VARCHAR},systimestamp, 
+		#{userId,jdbcType=VARCHAR}, systimestamp, #{userId,jdbcType=VARCHAR}, #{evaluationPoolMappingId})
+	</update>
+
+	<!--<update id="updateProposalStatus" parameterType="java.util.Map">
+		UPDATE
+		PROPOSAL_CONFIGURATION SET STATUS_ID=#{statusId} WHERE
+		PROCUREMENT_ID=#{asProcurementId}
+	</update>	
+	--><update id="updateRfpDocumentTable" parameterType="Map">
+		UPDATE
+		RFP_DOCUMENT SET
+		DOCUMENT_TITLE=#{DocumentTitle},MODIFIED_DATE=#{modifiedDate},MODIFIED_BY_USERID=#{modifiedBy}
+		WHERE PROCUREMENT_ID=#{procurementId} AND
+		DOCUMENT_IDENTIFIER_ID=#{documentId}
+	</update>
+	
+	<select id="fetchReviewAwardcomment">
+
+	</select>
+
+	<resultMap type="com.nyc.hhs.model.Evaluator" id="evaluationTaskDetails">
+		<result property="externalEvaluatorId" column="AGENCY_USER_ID" />
+		<result property="internalEvaluatorId" column="INT_EVALUATOR_USER_ID" />
+		<result property="proposalId" column="PROPOSAL_ID" />
+	</resultMap>
+
+	<select id="fetchEvaluationTaskDetails" parameterType="java.lang.String"
+		resultMap="evaluationTaskDetails">
+		SELECT
+		ext.AGENCY_USER_ID,
+		inteval.INT_EVALUATOR_USER_ID,
+		eval.PROPOSAL_ID
+		FROM
+		EVALUATION_SETTINGS_EXTERNAL ext,
+		EVALUATION_SETTINGS_INTERNAL inteval,
+		EVALUATION_STATUS eval,
+		PROCUREMENT proc
+		WHERE
+		proc.PROCUREMENT_ID=#{asProcurementId,jdbcType=VARCHAR}
+		and
+		eval.STATUS_ID = (SELECT STATUS_ID FROM STATUS_MASTER_R2_R3 WHERE
+		PROCESS_TYPE='Proposal' AND STATUS='Accepted for Evaluation')
+	</select>
+
+	<resultMap type="com.nyc.hhs.model.EvaluationBean" id="procStatus">
+		<result property="procurementStatus" column="STATUS" />
+	</resultMap>
+
+	<select id="fetchProcurementStatus" parameterType="java.lang.String"
+		resultMap="procStatus">
+		SELECT
+		stat.STATUS
+		FROM
+		PROCUREMENT proc
+		INNER JOIN
+		STATUS_MASTER_R2_R3 stat
+		ON stat.STATUS_ID = proc.STATUS_ID
+		AND
+		proc.PROCUREMENT_ID =
+		#{asProcurementId,jdbcType=VARCHAR}
+	</select>
+
+	<resultMap id="awardDocument" type="com.nyc.hhs.model.ExtendedDocument">
+		<result property="documentTitle" column="DOCUMENT_TITLE" />
+		<result property="documentType" column="DOCUMENT_TYPE" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+		<result property="lastModifiedBy" column="MODIFIED_BY_USERID" />
+	</resultMap>
+
+	<select id="getAwardDocumentsInfo" parameterType="java.lang.String"
+		resultMap="awardDocument">
+		select
+		DOCUMENT_TITLE,DOCUMENT_TYPE,MODIFIED_DATE,MODIFIED_BY_USERID from
+		AWARD_DOCUMENT where AwardId = #{asAwardId}
+	</select>
+	
+	<resultMap id="evaluationSettingsInternalExternalList" type="com.nyc.hhs.model.Evaluator">
+		<result property="externalEvaluatorId" column="FIRST_NAME" />
+		<result property="internalEvaluatorId" column="LAST_NAME" />
+		<result property="proposalId" column="user_id" />
+	</resultMap>
+	
+	<select id="fetchEvaluationSettingsInternal" parameterType="java.lang.String" resultMap="evaluationSettingsInternalExternalList">
+	select EVAL_SETTINGS_INT_ID, PROCUREMENT_ID, AGENCY_ID, INT_EVALUATOR_USERID, CREATED_DATE,
+	CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID, ADD_DELETE_FLAG from evaluation_Settings_Internal 
+	where procurementId = #{procurementId}
+	</select>
+
+	<select id="fetchEvaluationSettingsExternal" parameterType="java.lang.String" resultMap="evaluationSettingsInternalExternalList">
+	select EVAL_SETTINGS_EXT_ID, PROCUREMENT_ID, AGENCY_ID, EXT_EVALUATOR_NAME, CREATED_DATE,
+	CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID, ADD_DELETE_FLAG from evaluation_Settings_External 
+	where procurementId = #{procurementId}
+	</select>
+	
+	<resultMap id="fetchEvaluatorsList" type="com.nyc.hhs.model.AutoCompleteBean">
+		<result property="displayName" column="Name" />
+		<result property="hiddenId" column="USER_ID" />
+	</resultMap>
+
+	<!-- build 2.7.0, enhancement 5666 -->	
+	<select id="fetchInternalEvaluatorUsers" parameterType="java.util.Map" resultMap="fetchEvaluatorsList">
+		SELECT CUD.USER_ID,
+		  TRIM(NVL(CUD.FIRST_NAME,'')
+		  ||' '
+		  ||NVL(CUD.LAST_NAME,'')) name
+		FROM CITY_USER_DETAILS CUD
+		WHERE ORGANIZATION_NAME=#{asAgencyId}
+		and ((UPPER(CUD.USER_ROLE) like UPPER('program%') )
+		or (UPPER(CUD.USER_ROLE) like UPPER('cfo%')) 
+		OR (UPPER(CUD.USER_ROLE) LIKE UPPER('finance%')) )
+		AND UPPER(NVL(CUD.FIRST_NAME,'')
+		  ||' '
+		  ||NVL(CUD.LAST_NAME,'')) LIKE #{aoInputParam}			
+	</select>
+
+	<select id="fetchExternalEvaluatorUsers" parameterType="java.util.Map" resultMap="fetchEvaluatorsList">
+		SELECT CUD.USER_ID, TRIM(NVL(CUD.FIRST_NAME,'')||' '||NVL(CUD.LAST_NAME,'')) NAME FROM CITY_USER_DETAILS CUD WHERE ACTIVE_FLAG = 1 AND 
+      	 ORGANIZATION_NAME=#{asAgencyId} AND UPPER(CUD.USER_ROLE) like UPPER('acco%') AND UPPER(NVL(CUD.FIRST_NAME,'')||' '||NVL(CUD.LAST_NAME,'')) LIKE #{aoInputParam} 
+	</select>
+
+	<!--<select id="verifyExternalUserAgency" parameterType="java.lang.String"
+		resultType="String">
+	SELECT FIRST_NAME from city_user_details where user_id= #{asAgencyName} AND ACTIVE_FLAG = 1
+	</select>
+
+	--><insert id="saveInternalEvaluationDetails" parameterType="com.nyc.hhs.model.Evaluator">
+		INSERT INTO
+		EVALUATION_SETTINGS_INTERNAL(EVAL_SETTINGS_INT_ID,
+		PROCUREMENT_ID,AGENCY_ID,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,MODIFIED_BY_USERID,
+		INT_EVALUATOR_USERID,ADD_DELETE_FLAG, EVALUATION_POOL_MAPPING_ID)
+		(SELECT SEQ_EVAL_SETTINGS_INT_ID.NEXTVAL,#{procurementId,jdbcType=VARCHAR},
+		#{agencyId,jdbcType=VARCHAR},SYSDATE,
+		#{createdByUserId,jdbcType=VARCHAR},SYSDATE,
+		#{modifiedByUserId,jdbcType=VARCHAR},#{internalEvaluatorName,jdbcType=VARCHAR},#{status ,jdbcType=VARCHAR},
+		#{evaluationPoolMappingId,jdbcType=VARCHAR} FROM DUAL 
+		WHERE NOT EXISTS (SELECT 1 FROM EVALUATION_SETTINGS_INTERNAL 
+		WHERE INT_EVALUATOR_USERID=#{internalEvaluatorName,jdbcType=VARCHAR}
+		AND PROCUREMENT_ID = #{procurementId,jdbcType=VARCHAR} AND 
+		EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId,jdbcType=VARCHAR}))
+	</insert>
+	
+	<insert id="saveExternalEvaluationDetails" parameterType="com.nyc.hhs.model.Evaluator">
+		INSERT INTO
+		EVALUATION_SETTINGS_EXTERNAL(EVAL_SETTINGS_EXT_ID,
+		PROCUREMENT_ID,AGENCY_ID,EXT_EVALUATOR_NAME,AGENCY_USERID,CREATED_DATE,CREATED_BY_USERID,
+		MODIFIED_DATE,MODIFIED_BY_USERID,ADD_DELETE_FLAG, EVALUATION_POOL_MAPPING_ID)
+		(SELECT SEQ_EVAL_SETTINGS_INT_ID.NEXTVAL,#{procurementId,jdbcType=VARCHAR},
+		#{agencyId,jdbcType=VARCHAR},#{extEvaluatorName,jdbcType=VARCHAR},trim(#{agencyUserId,jdbcType=VARCHAR}),
+		SYSDATE,#{createdByUserId,jdbcType=VARCHAR},SYSDATE,
+		#{modifiedByUserId,jdbcType=VARCHAR},#{status ,jdbcType=VARCHAR},
+		#{evaluationPoolMappingId,jdbcType=VARCHAR} FROM DUAL 
+		WHERE NOT EXISTS (SELECT 1 FROM EVALUATION_SETTINGS_EXTERNAL WHERE EXT_EVALUATOR_NAME=#{extEvaluatorName,jdbcType=VARCHAR} 
+		AND AGENCY_USERID = #{agencyUserId,jdbcType=VARCHAR} 
+		AND PROCUREMENT_ID = #{procurementId,jdbcType=VARCHAR}
+		AND EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId,jdbcType=VARCHAR}))
+	</insert>
+	
+	<update id="updateEvaluatorInternalAfterEvaluation" parameterType="com.nyc.hhs.model.Evaluator">
+		UPDATE EVALUATION_SETTINGS_INTERNAL SET ADD_DELETE_FLAG = #{status}
+		WHERE PROCUREMENT_ID = #{procurementId} AND INT_EVALUATOR_USERID = #{internalEvaluatorName}
+		AND EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</update>
+	
+	<update id="updateEvaluatorExternalAfterEvaluation" parameterType="com.nyc.hhs.model.Evaluator">
+		UPDATE EVALUATION_SETTINGS_EXTERNAL SET ADD_DELETE_FLAG = #{status} 
+		WHERE PROCUREMENT_ID = #{procurementId} AND EXT_EVALUATOR_NAME = #{extEvaluatorName} 
+		AND AGENCY_USERID = #{agencyUserId,jdbcType=VARCHAR}
+		AND EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId} 
+	</update>
+	
+	<delete id="deleteEvaluationInternal" parameterType="java.util.Map">
+		DELETE
+		FROM EVALUATION_SETTINGS_INTERNAL
+		WHERE PROCUREMENT_ID =
+		#{asProcurementId,jdbcType=VARCHAR}
+		and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		and INT_EVALUATOR_USERID not in
+		<foreach item="items" collection="loInternalEvaluatorList"
+			open="(" separator="," close=")">
+			#{items.internalEvaluatorName}
+   		</foreach>
+	</delete>
+	<delete id="deleteEvaluationExternal" parameterType="java.util.Map">
+		DELETE
+		FROM EVALUATION_SETTINGS_EXTERNAL
+		WHERE PROCUREMENT_ID =
+		#{asProcurementId,jdbcType=VARCHAR}
+		and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		and (EXT_EVALUATOR_NAME,AGENCY_USERID) not in
+		<foreach item="items" collection="loExternalEvaluatorList"
+			open="(" separator="," close=")">
+			(#{items.extEvaluatorName},#{items.agencyUserId}) 
+   		</foreach>
+	</delete>
+	
+	<delete id="deleteEvaluatorInternalAfterEvaluation" parameterType="java.util.Map">
+		DELETE
+		FROM EVALUATION_SETTINGS_INTERNAL
+		WHERE PROCUREMENT_ID =
+		#{asProcurementId,jdbcType=VARCHAR}
+		and INT_EVALUATOR_USERID  in
+		<foreach item="items" collection="loEvaluatorsInternalList"
+			open="(" separator="," close=")">
+			#{items.internalEvaluatorName}
+   		</foreach>
+	</delete>
+	
+	<update id="updateEvaluatorCount" parameterType="map">
+		UPDATE EVALUATION_POOL_MAPPING SET EVALUATOR_COUNT = #{aoEvaluatorsCountNew} 
+		<if test="clearEvalSentFlag != null">
+			, EVALUATION_SENT = #{evaluationSent,jdbcType=VARCHAR}
+			, status_id = #{COMPETITION_POOL_PROPOSALS_RECEIVED}
+		</if>
+		WHERE EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- Start || Added as a part of Release 3.6.0 for enhancement 5905 -->
+	<update id="updateEvalProgressStatus" parameterType="map">
+		UPDATE EVALUATION_POOL_MAPPING SET EVALUATION_PROGRESS = #{evalProgressFlag} 
+		WHERE EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId,jdbcType=VARCHAR}
+	</update>
+	<select id="getEvalProgressStatus" parameterType="map" resultType="map">
+		SELECT EVALUATION_SENT,EVALUATION_PROGRESS FROM EVALUATION_POOL_MAPPING WHERE 
+		PROCUREMENT_ID=#{asProcurementId,jdbcType=VARCHAR} AND EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId,jdbcType=VARCHAR}
+	</select>
+	<!-- End || Added as a part of Release 3.6.0 for enhancement 5905 -->
+	
+	<resultMap type="com.nyc.hhs.model.EvaluationBean" id="evaluationResultsScores">
+		<result property="proposalId" column="PROPOSAL_ID" />
+		<result property="proposalTitle" column="PROPOSAL_TITLE" />
+		<result property="organizationName" column="ORGANIZATION_LEGAL_NAME" />
+		<result property="evaluationScore" column="EVALUATION_SCORE" />
+		<result property="proposalStatus" column="STATUS" />
+		<result property="awardAmount" column="AWARD_AMOUNT" />
+		<result property="proposalStatusId" column="PROPOSAL_STATUS_ID" />
+	</resultMap>
+	
+	<select id="fetchEvaluationResultsScores" parameterType="hashmap" resultMap="evaluationResultsScores">
+		SELECT PRO.PROPOSAL_ID, PRO.PROPOSAL_TITLE, ORG.ORGANIZATION_LEGAL_NAME, 
+    	to_char(EVAL.EVALUATION_SCORE, 'fm999.00') EVALUATION_SCORE, 
+		ST.STATUS, decode(ST.STATUS,'Not Selected','--',EVAL.AWARD_AMOUNT) AWARD_AMOUNT, PRO.PROPOSAL_STATUS_ID
+		FROM EVALUATION_RESULTS EVAL, PROPOSAL_CONFIG PRO, ORGANIZATION ORG, STATUS_MASTER_R2_R3 ST
+		<if test="EvaluationPoolMappingId != null">
+			,EVALUATION_POOL_MAPPING EPM
+		</if>
+		WHERE EVAL.PROPOSAL_ID = PRO.PROPOSAL_ID AND PRO.ORGANIZATION_ID = ORG.ORGANIZATION_ID AND 
+		PRO.PROC_REVIEW_STATUS_ID =  ST.STATUS_ID
+		AND PRO.PROCUREMENT_ID = #{ProcurementID} AND (PRO.PROC_REVIEW_STATUS_ID = 23 OR PRO.PROC_REVIEW_STATUS_ID = 24)
+		<if test="EvaluationPoolMappingId != null">
+		    AND PRO.EVALUATION_GROUP_ID = EPM.EVALUATION_GROUP_ID
+		    AND PRO.COMPETITION_POOL_ID = EPM.COMPETITION_POOL_ID
+		    AND EPM.EVALUATION_POOL_MAPPING_ID = #{EvaluationPoolMappingId}
+		</if>
+	    ORDER BY EVAL.EVALUATION_SCORE DESC
+	</select>
+	
+	<resultMap type="com.nyc.hhs.model.EvaluationBean" id="evalScore">
+		<result property="proposalId" column="PROPOSAL_ID" />
+		<result property="evaluationScore" column="EVALUATION_SCORE" />
+	</resultMap>
+	
+	<select id="getEvaluationScores" parameterType="map" resultMap="evalScore">
+		select PROPOSAL_ID, EVALUATION_SCORE from EVALUATION_RESULTS where PROPOSAL_ID IN 
+		<foreach item="items" index="index" collection="loProposalDetailsBeanList"
+				open="(" separator="," close=")">
+				#{items.proposalId}
+    		</foreach>
+	</select>
+	<select id="fetchProviderEvaluationScores" parameterType="map"  resultMap="evaluationResults">
+		select EVALUATION_CRITERIA.SCORE_SEQ_NUM, EVALUATION_CRITERIA.EVALUATION_CRITERIA_ID,score_criteria, maximum_score, to_char(round(avg(score),5), 'fm999.00000') score
+     from EVALUATION_CRITERIA, evaluation_status, evaluation_score
+     where EVALUATION_CRITERIA.EVALUATION_CRITERIA_ID=EVALUATION_SCORE.EVALUATION_CRITERIA_ID
+     and EVALUATION_SCORE.EVALUATION_STATUS_ID=evaluation_status.EVALUATION_STATUS_ID and
+     EVALUATION_CRITERIA.procurement_id=evaluation_status.procurement_id and
+     evaluation_status.procurement_id = #{asProcurementId} and evaluation_status.proposal_id = #{asProposalId}
+     group by EVALUATION_CRITERIA.EVALUATION_CRITERIA_ID,score_criteria,maximum_score, EVALUATION_CRITERIA.SCORE_SEQ_NUM
+     order by EVALUATION_CRITERIA.SCORE_SEQ_NUM
+	</select>
+	
+	<!-- R5 starts : updated -->
+	<select id="fetchEvaluationScoreDetailsForEvaluator" parameterType="map"  resultMap="evaluationResults">
+		SELECT   evalDet.evaluation_status_id,
+				  evalDet.evaluation_criteria_id,
+				  evalDet.score_criteria,
+				  evalDet.score AS EVALUATION_SCORE,
+				  evalDet.maximum_score,
+				  evalDet.comments,
+				  ( CASE WHEN #{versionNumber} = 1
+				  					THEN 0 
+				  				 WHEN #{versionNumber} != 1 AND
+				  					NVL((SELECT COUNT(1) FROM EVALUATION_SCORE_ARCHIVE WHERE EVALUATION_STATUS_ID = #{evaluationStatusId} AND VERSION_NUMBER = #{versionNumber}),0) = 0
+							    	THEN (CASE
+							         	   WHEN 1 = (SELECT COUNT(SCORE) FROM
+													    (SELECT SUM(SCORE) AS SCORE FROM EVALUATION_SCORE WHERE EVALUATION_STATUS_ID = #{evaluationStatusId} 
+													    	UNION
+													    SELECT SUM(SCORE) AS SCORE FROM EVALUATION_SCORE_ARCHIVE WHERE EVALUATION_STATUS_ID = #{evaluationStatusId} 
+													    AND VERSION_NUMBER = (#{versionNumber})-1
+													    )
+							  ) THEN 0
+							  ELSE 1
+							  END) 
+                    WHEN (SELECT SUM(SCORE) AS SCORE FROM EVALUATION_SCORE_ARCHIVE WHERE EVALUATION_STATUS_ID = #{evaluationStatusId}  AND VERSION_NUMBER = #{versionNumber}) != 
+                         (SELECT SUM(SCORE) AS SCORE FROM EVALUATION_SCORE_ARCHIVE WHERE EVALUATION_STATUS_ID = #{evaluationStatusId}  AND VERSION_NUMBER = (#{versionNumber})-1)
+                         THEN 1
+                    ELSE 0
+                    END
+				 ) AS GEN_SCORE_CHANGE_TYPE,
+       			(SELECT ( CASE WHEN NVL((SELECT comments FROM evaluation_gen_comment_archive WHERE evaluation_status_id = #{evaluationStatusId} 
+       																							AND VERSION_NUMBER = #{versionNumber}),'NO_COMMENTS_FOUND') = 'NO_COMMENTS_FOUND'
+						    THEN
+						      (SELECT COUNT(1)-1 FROM 
+						      	(SELECT INTERNAL_COMMENT AS comments FROM USER_COMMENT WHERE ENTITY_TYPE = 'Evaluator' AND ENTITY_ID = #{evaluationStatusId}
+						        UNION
+						        SELECT comments FROM evaluation_gen_comment_archive  WHERE evaluation_status_id = #{evaluationStatusId} AND VERSION_NUMBER = (#{versionNumber})-1
+						        )
+						      )
+       						  WHEN totalScore > 1
+					          THEN 1  ELSE 0 END) FROM
+													  (SELECT COUNT(1) AS totalScore FROM
+													    (SELECT comments FROM evaluation_gen_comment_archive WHERE evaluation_status_id = #{evaluationStatusId} AND VERSION_NUMBER = #{versionNumber}
+													      UNION
+													   SELECT comments FROM evaluation_gen_comment_archive WHERE evaluation_status_id = #{evaluationStatusId} AND VERSION_NUMBER = (#{versionNumber})-1
+													    )
+													  )
+				 ) AS GEN_COMMENT_CHANGE_FLAG,
+				  NVL((SELECT comments FROM evaluation_gen_comment_archive WHERE evaluation_status_id = #{evaluationStatusId} AND VERSION_NUMBER = #{versionNumber}),
+				  	  (SELECT INTERNAL_COMMENT FROM user_comment WHERE entity_type = 'Evaluator' AND ENTITY_ID = #{evaluationStatusId})
+				  	  )as internal_comment,
+				  (SELECT SUM(evalDet.score)
+				  FROM
+				    (SELECT es.evaluation_status_id,
+				      ec.evaluation_criteria_id,
+				      ec.score_criteria,
+				      es.score,
+				      ec.maximum_score,
+				      es.comments,
+				      ec.score_seq_num,
+				      es.VERSION_NUMBER
+				    FROM (SELECT COMMENTS,
+						EVALUATION_CRITERIA_ID,
+						EVALUATION_STATUS_ID,
+						SCORE,
+						(SELECT NVL(MAX(version_number),0)+1 FROM evaluation_version_archive WHERE PROPOSAL_ID = #{proposalId} AND CANCEL_FLAG = 0) AS VERSION_NUMBER
+						FROM evaluation_score
+						WHERE EVALUATION_STATUS_ID IN
+						<foreach item="items" index="index" collection="evaluatorStatusList" open="(" separator="," close=")">
+							#{items}
+						</foreach>
+						AND (SELECT NVL(MAX(version_number),0)+1 FROM evaluation_version_archive WHERE PROPOSAL_ID = #{proposalId} AND CANCEL_FLAG = 0 ) >= 1
+						UNION
+						SELECT COMMENTS,
+						EVALUATION_CRITERIA_ID,
+						EVALUATION_STATUS_ID,
+						SCORE,
+						VERSION_NUMBER
+						FROM evaluation_score_archive
+						WHERE EVALUATION_STATUS_ID IN
+						<foreach item="items" index="index" collection="evaluatorStatusList"  open="(" separator="," close=")">
+						  	#{items}
+				    	</foreach>
+				    ) es
+				    INNER JOIN evaluation_criteria ec ON ec.evaluation_criteria_id = es.evaluation_criteria_id
+				    AND es.evaluation_status_id  = #{evaluationStatusId} and es.VERSION_NUMBER = #{versionNumber}
+				    ORDER BY ec.score_seq_num
+				    ) evalDet
+				  ) AS SCORE,
+  					evalDet.SCORE_CHANGE_TYPE,
+    				evalDet.COMMENT_CHANGE_FLAG
+				FROM
+				  (SELECT es.evaluation_status_id,
+				    ec.evaluation_criteria_id,
+				    ec.score_criteria,
+				    es.score,
+				    ec.maximum_score,
+				    es.comments,
+				    ec.score_seq_num,
+				    es.SCORE_CHANGE_TYPE,
+    				es.COMMENT_CHANGE_FLAG
+				  FROM (SELECT COMMENTS,
+						EVALUATION_CRITERIA_ID,
+						EVALUATION_STATUS_ID,
+						SCORE,
+						(SELECT NVL(MAX(version_number),0)+1 FROM evaluation_version_archive WHERE PROPOSAL_ID = #{proposalId} AND CANCEL_FLAG = 0) AS VERSION_NUMBER,
+						SCORE_CHANGE_TYPE,
+    					COMMENT_CHANGE_FLAG
+						FROM evaluation_score
+						WHERE EVALUATION_STATUS_ID IN <foreach item="items" index="index" collection="evaluatorStatusList" 
+																						open="(" separator="," close=")">
+															#{items}
+				    								  </foreach>
+						UNION
+						SELECT COMMENTS,
+						EVALUATION_CRITERIA_ID,
+						EVALUATION_STATUS_ID,
+						SCORE,
+						VERSION_NUMBER,
+						SCORE_CHANGE_TYPE,
+    					COMMENT_CHANGE_FLAG
+						FROM evaluation_score_archive
+						WHERE EVALUATION_STATUS_ID IN  <foreach item="items" index="index" collection="evaluatorStatusList" 
+																							open="(" separator="," close=")">
+															#{items}
+				    									</foreach>
+						) es
+				  INNER JOIN evaluation_criteria ec  ON ec.evaluation_criteria_id = es.evaluation_criteria_id
+				  AND es.evaluation_status_id  = #{evaluationStatusId} and es.VERSION_NUMBER = #{versionNumber}
+				  ORDER BY ec.score_seq_num
+				  ) evalDet
+	</select>
+	<!-- R5 ends : updated -->
+		
+	<select id="fetchProviderProposalHeader" parameterType="java.lang.String" resultType="map">
+		   	select pc.proposal_title,org.ORGANIZATION_LEGAL_NAME,pr.PROCUREMENT_TITLE,
+		  	cp.competition_pool_title, pr.is_open_ended_rfp , 
+		  	(select rank from 
+				(select decode(er.EVALUATION_SCORE, null, 99999999 ,rank() OVER (ORDER BY nvl(er.Evaluation_score, 0) desc)) rank, er.proposal_id
+				from EVALUATION_RESULTS er, (select epm.evaluation_pool_mapping_id from evaluation_pool_mapping epm, proposal_config pc where 
+	                epm.evaluation_group_id = pc.evaluation_group_id
+			        and epm.competition_pool_id = pc.competition_pool_id 
+			        and pc.proposal_id = #{asProposalId}) epm
+				    where er.evaluation_pool_mapping_id = epm.evaluation_pool_mapping_id 
+				 ) 
+		     where proposal_id = #{asProposalId}) rank, 
+		    (select count(1) from proposal_config pc1
+		          where pc1.proposal_status_id != 25 and pc1.competition_pool_id = pc.competition_pool_id 
+              and pc1.evaluation_group_id = pc.evaluation_group_id) total
+		   	from proposal_config pc,ORGANIZATION org,PROCUREMENT pr, competition_pool cp 
+		   	where pc.proposal_id=#{asProposalId}
+		   	and org.ORGANIZATION_ID = pc.ORGANIZATION_ID 
+		   	and pr.PROCUREMENT_ID = pc.PROCUREMENT_ID
+		   	and pc.competition_pool_id = cp.competition_pool_id
+	</select>
+	
+	<select id="fetchProposalComments"  parameterType="java.lang.String" resultMap="proposalcomments">
+	  	select nyc.AGENCY_NAME, uc.provider_comment , uc.audit_date 
+		from NYC_AGENCY_DETAILS nyc, user_comment uc 
+		where nyc.agency_id in 
+		(select ORGANIZATION_NAME from city_user_details where user_id in 
+		(select modified_by_userid from user_comment where entity_id = #{asProposalId}
+		and ENTITY_TYPE ='Accept Proposal'))
+		and entity_id = #{asProposalId}
+		and ENTITY_TYPE ='Accept Proposal'
+		 and uc.provider_comment is not null
+	</select>
+	
+	<select id="fetchEvaluationScoreSum"  parameterType="java.lang.String" resultType="int">
+	select sum(SCORE) from EVALUATION_SCORE where PROCUREMENT_ID = #{procurementId}
+	</select>
+	
+	<select id="countEvaluationSettingsUsers"  parameterType="java.lang.String" resultType="int">
+	SELECT count(1) FROM(
+    SELECT COUNT(agency_userId) FROM EVALUATION_SETTINGS_EXTERNAL WHERE procurement_id = #{procurementId}
+    UNION ALL
+    SELECT COUNT(CREATED_BY_USERID) FROM evaluation_settings_internal WHERE procurement_id = #{procurementId})
+	</select>
+
+	<delete id="deleteEvaluationResults" parameterType="map">
+		delete from evaluation_results where EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</delete>
+	<delete id="deleteEvaluationStatus" parameterType="map">
+		delete from evaluation_status where procurement_id  = #{asProcurementId}
+		and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</delete>
+	<delete id="deleteEvaluationScore" parameterType="map">
+		delete from evaluation_score where EVALUATION_STATUS_ID in (select EVALUATION_STATUS_ID from evaluation_status
+		where procurement_id =#{asProcurementId}
+		and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}) 
+	</delete>
+		
+	<select id="getEvaluationCount" parameterType="java.lang.String" resultType="int">
+	SELECT EVALUATOR_COUNT
+	FROM EVALUATION_POOL_MAPPING
+	WHERE EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	AND ROWNUM = 1
+	</select>
+	
+	<select id="findEvaluationTaskSent" parameterType="map" resultType="int"> 
+		SELECT count(1) FROM EVALUATION_STATUS WHERE PROCUREMENT_ID = #{asProcurementId} 
+		and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</select>
+	
+	<select id="getEvaluationReviewScore" parameterType="map" resultType="int">
+		select COUNT(ER.PROPOSAL_ID)
+		from EVALUATION_RESULTS ER,
+		PROPOSAL_CONFIG PC
+		WHERE ER.PROPOSAL_ID = PC.PROPOSAL_ID
+		AND PC.PROCUREMENT_ID= #{asProcurementId}
+		AND ER.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</select>
+	
+	<select id="getInternalEvaluationsList" parameterType="map" resultMap="mapEvaluationSettingInternal"> 
+		SELECT EVAL_SETTINGS_INT_ID, CITY.USER_ID,TRIM(NVL(CITY.FIRST_NAME,'')||' '||NVL(CITY.LAST_NAME,'')) NAME,AGENCY_ID ,INTERNAL_USER.INT_EVALUATOR_USERID
+		FROM  
+		EVALUATION_SETTINGS_INTERNAL INTERNAL_USER,
+		CITY_USER_DETAILS CITY 
+		WHERE INTERNAL_USER.INT_EVALUATOR_USERID = CITY.USER_ID AND PROCUREMENT_ID= #{procumentID} AND (ADD_DELETE_FLAG != 'D' or ADD_DELETE_FLAG is null)
+		AND EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</select>
+	
+	<select id="getExternalEvaluationsList" parameterType="map" resultMap="mapEvaluationSettingExternal"> 
+		SELECT EVAL_SETTINGS_EXT_ID, TRIM(NVL(CITY.FIRST_NAME,'')||' '||NVL(CITY.LAST_NAME,'')) NAME ,EXT_EVALUATOR_NAME,AGENCY_USERID,AGENCY_ID FROM  EVALUATION_SETTINGS_EXTERNAL 
+		EXTERNAL_USER,CITY_USER_DETAILS CITY 
+		WHERE EXTERNAL_USER.AGENCY_USERID = CITY.USER_ID AND PROCUREMENT_ID= #{procumentID} AND (ADD_DELETE_FLAG != 'D' or ADD_DELETE_FLAG is null) 
+		AND EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		ORDER BY EXT_EVALUATOR_NAME
+	</select>
+	
+	<select id="fetchEvaluationIntStatusId" parameterType="java.lang.String"
+		resultType="String">
+		 SELECT EVALUATION_STATUS_ID 
+  		 FROM EVALUATION_STATUS 
+  		 WHERE EVAL_SETTINGS_INT_ID = #{lsEvalIntId}
+	</select>
+	
+	<select id="fetchEvaluationExtStatusId" parameterType="java.lang.String"
+		resultType="String">
+		 SELECT EVALUATION_STATUS_ID 
+  		 FROM EVALUATION_STATUS 
+  		 WHERE EVAL_SETTINGS_EXT_ID = #{lsEvalExtId}
+	</select>
+
+	<resultMap type="com.nyc.hhs.model.Evaluator" id="mapEvaluationSettingInternal">
+		<result property="agencyId" column="AGENCY_ID" />
+		<result property="name" column="Name" />
+		<result property="userId" column="INT_EVALUATOR_USERID" />
+		<result property="internalEvaluatorName" column="INT_EVALUATOR_USERID" />
+		<result property="evalSettingId" column="EVAL_SETTINGS_INT_ID" />
+	</resultMap>
+	
+	<resultMap type="com.nyc.hhs.model.Evaluator" id="mapEvaluationSettingExternal">
+		<result property="agencyId" column="AGENCY_ID" />
+		<result property="extEvaluatorName" column="EXT_EVALUATOR_NAME" />
+		<result property="agencyUserId" column="AGENCY_USERID" />
+		<result property="name" column="Name" />
+		<result property="evalSettingId" column="EVAL_SETTINGS_EXT_ID" />
+	</resultMap>
+	
+	<resultMap id="evalCriteria" type="com.nyc.hhs.model.EvaluationBean" >
+		<result property="scoreSeqNum" column="SCORE_SEQ_NUM" />
+		<result property="scoreCriteria" column="SCORE_CRITERIA" />
+		<result property="maximumScore" column="MAXIMUM_SCORE" />
+	</resultMap>
+	
+	<select id="getProcurementAgencyId" parameterType="String" resultType="map">
+		SELECT AGENCY_ID,STATUS_ID FROM PROCUREMENT WHERE PROCUREMENT_ID=#{asProcurementId}
+	</select>
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<select id="fetchEvaluationCriteriaDetails" parameterType="map" resultMap="evalCriteria">
+            SELECT SCORE_SEQ_NUM, SCORE_CRITERIA, MAXIMUM_SCORE
+            FROM EVALUATION_CRITERIA EC, EVALUATION_GROUP EG, evaluation_pool_mapping epm
+            WHERE EG.PROCUREMENT_ID = EC.PROCUREMENT_ID
+		    AND EC.PROCUREMENT_ID = #{procurementId}
+			AND eg.evaluation_group_id = epm.evaluation_group_id
+			AND epm.evaluation_pool_mapping_id = #{evaluationPoolMappingId}
+		    AND EG.VERSION_NUMBER_EC = EC.VERSION_NUMBER
+            ORDER BY EC.SCORE_SEQ_NUM
+      </select>
+
+	
+	<select id="getDBDDocsList" parameterType="java.lang.String" resultType="map">
+		SELECT PC.PROPOSAL_ID, pc.PROPOSAL_TITLE, PC.ORGANIZATION_ID, 
+        pd.DOCUMENT_IDENTIFIER_ID, org.organization_legal_name, pd.DOCUMENT_IDENTIFIER_ID
+		from PROPOSAL_CONFIG pc, PROPOSAL_DOCUMENT pd, PROCUREMENT_DOCUMENT_CONFIG pdc, Organization org, evaluation_pool_mapping epm 
+		where
+			epm.evaluation_pool_mapping_id = #{evaluationPoolMappingId} and
+		    pc.COMPETITION_POOL_id = epm.COMPETITION_POOL_id and
+		    pc.evaluation_group_id = epm.evaluation_group_id and 
+		    pc.PROCUREMENT_ID = #{procurementId} and
+			pc.PROPOSAL_ID = pd.PROPOSAL_ID and
+		    pc.PROCUREMENT_ID = pdc.PROCUREMENT_ID and
+		    org.organization_id = pc.organization_id and
+			pc.PROPOSAL_STATUS_ID != #{PROPOSAL_NON_RESPONSIVE} and
+		    pdc.PROCUREMENT_DOCUMENT_TYPE = #{DBD} and
+		    pdc.PROCUREMENT_DOCUMENT_ID = pd.PROCUREMENT_DOCUMENT_ID
+		order by org.organization_legal_name, PC.ORGANIZATION_ID, pc.PROPOSAL_TITLE, PC.PROPOSAL_ID, pd.DOCUMENT_IDENTIFIER_ID
+	</select>
+	
+	<select id="checkDBDDownloadAllowed" parameterType="java.lang.String" resultType="int">
+		Select count(1) from proposal_config pc, evaluation_results er
+		where
+		er.PROPOSAL_ID = pc.PROPOSAL_ID and
+		pc.procurement_id = #{asProcurementId}
+	</select>
+	
+	<!-- Fetched estatus.EVALUATION_STATUS_ID also as per enhancement 5415 -->
+	<select id="fetchEvaluatorCommentsDetails" parameterType="Map" resultMap="evalComments">
+		SELECT cud.FIRST_NAME, cud.LAST_NAME, estatus.INTERNAL_COMMENT , esx.EXT_EVALUATOR_NAME,estatus.EVALUATION_STATUS_ID,
+		NVL(esx.EXT_EVALUATOR_NAME, cud.FIRST_NAME || ' ' || cud.Last_Name ) as ExternalName, estatus.status_id
+		from CITY_USER_DETAILS cud,EVALUATION_SETTINGS_EXTERNAL esx ,(select internal_comment, 
+		          estatus.MODIFIED_BY_USERID, ESTATUS.EVAL_SETTINGS_EXT_ID,estatus.EVALUATION_STATUS_ID,estatus.status_id from user_comment uc, EVALUATION_STATUS estatus
+		          where
+		          uc.ENTITY_TYPE = 'Evaluator' and
+		          estatus.PROPOSAL_ID = #{proposalId} and
+		          uc.ENTITY_ID = estatus.EVALUATION_STATUS_ID) estatus
+		where esx.EVAL_SETTINGS_EXT_ID(+) = estatus.EVAL_SETTINGS_EXT_ID and
+		cud.USER_ID = estatus.MODIFIED_BY_USERID 
+		ORDER BY lower(ExternalName)
+	</select>
+	
+	<!-- Added property evaluationStatusId  as per enhancement 5415 -->
+	<resultMap id="evalComments" type="com.nyc.hhs.model.EvaluationBean" >
+		<result property="comments" column="INTERNAL_COMMENT" />
+		<result property="evaluatorFirstName" column="FIRST_NAME" />
+		<result property="evaluatorSecondName" column="LAST_NAME" />
+		<result property="evaluatorId" column="USER_ID" />
+		<result property="externalEvaluatorName" column="EXT_EVALUATOR_NAME" />
+		<result property="evaluationStatusId" column="EVALUATION_STATUS_ID" />
+		<result property="statusId" column="status_id" />
+	</resultMap>
+
+	<insert id="insertEvaluationStatus" parameterType="com.nyc.hhs.model.EvaluationDetailBean">
+		INSERT INTO EVALUATION_STATUS ( evaluation_status_id, procurement_id,
+		proposal_id, organization_id, status_id, proc_status_id,
+		created_date, created_by_userid, modified_date, modified_by_userid,
+		EVAL_SETTINGS_INT_ID,EVAL_SETTINGS_Ext_ID, EVALUATION_POOL_MAPPING_ID)
+		values( evaluation_status_id.nextval,
+		#{procurementId, jdbcType=VARCHAR},
+		#{proposalId, jdbcType=VARCHAR},
+		#{organizationId, jdbcType=VARCHAR},
+		#{statusId, jdbcType=VARCHAR},
+		#{procStatusId, jdbcType=VARCHAR},
+		SYSDATE,
+		#{createdByUserId, jdbcType=VARCHAR},
+		SYSDATE,
+		#{modifiedByUserId, jdbcType=VARCHAR}, #{evaSettingsIntId, jdbcType=VARCHAR},
+		#{evaSettingsExtId, jdbcType=VARCHAR}, #{evaluationPoolMappingId, jdbcType=VARCHAR})
+	</insert>
+	<resultMap id="evaluationStatus" type="com.nyc.hhs.model.EvaluationDetailBean">
+		<result property="proposalId" column="PROPOSAL_ID" />
+		<result property="organizationId" column="ORGANIZATION_ID" />
+		<result property="statusId" column="PROPOSAL_STATUS_ID" />
+		<result property="evaSettingsIntId" column="EVAL_SETTINGS_INT_ID" />
+		<result property="evaSettingsExtId" column="EVAL_SETTINGS_EXT_ID" />
+		<result property="evaluationPoolMappingId" column="EVALUATION_POOL_MAPPING_ID" />
+	</resultMap>
+
+	<select id="fetchIntExtProposalDetails" parameterType="java.util.Map" resultMap="evaluationStatus">
+		    select PROPOSAL_ID,ORGANIZATION_ID,PROPOSAL_STATUS_ID,EVAL_SETTINGS_INT_ID,EVAL_SETTINGS_EXT_ID, EVALUATION_POOL_MAPPING_ID
+			from (SELECT pc.PROPOSAL_ID, pc.ORGANIZATION_ID,pc.PROCUREMENT_ID, pc.PROPOSAL_STATUS_ID,
+		    es.EVAL_SETTINGS_INT_ID EVAL_SETTINGS_INT_ID, null EVAL_SETTINGS_EXT_ID, es.EVALUATION_POOL_MAPPING_ID
+			FROM PROPOSAL_CONFIG pc, EVALUATION_SETTINGS_INTERNAL es, EVALUATION_POOL_MAPPING epm
+		    WHERE pc.PROCUREMENT_ID = es.PROCUREMENT_ID
+	        and es.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	        and epm.COMPETITION_POOL_id = pc.COMPETITION_POOL_id
+	        and epm.evaluation_group_id = pc.evaluation_group_id
+	        and epm.EVALUATION_POOL_MAPPING_ID = es.EVALUATION_POOL_MAPPING_ID 
+		    UNION ALL
+		    SELECT pc.PROPOSAL_ID,pc.ORGANIZATION_ID,pc.PROCUREMENT_ID, pc.PROPOSAL_STATUS_ID,
+		    null abc,ese.EVAL_SETTINGS_EXT_ID, ese.EVALUATION_POOL_MAPPING_ID 
+		    FROM PROPOSAL_CONFIG pc, EVALUATION_SETTINGS_EXTERNAL ese, EVALUATION_POOL_MAPPING epm
+		    WHERE pc.PROCUREMENT_ID = ese.PROCUREMENT_ID
+          	and ese.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+        	and epm.COMPETITION_POOL_id = pc.COMPETITION_POOL_id
+        	and epm.evaluation_group_id = pc.evaluation_group_id
+        	and epm.EVALUATION_POOL_MAPPING_ID = ese.EVALUATION_POOL_MAPPING_ID 
+		    ) where  PROCUREMENT_ID = #{loProcurementId} and PROPOSAL_STATUS_ID not in (#{lsDraftId},#{markProposalNonResponsive})
+	</select>
+	
+	<resultMap id="evaluationScores" type="com.nyc.hhs.model.EvaluationBean" >
+		<result property="externalEvaluatorName" column="EXT_EVALUATOR_NAME" />
+		<result property="score" column="SCORE" />
+		<result property="scoreSeqNum" column="SCORE_SEQ_NUM" />
+		<result property="evaluatorFirstName" column="NAME" />
+		<result property="evaluatorId" column="USER_ID" />
+		<result property="modifiedFlag" column="MODIFIED_FLAG" />
+		<result property="agencyUserId" column="AGENCY" />
+		<result property="evaluationStatusId" column="EVALUATION_STATUS_ID" />
+		<result property="procStatusId" column="PROC_STATUS_ID" />
+		<result property="evaluatorDisplayId" column="evaluatorDisplayId" />
+		<result property="comments" column="INTERNAL_COMMENT" />
+		<!-- R5- Starts -->
+		<result property="versionNumber" column="VERSION_NUMBER" />
+		<result property="roundInfo" column="ROUNDS" />
+		<result property="scoreChangeType" column="SCORE_CHANGE_TYPE" />
+		<result property="commentChangeFlag" column="COMMENT_CHANGE_FLAG" />
+		<result property="submissionCloseDate" column="CREATED_DATE" />
+		<result property="statusId" column="STATUS_ID" />
+		<result property="returnFlag" column="RETURN_STATUS" />
+		<!-- R5- Ends -->
+	</resultMap>
+	
+	<!-- R5: Starts - Updated -->
+	<select id="displayEvaluationScoresDetails" parameterType="Map" resultMap="evaluationScores">
+	 SELECT EVALUATION_STATUS.PROC_STATUS_ID,
+	 		(CASE
+		    WHEN ALL_SCORE.VERSION_NUMBER = 1 THEN 0
+		    ELSE 
+		       (SELECT DECODE(RETURN_STATUS,1,1,0,0,NULL,0) FROM EVALUATION_GEN_COMMENT_ARCHIVE WHERE VERSION_NUMBER = (ALL_SCORE.VERSION_NUMBER -1)AND EVALUATION_STATUS_ID = EVALUATION_STATUS.EVALUATION_STATUS_ID)
+		    END
+		    ) AS RETURN_STATUS,
+	 		EVALUATION_STATUS.STATUS_ID,
+		EVALUATION_STATUS.EVALUATION_STATUS_ID,
+		evaluation_criteria.SCORE_SEQ_NUM,
+		ALL_SCORE.SCORE,
+		ALL_SCORE.COMMENTS,
+		DECODE(EVALUATION_SETTINGS_EXTERNAL.EXT_EVALUATOR_NAME, NULL,'internal',EVALUATION_SETTINGS_EXTERNAL.EXT_EVALUATOR_NAME) AS EXT_EVALUATOR_NAME,
+		DECODE(EVALUATION_SETTINGS_EXTERNAL.AGENCY_USERID,NULL,'agency',EVALUATION_SETTINGS_EXTERNAL.AGENCY_USERID) AS AGENCY,
+		city_user_details.USER_ID,
+		TRIM(NVL(city_user_details.FIRST_NAME,'') ||' ' ||NVL(city_user_details.LAST_NAME,'')) as NAME,
+		DECODE(EVALUATION_SETTINGS_EXTERNAL.EXT_EVALUATOR_NAME,NULL,TRIM(NVL(city_user_details.FIRST_NAME,'') ||' ' ||NVL(city_user_details.LAST_NAME,'')),EVALUATION_SETTINGS_EXTERNAL.EXT_EVALUATOR_NAME) as INTERNAL_NAME,
+		NVL(EVALUATION_SETTINGS_INTERNAL.EVAL_SETTINGS_INT_ID,EVALUATION_SETTINGS_EXTERNAL.EVAL_SETTINGS_EXT_ID) AS evaluatorDisplayId,
+		NVL(ALL_SCORE.VERSION_NUMBER,1) AS VERSION_NUMBER,
+	    ALL_SCORE.SCORE_CHANGE_TYPE,
+	    ALL_SCORE.COMMENT_CHANGE_FLAG,
+	    (CASE WHEN NVL(ALL_SCORE.VERSION_NUMBER,1) = 1 
+	    		THEN (SELECT MIN(TO_CHAR(CREATED_DATE,'MM/DD/YYYY')) FROM EVALUATION_STATUS WHERE PROPOSAL_ID =#{proposalId}) 
+	    	  ELSE (SELECT TO_CHAR(CREATED_DATE,'MM/DD/YYYY') FROM EVALUATION_VERSION_ARCHIVE WHERE PROPOSAL_ID =#{proposalId} AND CANCEL_FLAG = 0 AND VERSION_NUMBER = (ALL_SCORE.VERSION_NUMBER-1)) END) AS CREATED_DATE 
+		FROM
+			(SELECT COMMENTS,
+					EVALUATION_CRITERIA_ID,
+					EVALUATION_STATUS_ID,
+					SCORE,
+					(SELECT NVL(MAX(version_number),0)+1 FROM evaluation_version_archive WHERE PROPOSAL_ID =#{proposalId} AND CANCEL_FLAG = 0) AS VERSION_NUMBER,
+		    	SCORE_CHANGE_TYPE,
+		    	COMMENT_CHANGE_FLAG
+			FROM evaluation_score
+				WHERE EVALUATION_STATUS_ID IN <foreach item="items" index="index" collection="evaluatorStatusList"
+															open="(" separator="," close=")">
+															#{items}
+											    		 </foreach>
+						and (SELECT COUNT(1) FROM EVALUATION_STATUS WHERE PROPOSAL_ID =#{proposalId} AND (PROC_STATUS_ID IS NULL OR PROC_STATUS_ID = 43) ) &gt; 0
+			UNION 
+			SELECT  COMMENTS,
+					EVALUATION_CRITERIA_ID,
+					EVALUATION_STATUS_ID,
+					SCORE,
+					VERSION_NUMBER,
+				    SCORE_CHANGE_TYPE,
+				    COMMENT_CHANGE_FLAG
+			FROM evaluation_score_archive
+				WHERE EVALUATION_STATUS_ID IN <foreach item="items" index="index" collection="evaluatorStatusList"
+															open="(" separator="," close=")">
+															#{items}
+											    		 </foreach>
+			)ALL_SCORE
+		INNER JOIN EVALUATION_CRITERIA ON ALL_SCORE.EVALUATION_CRITERIA_ID = EVALUATION_CRITERIA.EVALUATION_CRITERIA_ID
+		FULL OUTER JOIN EVALUATION_STATUS ON ALL_SCORE.EVALUATION_STATUS_ID = EVALUATION_STATUS.EVALUATION_STATUS_ID
+		FULL OUTER JOIN EVALUATION_SETTINGS_INTERNAL ON EVALUATION_STATUS.EVAL_SETTINGS_INT_ID =
+		EVALUATION_SETTINGS_INTERNAL.EVAL_SETTINGS_INT_ID FULL OUTER JOIN EVALUATION_SETTINGS_EXTERNAL ON EVALUATION_STATUS.EVAL_SETTINGS_EXT_ID = EVALUATION_SETTINGS_EXTERNAL.EVAL_SETTINGS_EXT_ID
+		FULL OUTER JOIN CITY_USER_DETAILS ON EVALUATION_SETTINGS_EXTERNAL.AGENCY_USERID =CITY_USER_DETAILS.USER_ID
+											OR CITY_USER_DETAILS.user_id = EVALUATION_SETTINGS_INTERNAL.INT_EVALUATOR_USERID
+		WHERE EVALUATION_STATUS.EVALUATION_STATUS_ID IN <foreach item="items" index="index" collection="evaluatorStatusList"
+															open="(" separator="," close=")">
+															#{items}
+											    		 </foreach>
+		ORDER BY version_number, internal_name
+	</select>
+	<!-- R5: Ends - Updated -->
+	
+		<resultMap id="acceptProposalTaskDetails" type="com.nyc.hhs.model.AcceptProposalTaskBean" >
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<result property="proposalId" column="PROPOSAL_ID" />
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="proposalTitle" column="PROPOSAL_TITLE" />
+		<result property="providerId" column="ORGANIZATION_ID" />
+		<result property="procurementEpin" column="EPIN" />
+		<result property="agencyId" column="AGENCY_ID" />
+		<result property="updateFirstRoundApprovalDate" column="UPD_FST_RND_EVAL_CMPLT_DATE" />
+	</resultMap>
+	<select id="getDetailsToLaunchAcceptProposalWF" parameterType="String" resultMap="acceptProposalTaskDetails">
+		SELECT PROC.PROCUREMENT_TITLE,PROP.ORGANIZATION_ID,PROP.PROPOSAL_TITLE,PROP.PROPOSAL_ID,PROC.EPIN,PROC.UPD_FST_RND_EVAL_CMPLT_DATE,PROC.PROCUREMENT_ID,PROC.AGENCY_ID
+		FROM PROCUREMENT PROC,PROPOSAL_CONFIG PROP WHERE PROC.PROCUREMENT_ID=PROP.PROCUREMENT_ID AND PROP.PROPOSAL_STATUS_ID=18 AND PROC.PROCUREMENT_ID=#{asProcurementId}
+	</select>
+	<select id="fetchProviderNameList" parameterType="java.lang.String" resultType="string">
+	select organization_legal_name from organization where lower(organization_legal_name) like #{asProviderName}
+	</select>
+	
+	<select id="fetchReviewScoreCount" parameterType="map" resultType="int">
+		SELECT COUNT(PROPOSAL_ID)
+		FROM evaluation_status 
+		WHERE PROCUREMENT_ID=#{asProcurementId}
+    	AND status_id in (41,42)
+    	AND EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</select>
+	<select id="fetchEvaluatorCount" parameterType="map" resultType="int">
+		SELECT COUNT(PROPOSAL_ID)
+		FROM evaluation_status 
+		WHERE PROCUREMENT_ID=#{asProcurementId}
+		AND EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</select>
+	
+	<select id="fetchProcurementDates" parameterType="map" resultMap="evaluationResults">
+		select eg.SUBMISSION_CLOSE_DATE, p.UPD_PROPOSAL_DUE_DATE, p.IS_OPEN_ENDED_RFP from procurement p, evaluation_group eg 
+		where p.procurement_id = #{procumentID}
+		and p.procurement_id = eg.procurement_id
+		<if test="evaluationGroupId != null">
+			and eg.evaluation_group_id = #{evaluationGroupId}
+		</if>
+	</select>
+	
+	
+	<select id="fetchExtAndIntEvaluator" parameterType="java.lang.String" resultType="Map">
+	SELECT EMAIL_ID, FIRST_NAME || ' ' || LAST_NAME name,user_id userId FROM 
+	city_user_details where USER_ID in
+	(SELECT AGENCY_USERID userid FROM EVALUATION_SETTINGS_EXTERNAL WHERE PROCUREMENT_ID=#{asProcurementID} UNION ALL 
+	SELECT INT_EVALUATOR_USERID userid FROM EVALUATION_SETTINGS_INTERNAL WHERE PROCUREMENT_ID=#{asProcurementID}) 
+	</select>
+
+	<resultMap id="evaluationCriteriaBeanDetails" type="com.nyc.hhs.model.EvaluationBean">		
+		<result property="scoreSeqNum" column="SCORE_SEQ_NUM" />
+		<result property="scoreCriteria" column="SCORE_CRITERIA" />
+		<result property="score" column="TEMP_SCORE" />		
+		<result property="comments" column="TEMP_COMMENTS" />		
+		<result property="maximumScore" column="MAXIMUM_SCORE" />			
+		<result property="evaluationCriteriaId" column="EVALUATION_CRITERIA_ID" />
+		<result property="evaluationStatusId" column="EVALUATION_STATUS_ID" />		
+		<result property="modifiedFlag" column="MODIFIED_FLAG" />
+		<result property="createdByUserId" column="CREATED_BY_USERID" />
+		<result property="modifiedByUserId" column="MODIFIED_BY_USERID" />				
+	</resultMap>
+
+<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	 <select id="fetchEvaluationScoreDetail" parameterType="java.util.Map" resultMap="evaluationCriteriaBeanDetails"> 
+		SELECT score.temp_score,
+		  score.temp_comments,
+		  criteria.score_criteria,
+		  criteria.maximum_score,
+		  criteria.SCORE_SEQ_NUM,
+		  criteria.EVALUATION_CRITERIA_ID,
+		  score.MODIFIED_FLAG,
+		  #{evaluationStatusId} AS evaluation_status_id
+		FROM
+		  (SELECT * FROM evaluation_score WHERE evaluation_status_id = #{evaluationStatusId}
+		  )score,
+		  evaluation_criteria criteria,
+		  evaluation_pool_mapping epm,
+		  evaluation_group eg,
+		  evaluation_status es
+		WHERE criteria.evaluation_criteria_id = score.evaluation_criteria_id(+)
+		AND eg.procurement_id                 = criteria.procurement_id
+		AND criteria.procurement_id           = #{procurementId,jdbcType=VARCHAR} 
+		and epm.evaluation_pool_mapping_id = es.evaluation_pool_mapping_id
+		and es.evaluation_status_id = #{evaluationStatusId}
+		and epm.evaluation_group_id = eg.evaluation_group_id
+		AND eg.VERSION_NUMBER_EC              = criteria.version_number
+		ORDER BY criteria.SCORE_SEQ_NUM
+      </select>
+	
+	  <!-- R5 Starts : Updated-->
+      <update id="updateScoreDetails" parameterType="com.nyc.hhs.model.EvaluationBean">
+            UPDATE EVALUATION_SCORE SCO
+	      SET 
+	      <if test="actionPerformed == 'Finished'">
+	            SCO.SCORE = #{score,jdbcType=VARCHAR},
+	            SCO.COMMENTS = #{comments,jdbcType=VARCHAR},
+	            <if test="modifiedFlag == 1">
+	            	SCO.MODIFIED_FLAG = decode(#{score,jdbcType=VARCHAR} , SCO.SCORE, 0, 1),
+	            </if>
+	            SCO.SCORE_CHANGE_TYPE = (SELECT NVL(SUM(CASE WHEN  #{score,jdbcType=VARCHAR} &gt; (SELECT score FROM evaluation_score_Archive
+			                                        							WHERE EVALUATION_CRITERIA_ID = #{evaluationCriteriaId,jdbcType=VARCHAR}
+		                                       									AND EVALUATION_STATUS_ID = #{evaluationStatusId,jdbcType=VARCHAR}
+		                                       									AND version_number =(SELECT MAX(version_number) 
+	                                       															FROM evaluation_score_Archive
+														                                         	WHERE EVALUATION_STATUS_ID = #{evaluationStatusId,jdbcType=VARCHAR}
+														                                          	AND EVALUATION_CRITERIA_ID = #{evaluationCriteriaId,jdbcType=VARCHAR}
+																			                        )
+																			   ) THEN '1'
+		        							WHEN  #{score,jdbcType=VARCHAR} &lt; (SELECT score FROM evaluation_score_Archive
+                                        										WHERE EVALUATION_CRITERIA_ID = #{evaluationCriteriaId,jdbcType=VARCHAR}
+                                        										AND EVALUATION_STATUS_ID = #{evaluationStatusId,jdbcType=VARCHAR}
+                                        										AND version_number = (SELECT MAX(version_number)
+															                                          FROM evaluation_score_Archive
+															                                          WHERE EVALUATION_STATUS_ID = #{evaluationStatusId,jdbcType=VARCHAR}
+															                                          AND EVALUATION_CRITERIA_ID = #{evaluationCriteriaId,jdbcType=VARCHAR}
+															                                          )
+															                    ) THEN '-1'
+            								WHEN  #{score,jdbcType=VARCHAR} = (SELECT score FROM evaluation_score_Archive
+									                                        WHERE EVALUATION_CRITERIA_ID = #{evaluationCriteriaId,jdbcType=VARCHAR}
+									                                        AND EVALUATION_STATUS_ID = #{evaluationStatusId,jdbcType=VARCHAR}
+									                                        AND version_number = (SELECT MAX(version_number)
+														                                          FROM evaluation_score_Archive
+														                                          WHERE EVALUATION_STATUS_ID = #{evaluationStatusId,jdbcType=VARCHAR}
+														                                          AND EVALUATION_CRITERIA_ID = #{evaluationCriteriaId,jdbcType=VARCHAR}
+									                                          					 )
+									                                          ) THEN '0'
+									    END),0) as SCORE_CHANGE_TYPE
+         				from evaluation_score
+          				WHERE EVALUATION_STATUS_ID = #{evaluationStatusId,jdbcType=VARCHAR}
+						AND EVALUATION_CRITERIA_ID = #{evaluationCriteriaId,jdbcType=VARCHAR}),
+						
+		SCO.COMMENT_CHANGE_FLAG = (SELECT NVL(SUM( CASE WHEN #{comments,jdbcType=VARCHAR} = (SELECT comments
+                                        										 FROM evaluation_score_Archive
+										                                         WHERE EVALUATION_CRITERIA_ID = #{evaluationCriteriaId,jdbcType=VARCHAR}
+										                                         AND EVALUATION_STATUS_ID = #{evaluationStatusId,jdbcType=VARCHAR}
+                                        										 AND version_number = (SELECT MAX(version_number)
+																                                          FROM evaluation_score_Archive
+																                                        WHERE EVALUATION_STATUS_ID = #{evaluationStatusId,jdbcType=VARCHAR}
+																                                        AND EVALUATION_CRITERIA_ID = #{evaluationCriteriaId,jdbcType=VARCHAR}
+                                          																)
+                                          										) THEN '0'
+		        							WHEN #{comments,jdbcType=VARCHAR} != (SELECT comments
+                                        										 FROM evaluation_score_Archive
+										                                         WHERE EVALUATION_CRITERIA_ID = #{evaluationCriteriaId,jdbcType=VARCHAR}
+										                                         AND EVALUATION_STATUS_ID = #{evaluationStatusId,jdbcType=VARCHAR}
+										                                         AND version_number = (SELECT MAX(version_number)
+                                          																FROM evaluation_score_Archive
+															                                          WHERE EVALUATION_STATUS_ID = #{evaluationStatusId,jdbcType=VARCHAR}
+															                                          AND EVALUATION_CRITERIA_ID = #{evaluationCriteriaId,jdbcType=VARCHAR}
+                                          															  )
+                                          										) THEN '1'
+		      END),0) as COMMENT_CHANGE_FLAG
+          from evaluation_score
+          WHERE EVALUATION_STATUS_ID = #{evaluationStatusId,jdbcType=VARCHAR}
+		  AND EVALUATION_CRITERIA_ID = #{evaluationCriteriaId,jdbcType=VARCHAR}),
+	      </if>
+	      SCO.TEMP_SCORE = #{score,jdbcType=VARCHAR} ,SCO.TEMP_COMMENTS = #{comments,jdbcType=VARCHAR} ,MODIFIED_DATE= systimestamp ,MODIFIED_BY_USERID= #{modifiedByUserId, jdbcType=VARCHAR}
+	     
+	      WHERE SCO.EVALUATION_STATUS_ID = #{evaluationStatusId,jdbcType=VARCHAR} AND         
+	      SCO.EVALUATION_CRITERIA_ID = #{evaluationCriteriaId,jdbcType=VARCHAR}
+      </update>
+	  <!-- R5 Ends : Updated-->
+	
+	<!-- R5 Starts : Updated-->
+	<insert id="insertScoreDetails" parameterType="com.nyc.hhs.model.EvaluationBean">
+		INSERT INTO
+		EVALUATION_SCORE(EVALUATION_SCORE_ID, EVALUATION_STATUS_ID, EVALUATION_CRITERIA_ID, 
+		MODIFIED_FLAG,
+		<if test="actionPerformed == 'Finished'">
+    		SCORE, COMMENTS,
+    	</if>
+    	TEMP_SCORE,TEMP_COMMENTS, CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,MODIFIED_BY_USERID, SCORE_CHANGE_TYPE,COMMENT_CHANGE_FLAG)
+		values(evaluation_score_id.nextval,
+		#{evaluationStatusId,jdbcType=VARCHAR},
+		#{evaluationCriteriaId,jdbcType=VARCHAR},
+		0,
+		<if test="actionPerformed == 'Finished'">
+    		#{score, jdbcType=VARCHAR},
+    		#{comments, jdbcType=VARCHAR},
+    	</if>		
+		#{score, jdbcType=VARCHAR},
+		#{comments, jdbcType=VARCHAR}, systimestamp,
+		#{createdByUserId, jdbcType=VARCHAR},
+		systimestamp,
+		#{modifiedByUserId, jdbcType=VARCHAR},0,0)		
+	</insert>
+	<!-- R5 Ends : Updated-->
+	
+	<select id="fetchTotalEvaluationComplete" parameterType="com.nyc.hhs.model.EvaluationBean"
+		resultType="int">
+		SELECT COUNT(ES.PROPOSAL_ID) AS Total_Evaluations_Complete
+		FROM evaluation_status ES,
+		proposal_config PC, 
+		EVALUATION_POOL_MAPPING epm
+		WHERE ES.proposal_id = PC.proposal_id
+		AND ES.EVALUATION_POOL_MAPPING_ID = epm.EVALUATION_POOL_MAPPING_ID
+		AND epm.evaluation_group_id = pc.evaluation_group_id
+		AND epm.competition_pool_id = pc.competition_pool_id
+		AND PC.proposal_status_id != 25
+		AND ES.status_id = '104'
+		AND PC.procurement_id = #{procurementId}
+		AND epm.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</select>
+	
+	<select id="fetchTotalEvaluationInProgess" parameterType="com.nyc.hhs.model.EvaluationBean"
+		resultType="int">
+   		select COUNT(ES.PROPOSAL_ID) AS Total_Evaluations_InProgress
+		from evaluation_status ES,
+		proposal_config PC,
+		EVALUATION_POOL_MAPPING epm
+		WHERE ES.proposal_id = PC.proposal_id
+		AND ES.EVALUATION_POOL_MAPPING_ID = epm.EVALUATION_POOL_MAPPING_ID
+		AND epm.evaluation_group_id = pc.evaluation_group_id
+		AND epm.competition_pool_id = pc.competition_pool_id
+		AND PC.proposal_status_id != 25
+		AND ES.status_id IN('41', '42')
+		AND PC.procurement_id = #{procurementId}
+		AND epm.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</select>
+	
+	<resultMap type="com.nyc.hhs.model.EvaluationBean" id="awardSelectionComments">
+		<result property="proposalTitle" column="PROPOSAL_TITLE" />		
+		<result property="organizationName" column="ORGANIZATION_LEGAL_NAME" />
+		<result property="comments" column="INTERNAL_COMMENT" />
+	</resultMap>
+	
+	<select id="fetchSelectionCommentsForAwardTask" parameterType="hashmap" resultMap="awardSelectionComments">
+		 SELECT PRO.PROPOSAL_TITLE, ORG.ORGANIZATION_LEGAL_NAME, USERCOM.INTERNAL_COMMENT 
+    		FROM PROPOSAL_CONFIG PRO, ORGANIZATION ORG, USER_COMMENT USERCOM
+    		WHERE USERCOM.ENTITY_ID = PRO.PROPOSAL_ID AND PRO.ORGANIZATION_ID = ORG.ORGANIZATION_ID
+    		AND USERCOM.ENTITY_ID = #{entityId,jdbcType=VARCHAR} AND  USERCOM.ENTITY_TYPE = #{entityType,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- Start || Changes done for enhancement 6577 for Release 3.10.0 -->
+	<select id="fetchNoOfProviders" parameterType="java.util.Map"
+		resultType="int">
+		SELECT COUNT(DISTINCT(PC1.organization_id))
+			FROM proposal_config PC1, proposal_config PC
+			WHERE PC1.organization_id = PC.organization_id
+			AND pc.procurement_id =#{asProcurementId}
+			and pc.PROPOSAL_STATUS_ID!=#{asProcurementStatus} 
+			 and pc.PROPOSAL_STATUS_ID!=#{proposalStatusId}
+	</select>
+	<select id="fetchNoOfProposals" parameterType="java.util.Map"
+		resultType="int">
+		select count(1) from proposal_config where procurement_id=#{asProcurementId} and PROPOSAL_STATUS_ID!=#{asProcurementStatus} and PROPOSAL_STATUS_ID!=#{proposalStatusId} 
+	</select>
+	<!-- End || Changes done for enhancement 6577 for Release 3.10.0 -->
+	<update id="updateProcurementForCloseSubmissions" parameterType="java.util.Map">
+		update procurement set status_id=#{asProcurementStatus},
+		MODIFIED_BY_USERID=#{userId},MODIFIED_DATE=systimestamp 
+		where procurement_id=#{asProcurementId}
+	</update>
+	
+	<!-- Below Query modified for enhancement 3.1.0 :6204 -->
+	<update id="updateReturnForRevision" parameterType="java.util.Map">
+		UPDATE PROPOSAL_CONFIG set PROPOSAL_STATUS_ID= #{asStatusId}, LAST_UPDATE_DATE = systimestamp WHERE PROCUREMENT_ID=#{asProcurementId} 
+		 and PROPOSAL_ID=#{asProposalId}
+	</update>
+	
+	<update id="updateDocReturnForRevision" parameterType="java.util.Map">
+		UPDATE PROPOSAL_DOCUMENT set PROPOSAL_DOCUMENT_STATUS_ID= #{documentStatus} WHERE PROCUREMENT_ID=#{asProcurementId}
+		and PROPOSAL_ID=#{asProposalId} and PROPOSAL_DOCUMENT_STATUS_ID = #{prevStatus}
+	</update>
+	
+	<update id="updateEvaluationStatusReturned" parameterType="java.util.Map">
+		UPDATE EVALUATION_STATUS set STATUS_ID= #{asScoreReturned}	WHERE PROCUREMENT_ID=#{asProcurementId}
+		and PROPOSAL_ID=#{asProposalId}
+	</update>
+	
+	<update id="updateEvaluationReviewDetails" parameterType="com.nyc.hhs.model.EvaluationBean">
+		UPDATE EVALUATION_STATUS set PROC_STATUS_ID= #{procStatusId} WHERE EVALUATION_STATUS_ID=#{evaluationStatusId}
+		and PROPOSAL_ID=#{proposalId}
+	</update>
+	
+	<update id="finishEvaluationReviewsStatus" parameterType="map">
+		UPDATE EVALUATION_STATUS set STATUS_ID = #{asProcStatus}, PROC_STATUS_ID = null 
+		WHERE PROPOSAL_ID=#{proposalId}
+		<if test="evaluatorStatusList != null">
+			and EVALUATION_STATUS_ID in
+			<foreach item="items" index="index" collection="evaluatorStatusList"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach> 
+		</if>  
+	</update>
+	
+	<update id="finishEvaluationReviewsStatusCompleted" parameterType="map">
+		UPDATE EVALUATION_STATUS set PROC_STATUS_ID = STATUS_ID 
+		WHERE PROPOSAL_ID = #{proposalId}
+		AND STATUS_ID != #{asProcStatus}
+	</update>
+	
+	<select id="sendNotification" parameterType="java.lang.String" resultType="map">
+	   SELECT  pro.procurement_title, proconf.organization_id from procurement pro, proposal_config proconf 
+		where proconf.procurement_id=pro.procurement_id and proconf.proposal_id=#{asProposalId}
+	</select>
+	
+	<select id="checkForSendEvalTaskButton" parameterType="java.lang.String" resultType="int">
+	    select distinct count(1) from evaluation_status e full join
+		(select procurement_id, proposal_id from proposal_config where proposal_status_id not in (20,25)
+		and procurement_id = #{asProcurementId}) proc on proc.procurement_id = e.procurement_id
+		where (e.procurement_id = #{asProcurementId} or proc.procurement_id = #{asProcurementId})
+	</select>
+	
+	<select id="fetchAwardStatusId" parameterType="com.nyc.hhs.model.EvaluationBean"
+		resultType="map">
+		 SELECT AWARD_REVIEW_STATUS_ID, AWARD_APPROVAL_DATE  
+  		 FROM AWARD 
+  		 WHERE PROCUREMENT_ID = #{procurementId,jdbcType=VARCHAR}
+  		 and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</select>
+	
+	
+	<update id="updateModifiedFlagEvalResults" parameterType="com.nyc.hhs.model.EvaluationBean">
+		UPDATE EVALUATION_RESULTS SET MODIFIED_FLAG = '1' where PROPOSAL_ID = #{proposalId}
+	</update>
+	
+	<!-- Start || Changes done for enhancement 6574 for Release 3.10.0 -->
+	<update id="updateModifiedFlagForOrg" parameterType="com.nyc.hhs.model.EvaluationBean">
+		UPDATE EVALUATION_RESULTS SET MODIFIED_FLAG = '1' where PROPOSAL_ID in (select distinct pc.proposal_id from proposal_config pc, EVALUATION_RESULTS eval where 
+		pc.proposal_id = eval.proposal_id and pc.organization_id = (select organization_id from proposal_config where proposal_id = #{proposalId}) and pc.procurement_id = 
+		(select procurement_id from proposal_config where proposal_id = #{proposalId}) and pc.evaluation_group_id = (select evaluation_group_id from proposal_config where proposal_id = #{proposalId}) 
+		and pc.competition_pool_id = (select competition_pool_id from proposal_config where proposal_id = #{proposalId})) 
+	</update>
+	<!-- End || Changes done for enhancement 6574 for Release 3.10.0 -->
+	
+	<select id="countEvaluationUsers"  parameterType="java.lang.String" resultType="int">
+		SELECT EVALUATOR_COUNT from EVALUATION_POOL_MAPPING where EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</select>
+	
+	<select id="getAwardReviewStatusId" parameterType="com.nyc.hhs.model.EvaluationFilterBean" resultType="String">
+		select Award_review_status_id from Award 
+		where procurement_id = #{procurementId}
+		and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</select>
+	
+	<!-- Start || Changes done for Enhancement #6574 for Release 3.10.0 -->
+	<select id="getAwardConfigDocs" parameterType="com.nyc.hhs.model.EvaluationFilterBean" resultType="String">
+		select AWARD_DOCUMENT_CONFIG_ID from AWARD_DOCUMENT_CONFIG awDocConfig, AWARD award where 
+		awDocConfig.AWARD_ID = award.AWARD_ID 
+		and award.procurement_id = #{procurementId}
+		and award.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</select>
+	<!-- End || Changes done for Enhancement #6574 for Release 3.10.0 -->
+	
+	<select id="getProposalStatusIdCount" parameterType="com.nyc.hhs.model.EvaluationFilterBean" resultType="int">
+		select distinct proc_review_status_id 
+	  	from proposal_config pc, evaluation_pool_mapping epm
+		where pc.proposal_status_id in (20, 23, 24) 
+	  	and pc.procurement_id = epm.procurement_id
+	  	and pc.EVALUATION_GROUP_ID = epm.EVALUATION_GROUP_ID
+	  	and pc.COMPETITION_POOL_ID = epm.COMPETITION_POOL_ID
+		and pc.procurement_id = #{procurementId}
+	 	and epm.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</select>
+	
+	<resultMap id="evaluationWFProposalDetails" type="com.nyc.hhs.model.AcceptProposalTaskBean" >
+		<result property="procurementId" column="PROCUREMENT_ID" />
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="procurementEpin" column="EPIN" />
+		<result property="agencyId" column="AGENCY_ID" />
+		<result property="proposalId" column="PROPOSAL_ID" />
+		<result property="proposalTitle" column="PROPOSAL_TITLE" />
+		<result property="updateFirstRoundApprovalDate" column="UPD_FST_RND_EVAL_CMPLT_DATE" />
+		<result property="providerId" column="ORGANIZATION_ID"/>
+		
+	</resultMap>
+	<select id="fetchProposalDetailsForEvaluationTask" parameterType="String" resultMap="evaluationWFProposalDetails">
+		SELECT PROC.PROCUREMENT_TITLE,PROP.ORGANIZATION_ID,PROP.PROPOSAL_TITLE,PROP.PROPOSAL_ID,PROC.EPIN,PROC.UPD_FST_RND_EVAL_CMPLT_DATE,PROC.PROCUREMENT_ID,PROC.AGENCY_ID
+		FROM PROCUREMENT PROC,PROPOSAL_CONFIG PROP WHERE PROC.PROCUREMENT_ID=PROP.PROCUREMENT_ID AND PROP.PROPOSAL_STATUS_ID=20 AND PROC.PROCUREMENT_ID=#{asProcurementId}
+	</select>
+	
+	<!-- Below Query modified for enhancement 3.1.0 :6204 -->
+	<update id="updateProposalStatusAccForEval" parameterType="java.util.Map">
+		update proposal_config set proposal_status_id = #{PROPOSAL_ACCEPTED_FOR_EVALUATION,jdbcType=VARCHAR},
+		proc_review_status_id = #{PROPOSAL_ACCEPTED_FOR_EVALUATION,jdbcType=VARCHAR},
+		MODIFIED_DATE = SYSDATE,LAST_UPDATE_DATE = systimestamp
+		where proposal_id in
+		(select proposal_id  from proposal_config pc, evaluation_pool_mapping epm
+		where pc.evaluation_group_id = epm.evaluation_group_id
+		and pc.COMPETITION_POOL_id = epm.COMPETITION_POOL_id
+		and epm.evaluation_pool_mapping_id = #{evaluationPoolMappingId,jdbcType=VARCHAR}
+		and pc.procurement_id = #{procurementId,jdbcType=VARCHAR} 
+		) 
+		and proposal_status_id not in( #{PROPOSAL_DRAFT,jdbcType=VARCHAR},#{PROPOSAL_NON_RESPONSIVE,jdbcType=VARCHAR})
+	</update>
+	
+	<resultMap id="AwardWFProcurementDetails" type="com.nyc.hhs.model.AcceptProposalTaskBean" >
+		<result property="agencyPrimaryContactId" column="AGENCY_PRIMARY_CONTACT_ID" />
+		<result property="agencySecondaryContactId" column="AGENCY_SECONDARY_CONTACT_ID" />
+		<result property="procurementTitle" column="PROCUREMENT_TITLE" />
+		<result property="procurementEpin" column="EPIN" />
+		<result property="agencyId" column="AGENCY_ID" />
+		<result property="agencyName" column="AGENCY_NAME" />
+		<result property="agencyPrimaryContact" column="AGENCY_PRIMARY_CONTACT" />
+		<result property="agencySecondaryContact" column="AGENCY_SECONDARY_CONTACT" />
+		<result property="accPrimaryContactId" column="ACC_PRIMARY_CONTACT_ID" />
+		<result property="accSecondaryContactId" column="ACC_SECONDARY_CONTACT_ID" />
+		<result property="accPrimaryContact" column="ACC_PRIMARY_CONTACT" />
+		<result property="accSecondaryContact" column="ACC_SECONDARY_CONTACT" />
+		<result property="competitionPoolTitle" column="COMPETITION_POOL_TITLE" />
+		<result property="evaluationGroupTitle" column="EVALUATION_GROUP_TITLE" />
+		<result property="isOpenEndedRfp" column="IS_OPEN_ENDED_RFP" />
+	</resultMap>
+	<select id="fetchProcurementDetailsForAwardWF" parameterType="map" resultMap="AwardWFProcurementDetails">
+	    SELECT NAD.AGENCY_NAME,PR.AGENCY_ID,PR.EPIN,PR.PROCUREMENT_ID,PR.PROCUREMENT_TITLE,CUD.EMAIL_ID AS 
+		AGENCY_PRIMARY_CONTACT_ID,CUD1.EMAIL_ID AS AGENCY_SECONDARY_CONTACT_ID, 
+	    CUD2.EMAIL_ID AS ACC_PRIMARY_CONTACT_ID,
+	    CUD3.EMAIL_ID AS ACC_SECONDARY_CONTACT_ID,
+	    CUD.FIRST_NAME ||' '||cud.last_name as AGENCY_PRIMARY_CONTACT,
+	    CUD1.FIRST_NAME ||' '||cud1.last_name as AGENCY_SECONDARY_CONTACT, 
+	    CUD2.FIRST_NAME ||' '||cud2.last_name as ACC_PRIMARY_CONTACT,
+	    CUD3.FIRST_NAME ||' '||cud3.last_name as ACC_SECONDARY_CONTACT,
+        EG.EVALUATION_GROUP_TITLE, CP.COMPETITION_POOL_TITLE,
+        PR.IS_OPEN_ENDED_RFP
+	    FROM PROCUREMENT PR, 
+	    CITY_USER_DETAILS CUD,CITY_USER_DETAILS CUD1,CITY_USER_DETAILS CUD2, CITY_USER_DETAILS CUD3,NYC_AGENCY_DETAILS NAD,
+        EVALUATION_POOL_MAPPING EPM, EVALUATION_GROUP EG, COMPETITION_POOL CP
+	    WHERE PR.PROCUREMENT_ID=#{asProcurementId}
+		AND CUD.USER_ID=PR.AGENCY_PRIMARY_CONTACT_ID AND CUD1.USER_ID=PR.AGENCY_SECONDARY_CONTACT_ID AND NAD.AGENCY_ID=PR.AGENCY_ID
+	    AND CUD2.USER_ID=PR.ACCELERATOR_PRMRY_CONTACT_ID AND CUD3.USER_ID=PR.ACCELERATOR_SECNDRY_CONTACT_ID AND 
+	    NAD.AGENCY_ID=PR.AGENCY_ID AND EPM.EVALUATION_GROUP_ID = EG.EVALUATION_GROUP_ID
+        AND EPM.COMPETITION_POOL_ID = CP.COMPETITION_POOL_ID AND EPM.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</select>
+	
+	<update id="updateEvaluationStatus" parameterType="hashmap">
+		UPDATE EVALUATION_STATUS SET status_id = #{statusId,jdbcType=VARCHAR}, modified_by_userid = #{userId,jdbcType=VARCHAR}, 
+		modified_date = SYSDATE WHERE evaluation_status_id = #{evaluationStatusId,jdbcType=VARCHAR}
+	</update>
+	
+	<insert id="insertEvaluationResult" parameterType="map">
+		INSERT INTO
+		EVALUATION_RESULTS(EVALUATION_RESULTS_ID,
+		PROPOSAL_ID, EVALUATION_SCORE, MODIFIED_FLAG,
+		CREATED_DATE, CREATED_BY_USERID, MODIFIED_DATE,
+		MODIFIED_BY_USERID, EVALUATION_POOL_MAPPING_ID,REQUEST_AMENDMENT_FLAG)
+		values(SEQ_EVALUATION_RESULTS_ID.nextval,
+		#{proposalId,jdbcType=VARCHAR},
+		#{score,jdbcType=VARCHAR},		
+		0,
+		systimestamp,
+		#{userId, jdbcType=VARCHAR},
+		systimestamp,
+		#{userId, jdbcType=VARCHAR}, 
+		<choose>
+			<when test="evaluationPoolMappingId != null and evaluationPoolMappingId != ''">
+				#{evaluationPoolMappingId, jdbcType=VARCHAR}
+			</when>
+			<otherwise>
+				(select epm.evaluation_pool_mapping_id from evaluation_pool_mapping epm,
+				proposal_config pc
+				where pc.competition_pool_id = epm.competition_pool_id
+				and pc.evaluation_group_id = epm.evaluation_group_id
+				and pc.proposal_id = #{proposalId})
+			</otherwise>
+		</choose>
+		,0
+		)	
+	</insert>
+	
+	<update id="updateEvaluationResult" parameterType="java.util.Map">
+    	UPDATE EVALUATION_RESULTS 
+    	SET EVALUATION_SCORE = #{score,jdbcType=VARCHAR},
+    	MODIFIED_DATE = systimestamp,
+    	MODIFIED_BY_USERID = #{userId, jdbcType=VARCHAR}
+    	WHERE PROPOSAL_ID = #{proposalId,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- Below Query modified for enhancement 3.1.0 :6204 -->
+	<update id="modifyProposalStatus" parameterType="java.util.Map">
+    	UPDATE PROPOSAL_CONFIG 
+    	SET PROPOSAL_STATUS_ID = #{proposalStatusId,jdbcType=VARCHAR},
+    	LAST_UPDATE_DATE = systimestamp
+    	WHERE PROPOSAL_ID = #{proposalId,jdbcType=VARCHAR}
+	</update>
+	
+	<delete id="deleteFromEvaluationScoreInternal" parameterType="java.util.Map">
+		delete from evaluation_score where evaluation_status_id in (select EVALUATION_STATUS_ID from evaluation_status 
+		where EVAL_SETTINGS_INT_ID in (select EVAL_SETTINGS_INT_ID from EVALUATION_SETTINGS_INTERNAL 
+		WHERE PROCUREMENT_ID =
+		#{asProcurementId,jdbcType=VARCHAR}
+		and INT_EVALUATOR_USERID  in
+		<foreach item="items" collection="loEvaluatorsInternalList"
+			open="(" separator="," close=")">
+			#{items.internalEvaluatorName}
+   		</foreach> ) )
+	</delete>
+	
+	<delete id="deleteFromEvaluationStatusInternal" parameterType="java.util.Map">
+		delete from evaluation_status 
+		where EVAL_SETTINGS_INT_ID in (select EVAL_SETTINGS_INT_ID from EVALUATION_SETTINGS_INTERNAL 
+		WHERE PROCUREMENT_ID =
+		#{asProcurementId,jdbcType=VARCHAR}
+		and INT_EVALUATOR_USERID  in
+		<foreach item="items" collection="loEvaluatorsInternalList"
+			open="(" separator="," close=")">
+			#{items.internalEvaluatorName}
+   		</foreach> )
+	</delete>
+	
+	<delete id="deleteFromEvaluationScoreExternal" parameterType="com.nyc.hhs.model.Evaluator">
+		delete from evaluation_score where evaluation_status_id in (select EVALUATION_STATUS_ID from evaluation_status 
+		where EVAL_SETTINGS_EXT_ID in (select EVAL_SETTINGS_EXT_ID from EVALUATION_SETTINGS_EXTERNAL 
+		WHERE PROCUREMENT_ID =
+		#{procurementId,jdbcType=VARCHAR}
+		and EXT_EVALUATOR_NAME =#{extEvaluatorName} and AGENCY_USERID = #{agencyUserId} ))
+		
+	</delete>
+	
+	<delete id="deleteFromEvaluationStatusExternal" parameterType="com.nyc.hhs.model.Evaluator">
+		delete from evaluation_status 
+		where EVAL_SETTINGS_EXT_ID in (select EVAL_SETTINGS_EXT_ID from EVALUATION_SETTINGS_EXTERNAL 
+		WHERE PROCUREMENT_ID =
+		#{procurementId,jdbcType=VARCHAR}
+		and EXT_EVALUATOR_NAME =#{extEvaluatorName} and AGENCY_USERID = #{agencyUserId} )
+	</delete>
+	
+	<delete id="deleteEvaluatorExternalAfterEvaluation" parameterType="com.nyc.hhs.model.Evaluator">
+		DELETE
+		FROM EVALUATION_SETTINGS_EXTERNAL
+		WHERE PROCUREMENT_ID =
+		#{procurementId,jdbcType=VARCHAR}
+		and EXT_EVALUATOR_NAME = #{extEvaluatorName} and AGENCY_USERID = #{agencyUserId}
+	</delete>
+	
+	<select id="deletedInternalEvalautionStatusId" parameterType="java.util.Map" resultType="int">
+		select EVALUATION_STATUS_ID from evaluation_status 
+		where EVAL_SETTINGS_INT_ID in (select EVAL_SETTINGS_INT_ID from EVALUATION_SETTINGS_INTERNAL 
+		WHERE PROCUREMENT_ID =
+		#{asProcurementId,jdbcType=VARCHAR}
+		and INT_EVALUATOR_USERID  in
+		<foreach item="items" collection="loEvaluatorsInternalList"
+			open="(" separator="," close=")">
+			#{items.internalEvaluatorName}
+   		</foreach> )
+	</select>
+	
+	<select id="deletedExternalEvalautionStatusId" parameterType="java.util.Map" resultType="int">
+		select EVALUATION_STATUS_ID from evaluation_status 
+		where EVAL_SETTINGS_EXT_ID in (select EVAL_SETTINGS_EXT_ID from EVAL_SETTINGS_EXT_ID 
+		WHERE PROCUREMENT_ID =
+		#{asProcurementId,jdbcType=VARCHAR}
+		and EXT_EVALUATOR_NAME = #{extEvaluatorName} and AGENCY_USERID = #{agencyUserId})
+	</select>
+	
+	<select id="fetchInternalEvaluatorId" parameterType="java.lang.String" resultType="int">
+		 SELECT ESI.EVAL_SETTINGS_INT_ID FROM EVALUATION_SETTINGS_INTERNAL ESI, EVALUATION_STATUS ES
+			WHERE ESI.EVAL_SETTINGS_INT_ID != ES.EVAL_SETTINGS_INT_ID 
+			AND   ES.procurement_id=#{asProcurementId}
+	</select>	
+	<insert id="insertSelectedProposalComments" parameterType="com.nyc.hhs.model.EvaluationBean">
+		INSERT INTO USER_COMMENT(USER_COMMENT_ID, WORKFLOW_ID, TASK_ID, AUDIT_DATE, 
+		INTERNAL_COMMENT, PROVIDER_COMMENT, ENTITY_TYPE, AGENCY_ID,
+        CREATED_DATE, CREATED_BY_USERID, MODIFIED_DATE, MODIFIED_BY_USERID, ENTITY_ID)
+        VALUES(SEQ_USER_COMMENT_ID.NEXTVAL,'','',sysdate,#{comments, jdbcType=VARCHAR},'','Selection Comments',''
+        ,sysdate,#{modifiedByUserId},sysdate,#{modifiedByUserId},#{proposalId,jdbcType=VARCHAR})
+	</insert>
+	<select id="fetchExternalEvaluatorId" parameterType="java.lang.String" resultType="int">
+		 SELECT ESE.EVAL_SETTINGS_EXT_ID FROM EVALUATION_SETTINGS_EXTERNAL ESE, EVALUATION_STATUS ES
+			WHERE ESE.EVAL_SETTINGS_EXT_ID != ES.EVAL_SETTINGS_EXT_ID
+			AND ES.procurement_id=#{asProcurementId}
+	</select>
+	
+	<delete id="deleteEvaluationSettingsInternal" parameterType="map">
+		delete from EVALUATION_SETTINGS_INTERNAL where procurement_id=#{asProcurementId} 
+		and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</delete>
+	
+	<delete id="deleteEvaluationSettingsExternal" parameterType="map">
+		delete from EVALUATION_SETTINGS_EXTERNAL where procurement_id=#{asProcurementId} 
+		and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</delete>
+	
+	<!--<update id="updateProcurementTableRecords" parameterType="java.lang.String">
+		UPDATE PROCUREMENT SET EVALUATOR_COUNT = 0 
+		WHERE PROCUREMENT_ID = #{asProcurementId,jdbcType=VARCHAR}
+	</update>-->
+	
+	<update id="updateNotSelectedProposalComments" parameterType="com.nyc.hhs.model.EvaluationBean">
+		UPDATE USER_COMMENT uc
+	    SET uc.INTERNAL_COMMENT = #{comments, jdbcType=VARCHAR}, 
+	    MODIFIED_DATE = sysdate, MODIFIED_BY_USERID = #{modifiedByUserId}
+	    WHERE uc.ENTITY_TYPE = 'Selection Comments'
+	    AND uc.ENTITY_ID = #{proposalId,jdbcType=VARCHAR}
+	</update>
+	
+	<select id="fetchAwardAppDate" parameterType="com.nyc.hhs.model.EvaluationFilterBean" resultType="String">
+		 select AWARD_APPROVAL_DATE from AWARD 
+		 where procurement_id = #{procurementId}
+		 and EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</select>
+	
+	<select id="fetchEvaluatorsList" parameterType="map" resultMap="evaluationScores">
+		select USER_ID,NAME, EXT_EVALUATOR_NAME,evaluatorDisplayId, INTERNAL_NAME from
+		(SELECT CUD.USER_ID, TRIM(NVL(CUD.FIRST_NAME,'')||' '||NVL(CUD.LAST_NAME,'')) NAME,
+        'internal' as EXT_EVALUATOR_NAME,es.EVAL_SETTINGS_INT_ID as evaluatorDisplayId,
+        TRIM(NVL(CUD.FIRST_NAME,'')||' '||NVL(CUD.LAST_NAME,'')) as INTERNAL_NAME
+		FROM EVALUATION_SETTINGS_INTERNAL es ,CITY_USER_DETAILS cud
+		WHERE cud.user_id = es.INT_EVALUATOR_USERID and
+        es.PROCUREMENT_ID = #{procurementId} 
+        <if test="evaluationPoolMappingId != null">
+        	and es.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+        </if>
+		UNION ALL
+		SELECT CUD.USER_ID, TRIM(NVL(CUD.FIRST_NAME,'')||' '||NVL(CUD.LAST_NAME,'')) NAME,
+        ese.EXT_EVALUATOR_NAME as EXT_EVALUATOR_NAME,ese.EVAL_SETTINGS_EXT_ID as evaluatorDisplayId,
+        ese.EXT_EVALUATOR_NAME as INTERNAL_NAME
+		FROM EVALUATION_SETTINGS_EXTERNAL ese ,CITY_USER_DETAILS cud
+        where  
+        cud.user_id = ese.AGENCY_USERID and
+        ese.PROCUREMENT_ID = #{procurementId} 
+         <if test="evaluationPoolMappingId != null">
+        	and ese.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+        </if>)
+        order by lower(INTERNAL_NAME)
+	</select>
+	
+	<select id="fetchUserEmailIds" parameterType="java.lang.String" resultType="string">
+		SELECT CUD.EMAIL_ID FROM CITY_USER_DETAILS CUD, EVALUATION_STATUS ES, EVALUATION_SETTINGS_INTERNAL ESI  
+		WHERE CUD.USER_ID= ESI.INT_EVALUATOR_USERID
+			AND ES.EVAL_SETTINGS_INT_ID = ESI.EVAL_SETTINGS_INT_ID
+			AND ES.PROPOSAL_ID = #{asProposalId}
+		UNION 
+			SELECT CUD.EMAIL_ID
+				FROM CITY_USER_DETAILS CUD, EVALUATION_STATUS ES, EVALUATION_SETTINGS_EXTERNAL ESE
+			WHERE CUD.USER_ID = ESE.AGENCY_USERID
+			AND   ESE.EVAL_SETTINGS_EXT_ID = ES.EVAL_SETTINGS_EXT_ID
+			AND   PROPOSAL_ID =#{asProposalId}
+	</select>
+	
+	<select id="fetchReturnedScoresUserEmailIds" parameterType="java.lang.String" resultType="string">
+		SELECT cud.EMAIL_ID FROM CITY_USER_DETAILS cud WHERE cud.USER_ID IN 
+		(SELECT INT_EVALUATOR_USERID FROM EVALUATION_SETTINGS_INTERNAL WHERE EVAL_SETTINGS_INT_ID IN 
+		(SELECT EVAL_SETTINGS_INT_ID FROM EVALUATION_STATUS WHERE EVALUATION_STATUS_ID = #{asEvaluationStatusId}))
+		UNION
+		SELECT cud.EMAIL_ID FROM CITY_USER_DETAILS cud WHERE cud.USER_ID IN 
+		(SELECT AGENCY_USERID FROM EVALUATION_SETTINGS_EXTERNAL WHERE EVAL_SETTINGS_EXT_ID IN
+		(SELECT EVAL_SETTINGS_EXT_ID FROM EVALUATION_STATUS WHERE EVALUATION_STATUS_ID = #{asEvaluationStatusId}))
+	</select>
+	
+	<update id="updateAddDelFlag" parameterType="java.util.Map">
+		UPDATE CONTRACT SET ADD_DELETE_FLAG = #{addDeleteStatus} 
+		WHERE PROCUREMENT_ID = #{asProcurementId}
+		and EVALUATION_POOL_MAPPING_ID=#{evaluationPoolMappingId}
+	</update>
+	
+	<select id="getUpdatedProposalDueDate" parameterType="java.lang.String"
+		resultType="java.sql.Timestamp">
+		SELECT UPD_PROPOSAL_DUE_DATE from PROCUREMENT WHERE PROCUREMENT_ID=#{asProcurementID}
+	</select>
+	
+	<select id="fetchEvaluationStatusCount" parameterType="map"
+		resultType="int">
+		SELECT count(1) FROM EVALUATION_STATUS WHERE PROCUREMENT_ID=#{procurementId}
+		and EVALUATION_POOL_MAPPING_ID=#{evaluationPoolMappingId}
+	</select>
+	
+	<select id="fetchReqDocCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT COUNT(PROCUREMENT_DOCUMENT_ID) FROM procurement_document_config
+		where procurement_id = #{asProcurementId} AND procurement_document_type = #{reqDocName}
+	</select>
+	
+	<select id="fetchNotNonResponsiveCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) FROM PROPOSAL_CONFIG WHERE PROCUREMENT_ID=#{asProcurementId} 
+		AND EVALUATION_GROUP_ID = #{evaluationGroupId} AND COMPETITION_POOL_ID = #{competitionPoolId}
+		AND PROPOSAL_STATUS_ID!=#{statusId} AND PROPOSAL_STATUS_ID!=#{lsDraftId}
+	</select>
+	<!-- Start || Changes made for Release 3.6.0 for enhancement 5905 -->
+	<update id="updateEvaluationSentFlag" parameterType="java.util.Map">
+		UPDATE EVALUATION_POOL_MAPPING SET EVALUATION_SENT=#{evaluationSent}, EVALUATION_PROGRESS=#{evaluationSent} 
+		WHERE EVALUATION_POOL_MAPPING_ID=#{evaluationPoolMappingId}
+	</update>
+	<!-- End || Changes made for Release 3.6.0 for enhancement 5905 -->
+	<select id="fetchEvaluationSentFlag" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		SELECT EVALUATION_SENT FROM EVALUATION_POOL_MAPPING WHERE EVALUATION_POOL_MAPPING_ID=#{evaluationPoolMappingId}
+	</select>
+	
+	<select id="fetchUpdatedAwardAmount" parameterType="map" resultType="String">
+		SELECT sum(award_amount) award from evaluation_results 
+		where proposal_id in
+			(select proposal_id from proposal_config where 
+			procurement_id = #{asProcurementId} and proc_review_status_id = 23)
+		and EVALUATION_POOL_MAPPING_ID=#{evaluationPoolMappingId}
+	</select>
+	
+	<!-- comp_pool.COMPETITION_POOL_TITLE, eval_group.EVALUATION_GROUP_TITLE and 
+	procurement.IS_OPEN_ENDED_RFP are fetched as a part of R4 Open procurement change-->
+	<select id="fetchProposalAndOrgName" parameterType="string" resultType="map">
+		SELECT pc.proposal_title, org.organization_legal_name, comp_pool.COMPETITION_POOL_TITLE, 
+		eval_group.EVALUATION_GROUP_TITLE, procurement.IS_OPEN_ENDED_RFP
+		FROM PROPOSAL_CONFIG PC, ORGANIZATION ORG, 
+		PROCUREMENT procurement, COMPETITION_POOL comp_pool, EVALUATION_GROUP eval_group 
+		WHERE PC.PROPOSAL_ID = #{asProposalId} AND
+		pc.organization_id = org.organization_id AND
+		PC.COMPETITION_POOL_ID = comp_pool.COMPETITION_POOL_ID AND 
+		PC.EVALUATION_GROUP_ID = eval_group.EVALUATION_GROUP_ID AND 
+		PC.PROCUREMENT_ID = procurement.PROCUREMENT_ID
+	</select>
+	
+	<insert id="evaluationVersionArchive" parameterType="java.util.Map">
+		INSERT
+		INTO EVALUATION_VERSION_ARCHIVE
+		  (
+		    EVALUATION_VERSION_ARCHIVE_ID,
+		    VERSION_NUMBER,
+		    PROPOSAL_ID,
+		    CREATED_DATE,
+		    CREATED_BY_USERID,
+		    ACCO_COMMENTS,
+		    CANCEL_FLAG
+		  )
+		  VALUES
+		  (
+		    SEQ_EVAL_VERSION_ARCHIVE_ID.nextval,
+		    (SELECT COUNT(*)+1 FROM EVALUATION_VERSION_ARCHIVE  WHERE PROPOSAL_ID = #{asProposalId} AND CANCEL_FLAG = 0),
+		    #{asProposalId},
+		    SYSTIMESTAMP,
+		    #{asUserId},
+		    (SELECT internal_comment
+		    FROM user_comment
+		    WHERE entity_type= 'Evaluation'
+		    AND entity_id    = #{asProposalId}
+		    ),
+		    0
+		  )
+  	</insert>
+	
+	<!-- R5 starts : updated -->
+	<insert id="evaluationScoreArchive" parameterType="java.util.Map">
+		INSERT
+		INTO EVALUATION_SCORE_ARCHIVE
+		  (
+		    EVALUATION_SCORE_ARCHIVE_ID,
+		    EVALUATION_STATUS_ID,
+		    EVALUATION_CRITERIA_ID,
+		    SCORE,
+		    COMMENTS,
+		    VERSION_NUMBER,
+		    SCORE_CHANGE_TYPE,
+    		COMMENT_CHANGE_FLAG,
+    		CREATED_BY_USERID,
+    		CREATED_DATE
+		  )
+		SELECT SEQ_EVAL_SCORE_ARCHIVE_ID.nextval,
+		  EVALUATION_STATUS_ID,
+		  EVALUATION_CRITERIA_ID,
+		  SCORE,
+		  COMMENTS,
+		  (SELECT MAX(VERSION_NUMBER)
+		  FROM EVALUATION_VERSION_ARCHIVE
+		  WHERE PROPOSAL_ID = #{asProposalId} AND CANCEL_FLAG = 0
+		  ) AS VERSION_NUMBER,
+		  SCORE_CHANGE_TYPE,
+		  COMMENT_CHANGE_FLAG,
+		  CREATED_BY_USERID,
+		  systimestamp
+		FROM EVALUATION_SCORE
+		WHERE EVALUATION_STATUS_ID IN
+		  (SELECT EVALUATION_STATUS_ID FROM EVALUATION_STATUS WHERE PROPOSAL_ID = #{asProposalId}
+		  )
+  	</insert>
+	<!-- R5 ends : updated -->
+
+	<!-- R5 starts : updated -->
+	<insert id="evaluationGenCommentArchive" parameterType="java.util.Map">
+		INSERT
+		INTO EVALUATION_GEN_COMMENT_ARCHIVE
+		  (
+		    EVALUATION_GEN_COMMENT_ID,
+		    EVALUATION_STATUS_ID,
+		    COMMENTS,
+		    VERSION_NUMBER,
+		    RETURN_STATUS,
+		    CREATED_BY_USERID,
+		    CREATED_DATE
+		  )
+		SELECT SEQ_EVAL_GEN_COMMENT_ID.nextval,
+		  ENTITY_ID,
+		  INTERNAL_COMMENT,
+		  (SELECT MAX(VERSION_NUMBER)
+		  FROM EVALUATION_VERSION_ARCHIVE
+		  WHERE PROPOSAL_ID = #{asProposalId} AND CANCEL_FLAG = 0 
+		  ) AS VERSION_NUMBER,
+		 (SELECT DECODE(STATUS_ID,104,0,1) FROM EVALUATION_STATUS WHERE EVALUATION_STATUS_ID = entity_id) AS RETURN_STATUS,
+		  CREATED_BY_USERID,
+		  systimestamp
+		FROM USER_COMMENT
+		WHERE entity_type = 'Evaluator'
+		AND entity_id    IN
+		  (SELECT evaluation_status_id FROM evaluation_status WHERE proposal_id = #{asProposalId}
+		  )
+  	</insert>
+	<!-- R5 ends : updated -->
+	
+	<resultMap type="com.nyc.hhs.model.EvaluationSummaryBean" id="evaluationSummaryList">
+		<result property="competitionPoolId" column="COMPETITION_POOL_ID" />
+		<result property="competitionPoolTitle" column="COMPETITION_POOL_TITLE" />
+		<result property="evaluationGroupId" column="evaluation_group_id" />
+		<result property="evaluationPoolMappingId" column="EVALUATION_POOL_MAPPING_ID" />
+		<result property="providersSubmitted" column="provider_count" />
+		<result property="proposalsSubmitted" column="proposal_count" />
+		<result property="evaluationStatus" column="status" />
+		<result property="evaluationsInProgress" column="Evaluation_InProgress" />
+		<result property="evaluationsComplete" column="Evalution_Completed" />
+		<result property="userRole" column="userRole" />
+		<result property="userType" column="userType" />
+		<result property="awardApprovalCount" column="Award_Approval_Count" />
+	</resultMap>
+	
+	<!-- Start || Changes made for enahnacement 6577 for Release 3.10.0 -->
+	<select id="fetchEvaluationSummary" parameterType="com.nyc.hhs.model.EvaluationSummaryBean" 
+		resultMap="evaluationSummaryList">
+		Select COMPETITION_POOL_ID, competition_pool_title, evaluation_group_id,
+		EVALUATION_POOL_MAPPING_ID, provider_count, proposal_count, status, Evalution_Completed, 
+		Evaluation_InProgress, Award_Approval_Count, userRole, userType, rn from 
+		(select COMPETITION_POOL_ID, competition_pool_title, evaluation_group_id,
+		EVALUATION_POOL_MAPPING_ID, provider_count, proposal_count, status, Evalution_Completed, 
+		Evaluation_InProgress, Award_Approval_Count, userRole, userType, rownum as rn
+		from (
+    	SELECT comp.COMPETITION_POOL_ID,
+		  comp.competition_pool_title,
+		  evgrp.evaluation_group_id,
+		  grpcomp.EVALUATION_POOL_MAPPING_ID,
+		  (SELECT COUNT(DISTINCT(organization_id))
+		  FROM proposal_config pc
+		  WHERE pc.COMPETITION_POOL_ID = comp.COMPETITION_POOL_ID
+		  AND pc.evaluation_group_id            = evgrp.evaluation_group_id
+		  AND pc.proposal_status_id            != 17
+		  ) provider_count,
+		  (SELECT COUNT(proposal_id)
+		  FROM proposal_config pc
+		  WHERE pc.COMPETITION_POOL_ID = comp.COMPETITION_POOL_ID
+		  AND pc.evaluation_group_id            = evgrp.evaluation_group_id
+		  AND pc.proposal_status_id            != 17
+		  ) proposal_count,
+		  sm.status,
+		  (SELECT COUNT(evr.status_id)
+		  FROM evaluation_status evr,
+		    proposal_config pc
+		  WHERE evr.status_id                 ='104'
+		  AND pc.proposal_status_id          not in (25,166)
+		  AND pc.COMPETITION_POOL_ID = comp.COMPETITION_POOL_ID
+		  AND pc.evaluation_group_id = evgrp.evaluation_group_id
+		  AND pc.proposal_id                  = evr.proposal_id
+		  ) AS Evalution_Completed,
+		  (SELECT COUNT(evr.status_id)
+		  FROM evaluation_status evr,
+		    proposal_config pc
+		  WHERE evr.proposal_id               = pc.proposal_id
+		  AND evr.status_id                  IN('41', '42')
+		  AND pc.proposal_status_id          not in (25,166)
+		  AND pc.COMPETITION_POOL_ID = comp.COMPETITION_POOL_ID
+		  AND pc.evaluation_group_id = evgrp.evaluation_group_id
+		  AND pc.proposal_id                  = evr.proposal_id
+		  ) AS Evaluation_InProgress,
+		  (SELECT COUNT(awd.award_id)
+		  FROM award awd
+		  WHERE awd.evaluation_pool_mapping_id = grpcomp.evaluation_pool_mapping_id
+      	  and awd.award_approval_date is not null
+		  ) AS Award_Approval_Count,
+		  #{userRole} as userRole,
+		  #{userType} as userType
+		  FROM COMPETITION_POOL comp,
+		  evaluation_group evgrp,
+		  EVALUATION_POOL_MAPPING grpcomp,
+		  status_master_r2_r3 sm
+		WHERE comp.procurement_id                = evgrp.procurement_id
+		AND grpcomp.status_id                       = sm.status_id
+		AND grpcomp.evaluation_group_id          = evgrp.evaluation_group_id
+		AND grpcomp.COMPETITION_POOL_ID = comp.COMPETITION_POOL_ID
+		AND grpcomp.procurement_id               = evgrp.procurement_id
+		AND evgrp.procurement_id                 = #{procurementId}
+    	<if test="evaluationGroupId != null">
+	    	and grpcomp.evaluation_group_id = #{evaluationGroupId}
+    	</if> 
+    	order by 
+		<choose>
+			<when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+			<otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+		</choose>
+		<choose>
+			<when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+			<otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+		</choose>
+		)a ) b WHERE rn
+		BETWEEN #{startNode} AND
+		#{endNode}
+	</select>
+	<!-- End || Changes made for enahnacement 6577 for Release 3.10.0 -->
+	
+	<select id="fetchEvaluationSummaryCount" parameterType="com.nyc.hhs.model.EvaluationSummaryBean" resultType="int">
+		SELECT count(*)
+		FROM COMPETITION_POOL comp,
+		  evaluation_group evgrp,
+		  EVALUATION_POOL_MAPPING grpcomp,
+		  status_master_r2_r3 sm
+		WHERE comp.procurement_id                = evgrp.procurement_id
+		AND grpcomp.status_id                       = sm.status_id
+		AND grpcomp.evaluation_group_id          = evgrp.evaluation_group_id
+		AND grpcomp.COMPETITION_POOL_ID = comp.COMPETITION_POOL_ID
+		AND grpcomp.procurement_id               = evgrp.procurement_id
+		AND evgrp.procurement_id                 = #{procurementId}
+    	<if test="evaluationGroupId != null">
+	    	and grpcomp.evaluation_group_id = #{evaluationGroupId}
+    	</if> 
+	</select>
+	
+	<resultMap type="com.nyc.hhs.model.EvaluationGroupsProposalBean" id="evaluationGroupProposalSummaryList">
+		<result property="evaluationGroupId" column="EVALUATION_GROUP_ID" />
+		<result property="evaluationGroupTitle" column="EVALUATION_GROUP_TITLE" />
+		<result property="providersSubmitted" column="provider_count" />
+		<result property="proposalsSubmitted" column="proposal_count" />
+		<result property="evaluationStatus" column="status" />
+		<result property="evaluationsInProgress" column="Evaluation_InProgress" />
+		<result property="evaluationsComplete" column="Evaluation_Completed" />
+		<result property="closingDate" column="SUBMISSION_CLOSE_DATE" />
+	</resultMap>
+	
+	<!-- Start || Changes made for 6577 for Release 3.10.0 -->
+	<select id="fetchEvaluationGroupProposal" parameterType="com.nyc.hhs.model.EvaluationGroupsProposalBean" 
+		resultMap="evaluationGroupProposalSummaryList">
+		select EVALUATION_GROUP_ID, EVALUATION_GROUP_TITLE, status, 
+		SUBMISSION_CLOSE_DATE, provider_count,
+		proposal_count, Evaluation_Completed, Evaluation_InProgress, rn from (
+		select EVALUATION_GROUP_ID, EVALUATION_GROUP_TITLE, status, 
+		SUBMISSION_CLOSE_DATE, provider_count,
+		proposal_count, Evaluation_Completed, Evaluation_InProgress, 
+		rownum as rn from(
+		select evgrp.EVALUATION_GROUP_ID, evgrp.EVALUATION_GROUP_TITLE, sm.status, nvl(TO_CHAR(evgrp.SUBMISSION_CLOSE_DATE,'MM/DD/yyyy'), '----') AS SUBMISSION_CLOSE_DATE,
+ 		(select count(distinct(organization_id)) from proposal_config pc where pc.EVALUATION_GROUP_ID = evgrp.EVALUATION_GROUP_ID
+    	and pc.proposal_status_id != 17) provider_count,
+		(select count(proposal_id) from proposal_config pc where pc.EVALUATION_GROUP_ID = evgrp.EVALUATION_GROUP_ID
+		and pc.proposal_status_id != 17) proposal_count,
+		(select count(evr.status_id) from evaluation_status evr, proposal_config pc where evr.status_id ='104'
+	     and pc.proposal_status_id not in (25,166) 
+	     and pc.proposal_id = evr.proposal_id and pc.EVALUATION_GROUP_ID = evgrp.EVALUATION_GROUP_ID) as Evaluation_Completed, 
+	     (select count(evr.status_id) from evaluation_status evr, proposal_config pc  where evr.proposal_id = pc.proposal_id 
+	      and evr.status_id in('41', '42')  and pc.proposal_status_id not in (25,166) 
+	      and pc.proposal_id = evr.proposal_id and pc.EVALUATION_GROUP_ID = evgrp.EVALUATION_GROUP_ID) as Evaluation_InProgress
+		from 
+			evaluation_group evgrp, status_master_r2_r3 sm
+		where 
+			evgrp.procurement_id =  #{procurementId}
+			and evgrp.status_id = sm.status_id
+			order by 
+			<choose>
+				<when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+				<otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+			</choose>
+			<choose>
+				<when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+				<otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+			</choose>
+			)a ) b WHERE rn
+			BETWEEN #{startNode} AND
+			#{endNode}
+	</select>
+	<!-- End || Changes made for 6577 for Release 3.10.0 -->
+	
+	<select id="fetchEvalGroupProposalCount" parameterType="com.nyc.hhs.model.EvaluationGroupsProposalBean" 
+		resultType="int">
+		select count(*)
+		from evaluation_group evgrp, status_master_r2_r3 sm
+		where 
+			evgrp.procurement_id =  #{procurementId}
+			and evgrp.status_id = sm.status_id
+	</select>
+	
+
+	<select id="fetchEvaluationGroupsProcurement" parameterType="map" resultType="map">
+		select evgrp.EVALUATION_GROUP_ID, evgrp.EVALUATION_GROUP_TITLE
+		from evaluation_group evgrp
+		where evgrp.procurement_id =  #{asProcurementId}
+		and evgrp.status_id !=  #{EVALUATION_GROUP_NO_PROPOSALS}
+		order by lower(evgrp.EVALUATION_GROUP_TITLE)
+	</select>
+	
+	<!-- Query modified as a part of release 3.10.0 enhancement 6577 -->	
+	<select id="fetchCompetitionPoolTitle" parameterType="string" resultType="map">
+		select epm.evaluation_pool_mapping_id, cc.competition_pool_title
+		from evaluation_group eg, COMPETITION_POOL cc, evaluation_pool_mapping epm
+		where
+		eg.evaluation_group_id = #{asEvaluationGroupId}
+		and eg.evaluation_group_id = epm.evaluation_group_id 
+		and epm.COMPETITION_POOL_id = cc.COMPETITION_POOL_id
+		and epm.status_id != #{COMPETITION_POOL_NO_PROPOSALS}
+		and epm.status_id!='167'
+		order by lower(cc.competition_pool_title)
+	</select>
+	
+	<!--<select id="fetchCompetitionPoolTitleProc" parameterType="string" resultType="map">
+		select epm.evaluation_pool_mapping_id, cc.competition_pool_title
+		from evaluation_group eg, COMPETITION_POOL cc, evaluation_pool_mapping epm
+		where
+		eg.procurement_id = #{asProcurementId}
+		and eg.evaluation_group_id = epm.evaluation_group_id 
+		and epm.COMPETITION_POOL_id = cc.COMPETITION_POOL_id
+		and epm.status_id != #{COMPETITION_POOL_NO_PROPOSALS}
+		order by lower(cc.competition_pool_title)
+	</select>
+	
+	--><select id="fetchGroupTitleAndDate" parameterType="string" resultType="map">
+		select cc.competition_pool_title, eg.evaluation_group_title, nvl(TO_CHAR(eg.SUBMISSION_CLOSE_DATE,'MM/DD/yyyy'), '----') AS SUBMISSION_CLOSE_DATE
+		from evaluation_group eg, COMPETITION_POOL cc, evaluation_pool_mapping epm
+		where
+		epm.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+		and eg.evaluation_group_id = epm.evaluation_group_id 
+		and epm.COMPETITION_POOL_id = cc.COMPETITION_POOL_id
+	</select>
+	
+	<select id="fetchGroupTitleAndDateGroup" parameterType="map" resultType="map">
+		select eg.evaluation_group_title, nvl(TO_CHAR(eg.SUBMISSION_CLOSE_DATE,'MM/DD/yyyy'), '----') AS SUBMISSION_CLOSE_DATE
+		from evaluation_group eg
+		where
+		<if test="evaluationGroupId != null">
+		 	eg.evaluation_group_id = #{evaluationGroupId} and
+		</if>
+		eg.procurement_id = #{asProcurementId}
+	</select>
+	
+	<select id="fetchProposalCountAndCompId" parameterType="map" resultType="map">
+		select cp.COMPETITION_POOL_ID, 
+	    (select count(1) from PROPOSAL_CONFIG where 
+	    EVALUATION_GROUP_ID = #{evaluationGroupId} and PROPOSAL_STATUS_ID = #{asProposalStatus} and 
+	 	competition_pool_id = cp.competition_pool_id) PROPOSAL_COUNT
+		from competition_pool cp
+		where 
+		cp.procurement_id = #{asProcurementId}
+	</select>
+	
+	<!-- Start || Changes made for enhancement 6577 for Release 3.10.0 -->
+	<update id="updateCompPoolStatus" parameterType="map">
+		update EVALUATION_POOL_MAPPING 
+		set status_id = #{aoCompPoolStatus} 
+		where COMPETITION_POOL_ID = #{aoCompConfId}
+		and EVALUATION_GROUP_ID = #{evaluationGroupId} and status_id != 167
+	</update>
+	<!-- End || Changes made for enhancement 6577 for Release 3.10.0 -->
+	
+	<select id="fetchEvaluationGroupId" parameterType="string" resultType="string">
+		SELECT EVALUATION_GROUP_ID FROM EVALUATION_GROUP WHERE PROCUREMENT_ID = #{procurementId}
+	</select>
+	
+	<select id="getMinPoolMappingStatusId" parameterType="map" resultType="int">
+         SELECT MIN(DECODE(status_id,
+  		(SELECT distinct '140'
+     	FROM evaluation_pool_mapping
+    	WHERE     	
+    	<choose>
+        	<when test="evaluationGroupId != null">EVALUATION_GROUP_ID = #{evaluationGroupId}</when>
+        	<otherwise>
+        		EVALUATION_GROUP_ID = (select EVALUATION_GROUP_ID from evaluation_pool_mapping where EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId})
+        	</otherwise>
+        </choose> 
+  		AND evaluation_pool_mapping.status_id =167
+  		),167, status_id))
+   		FROM
+   		EVALUATION_POOL_MAPPING
+    	WHERE     	
+    	<choose>
+        	<when test="evaluationGroupId != null">EVALUATION_GROUP_ID = #{evaluationGroupId}</when>
+        	<otherwise>
+        		EVALUATION_GROUP_ID = (select EVALUATION_GROUP_ID from evaluation_pool_mapping where EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId})
+        	</otherwise>
+        </choose> 
+	</select>
+	
+	<!-- Start || Changes made for enhancement 6577 for Release 3.10.0 -->
+	<update id="updateEvalGroupStatus" parameterType="map">
+		 Update EVALUATION_GROUP
+   		 set status_id = decode(#{minStatusId}, #{COMPETITION_POOL_RELEASED}, 
+   		 #{EVALUATION_GROUP_RELEASED}, #{COMPETITION_POOL_PROPOSALS_RECEIVED}, 
+   		 #{EVALUATION_GROUP_PROPOSALS_RECEIVED}, #{COMPETITION_POOL_EVALUATION_COMPLETE}, 
+   		 #{EVALUATION_GROUP_EVALUATION_COMPLETE}, #{COMPETITION_POOL_SELECTIONS_MADE}, 
+   		 #{EVALUATION_GROUP_SELECTIONS_MADE}, #{COMPETITION_POOL_NO_PROPOSALS}, #{EVALUATION_GROUP_NO_PROPOSALS}, 
+   		 #{COMPETITION_POOL_NON_RESPONSIVE}, #{EVALUATION_GROUP_NON_RESPONSIVE}, 
+   		 #{COMPETITION_POOL_CANCELLED}, #{EVALUATION_GROUP_CANCELLED})
+   		 <if test="closeSubmissionFlag != null">
+   		 	, submission_close_date=systimestamp, submission_close_userid=#{userId}
+   		 </if>
+   		 <if test="userId != null">
+   		 	, MODIFIED_BY_USERID = #{userId},
+         	MODIFIED_DATE = systimestamp
+   		 </if>
+         where 
+         <choose>
+         	<when test="evaluationGroupId != null">EVALUATION_GROUP_ID = #{evaluationGroupId}</when>
+         	<otherwise>
+         		EVALUATION_GROUP_ID = (select EVALUATION_GROUP_ID from evaluation_pool_mapping where EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId})
+         	</otherwise>
+         </choose>
+         and status_id != decode(#{minStatusId}, #{COMPETITION_POOL_RELEASED}, 
+         #{EVALUATION_GROUP_RELEASED}, #{COMPETITION_POOL_PROPOSALS_RECEIVED}, 
+         #{EVALUATION_GROUP_PROPOSALS_RECEIVED}, #{COMPETITION_POOL_EVALUATION_COMPLETE}, 
+         #{EVALUATION_GROUP_EVALUATION_COMPLETE}, #{COMPETITION_POOL_SELECTIONS_MADE}, 
+         #{EVALUATION_GROUP_SELECTIONS_MADE}, #{COMPETITION_POOL_NO_PROPOSALS}, #{EVALUATION_GROUP_NO_PROPOSALS}, 
+         #{COMPETITION_POOL_NON_RESPONSIVE}, #{EVALUATION_GROUP_NON_RESPONSIVE}, 
+   		 #{COMPETITION_POOL_CANCELLED}, #{EVALUATION_GROUP_CANCELLED})
+	</update>
+	<!-- End || Changes made for enhancement 6577 for Release 3.10.0 -->
+	
+	<select id="checkSendEvalVisiblityStatus" parameterType="map" resultType="hashmap">
+		select (select count(1) proposal_count
+		from proposal_config pc, evaluation_pool_mapping epm
+		where 
+		pc.competition_pool_id = epm.competition_pool_id
+		and pc.evaluation_group_id = epm.evaluation_group_id
+		and pc.proposal_status_id not in (#{lsDraftId}, #{proposalAcceptedForEval}, #{proposalNonResponsive})
+		and epm.evaluation_pool_mapping_id = #{evaluationPoolMappingId}) proposal_count, 
+		(select count(1) proposal_count_total
+		from proposal_config pc, evaluation_pool_mapping epm
+		where 
+		pc.competition_pool_id = epm.competition_pool_id
+		and pc.evaluation_group_id = epm.evaluation_group_id
+		and pc.proposal_status_id not in (#{lsDraftId})
+		and epm.evaluation_pool_mapping_id = #{evaluationPoolMappingId}) proposal_count_total
+		from dual
+	</select>
+	
+	<select id="checkCancelEvalVisibilityStatus" parameterType="string" resultType="int">
+		select count(award_id) from award 
+		where evaluation_pool_mapping_id = #{evaluationPoolMappingId}
+    	and ((award_approval_date is null 
+    	and award_review_status_id = 33)
+    	or (award_approval_date is not null 
+   		))
+	</select>
+	
+	<delete id="deleteAwardData" parameterType="map">
+		delete from award where EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</delete>
+	
+	<select id="fetchRfpReleasedBeforeR4Flag" parameterType="string" resultType="string">
+		select IS_RELEASED_BEFORE_R4 from procurement where procurement_id = #{procurementId}
+	</select>
+	
+	<select id="getMinGroupStatusId" parameterType="map" resultType="int">
+		Select min(STATUS_ID) from EVALUATION_GROUP
+    	where procurement_id = #{asProcurementId} 
+	</select>
+	
+	<update id="updateProcurementStatusBasedOnGroup" parameterType="map">
+		 Update PROCUREMENT
+   		 set status_id = decode(#{minStatusId}, #{EVALUATION_GROUP_RELEASED}, 
+   		 #{PROCUREMENT_RELEASED}, #{EVALUATION_GROUP_PROPOSALS_RECEIVED}, 
+   		 #{PROCUREMENT_PROPOSALS_RECEIVED}, #{EVALUATION_GROUP_EVALUATION_COMPLETE}, 
+   		 #{PROCUREMENT_EVALUATIONS_COMPLETE}, #{EVALUATION_GROUP_SELECTIONS_MADE}, 
+   		 #{PROCUREMENT_SELECTIONS_MADE}, #{EVALUATION_GROUP_NO_PROPOSALS}, #{PROCUREMENT_PROPOSALS_RECEIVED}, 
+   		 #{EVALUATION_GROUP_NON_RESPONSIVE}, #{PROCUREMENT_PROPOSALS_RECEIVED})
+   		 <if test="userId != null">
+	   		 , MODIFIED_BY_USERID = #{userId},
+	         MODIFIED_DATE = systimestamp
+   		 </if>
+         where PROCUREMENT_ID = #{asProcurementId}
+	         and status_id != decode(#{minStatusId}, #{EVALUATION_GROUP_RELEASED}, 
+	         #{PROCUREMENT_RELEASED}, #{EVALUATION_GROUP_PROPOSALS_RECEIVED}, 
+	         #{PROCUREMENT_PROPOSALS_RECEIVED}, #{EVALUATION_GROUP_EVALUATION_COMPLETE}, 
+	         #{PROCUREMENT_EVALUATIONS_COMPLETE}, #{EVALUATION_GROUP_SELECTIONS_MADE}, 
+	         #{PROCUREMENT_SELECTIONS_MADE}, #{EVALUATION_GROUP_NO_PROPOSALS}, #{PROCUREMENT_PROPOSALS_RECEIVED}, 
+	         #{EVALUATION_GROUP_NON_RESPONSIVE}, #{PROCUREMENT_PROPOSALS_RECEIVED})
+	</update>
+	
+	<!-- Query for default configuration Id update in procurement table-->
+	<update id="updateDefaultConfigurationId" parameterType="map">
+		 update EVALUATION_GROUP set DEFAULT_CONFIGURATION_ID = #{defaultConfigId},
+		 MODIFIED_BY_USERID = #{userId}, MODIFIED_DATE = systimestamp
+		 where evaluation_group_id = (select evaluation_group_id from evaluation_pool_mapping 
+                              			where evaluation_pool_mapping_id = #{defaultConfigId})
+	</update>
+	
+	<!-- Below Query modified for enhancement 3.1.0 :6204 -->
+	<update id="updateProposalStatus" parameterType="map">
+		update PROPOSAL_CONFIG set PROPOSAL_STATUS_ID = #{PROPOSAL_PENDING_REASSIGNMENT},
+		LAST_UPDATE_DATE = systimestamp
+		where PROPOSAL_ID = #{proposalId}
+	</update>
+	
+	<!-- Start || Changes made for enhancement 6577 for Release 3.10.0 -->
+	<update id="updateEvalPoolMappingStatus" parameterType="map">
+		update evaluation_pool_mapping set status_id = #{competitionPoolStatus}
+		where EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId} and status_id != 167
+	</update>
+	<!-- End || Changes made for enhancement 6577 for Release 3.10.0 -->
+	
+	<resultMap type="com.nyc.hhs.model.AwardsContractSummaryBean" id="fetchGroupAwardsContracts">
+		<result property="competitionPoolTitle" column="COMPETITION_POOL_TITLE" />
+		<result property="competitionPoolId" column="COMPETITION_POOL_ID" />
+		<result property="totalAwardAmount" column="award_amount" />
+		<result property="numberOfAwards" column="awardCount" />
+		<result property="evalPoolStatus" column="status_id" />
+		<result property="evaluationPoolMappingId" column="evaluation_pool_mapping_id" />
+	</resultMap>
+	<!-- Query modified as a part of release 3.3.0 defect 6463 -->
+	<select id="fetchGroupAwardsContracts" parameterType="com.nyc.hhs.model.AwardsContractSummaryBean" 
+		resultMap="fetchGroupAwardsContracts">
+		select COMPETITION_POOL_TITLE, COMPETITION_POOL_ID, award_amount, awardCount, status_id, evaluation_pool_mapping_id
+		 from (select a.COMPETITION_POOL_TITLE, a.COMPETITION_POOL_ID, 
+		 decode(a.award_amount, '0', '0.00', to_char(a.award_amount, '999,999,999,999,999,999,999.99')) award_amount, a.awardCount, 
+		 a.status_id, a.evaluation_pool_mapping_id, rownum rn
+			from (select cp.COMPETITION_POOL_TITLE, cp.COMPETITION_POOL_ID, epm.evaluation_pool_mapping_id, epm.status_id,
+				  (SELECT NVL(sum(c.contract_amount),0) award_amount
+      				FROM EVALUATION_POOL_MAPPING evpm,
+        			contract c
+      				WHERE evpm.evaluation_pool_mapping_id = c.evaluation_pool_mapping_id
+      				and evpm.evaluation_pool_mapping_id = epm.evaluation_pool_mapping_id
+      				AND c.STATUS_ID                     != 69 and c.STATUS_ID != 165) award_amount, 
+					(select COUNT(awd.award_id) awardCount from award awd, contract c
+					  where epm.evaluation_pool_mapping_id = awd.evaluation_pool_mapping_id
+					  and  c.evaluation_pool_mapping_id = epm.evaluation_pool_mapping_id
+					   and c.STATUS_ID != 69 and c.STATUS_ID != 165) awardCount
+				from COMPETITION_POOL CP, EVALUATION_GROUP EG, EVALUATION_POOL_MAPPING EPM, award a
+				where 
+				cp.competition_pool_id = epm.competition_pool_id
+				and eg.evaluation_group_id = epm.evaluation_group_id
+				and epm.evaluation_pool_mapping_id = a.evaluation_pool_mapping_id(+)
+				and eg.procurement_id = #{procurementId}
+				and a.award_approval_date is not null
+				 <if test="evaluationGroupId != null and evaluationGroupId != ''">
+				    	and eg.evaluation_group_id = #{evaluationGroupId}
+			     </if>
+				group by  CP.COMPETITION_POOL_TITLE, CP.COMPETITION_POOL_ID, epm.evaluation_pool_mapping_id, epm.status_id 
+				having count(a.award_id) > 0
+				order by
+				<choose>
+					<when test="firstSortDate != false">${firstSort} ${firstSortType}</when>
+					<otherwise>lower(${firstSort}) ${firstSortType}</otherwise>
+				</choose>
+				<choose>
+					<when test="secondSortDate != false">, ${secondSort} ${secondSortType}</when>
+					<otherwise>, lower(${secondSort}) ${secondSortType}</otherwise>
+				</choose>
+				)a ) b WHERE rn BETWEEN #{startNode} AND
+				#{endNode}
+	</select>
+	<!-- End || Changes made for enhancement 6577 for Release 3.10.0 -->
+	
+	<select id="fetchGroupAwardsContractsCount" parameterType="com.nyc.hhs.model.AwardsContractSummaryBean" 
+		resultType="int">
+		  	select count(*)
+			from (select count(epm.evaluation_pool_mapping_id) group_count
+	        FROM EVALUATION_GROUP EG, EVALUATION_POOL_MAPPING EPM, award a
+	        WHERE
+            eg.evaluation_group_id = epm.evaluation_group_id
+            and epm.evaluation_pool_mapping_id = a.evaluation_pool_mapping_id
+            and eg.procurement_id = #{procurementId}
+            and a.award_approval_date is not null
+            <if test="evaluationGroupId != null and evaluationGroupId != ''">
+	    		and eg.evaluation_group_id = #{evaluationGroupId}
+      	    </if>
+            group by epm.evaluation_pool_mapping_id
+            having count(a.award_id) > 0)
+            where group_count > 0
+	</select>
+	
+	<select id="getProposalCountAndCompId" parameterType="map" resultType="map">
+			select epm.evaluation_pool_mapping_id, 
+			(select count(1) from proposal_config where evaluation_group_id = epm.evaluation_group_id
+	  		and competition_pool_id = epm.competition_pool_id and proposal_status_id != #{PROPOSAL_DRAFT}) proposal_count
+			from (select * from evaluation_pool_mapping 
+			where status_id in (#{COMPETITION_POOL_PROPOSALS_RECEIVED}, #{COMPETITION_POOL_NO_PROPOSALS}))epm, 
+			proposal_config pc
+			where pc.proposal_id = #{proposalId}
+			and pc.evaluation_group_id = epm.evaluation_group_id(+) 
+			group by epm.evaluation_pool_mapping_id, epm.competition_pool_id, epm.evaluation_group_id
+	</select>
+	
+	<!-- Start || Changes made for enhancement 6577 for Release 3.10.0 -->
+	<update id="updateCompPoolStatusInPropResubmit" parameterType="map">
+			update EVALUATION_POOL_MAPPING 
+			set status_id = #{aoCompPoolStatus} 
+			where evaluation_pool_mapping_id = #{evaluationPoolMappingId} and status_id != 167
+	</update>
+	<!-- End || Changes made for enhancement 6577 for Release 3.10.0 -->
+	
+	<select id="fetchEvaluationGroupStatus" parameterType="map" resultType="string">
+			select STATUS_ID from evaluation_group 
+			where evaluation_group_id = (select evaluation_group_id from proposal_config 
+			where proposal_id = #{proposalId})
+	</select>
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<select id="checkIfPublishedReleased" parameterType="string" resultType="integer">
+		select count(1) from procurement 
+		where procurement_id = #{procurementId}
+		and status_id in (2,3)
+	</select>
+	
+	<delete id="removeBafoDocsFromVault" parameterType="String">
+		DELETE FROM
+		BAFO_DOCUMENT WHERE DOCUMENT_IDENTIFIER_ID=#{asDocumentId}
+	</delete>
+	
+	<select id="fetchEvaluationGroupsWithAwards" parameterType="map" resultType="map">
+		select evaluation_group_id, EVALUATION_GROUP_TITLE
+			from (select eg.evaluation_group_id, eg.EVALUATION_GROUP_TITLE
+	        FROM EVALUATION_GROUP EG, EVALUATION_POOL_MAPPING EPM, award a
+	        WHERE
+            eg.evaluation_group_id = epm.evaluation_group_id
+            and epm.evaluation_pool_mapping_id = a.evaluation_pool_mapping_id
+            and eg.procurement_id = #{asProcurementId} 
+            and a.award_approval_date is not null
+            group by eg.evaluation_group_id, eg.EVALUATION_GROUP_TITLE
+            having count(a.award_id) > 0) order by lower(EVALUATION_GROUP_TITLE)
+	</select>
+	
+	<select id="fetchEvalGroupIdFromPoolMappingId" parameterType="string" resultType="string">
+		select evaluation_group_id from evaluation_pool_mapping 
+		where evaluation_pool_mapping_id = #{evaluationPoolMappingId}
+	</select>
+	
+	<!-- START | Created by: Sadhna Verma | Queries Added to update non responsive competition pool and evaluation group -->
+	<select id="fetchNotNonResponsivePropCount" parameterType="map" resultType="integer">
+		select count(1) from proposal_config prop, evaluation_pool_mapping eval 
+		where eval.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId} 
+		and eval.PROCUREMENT_ID = prop.PROCUREMENT_ID
+		and eval.EVALUATION_GROUP_ID = prop.EVALUATION_GROUP_ID
+		and eval.COMPETITION_POOL_ID = prop.COMPETITION_POOL_ID
+		and prop.PROPOSAL_STATUS_ID not in( #{PROPOSAL_DRAFT,jdbcType=VARCHAR},#{PROPOSAL_NON_RESPONSIVE,jdbcType=VARCHAR})
+	</select>
+
+	<select id="fetchNonResponsiveCompPoolCount" parameterType="map" resultType="integer">
+	Select
+	countNonResponsiveCompPool
+	from
+		(select count(1) as countTotalCompPool from competition_pool comp
+		where comp.PROCUREMENT_ID = (select procurement_id from 
+		evaluation_pool_mapping where EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}))
+		,(select count(1) as countNoPropRecvdCompPool from evaluation_pool_mapping eval
+		where eval.evaluation_group_id = (select evaluation_group_id from 
+		evaluation_pool_mapping where EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId})
+		and eval.status_id = #{COMPETITION_POOL_NO_PROPOSALS,jdbcType=VARCHAR})
+		,(select count(1) as countNonResponsiveCompPool from evaluation_pool_mapping eval
+		where eval.evaluation_group_id = (select evaluation_group_id from 
+		evaluation_pool_mapping where EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId})
+		and eval.status_id =#{COMPETITION_POOL_NON_RESPONSIVE,jdbcType=VARCHAR})
+    where countNonResponsiveCompPool > 0
+    and countNoPropRecvdCompPool + countNonResponsiveCompPool = countTotalCompPool
+	</select>
+	
+	<!--Start || Modified as a part of release 3.10.0 for enhancement request 6577-->
+	<update id="updateNonResponsiveEvalGroup" parameterType="map">
+		update evaluation_group eval set eval.STATUS_ID = #{EVALUATION_GROUP_NON_RESPONSIVE,jdbcType=VARCHAR} where eval.status_id != 168 and eval.EVALUATION_GROUP_ID = (select EVALUATION_GROUP_ID from evaluation_pool_mapping where EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}) 
+	</update>
+	<!-- END | Created by: Sadhna Verma | Queries Added to update non responsive competition pool and evaluation group -->
+	<!--End || Modified as a part of release 3.10.0 for enhancement request 6577-->
+	
+	<!--Modified as a part of release 3.1.0 for enhancement request 6024-->
+	<update id="updateEvalGroupWithVersionInfo" parameterType="map">
+		update evaluation_group set 
+		VERSION_NUMBER_EC = (select max(version_number) from EVALUATION_CRITERIA where procurement_id = #{asProcurementId}),
+		VERSION_NUMBER_PDC = (select max(version_number) from PRCRMNT_DOCUMENT_MAPPING where procurement_id = #{asProcurementId}),
+		VERSION_NUMBER_PQC = (select max(version_number) from PRCRMNT_QUESTION_MAPPING where procurement_id = #{asProcurementId}),
+		VERSION_NUMBER_RFP_DOC = (select max(version_number) from RFP_DOCUMENT where procurement_id = #{asProcurementId}) 
+		where EVALUATION_GROUP_ID = #{evaluationGroupId} 
+	</update>
+	
+	<!--Added as a part of release 3.6.0 for enhancement request 5905-->
+	<select id="getAllEvalProgressStatusFlag" parameterType="map" resultType="int">
+		SELECT COUNT(PROPOSAL_ID)
+		FROM evaluation_status 
+		WHERE EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+    	AND status_id != 104
+	</select>
+	
+	<!--START || Added as a part of release 3.10.0 for enhancement request 6577-->
+	
+	<select id="fetchCompTitleAndProcTitle" parameterType="map" resultType="hashmap">
+	select comp.competition_pool_title, proc.procurement_title from competition_pool comp, procurement proc, evaluation_pool_mapping eval 
+	where eval.procurement_id = proc.procurement_id and comp.competition_pool_id = eval.competition_pool_id 
+	and eval.evaluation_pool_mapping_id = #{evaluationPoolMappingId}
+	</select>
+	
+	<select id="fetchProvidersInCompetition" parameterType="map" resultType="string">
+	select distinct organization_id from proposal_config prop where prop.procurement_id = #{procurementId} 
+	and prop.evaluation_group_id = #{evaluationGroupId} and prop.competition_pool_id = #{competitionPoolId}
+	</select>
+	
+	<!--END || Added as a part of release 3.10.0 for enhancement request 6577-->
+	
+	<!--START || Added as a part of release 3.11.0 for enhancement request 5978-->
+	<select id="fetchInfoForReturnedPropNotificatn" parameterType="String" resultType="hashmap">
+	select org.organization_legal_name, proc.procurement_title, prop.organization_id from proposal_config prop, procurement proc, organization org 
+	where prop.procurement_id = proc.procurement_id 
+	and prop.organization_id = org.organization_id and prop.proposal_id=#{proposalId} 
+	</select>
+	
+	<select id="fetchLastComment" parameterType="String"
+		resultType="hashmap">
+		SELECT PROVIDER_COMMENT, USER_ID, ORGANIZATION_NAME FROM (SELECT USERT.PROVIDER_COMMENT, DET.USER_ID, NAD.AGENCY_NAME as ORGANIZATION_NAME FROM USER_COMMENT USERT, CITY_USER_DETAILS DET, NYC_AGENCY_DETAILS NAD
+			WHERE USERT.ENTITY_ID = #{proposalId} AND USERT.ENTITY_TYPE='Accept Proposal' 
+		and usert.CREATED_BY_USERID = DET.USER_ID AND NAD.AGENCY_ID = DET.ORGANIZATION_NAME
+		ORDER BY usert.AUDIT_DATE DESC) WHERE ROWNUM=1 
+	</select>
+	<!--END || Added as a part of release 3.11.0 for enhancement request 5978-->
+	
+	<!--START || Added as a part of release 3.10.0 for enhancement request 6574-->
+	<select id="fetchEvalPoolMappingStatus" parameterType="string" resultType="string">
+		SELECT status_id
+		FROM EVALUATION_POOL_MAPPING 
+		WHERE EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</select>
+	<select id="fetchSelectedProposals" parameterType="String" resultType="int">
+		SELECT count(pc.proposal_id) as SELECTED_PROPOSALS from PROPOSAL_CONFIG pc, evaluation_pool_mapping eval
+		WHERE pc.competition_pool_id = eval.competition_pool_id and pc.evaluation_group_id = eval.evaluation_group_id 
+		and pc.procurement_id = eval.procurement_id 
+		and pc.proc_review_status_id = '23' and eval.evaluation_pool_mapping_id = #{evaluationPoolMappingId}
+	</select>
+	<select id="fetchContractCount" parameterType="String" resultType="int">
+		SELECT count(con.contract_id  ) as CONTRACTS from CONTRACT con WHERE con.evaluation_pool_mapping_id = #{evaluationPoolMappingId}
+	</select>
+	<!--END || Added as a part of release 3.10.0 for enhancement request 6574-->
+	
+	<!-- 	R5code starts -->
+	<insert id="insertDefaultDocumentVisibility" parameterType="com.nyc.hhs.model.Procurement">
+		insert into EV_DOCUMENT_VISIBILITY(EV_DOCUMENT_VISIBILITY_ID,PROCUREMENT_DOCUMENT_ID,EVALUATION_POOL_MAPPING_ID,VISIBILITY_FLAG,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,MODIFIED_BY_USERID)
+		(select SEQ_EV_DOCUMENT_VISIBILITY_ID.NEXTVAL, pdm.PROCUREMENT_DOCUMENT_ID, epm.evaluation_pool_mapping_id, DECODE(pdc.PROCUREMENT_DOCUMENT_TYPE, 
+		  						<foreach item="items" index="index" collection="hiddenDocTypes"
+									open="" separator="," close="">
+									#{items, jdbcType=VARCHAR} , 0
+					    		</foreach>, 1), systimestamp, #{userId, jdbcType=VARCHAR}, systimestamp, #{userId, jdbcType=VARCHAR} 
+		from procurement p, PRCRMNT_DOCUMENT_MAPPING pdm, evaluation_pool_mapping epm, evaluation_group eg, procurement_document_config pdc
+		where p.procurement_id = pdm.procurement_id
+		and eg.evaluation_group_id = epm.evaluation_group_id
+		and p.procurement_id = #{asProcurementId}
+		and pdm.version_number = eg.VERSION_NUMBER_PDC
+		and eg.evaluation_group_id=#{evaluationGroupId}
+		and pdc.PROCUREMENT_DOCUMENT_ID = pdm.PROCUREMENT_DOCUMENT_ID
+		and (epm.evaluation_pool_mapping_id, pdm.PROCUREMENT_DOCUMENT_ID) not in 
+			(select evaluation_pool_mapping_id, PROCUREMENT_DOCUMENT_ID from EV_DOCUMENT_VISIBILITY where evaluation_pool_mapping_id = epm.evaluation_pool_mapping_id)
+		)
+	</insert>
+	
+	<update id="updateHiddenDocumentVisibility" parameterType="java.util.Map">
+    	UPDATE EV_DOCUMENT_VISIBILITY
+    	SET VISIBILITY_FLAG = 0,
+    	MODIFIED_DATE = systimestamp,
+    	MODIFIED_BY_USERID = #{userId, jdbcType=VARCHAR} 
+    	WHERE (EVALUATION_POOL_MAPPING_ID, PROCUREMENT_DOCUMENT_ID)
+    	 in (select edv.EVALUATION_POOL_MAPPING_ID, edv.PROCUREMENT_DOCUMENT_ID from 
+    	 		EV_DOCUMENT_VISIBILITY edv , procurement_document_config pdc, evaluation_pool_mapping epm where 
+    	 		epm.EVALUATION_GROUP_ID = #{evaluationGroupId}
+    	 		and edv.evaluation_pool_mapping_id = epm.evaluation_pool_mapping_id
+    	 		and pdc.PROCUREMENT_DOCUMENT_type in <foreach item="items" index="index" collection="hiddenDocTypes"
+									open="(" separator="," close=")">
+									#{items, jdbcType=VARCHAR} 
+					    		</foreach>
+    	 		and pdc.procurement_id = #{asProcurementId, jdbcType=VARCHAR} 
+    	 		and pdc.PROCUREMENT_DOCUMENT_ID = edv.PROCUREMENT_DOCUMENT_ID
+    	 	)
+	</update>
+	
+	<resultMap type="com.nyc.hhs.model.DocumentVisibility" id="evaluatorDocumentsVisibility">
+		<result property="procurementId" column="PROCUREMENT_ID"/>
+		<result property="procurementDocumentId" column="PROCUREMENT_DOCUMENT_ID"/>
+		<result property="visibility" column="VISIBILITY_FLAG"/>
+		<result property="evaluationPoolMappingId" column="EVALUATION_POOL_MAPPING_ID"/>
+		<result property="documentType" column="PROCUREMENT_DOCUMENT_TYPE"/>
+		<result property="documentVisibilityId" column="EV_DOCUMENT_VISIBILITY_ID"/>
+		<result property="requiredFlag" column="REQUIRED_FLAG"/>
+	</resultMap>
+	<select id="fetchDocumentVisibilityDetails" parameterType="Map" resultMap="evaluatorDocumentsVisibility">
+		SELECT pdc.PROCUREMENT_ID,
+		  pdc.PROCUREMENT_DOCUMENT_ID,
+		  NVL(edv.VISIBILITY_FLAG, DECODE(pdc.PROCUREMENT_DOCUMENT_TYPE, 
+		  						<foreach item="items" index="index" collection="hiddenDocTypes"
+									open="" separator="," close="">
+									#{items, jdbcType=VARCHAR} , 0
+					    		</foreach>, 1)) VISIBILITY_FLAG,
+		  #{evaluationPoolMappingId} EVALUATION_POOL_MAPPING_ID,
+		  edv.EV_DOCUMENT_VISIBILITY_ID,
+		  pdc.PROCUREMENT_DOCUMENT_TYPE,
+		  pdc.REQUIRED_FLAG
+		FROM
+		  (SELECT * FROM EV_DOCUMENT_VISIBILITY WHERE evaluation_pool_mapping_id =  #{evaluationPoolMappingId}
+		  ) edv,
+		  procurement_document_config pdc
+		WHERE pdc.procurement_id        = #{procurementId}
+		AND pdc.PROCUREMENT_DOCUMENT_ID = edv.PROCUREMENT_DOCUMENT_ID(+)
+	</select>
+	
+	<select id="fetchDocumentVisibilityDetailsAfterRelease" parameterType="Map" resultMap="evaluatorDocumentsVisibility">
+		select pdc.PROCUREMENT_ID, edv.PROCUREMENT_DOCUMENT_ID, edv.VISIBILITY_FLAG, edv.EVALUATION_POOL_MAPPING_ID, 
+		edv.EV_DOCUMENT_VISIBILITY_ID, pdc.PROCUREMENT_DOCUMENT_TYPE, pdc.REQUIRED_FLAG from EV_DOCUMENT_VISIBILITY edv, procurement_document_config pdc 
+		where evaluation_pool_mapping_id = #{evaluationPoolMappingId} and pdc.PROCUREMENT_DOCUMENT_ID = edv.PROCUREMENT_DOCUMENT_ID(+)
+	</select>
+	
+	<update id="updateDocumentVisibility" parameterType="com.nyc.hhs.model.DocumentVisibility">
+    	UPDATE EV_DOCUMENT_VISIBILITY
+    	SET VISIBILITY_FLAG = #{visibility},
+    	MODIFIED_DATE = systimestamp,
+    	MODIFIED_BY_USERID = #{userId, jdbcType=VARCHAR} 
+    	WHERE EV_DOCUMENT_VISIBILITY_ID = #{documentVisibilityId}
+	</update>
+	
+	<insert id="insertDocumentVisibility" parameterType="com.nyc.hhs.model.DocumentVisibility">
+    	insert into EV_DOCUMENT_VISIBILITY (EV_DOCUMENT_VISIBILITY_ID,PROCUREMENT_DOCUMENT_ID,EVALUATION_POOL_MAPPING_ID,VISIBILITY_FLAG,CREATED_DATE,CREATED_BY_USERID,MODIFIED_DATE,MODIFIED_BY_USERID)
+    	values (SEQ_EV_DOCUMENT_VISIBILITY_ID.NEXTVAL, #{procurementDocumentId}, #{evaluationPoolMappingId}, #{visibility}, systimestamp, #{userId}, systimestamp, #{userId})
+	</insert>
+	
+	<update id="updateScoreChangeToDefault" parameterType="java.util.Map">
+		UPDATE EVALUATION_SCORE
+		SET SCORE_CHANGE_TYPE = 0,
+			COMMENT_CHANGE_FLAG = 0
+		WHERE EVALUATION_STATUS_ID IN (SELECT EVALUATION_STATUS_ID FROM EVALUATION_STATUS WHERE PROPOSAL_ID = #{asProposalId})
+	</update>
+	
+	<select id="fetchEvaluationRoundScoreDetails" parameterType="java.util.Map" resultMap="evaluationCriteriaBeanDetails">
+		SELECT    EVALUATION_CRITERIA_ID,
+				  SCORE_CRITERIA,
+				  MAXIMUM_SCORE,
+				  SCORE_SEQ_NUM,
+				  (SELECT TEMP_SCORE
+				  FROM EVALUATION_SCORE
+				  WHERE EVALUATION_SCORE.EVALUATION_STATUS_ID = #{EntityID} AND EVALUATION_SCORE.EVALUATION_CRITERIA_ID = EC.EVALUATION_CRITERIA_ID
+				  ) AS SCORE,
+				  (SELECT TEMP_COMMENTS
+				  FROM EVALUATION_SCORE
+				  WHERE EVALUATION_SCORE.EVALUATION_STATUS_ID = #{EntityID} AND EVALUATION_SCORE.EVALUATION_CRITERIA_ID = EC.EVALUATION_CRITERIA_ID
+				  ) AS COMMENTS,
+				  (SELECT MODIFIED_FLAG
+				  FROM EVALUATION_SCORE
+				  WHERE EVALUATION_SCORE.EVALUATION_STATUS_ID = #{EntityID} AND EVALUATION_SCORE.EVALUATION_CRITERIA_ID = EC.EVALUATION_CRITERIA_ID
+				  ) AS MODIFIED_FLAG,
+				  #{EntityID} AS EVALUATIONSTATUSID
+				FROM EVALUATION_CRITERIA EC, EVALUATION_GROUP EG, EVALUATION_POOL_MAPPING EPM
+				WHERE EG.PROCUREMENT_ID = EC.PROCUREMENT_ID
+				AND EG.EVALUATION_GROUP_ID = EPM.EVALUATION_GROUP_ID
+				AND EG.VERSION_NUMBER_EC = EC.VERSION_NUMBER
+				AND EPM.EVALUATION_POOL_MAPPING_ID = #{EvaluationPoolMappingId}
+				AND EC.PROCUREMENT_ID = #{ProcurementID} 
+	</select>
+	
+	<select id="fetchRoundDropdownDetails" parameterType="Map" resultMap="evaluationScores">
+		SELECT    DISTINCT ROUNDS,
+				  VERSION_NUMBER
+				FROM
+				  (SELECT 'Iteration'
+				    ||' '
+				    || EVALUATION_SCORE_ARCHIVE.VERSION_NUMBER
+				    ||' - '
+				    ||
+				    CASE
+				      WHEN EVALUATION_SCORE_ARCHIVE.VERSION_NUMBER = 1
+				      THEN
+				        (SELECT MIN(TO_CHAR(CREATED_DATE,'MM/DD/YYYY'))
+				        FROM EVALUATION_STATUS
+				        WHERE PROCUREMENT_ID = #{ProcurementID} AND PROPOSAL_ID = #{ProposalID}
+				        )
+				      ELSE (SELECT TO_CHAR(CREATED_DATE,'MM/DD/YYYY')
+					      FROM EVALUATION_VERSION_ARCHIVE
+					      WHERE PROPOSAL_ID  =#{ProposalID} AND CANCEL_FLAG = 0
+					      AND VERSION_NUMBER = (EVALUATION_SCORE_ARCHIVE.VERSION_NUMBER-1)
+					      )
+				    END AS rounds,
+				    EVALUATION_SCORE_ARCHIVE.VERSION_NUMBER,
+				    (
+				    CASE
+				      WHEN EVALUATION_SCORE_ARCHIVE.VERSION_NUMBER = 1
+				      THEN 1
+				       ELSE DECODE((SELECT RETURN_STATUS FROM EVALUATION_GEN_COMMENT_ARCHIVE
+						   WHERE EVALUATION_STATUS_ID = EVALUATION_SCORE_ARCHIVE.EVALUATION_STATUS_ID AND VERSION_NUMBER + 1 = EVALUATION_SCORE_ARCHIVE.VERSION_NUMBER),1,1,0,0)
+				    END )AS RETURN_STATUS
+				  FROM EVALUATION_SCORE_ARCHIVE EVALUATION_SCORE_ARCHIVE
+				  WHERE EVALUATION_SCORE_ARCHIVE.EVALUATION_STATUS_ID = #{EntityID}
+				  )
+				WHERE RETURN_STATUS != 0
+				ORDER BY VERSION_NUMBER DESC
+	</select>
+	
+	<select id="fetchAllRoundDropdownDetails" parameterType="Map" resultMap="evaluationScores">
+		  SELECT VERSION_NUMBER, 'Iteration '||VERSION_NUMBER||' - '||
+			  (
+			  CASE
+			    WHEN NVL(FULL_DATA.VERSION_NUMBER,1) = 1
+			    THEN
+			      (SELECT MIN(TO_CHAR(CREATED_DATE,'MM/DD/YYYY'))
+			      FROM EVALUATION_STATUS
+			      WHERE PROPOSAL_ID = #{proposalId}
+			      )
+			    ELSE
+			      (SELECT TO_CHAR(CREATED_DATE,'MM/DD/YYYY')
+			      FROM EVALUATION_VERSION_ARCHIVE
+			      WHERE PROPOSAL_ID  = #{proposalId}
+			      AND CANCEL_FLAG    = 0
+			      AND VERSION_NUMBER = (FULL_DATA.VERSION_NUMBER-1)
+			      )
+			  END) AS ROUNDS
+			FROM
+			  (SELECT ALL_DATA.VERSION_NUMBER,
+			    CASE
+			      WHEN ALL_DATA.VERSION_NUMBER = 1
+			      THEN 1
+			      WHEN ALL_DATA.VERSION_NUMBER > 1
+			      THEN
+			        (SELECT DECODE(EGCA.RETURN_STATUS,1,1,0,0)
+			        FROM EVALUATION_GEN_COMMENT_ARCHIVE EGCA
+			        WHERE EGCA.VERSION_NUMBER     = (ALL_DATA.VERSION_NUMBER - 1)
+			        AND EGCA.EVALUATION_STATUS_ID =#{evaluationStatusId}
+			        )
+			      ELSE 0
+			    END AS RETURN_STATUS
+			  FROM
+			    (SELECT DISTINCT VERSION_NUMBER
+			    FROM EVALUATION_SCORE_ARCHIVE
+			    WHERE EVALUATION_STATUS_ID = #{evaluationStatusId}
+			    UNION
+			      (SELECT
+			        (SELECT NVL(MAX(VERSION_NUMBER),0) + 1
+			        FROM EVALUATION_SCORE_ARCHIVE
+			        WHERE EVALUATION_SCORE_ARCHIVE.EVALUATION_STATUS_ID = #{evaluationStatusId}
+			        ) AS VERSION_NUMBER
+			      FROM EVALUATION_SCORE
+			      WHERE EVALUATION_STATUS_ID =#{evaluationStatusId}
+			      )
+			    )ALL_DATA
+			  )FULL_DATA
+			WHERE FULL_DATA.RETURN_STATUS = 1
+			ORDER BY VERSION_NUMBER DESC
+	</select>
+	
+	<select id="fetchEvalScoreOfSelectRound" parameterType="Map" resultMap="evaluationResults">
+		SELECT 	SCORE AS EVALUATION_SCORE,
+			  	EVALUATION_SCORE_ARCHIVE.COMMENTS,
+			  	EVALUATION_CRITERIA.SCORE_CRITERIA,
+				EVALUATION_CRITERIA.MAXIMUM_SCORE,
+				SCORE_SEQ_NUM,
+				EVALUATION_GEN_COMMENT_ARCHIVE.COMMENTS AS INTERNAL_COMMENT,
+				(SELECT SUM(SCORE) FROM EVALUATION_SCORE_ARCHIVE WHERE EVALUATION_STATUS_ID = #{evaluationStatusId} AND VERSION_NUMBER =#{versionNumber}
+				) AS SCORE,
+				EVALUATION_SCORE_ARCHIVE.COMMENT_CHANGE_FLAG,
+  				EVALUATION_SCORE_ARCHIVE.SCORE_CHANGE_TYPE,
+ 				(SELECT CASE WHEN count(1) > 1 THEN 1 ELSE 0 END FROM (SELECT COMMENTS FROM EVALUATION_GEN_COMMENT_ARCHIVE WHERE EVALUATION_STATUS_ID = #{evaluationStatusId}
+ 				 AND VERSION_NUMBER = (#{versionNumber}
+				        ) - 1
+				        UNION
+				       SELECT COMMENTS FROM EVALUATION_GEN_COMMENT_ARCHIVE WHERE EVALUATION_STATUS_ID = #{evaluationStatusId} 
+				       AND VERSION_NUMBER = #{versionNumber}
+				      	)
+				 ) AS GEN_COMMENT_CHANGE_FLAG,
+				 DECODE(#{versionNumber},1,0,EVALUATION_SCORE_ARCHIVE.VERSION_NUMBER,( select case when score_1 = score_2 then 0 else 1 END from
+					(SELECT SUM(SCORE) as score_1 FROM EVALUATION_SCORE_ARCHIVE WHERE EVALUATION_STATUS_ID = #{evaluationStatusId} AND VERSION_NUMBER = #{versionNumber})t1,
+	           		(SELECT SUM(SCORE) as score_2 FROM EVALUATION_SCORE_ARCHIVE WHERE EVALUATION_STATUS_ID = #{evaluationStatusId} AND VERSION_NUMBER = (#{versionNumber})-1)t2)
+           		) AS GEN_SCORE_CHANGE_TYPE,
+				 #{evaluationStatusId} AS EVALUATION_STATUS_ID,
+				 #{versionNumber} AS VERSION_NUMBER
+				 
+		FROM EVALUATION_SCORE_ARCHIVE
+			INNER JOIN EVALUATION_CRITERIA ON EVALUATION_SCORE_ARCHIVE.EVALUATION_CRITERIA_ID = EVALUATION_CRITERIA.EVALUATION_CRITERIA_ID
+			INNER JOIN EVALUATION_GEN_COMMENT_ARCHIVE ON EVALUATION_GEN_COMMENT_ARCHIVE.EVALUATION_STATUS_ID = EVALUATION_SCORE_ARCHIVE.EVALUATION_STATUS_ID
+													 AND EVALUATION_GEN_COMMENT_ARCHIVE.VERSION_NUMBER =  EVALUATION_SCORE_ARCHIVE.VERSION_NUMBER
+		WHERE EVALUATION_SCORE_ARCHIVE.EVALUATION_STATUS_ID = #{evaluationStatusId}
+		AND EVALUATION_SCORE_ARCHIVE.VERSION_NUMBER =#{versionNumber}
+		ORDER BY SCORE_SEQ_NUM
+	</select>
+
+	<resultMap type="com.nyc.hhs.model.EvaluationDetailBean" id="evaluatorProgress">
+		<result property="evaluationStatusId" column="EVALUATION_STATUS_ID"/>
+		<result property="evaluatorName" column="EVALUATOR_NAME"/>
+		<result property="proposalId" column="PROPOSAL_ID"/>
+		<result property="proposalTitle" column="PROPOSAL_TITLE"/>
+		<result property="evaluationCompletedStatus" column="IS_COMPLETED"/>
+		<result property="providerName" column="PROVIDER_NAME"/>
+	</resultMap>
+	
+	<select id="fetchEvaluationProgress" parameterType="Map" resultMap="evaluatorProgress">
+		SELECT DISTINCT EVALUATION_STATUS.EVALUATION_STATUS_ID,
+			  (
+			  CASE
+			    WHEN EVALUATION_STATUS.EVAL_SETTINGS_EXT_ID IS NOT NULL
+			    THEN EVALUATION_SETTINGS_EXTERNAL.EXT_EVALUATOR_NAME
+			      ||'(via '
+			  END)
+			  ||
+			  (SELECT FIRST_NAME
+			    ||' '
+			    ||LAST_NAME
+			  FROM CITY_USER_DETAILS
+			  WHERE USER_ID = (
+			    CASE
+			      WHEN EVALUATION_STATUS.EVAL_SETTINGS_INT_ID IS NOT NULL
+			      THEN EVALUATION_SETTINGS_INTERNAL.INT_EVALUATOR_USERID
+			      WHEN EVALUATION_STATUS.EVAL_SETTINGS_EXT_ID IS NOT NULL
+			      THEN EVALUATION_SETTINGS_EXTERNAL.AGENCY_USERID
+			    END )
+			  )
+			  || (
+			  CASE
+			    WHEN EVALUATION_STATUS.EVAL_SETTINGS_EXT_ID IS NOT NULL
+			    THEN ')'
+			  END)AS EVALUATOR_NAME,
+			  PROPOSAL_CONFIG.PROPOSAL_ID,
+			  PROPOSAL_CONFIG.PROPOSAL_TITLE,
+			  (
+			  CASE
+			    WHEN EVALUATION_STATUS.STATUS_ID = #{statusId}
+			    THEN 1
+			    ELSE 0
+			  END) AS IS_COMPLETED,
+			  ORGANIZATION.ORGANIZATION_LEGAL_NAME AS PROVIDER_NAME
+			FROM EVALUATION_STATUS
+			INNER JOIN PROPOSAL_CONFIG ON EVALUATION_STATUS.PROPOSAL_ID = PROPOSAL_CONFIG.PROPOSAL_ID
+			INNER JOIN EVALUATION_POOL_MAPPING ON PROPOSAL_CONFIG.EVALUATION_GROUP_ID = EVALUATION_POOL_MAPPING.EVALUATION_GROUP_ID
+			                                  AND EVALUATION_STATUS.EVALUATION_POOL_MAPPING_ID = EVALUATION_POOL_MAPPING.EVALUATION_POOL_MAPPING_ID
+			                                  AND EVALUATION_POOL_MAPPING.EVALUATION_GROUP_ID  = PROPOSAL_CONFIG.EVALUATION_GROUP_ID
+			                                  AND EVALUATION_POOL_MAPPING.COMPETITION_POOL_ID  = PROPOSAL_CONFIG.COMPETITION_POOL_ID
+			INNER JOIN ORGANIZATION ON PROPOSAL_CONFIG.ORGANIZATION_ID = ORGANIZATION.ORGANIZATION_ID
+			LEFT JOIN EVALUATION_SETTINGS_EXTERNAL ON EVALUATION_STATUS.EVAL_SETTINGS_EXT_ID = EVALUATION_SETTINGS_EXTERNAL.EVAL_SETTINGS_EXT_ID
+			LEFT JOIN EVALUATION_SETTINGS_INTERNAL ON EVALUATION_STATUS.EVAL_SETTINGS_INT_ID = EVALUATION_SETTINGS_INTERNAL.EVAL_SETTINGS_INT_ID
+			WHERE EVALUATION_STATUS.PROCUREMENT_ID = #{procurementId}
+			AND PROPOSAL_CONFIG.PROPOSAL_STATUS_ID != #{proposalStatusId}
+			AND EVALUATION_POOL_MAPPING.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+			ORDER BY PROPOSAL_CONFIG.PROPOSAL_ID,EVALUATOR_NAME 
+	</select>
+	
+	<select id="fetchCountEvaluationScoreArchive" parameterType="Map" resultType="int">
+		SELECT count(1) FROM EVALUATION_SCORE_ARCHIVE WHERE VERSION_NUMBER = #{versionNumber} AND EVALUATION_STATUS_ID = #{evaluationStatusId}
+	</select>
+	
+	<select id="fetchLatestEvaluationScore" parameterType="Map" resultMap="evaluationResults" >
+	  SELECT  EVALUATION_SCORE,
+			  COMMENTS,
+			  SCORE_CHANGE_TYPE,
+			  COMMENT_CHANGE_FLAG,
+			  INTERNAL_COMMENT,
+			  SCORE,
+			  SCORE_CRITERIA,
+			  SCORE_SEQ_NUM,
+			  MAXIMUM_SCORE,
+			  (SELECT ( CASE WHEN totalScore > 1
+					          THEN 1  ELSE 0 END) FROM
+													  (SELECT COUNT(SCORE) AS totalScore
+													  FROM
+													    (SELECT SUM(SCORE) AS SCORE  FROM EVALUATION_SCORE_ARCHIVE WHERE EVALUATION_STATUS_ID = #{evaluationStatusId}   AND VERSION_NUMBER = ( #{versionNumber} ) - 1
+													      UNION
+													    SELECT SUM(SCORE) AS SCORE FROM EVALUATION_SCORE WHERE EVALUATION_STATUS_ID = #{evaluationStatusId}
+													    )
+													  )
+				 
+         	 ) AS GEN_SCORE_CHANGE_TYPE,
+			  (SELECT CASE WHEN count(1) > 1 THEN 1 ELSE 0 END FROM (
+  															SELECT COMMENTS FROM EVALUATION_GEN_COMMENT_ARCHIVE WHERE EVALUATION_STATUS_ID = #{evaluationStatusId} AND VERSION_NUMBER = (#{versionNumber}) - 1
+													        UNION 
+													       SELECT INTERNAL_COMMENT FROM user_comment WHERE entity_type = 'Evaluator' and entity_id = #{evaluationStatusId}
+				      										)
+				 ) AS GEN_COMMENT_CHANGE_FLAG
+			FROM (SELECT  TEMP_SCORE     AS EVALUATION_SCORE,
+			  TEMP_COMMENTS       AS COMMENTS,
+			  SCORE_CHANGE_TYPE,
+			  COMMENT_CHANGE_FLAG,
+			  INTERNAL_COMMENT,
+			  (SELECT SUM(TEMP_SCORE) FROM EVALUATION_SCORE WHERE EVALUATION_STATUS_ID = #{evaluationStatusId})AS SCORE,
+			  EVALUATION_CRITERIA.SCORE_CRITERIA,
+			  EVALUATION_CRITERIA.SCORE_SEQ_NUM,
+			  EVALUATION_CRITERIA.MAXIMUM_SCORE
+		FROM EVALUATION_SCORE
+		INNER JOIN EVALUATION_CRITERIA ON EVALUATION_SCORE.EVALUATION_CRITERIA_ID = EVALUATION_CRITERIA.EVALUATION_CRITERIA_ID
+		LEFT JOIN user_comment ON user_comment.entity_id = EVALUATION_SCORE.evaluation_status_id
+		AND user_comment.entity_type = 'Evaluator'
+		WHERE EVALUATION_STATUS_ID  = #{evaluationStatusId}
+		ORDER BY SCORE_SEQ_NUM)
+	</select>
+	
+	<update id="updateEvaluationVersionArchive" parameterType="map">
+		UPDATE EVALUATION_VERSION_ARCHIVE SET CANCEL_FLAG = 1 
+		WHERE PROPOSAL_ID in (select pc.proposal_id from evaluation_pool_mapping epm, proposal_config pc
+		where pc.evaluation_group_id = epm.evaluation_group_id and pc.competition_pool_id = epm.competition_pool_id
+		and epm.evaluation_pool_mapping_id = #{evaluationPoolMappingId}) 
+	</update>
+	
+	<select id="getAwardReviewStatusIdForEvaluationSetting" resultType="String" parameterType="hashmap">
+		SELECT AWARD_REVIEW_STATUS_ID FROM AWARD WHERE PROCUREMENT_ID = #{procurementId} AND EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId}
+	</select>
+	
+	<update id="updateEvaluationNegotiationStatus" parameterType="hashmap">
+		update evaluation_results  set negotiation_status=#{awardStatusId} where PROPOSAL_ID IN 
+		(select EVAL.PROPOSAL_ID from evaluation_results EVAL,PROPOSAL_CONFIG PRO where PRO.proposal_id=eval.proposal_id 
+		and EVAL.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId} 
+		<if test="providerId != null">
+		and PRO.ORGANIZATION_ID = #{providerId}
+		</if>
+		)
+	</update>
+	
+	<update id="setNegotiationEvaluationAmount" parameterType="java.lang.String">
+		update evaluation_results set  negotiation_status=175,preserved_amount=award_amount where evaluation_pool_mapping_id = #{asEvaluationPoolMappingId} 
+	</update>
+	
+	<update id="clearNegotiationData" parameterType="hashmap">
+		update evaluation_results set  negotiation_status='',preserved_amount='',NEGOTIATED_AWARD_AMOUNT ='' where PROPOSAL_ID IN 
+		(select EVAL.PROPOSAL_ID from evaluation_results EVAL,PROPOSAL_CONFIG PRO where PRO.proposal_id=eval.proposal_id 
+		and EVAL.EVALUATION_POOL_MAPPING_ID = #{evaluationPoolMappingId} 
+		<if test="organizationId != null">
+		and PRO.ORGANIZATION_ID = #{organizationId}
+		</if>
+		)		 
+	</update>
+	
+	<update id="updateEvaluationAmountAfterNegotiation" parameterType="hashmap">
+	update evaluation_results set award_amount=negotiated_award_amount  where
+	EVALUATION_POOL_MAPPING_ID=#{evaluationPoolMappingId}
+	</update>
+	
+	<update id="setRequestAmendmentFlag" parameterType="java.util.Map">
+		update evaluation_results set  REQUEST_AMENDMENT_FLAG=#{asFlag} where PROPOSAL_ID = #{asProposalId} 
+	</update>
+	
+	<update id="updateReturnStatusForEvalGenCommentArchive" parameterType="java.util.Map">
+		UPDATE EVALUATION_GEN_COMMENT_ARCHIVE SET RETURN_STATUS = 1 WHERE EVALUATION_STATUS_ID IN 
+ 		(SELECT evaluation_status_id FROM evaluation_status WHERE proposal_id = #{asProposalId} AND STATUS_ID != 104)
+	</update>
+	
+	<select id="getRequestAmendmentFlagFromEvaluationResult" resultType="String" parameterType="java.util.Map">
+		SELECT REQUEST_AMENDMENT_FLAG FROM EVALUATION_RESULTS WHERE PROPOSAL_ID = #{asProposalId}
+	</select>
+	
+	<select id="getEvaluationStatusList" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT EVALUATION_STATUS_ID FROM EVALUATION_STATUS WHERE PROPOSAL_ID =#{asProposalId}
+	</select>
+	
+	<update id="setReturnStatusEvaluationGeneralArchive" parameterType="java.util.Map">
+		UPDATE EVALUATION_GEN_COMMENT_ARCHIVE
+		SET RETURN_STATUS = #{asFlag}
+		WHERE EVALUATION_STATUS_ID IN <foreach item="items" index="index" collection="evaluatorStatusList" open="(" separator="," close=")">
+										#{items}
+							    	  </foreach>
+		AND VERSION_NUMBER = (SELECT MAX(VERSION_NUMBER) FROM EVALUATION_GEN_COMMENT_ARCHIVE
+								WHERE EVALUATION_STATUS_ID IN
+		  					<foreach item="items" index="index" collection="evaluatorStatusList" open="(" separator="," close=")">
+								#{items}
+				    		</foreach>
+							 )
+	</update>
+	<!-- 	R5code ends -->
+</mapper>

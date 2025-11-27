@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapper namespace="com.nyc.hhs.service.db.services.application.QuestionAnswerMapper">
+
+	<resultMap id="resultAnswer" type="com.nyc.hhs.model.QuestionAnswer">
+		<result property="msAppid" column="APPID" />
+		<result property="msEmpid" column="EMPID" />
+		<result property="msFormversion" column="FORMVERSION" />
+		<result property="msCreatedby" column="CREATEDBY" />
+		<result property="msEin" column="EIN"></result>
+		<result property="msOln" column="OLN"></result>
+		<result property="msCs" column="CS"></result>
+		<result property="msDuns" column="DUNS"></result>
+		<result property="msDba" column="DBA"></result>
+		<result property="msFrommonth" column="FROMMONTH"></result>
+		<result property="msFromdate" column="FROMDATE"></result>
+		<result property="msTomonth" column="TOMONTH"></result>
+		<result property="msTodate" column="TODATE"></result>
+		<result property="msMinistatement" column="MINISTATEMENT"></result>
+		<result property="msAddress1" column="ADDRESS1"></result>
+		<result property="msAddress2" column="ADDRESS2"></result>
+		<result property="msCity" column="CITY"></result>
+		<result property="msBorough" column="BOROUGH"></result>
+		<result property="msState" column="STATE"></result>
+		<result property="msZipcode" column="ZIPCODE"></result>
+		<result property="msPhoneno" column="PHONENO"></result>
+		<result property="msWebaddress" column="WEBADDRESS"></result>
+		<result property="msTwittersm" column="TWITTERSM"></result>
+		<result property="msFacebook" column="FACEBOOK"></result>
+		<result property="msOthersm" column="OTHERSM"></result>
+		<result property="msNone" column="NONE"></result>
+		<result property="msTwitter" column="TWITTER"></result>
+		<result property="msFacebookpage" column="FACEBOOKPAGE"></result>
+		<result property="msFormname" column="FORMNAME"></result>
+	</resultMap>
+
+	<insert id="insertEmpInfo" parameterType="hashmap">
+		INSERT INTO ${TABLENAME} (${COLUMN}) 
+		VALUES
+		${VALUESFORCOLUMN}
+	</insert>
+	
+	<select id="select" parameterType="hashmap" resultMap="resultAnswer">
+	   SELECT * FROM basicform WHERE CREATEDBY = #{CREATEDBY}
+	</select>
+	
+	<select id="selectEmpInfo" parameterType="hashmap" resultMap="resultAnswer">	
+	   SELECT  b.* FROM ${TABLE} b,application a WHERE a.appid= b.APPID AND a.appid = #{APPID}
+	</select>
+	
+	<update id="updateEmpInfo" parameterType="hashmap">
+	  update ${TABLENAME} set ${VALUESTOUPDATE}
+	  where CREATEDBY = #{CREATEDBY}
+	</update>
+
+
+	<select id="getFormData" parameterType="hashmap" resultMap="resultAnswer">
+	   SELECT b.* FROM basicform b, application a WHERE a.appid= b.APPID
+	</select>
+</mapper>

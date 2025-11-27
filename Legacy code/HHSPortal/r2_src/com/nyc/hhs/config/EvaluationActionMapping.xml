@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapping>
+	<page name="evaluationResults">
+		<awardReview status="all" role="all" >
+			<proposal status="21,22">
+				<action order="1">View Proposal</action>
+				<action order="2">View Evaluation Summary</action>
+			</proposal>
+			<proposal status="23,24">
+				<action order="1">View Proposal</action>
+				<action order="2">View Evaluation Summary</action>
+				<action order="5">View Comments</action>
+			</proposal>
+		</awardReview>
+		
+		
+		<awardReview status="NA,35" role="ACCO_STAFF,ACCO_ADMIN_STAFF" isPreviouslySelected="false" isPrevApproved="false" isProviderApproved="false">
+			<proposal status="21,23,24">
+				<action order="3" >Mark Selected</action>
+				<action order="4" >Mark Not Selected</action>
+			</proposal>
+		</awardReview>
+		
+		
+		<awardReview status="NA,35" role="ACCO_MANAGER" isPreviouslySelected="false" isPrevApproved="false" isProviderApproved="false">
+			<proposal status="21,23,24">
+				<action order="3" >Mark Selected</action>
+				<action order="4" >Mark Not Selected</action>
+				<action order="6">Request Score Amendment</action>
+			</proposal>
+		</awardReview>
+		
+		<awardReview status="35" role="ACCO_MANAGER,ACCO_STAFF,ACCO_ADMIN_STAFF" isPreviouslySelected="false" isPrevApproved="true" isProviderApproved="false">
+			<proposal status="23,24">
+				<action order="3">Mark Selected</action>
+				<action order="4" >Mark Not Selected</action>
+			</proposal>
+		</awardReview>
+		
+		<awardReview status="36" role="ACCO_MANAGER,ACCO_STAFF,ACCO_ADMIN_STAFF" isPreviouslySelected="false" isPrevApproved="true" isProviderApproved="false">
+			<proposal status="23,24">
+				<action order="3" >Mark Selected</action>
+				<action order="4" >Mark Not Selected</action>
+			</proposal>
+		</awardReview>
+		
+		
+		<!-- Start|| Changes done for Enhancement #6574 for Release 3.10.0 -->
+		<awardReview status="169" role="ACCO_MANAGER,ACCO_STAFF,ACCO_ADMIN_STAFF" isPreviouslySelected="false" isPrevApproved="true" isProviderApproved="true">
+			<proposal status="23,24">
+				<action order="3" >Mark Selected</action>
+				<action order="4" >Mark Not Selected</action>
+			</proposal>
+		</awardReview>
+		<awardReview status="169" role="ACCO_MANAGER,ACCO_STAFF,ACCO_ADMIN_STAFF" isPreviouslySelected="false" isPrevApproved="true" isProviderApproved="false">
+			<proposal status="23,24">
+				<action order="3" >Mark Selected</action>
+				<action order="4" >Mark Not Selected</action>
+			</proposal>
+		</awardReview>
+		<awardReview status="34" role="ACCO_MANAGER,ACCO_STAFF,ACCO_ADMIN_STAFF" isPreviouslySelected="false" isPrevApproved="true" isProviderApproved="false">
+			<proposal status="23,24">
+				<action order="3" >Mark Selected</action>
+				<action order="4" >Mark Not Selected</action>
+			</proposal>
+		</awardReview>
+		
+		<awardReview status="34" role="ACCO_MANAGER,ACCO_STAFF,ACCO_ADMIN_STAFF" isPreviouslySelected="false" isPrevApproved="true" isProviderApproved="true">
+			<proposal status="23,24">
+				<action order="3" >Mark Selected</action>
+				<action order="4" >Mark Not Selected</action>
+			</proposal>
+		</awardReview>
+		
+		<!-- End|| Changes done for Enhancement #6574 for Release 3.10.0 -->
+		
+	</page>
+</mapping>

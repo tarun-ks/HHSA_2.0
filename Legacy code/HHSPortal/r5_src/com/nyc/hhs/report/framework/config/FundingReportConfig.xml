@@ -1,0 +1,52 @@
+<charts>
+		<chart width="500pt" height="500pt" id="fundingSummary_provider"
+		chart_design_id="fundingSummary_Scripted.rptdesign" 
+		export_design_id="export/fundingSummaryExport.rptdesign"
+		dashboard_chart_design_id="fundingSummaryDashboard_provider.rptdesign"
+		 exportdata="true" exportformat="csv" datasource="scripted" sqlID="getFundingSummaryDetails" exporttablename="data"
+		emitterClass="com.nyc.hhs.report.extension.ExportCSVReport">
+		<report-params>
+			<param name="organizationId" scope="" target="ORGANIZATION_ID" />
+			<param name="fyYearId" scope="" target="fyYearId" />
+		</report-params>
+		<report-variables>
+			<variable name="reportList" scope="global" target="reportList" />
+		</report-variables>
+		<data-columns sqlID="getFundingSummaryDetails_ForGrid">
+				<column headingName="Agency" columnName="agencyName" size="10%" userType="provider_org"/>
+				<column headingName="CT#" columnName="ctNumber" size="15%" userType="provider_org"/>
+				<column headingName="Contract Title" columnName="contractTitle" size="30%" userType="provider_org"/>
+				<column headingName="Start Date" columnName="budgetStartDate" size="15%" userType="provider_org"/>
+				<column headingName="End Date" columnName="budgetEndDate" size="15%" userType="provider_org"/>
+				<column headingName="FY Amount ($)" columnName="fyYearAmount" size="15%" userType="provider_org"/>
+				<column headingName="Pending FY Amendment Amount ($)" columnName="pendingFyAmendmentAmount" size="20%" userType="provider_org"/>
+		</data-columns>
+		<table-columns/>
+	</chart>
+	
+	<chart width="500pt" height="500pt" id="fundingSummary_agency"
+		chart_design_id="fundingSummary_Scripted.rptdesign" 
+		export_design_id="export/fundingSummaryExport.rptdesign"
+		dashboard_chart_design_id="fundingSummaryDashboard_agency.rptdesign"
+		 exportdata="true" exportformat="csv" datasource="scripted" sqlID="getFundingSummaryDetails" exporttablename="data"
+		emitterClass="com.nyc.hhs.report.extension.ExportCSVReport">
+		<report-params>
+			<param name="organizationId" scope="" target="ORGANIZATION_ID" />
+			<param name="fyYearId" scope="" target="fyYearId" />
+		</report-params>
+		<report-variables>
+			<variable name="reportList" scope="global" target="reportList" />
+		</report-variables>
+		<data-columns sqlID="getFundingSummaryDetails_ForGrid">
+				<column headingName="Agency" columnName="agencyName" size="10%" userType="city_org"/>
+				<column headingName="Provider" columnName="provider" size="15%" userType="city_org,agency_org"/>
+				<column headingName="CT#" columnName="ctNumber" size="15%" userType="city_org,agency_org"/>
+				<column headingName="Contract Title" columnName="contractTitle" size="15%" userType="city_org,agency_org"/>
+				<column headingName="Start Date" columnName="budgetStartDate" size="15%" userType="city_org,agency_org"/>
+				<column headingName="End Date" columnName="budgetEndDate" size="15%" userType="city_org,agency_org"/>
+				<column headingName="FY Amount ($)" columnName="fyYearAmount" size="15%" userType="city_org,agency_org"/>
+				<column headingName="Pending FY Amendment Amount ($)" columnName="pendingFyAmendmentAmount" size="15%" userType="city_org,agency_org"/>
+		</data-columns>
+		<table-columns/>
+	</chart>
+</charts>

@@ -1,0 +1,378 @@
+{
+  "version": "2.0.0",
+  "description": "Enterprise Document Templates and Generation",
+  "template_engine": {
+    "template_language": "handlebars",
+    "supported_formats": ["html", "docx", "pdf", "xlsx"],
+    "variable_support": true,
+    "conditional_logic": true,
+    "loop_support": true,
+    "custom_functions": true,
+    "version_control": true
+  },
+  "document_templates": {
+    "contract_templates": {
+      "master_contract_template": {
+        "id": "master_contract_template",
+        "name": "Master Contract Template",
+        "description": "Master template for all contract types",
+        "document_type": "contract_agreement",
+        "version": "2.0.0",
+        "enabled": true,
+        "template_format": "docx",
+        "sections": [
+          {
+            "id": "header",
+            "name": "Contract Header",
+            "type": "static",
+            "content": "{{> contract_header}}",
+            "required": true,
+            "order": 1
+          },
+          {
+            "id": "parties",
+            "name": "Parties Section",
+            "type": "dynamic",
+            "content": "{{> parties_section}}",
+            "data_source": "contract.parties",
+            "required": true,
+            "order": 2
+          },
+          {
+            "id": "terms",
+            "name": "Terms and Conditions",
+            "type": "conditional",
+            "content": "{{#if contract_type.CT1}}{{> ct1_terms}}{{/if}}{{#if contract_type.CT2}}{{> ct2_terms}}{{/if}}{{#if contract_type.CT3}}{{> ct3_terms}}{{/if}}{{#if contract_type.CT4}}{{> ct4_terms}}{{/if}}",
+            "required": true,
+            "order": 3
+          },
+          {
+            "id": "payment_terms",
+            "name": "Payment Terms",
+            "type": "dynamic",
+            "content": "{{> payment_terms}}",
+            "data_source": "contract.payment_terms",
+            "required": true,
+            "order": 4
+          },
+          {
+            "id": "signatures",
+            "name": "Signature Section",
+            "type": "static",
+            "content": "{{> signature_section}}",
+            "required": true,
+            "order": 5
+          }
+        ],
+        "variables": [
+          "contract_id",
+          "contract_type",
+          "parties",
+          "effective_date",
+          "expiry_date",
+          "contract_value",
+          "currency",
+          "terms_conditions",
+          "payment_terms",
+          "special_clauses"
+        ],
+        "validation_rules": [
+          {
+            "field": "contract_id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "field": "parties",
+            "required": true,
+            "type": "array",
+            "min_items": 2
+          },
+          {
+            "field": "contract_value",
+            "required": true,
+            "type": "number",
+            "min_value": 0
+          }
+        ]
+      },
+      "ct1_contract_template": {
+        "id": "ct1_contract_template",
+        "name": "CT1 Contract Template",
+        "description": "Template for CT1 contract type",
+        "document_type": "contract_agreement",
+        "version": "1.0.0",
+        "enabled": true,
+        "template_format": "docx",
+        "parent_template": "master_contract_template",
+        "sections": [
+          {
+            "id": "ct1_specific_terms",
+            "name": "CT1 Specific Terms",
+            "type": "static",
+            "content": "{{> ct1_specific_terms}}",
+            "required": true,
+            "order": 3
+          }
+        ],
+        "variables": [
+          "service_description",
+          "performance_metrics",
+          "sla_requirements"
+        ]
+      },
+      "ct4_contract_template": {
+        "id": "ct4_contract_template",
+        "name": "CT4 Contract Template",
+        "description": "Template for CT4 contract type with legal requirements",
+        "document_type": "contract_agreement",
+        "version": "1.0.0",
+        "enabled": true,
+        "template_format": "docx",
+        "parent_template": "master_contract_template",
+        "sections": [
+          {
+            "id": "legal_terms",
+            "name": "Legal Terms",
+            "type": "static",
+            "content": "{{> legal_terms}}",
+            "required": true,
+            "order": 3
+          },
+          {
+            "id": "compliance_requirements",
+            "name": "Compliance Requirements",
+            "type": "static",
+            "content": "{{> compliance_requirements}}",
+            "required": true,
+            "order": 4
+          }
+        ],
+        "variables": [
+          "legal_review_required",
+          "compliance_certifications",
+          "liability_terms",
+          "dispute_resolution"
+        ]
+      }
+    },
+    "amendment_templates": {
+      "amendment_template": {
+        "id": "amendment_template",
+        "name": "Amendment Template",
+        "description": "Template for contract amendments",
+        "document_type": "amendment_document",
+        "version": "1.0.0",
+        "enabled": true,
+        "template_format": "docx",
+        "sections": [
+          {
+            "id": "amendment_header",
+            "name": "Amendment Header",
+            "type": "static",
+            "content": "{{> amendment_header}}",
+            "required": true,
+            "order": 1
+          },
+          {
+            "id": "amendment_details",
+            "name": "Amendment Details",
+            "type": "dynamic",
+            "content": "{{> amendment_details}}",
+            "data_source": "amendment.details",
+            "required": true,
+            "order": 2
+          },
+          {
+            "id": "changes_summary",
+            "name": "Changes Summary",
+            "type": "dynamic",
+            "content": "{{> changes_summary}}",
+            "data_source": "amendment.changes",
+            "required": true,
+            "order": 3
+          },
+          {
+            "id": "amendment_signatures",
+            "name": "Amendment Signatures",
+            "type": "static",
+            "content": "{{> amendment_signatures}}",
+            "required": true,
+            "order": 4
+          }
+        ],
+        "variables": [
+          "amendment_id",
+          "parent_contract_id",
+          "amendment_type",
+          "effective_date",
+          "description",
+          "changes",
+          "justification"
+        ]
+      }
+    },
+    "report_templates": {
+      "contract_report_template": {
+        "id": "contract_report_template",
+        "name": "Contract Report Template",
+        "description": "Template for contract reports",
+        "document_type": "report",
+        "version": "1.0.0",
+        "enabled": true,
+        "template_format": "docx",
+        "sections": [
+          {
+            "id": "report_header",
+            "name": "Report Header",
+            "type": "static",
+            "content": "{{> report_header}}",
+            "required": true,
+            "order": 1
+          },
+          {
+            "id": "executive_summary",
+            "name": "Executive Summary",
+            "type": "dynamic",
+            "content": "{{> executive_summary}}",
+            "data_source": "report.summary",
+            "required": true,
+            "order": 2
+          },
+          {
+            "id": "contract_details",
+            "name": "Contract Details",
+            "type": "dynamic",
+            "content": "{{> contract_details}}",
+            "data_source": "report.contracts",
+            "required": true,
+            "order": 3
+          },
+          {
+            "id": "financial_summary",
+            "name": "Financial Summary",
+            "type": "dynamic",
+            "content": "{{> financial_summary}}",
+            "data_source": "report.financials",
+            "required": true,
+            "order": 4
+          }
+        ],
+        "variables": [
+          "report_period",
+          "contract_count",
+          "total_value",
+          "active_contracts",
+          "expired_contracts",
+          "financial_summary"
+        ]
+      }
+    }
+  },
+  "template_fragments": {
+    "contract_header": {
+      "id": "contract_header",
+      "name": "Contract Header",
+      "content": "CONTRACT AGREEMENT\n\nContract ID: {{contract_id}}\nContract Type: {{contract_type}}\nEffective Date: {{effective_date}}\nExpiry Date: {{expiry_date}}\n\nThis Contract Agreement (\"Agreement\") is entered into on {{effective_date}} between the parties listed below.",
+      "type": "text"
+    },
+    "parties_section": {
+      "id": "parties_section",
+      "name": "Parties Section",
+      "content": "{{#each parties}}\nParty {{@index}}: {{name}}\nAddress: {{address}}\nContact: {{contact_person}}\nEmail: {{email}}\nPhone: {{phone}}\n{{/each}}",
+      "type": "text"
+    },
+    "ct1_terms": {
+      "id": "ct1_terms",
+      "name": "CT1 Terms",
+      "content": "SERVICE TERMS\n\n1. Service Description: {{service_description}}\n2. Performance Metrics: {{performance_metrics}}\n3. SLA Requirements: {{sla_requirements}}\n4. Delivery Schedule: As per agreed timeline\n5. Quality Standards: Industry best practices",
+      "type": "text"
+    },
+    "ct4_terms": {
+      "id": "ct4_terms",
+      "name": "CT4 Terms",
+      "content": "LEGAL TERMS\n\n1. Legal Review Required: {{legal_review_required}}\n2. Compliance Certifications: {{compliance_certifications}}\n3. Liability Terms: {{liability_terms}}\n4. Dispute Resolution: {{dispute_resolution}}\n5. Governing Law: Applicable jurisdiction",
+      "type": "text"
+    },
+    "payment_terms": {
+      "id": "payment_terms",
+      "name": "Payment Terms",
+      "content": "PAYMENT TERMS\n\n1. Contract Value: {{contract_value}} {{currency}}\n2. Payment Schedule: {{payment_schedule}}\n3. Payment Method: {{payment_method}}\n4. Late Payment: {{late_payment_terms}}\n5. Currency: {{currency}}",
+      "type": "text"
+    },
+    "signature_section": {
+      "id": "signature_section",
+      "name": "Signature Section",
+      "content": "SIGNATURES\n\nIn witness whereof, the parties have executed this Agreement as of the date first written above.\n\n_________________________    _________________________\n{{party1_name}}                {{party2_name}}\nDate: {{signature_date}}        Date: {{signature_date}}",
+      "type": "text"
+    }
+  },
+  "template_generation": {
+    "auto_generation_rules": [
+      {
+        "trigger": "contract_created",
+        "template": "master_contract_template",
+        "data_source": "contract_data",
+        "output_format": "docx",
+        "async": true
+      },
+      {
+        "trigger": "amendment_created",
+        "template": "amendment_template",
+        "data_source": "amendment_data",
+        "output_format": "docx",
+        "async": true
+      },
+      {
+        "trigger": "report_requested",
+        "template": "contract_report_template",
+        "data_source": "report_data",
+        "output_format": "docx",
+        "async": true
+      }
+    ],
+    "generation_settings": {
+      "default_format": "docx",
+      "include_watermark": true,
+      "include_metadata": true,
+      "auto_save": true,
+      "version_control": true
+    }
+  },
+  "template_validation": {
+    "validation_rules": [
+      {
+        "field": "template_id",
+        "required": true,
+        "type": "string"
+      },
+      {
+        "field": "sections",
+        "required": true,
+        "type": "array",
+        "min_items": 1
+      },
+      {
+        "field": "variables",
+        "required": true,
+        "type": "array"
+      }
+    ],
+    "content_validation": {
+      "check_placeholders": true,
+      "validate_data_types": true,
+      "check_required_fields": true
+    }
+  },
+  "metadata": {
+    "created_at": "2024-01-01T00:00:00Z",
+    "created_by": "system",
+    "version": "2.0.0",
+    "description": "Enterprise document templates with generation capabilities",
+    "tags": ["templates", "documents", "generation", "contracts", "reports"],
+    "dependencies": [
+      "schema/references.json",
+      "documents/document_types.json"
+    ]
+  }
+}

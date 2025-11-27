@@ -1,0 +1,221 @@
+
+.alert-progress-bar {
+	background: #FFF;
+	display: none;
+	z-index: 1001;
+}
+
+.h2Class
+{
+float: none !important;	
+}
+
+.customProp {
+	
+	display: none;
+	
+	}
+
+div.tabularWrapperDocumentVault {
+	float: right;
+	width: 79%;
+	height: 488.8px !important;
+	overflow: auto;
+}
+
+.tabularWrapperDocumentVault .paginationWrapper {
+	padding-top: 20px;
+	}
+#newFolderTree{
+	border:1px solid #D3D3D3;
+}
+
+.leftTreeStructure{
+	float: left;
+	width:21%;
+}
+
+.leftTree {
+	width: 100%;
+	overflow: scroll !important;
+	height: 480px;
+	border: 1px;
+	background-color: #E4E4E4;
+}
+
+.leftTreeOverlay {
+	float: left;
+	width: 76%;
+	overflow: auto;
+	height: 200px;
+	border: 1px;
+	background-color: #E4E4E4;
+}
+
+.ui-widget {
+	font-family: Verdana, sans-serif !important;
+	font-size: 12px !important;
+}
+
+.alert-box-sharedoc {
+	background: #FFF;
+	display: none;
+	z-index: 1001;
+}
+
+#tabs-container {
+	background: #fff;
+	border: none !important;
+}
+
+.alert-box-removeselectedprovs,.alert-box-unsharebyprovider,.alert-box-unshareall
+	{
+	background: #FFF;
+	display: none;
+	position: fixed;
+	top: 12%;
+	left: 14%;
+	width: 73%;
+	z-index: 1001;
+}
+
+#newTabs h5,#newTabs-sharedoc h5 {
+	background: #e4e4e4;
+	color: #5077aa;
+	font-size: 13px;
+	font-weight: bold;
+	padding: 6px 0 6px 6px;
+}
+
+.alert-box .sub-started a,.alert-box-sharedoc .sub-started a,.alert-box-unshareall .sub-started a,.alert-box-unsharebyprovider .sub-started a,.alert-box-removeselectedprovs .sub-started a
+	{
+	color: #fff;
+}
+
+.alert-box .sub-notstarted,.alert-box-sharedoc .sub-notstarted,.alert-box-unshareall .sub-notstarted,.alert-box-unsharebyprovider .sub-notstarted,.alert-box-removeselectedprovs .sub-notstarted
+	{
+	background-image: none;
+	color: #fff;
+}
+
+.formcontainer {
+	padding-left: 12px;
+	position: relative;
+}
+
+<!--
+added for page level pagination -->#newTabs #main-wrapper {
+	width: 880px;
+	padding: 0;
+}
+
+#newTabs .bodycontainer {
+	width: 880px;
+	background: #fff;
+	padding: 0;
+}
+
+.alert-box-delete,.alert-box-warning {
+	background: #FFF;
+	display: none;
+	z-index: 1001;
+}
+
+.errorMessages {
+	display: none;
+}
+
+.formcontainer .row span.label {
+	width: 50% !important;
+}
+
+.formcontainer .row span.widelabel {
+	width: 95% !important;
+}
+
+.formcontainer .row span.formfield {
+	width: 34% !important;
+}
+
+.formcontainer .row span.formfield1 {
+	width: 42% !important;
+}
+span.rdoLabels label {
+	font-size: 11px;
+	margin-right: 3px;
+}
+
+.formcontainer .row span.error {
+	float: left;
+	padding: 4px 0;
+	text-align: left;
+	color: red;
+	width: 31%;
+}
+
+.providerFilter {
+	width: 800px !important;
+}
+
+.providerFilter .row span.label {
+	width: 25% !important;
+}
+
+.providerFilter .row span.formfield {
+	width: 71% !important;
+}
+
+.providerFilter .row span.formfield select {
+	width: auto !important;
+}
+
+.providerFilter .row span.formfield .rdoBtn {
+	border: none !important;
+}
+.folderInfo{
+    overflow: auto;
+    margin: 4px;
+    height: auto;
+}
+.docInfo{
+    overflow: auto;
+    margin: 4px;
+    height: auto;
+}
+.buttonholder-align{
+	margin-right:10px;
+	margin-top: 10px;
+}
+#editViewCancelButton,#editViewSaveButton{
+	padding:5px 20px;
+}
+#editFolderNameText{
+	display:none;
+	height: 22px;
+}
+.dottedSpace{
+	border-top: dotted 1px;
+	 margin-right: 25px;
+}
+.tabularWrapper1 table{
+			width:100%;
+			border:1px solid #E4E4E4;
+			margin:0;
+			float: left
+			}
+			
+			
+.sharedStatusShallow{
+	
+}
+.sharedStatusFull{
+	margin-left:0px;
+}
+
+#addsharedmargin{
+	margin-top:75px;
+	
+}
+.errorForHelp{
+margin-left:52%;
+}

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.nyc.hhs.service.db.services.application.TransactionLogMapper">
+	<!-- <resultMap id="TransactionSummary" type="com.nyc.hhs.model.TransactionLogBean"> 
+		<result property="asErrorCode" column="ERROR_CODE" /> <result property="asTransactionTime" 
+		column="TRANSACTION_TIME" /> <result property="asTransactionDate" column="TRANSACTION_DATE" 
+		/> <result property="asExceptionName" column="EXCEPTION_NAME" /> <result 
+		property="asUserId" column="USER_ID" /> <result property="asTransactionDetails" 
+		column="TRANSACTION_DETAILS" /> </resultMap> <select id="getAllTransactionDetails" 
+		resultMap="TransactionSummary"> SELECT * FROM TRANSACTION_ERROR </select> -->
+
+	<insert id="logTransactionFailure" parameterType="hashmap">
+		INSERT INTO
+		TRANSACTION_LOG (ERROR_CODE, TRANSACTION_DATE, EXCEPTION_NAME,
+		USER_ID, TRANSACTION_DETAILS)
+		VALUES
+		(SEQ_TRANSACTION_ERROR.NEXTVAL,#{asTransactionDate},#{asExceptionName},#{asUserId},#{asTransactionDetails})
+	</insert>
+
+</mapper>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.TaskHistoryMapper">
+
+	<resultMap id="result" type="com.nyc.hhs.model.ApplicationAuditBean">
+		<result property="msOrgId" column="ORGANIZATION_ID" />
+		<result property="msAppid" column="APPLICATION_ID" />
+		<result property="msEventname" column="EVENT_NAME" />
+		<result property="msEventtype" column="EVENT_TYPE" />
+		<result property="msAuditDate" column="AUDIT_DATE" />
+		<result property="msUserid" column="USER_ID" />
+		<result property="msData" column="DATA" />
+		<result property="msEntityType" column="ENTITY_TYPE" />
+		<result property="msEntityId" column="ENTITY_ID" />
+		<result property="msSectionId" column="SECTION_ID" />
+		<result property="msEntityIdentifier" column="ENTITY_IDENTIFIER" />
+		<result property="msProviderFlag" column="PROVIDER_VISIBILITY_FLAG" />
+		
+	</resultMap>
+
+	<insert id="updateTaskHistoryAudit" parameterType="com.nyc.hhs.model.ApplicationAuditBean">
+		
+		
+		INSERT INTO APPLICATION_AUDIT (ORGANIZATION_ID,APPLICATION_ID,EVENT_NAME,EVENT_TYPE,AUDIT_DATE,USER_ID,DATA,ENTITY_TYPE,ENTITY_ID,SECTION_ID)VALUES(#{orgId},#{appid},#{eventname},#{eventtype},systimestamp,#{userid},#{data},#{entityType},#{entityId},#{sectionId} )
+		
+		
+	</insert>
+	
+	<select id="fetchTaskHistoryAudit" parameterType="hashmap" resultMap="result">
+		SELECT a.ORGANIZATION_ID, a.APPLICATION_ID, a.EVENT_NAME, a.EVENT_TYPE, a.AUDIT_DATE,b.FIRST_NAME||' '||b.MIDDLE_INITIAL||' '||b.LAST_NAME as USER_ID,a.DATA,a.ENTITY_TYPE,a.ENTITY_ID,a.SECTION_ID,a.ENTITY_IDENTIFIER 
+		FROM APPLICATION_AUDIT a INNER JOIN staff_city_user_details b ON a.user_id = b.user_id WHERE a.APPLICATION_ID =#{appid} AND a.SECTION_ID=#{sectionId} order by a.AUDIT_DATE desc
+	</select>
+	
+	<select id="fetchTaskHistoryWithdrawalAudit" parameterType="hashmap" resultMap="result">
+		SELECT a.ORGANIZATION_ID, a.APPLICATION_ID, a.EVENT_NAME, a.EVENT_TYPE, a.AUDIT_DATE,b.FIRST_NAME||' '||b.MIDDLE_INITIAL||' '||b.LAST_NAME as USER_ID,a.DATA,a.ENTITY_TYPE,a.ENTITY_ID,a.SECTION_ID,a.ENTITY_IDENTIFIER 
+		FROM APPLICATION_AUDIT a INNER JOIN staff_city_user_details b ON a.user_id = b.user_id WHERE a.APPLICATION_ID = #{appid} AND a.ENTITY_ID=#{entityId} order by a.AUDIT_DATE desc
+	</select>
+	
+	<select id="fetchAllAppTaskHistoryAudit" parameterType="hashmap" resultMap="result">
+		
+		SELECT a.ORGANIZATION_ID, a.APPLICATION_ID, a.EVENT_NAME, a.EVENT_TYPE, a.AUDIT_DATE,b.FIRST_NAME||' '||b.MIDDLE_INITIAL||' '||b.LAST_NAME as USER_ID,a.DATA,a.ENTITY_TYPE,a.ENTITY_ID,a.SECTION_ID,a.ENTITY_IDENTIFIER 
+		FROM APPLICATION_AUDIT a INNER JOIN staff_city_user_details b ON a.user_id = b.user_id WHERE a.APPLICATION_ID = #{appid} AND (a.SECTION_ID=#{sectionID1} OR a.SECTION_ID=#{sectionID2} OR a.SECTION_ID=#{sectionID3}  OR a.SECTION_ID=#{sectionID4}) OR a.ENTITY_ID=#{sectionID5} AND a.EVENT_TYPE!='Snapshot'  order by a.AUDIT_DATE desc
+		
+	</select>
+	
+	<select id="fetchLastProviderComments" parameterType="hashmap" resultMap="result">
+		SELECT ORGANIZATION_ID, APPLICATION_ID, EVENT_NAME, EVENT_TYPE, AUDIT_DATE,USER_ID,DATA,ENTITY_TYPE,ENTITY_ID,SECTION_ID,PROVIDER_VISIBILITY_FLAG FROM APPLICATION_AUDIT WHERE APPLICATION_ID = #{appid} AND SECTION_ID=#{sectionId} AND EVENT_NAME =#{providerComments} order by AUDIT_DATE desc
+	</select>
+	
+	<select id="fetchLastProviderCommentsWithdrawal" parameterType="hashmap" resultMap="result">
+		SELECT ORGANIZATION_ID, APPLICATION_ID, EVENT_NAME, EVENT_TYPE, AUDIT_DATE,USER_ID,DATA,ENTITY_TYPE,ENTITY_ID,SECTION_ID,PROVIDER_VISIBILITY_FLAG FROM APPLICATION_AUDIT WHERE APPLICATION_ID = #{appid} AND ENTITY_ID=#{entityId} AND EVENT_NAME =#{providerComments} order by AUDIT_DATE desc
+	</select>
+
+	
+	<select id="fetchBappComments" parameterType="hashmap" resultMap="result">
+		
+		SELECT ORGANIZATION_ID, APPLICATION_ID, EVENT_NAME, EVENT_TYPE, AUDIT_DATE,USER_ID,DATA,ENTITY_TYPE,ENTITY_ID,SECTION_ID FROM APPLICATION_AUDIT WHERE APPLICATION_ID = #{appid} AND SECTION_ID=#{sectionId} AND EVENT_NAME =#{providerComments} AND PROVIDER_VISIBILITY_FLAG=#{asProviderVisibilityFlag}  order by AUDIT_DATE desc
+		
+	</select>
+	
+		<select id="fetchTaskHistoryAuditGeneral" parameterType="hashmap" resultMap="result">
+		
+		SELECT a.ORGANIZATION_ID, a.EVENT_NAME, a.EVENT_TYPE, a.AUDIT_DATE,b.FIRST_NAME||' '||b.MIDDLE_INITIAL||' '||b.LAST_NAME as USER_ID,a.DATA,a.ENTITY_TYPE,a.ENTITY_ID,a.ENTITY_IDENTIFIER 
+		FROM GENERAL_AUDIT a INNER JOIN staff_city_user_details b ON a.user_id = b.user_id WHERE a.ENTITY_ID =#{appid} order by a.AUDIT_DATE desc
+		
+	</select>
+	
+	<select id="fetchLastProviderCommentsGeneral" parameterType="hashmap" resultMap="result">
+		
+		SELECT ORGANIZATION_ID, EVENT_NAME, EVENT_TYPE, AUDIT_DATE,USER_ID,DATA,ENTITY_TYPE,ENTITY_ID FROM GENERAL_AUDIT WHERE  ENTITY_ID =#{appid} AND EVENT_NAME =#{providerComments}  order by AUDIT_DATE desc
+		
+	</select>
+	
+	<select id="checkServiceTaskStatus" resultType="string">
+		SELECT * from (SELECT STATUS FROM SUPERSEDING_STATUS WHERE  ENTITY_ID =#{sectionId} order by TIMESTAMP desc) where rownum=1
+	</select>
+	
+	<update id="updateAuditStatus" parameterType="hashmap" >
+		UPDATE APPLICATION_AUDIT SET PROVIDER_VISIBILITY_FLAG='true' where APPLICATION_ID =#{appId} AND SECTION_ID=#{sectionId} AND EVENT_NAME =#{eventname} and AUDIT_DATE = (select max(AUDIT_DATE) from APPLICATION_AUDIT WHERE APPLICATION_ID =#{appId} AND SECTION_ID=#{sectionId} AND EVENT_NAME =#{eventname} )
+	</update>
+	
+	<update id="updateAuditStatusWithdrawal" parameterType="hashmap" >
+		UPDATE APPLICATION_AUDIT SET PROVIDER_VISIBILITY_FLAG='true' where APPLICATION_ID =#{appId} AND ENTITY_ID=#{sectionId} AND EVENT_NAME =#{eventname} and AUDIT_DATE = (select max(AUDIT_DATE) from APPLICATION_AUDIT WHERE APPLICATION_ID =#{appId} AND ENTITY_ID=#{sectionId} AND EVENT_NAME =#{eventname} )
+	</update>
+	
+	<update id="updateAuditforDoc" parameterType="hashmap" >
+		update application_audit set application_audit.provider_visibility_flag='true' where application_audit.ENTITY_ID in (select DOCUMENT_ID from document where document.PROC_DOC_STATUS='Returned') and application_audit.APPLICATION_ID=#{AppID} and application_audit.ORGANIZATION_ID=#{ProviderId}
+	</update>
+	
+</mapper>

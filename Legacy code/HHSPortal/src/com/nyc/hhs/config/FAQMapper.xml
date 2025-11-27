@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.FAQMapper">
+
+<!-- faq -->
+
+  <resultMap id="FAQSummary" type="com.nyc.hhs.model.FaqFormBean">
+		<result property="msQuestion" column="QUESTION" />
+		<result property="msAnswer" column="ANSWER" />
+		<result property="msCategory" column="CATEGORY" />
+		<result property="msQuestionId" column="QUESTION_ID" />
+		<result property="msTopicId" column="TOPIC_ID" />
+		<result property="msTopic" column="TOPIC_NAME" />
+	</resultMap>
+	
+	<select id="selectFAQ"   resultMap="FAQSummary">
+    	SELECT a.*,b.* FROM maintenance_faq_details a,maintenance_faq_master b where a.topic_id = b.topic_id
+    	and b.TOPIC_TYPE = #{msType} order by lower(b.topic_name) ASC, lower(a.question) ASC
+    </select>
+    
+	 <delete id="deleteFromfaqHelpDetail" parameterType="com.nyc.hhs.model.FaqFormBean">
+        DELETE from help_maintenance_faq_details 
+        	where topic_id in(select topic_id from help_maintenance_faq_master where topic_type =#{msType})
+	 </delete>
+		<delete id="deleteFromfaqHelpMaster" parameterType="com.nyc.hhs.model.FaqFormBean">
+	 	 DELETE FROM help_maintenance_faq_master where TOPIC_TYPE=#{msType}
+	</delete>
+	
+    <insert id="insertTofaqHelpMaster" parameterType="com.nyc.hhs.model.FaqFormBean">
+		INSERT INTO help_maintenance_faq_master (TOPIC_ID,TOPIC_NAME,TOPIC_TYPE,CREATED_BY,MODIFIED_BY,MODIFIED_DATE,CREATED_DATE)
+              (SELECT TOPIC_ID,TOPIC_NAME,TOPIC_TYPE,CREATED_BY,MODIFIED_BY,MODIFIED_DATE,CREATED_DATE FROM MAINTENANCE_FAQ_MASTER WHERE TOPIC_TYPE=#{msType})      
+	</insert>
+	
+	<insert id="insertTofaqHelpDetail" parameterType="com.nyc.hhs.model.FaqFormBean">
+		INSERT INTO help_maintenance_faq_details (QUESTION_ID,QUESTION,ANSWER,TOPIC_ID,CREATED_BY,MODIFIED_BY,MODIFIED_DATE,CREATED_DATE)
+              (SELECT DT.QUESTION_ID,DT.QUESTION,DT.ANSWER,DT.TOPIC_ID,DT.CREATED_BY,DT.MODIFIED_BY,DT.MODIFIED_DATE,DT.CREATED_DATE FROM maintenance_faq_details DT,maintenance_faq_master MS 
+       			  				 where DT.topic_id = MS.topic_id and MS.TOPIC_TYPE = #{msType})
+	</insert>
+      
+      <resultMap id="FAQSummaryForHelp" type="com.nyc.hhs.model.FaqFormBean">
+		<result property="msQuestion" column="QUESTION" />
+		<result property="msAnswer" column="ANSWER" />
+		<result property="msCategory" column="CATEGORY" />
+		<result property="msQuestionId" column="QUESTION_ID" />
+		<result property="msTopicId" column="TOPIC_ID" />
+		<result property="msTopic" column="TOPIC_NAME" />
+	</resultMap>
+	
+	<select id="selectFromFAQForHelp"   resultMap="FAQSummaryForHelp">
+  		SELECT a.*,b.* FROM HELP_MAINTENANCE_FAQ_DETAILS a,HELP_MAINTENANCE_FAQ_MASTER b where a.topic_id = b.topic_id
+  		and b.TOPIC_TYPE = #{msType} order by lower(b.topic_name) ASC, lower(a.question) ASC
+    </select>
+
+<!-- faq -->
+    
+    
+	<resultMap id="resultMaintenanceMaster" type="com.nyc.hhs.model.FaqFormMasterBean">
+			<result property="miTopicId" column="TOPIC_ID" />
+			<result property="msTopicName" column="TOPIC_NAME" />
+			<result property="msType" column="TOPIC_TYPE" />
+			<result property="msCreatedBy" column="CREATED_BY" />
+			<result property="msModifiedBy" column="MODIFIED_BY" />
+			<result property="moModifiedDate" column="MODIFIED_DATE" />		
+	</resultMap>
+	
+	<resultMap id="resultAnswer1" type="com.nyc.hhs.model.FaqFormDetailBean">
+	       <result property="miQuestionId" column="QUESTION_ID" />
+		   <result property="msQuestion" column="QUESTION" />
+		   <result property="msAnswer" column="ANSWER" />
+		   <result property="miTopicId" column="TOPIC_ID" />
+		   <result property="msCreatedBy" column="CREATED_BY" />
+		   <result property="msModifiedBy" column="MODIFIED_BY" />
+		   <result property="moModifiedDate" column="MODIFIED_DATE" />
+	</resultMap>
+		
+	<select id="selectAllTopic"   resultMap="resultMaintenanceMaster">
+	 		SELECT TOPIC_ID, TOPIC_NAME, TOPIC_TYPE FROM MAINTENANCE_FAQ_MASTER ORDER BY LOWER(topic_type) DESC, LOWER(topic_name) ASC
+	</select> 
+	 
+	
+	<insert id="insertNewTopic" parameterType="com.nyc.hhs.model.FaqFormMasterBean">
+			INSERT INTO MAINTENANCE_FAQ_MASTER (TOPIC_ID, TOPIC_NAME, TOPIC_TYPE, CREATED_BY, MODIFIED_BY,MODIFIED_DATE,CREATED_DATE)
+	        VALUES
+	        (SEQ_FAQ_TOPIC_ID.NEXTVAL,#{msTopicName},#{msType},#{msCreatedBy},#{msModifiedBy},#{moModifiedDate},current_timestamp)         
+	</insert>
+	
+	
+	<select id="selectQuestionsByTopic" resultMap="resultAnswer1">
+			SELECT QUESTION_ID, QUESTION, ANSWER FROM MAINTENANCE_FAQ_DETAILS WHERE TOPIC_ID=#{miTopicId} order by lower(question) ASC
+	</select>
+	
+	
+	<update id="updateTopicName" parameterType="com.nyc.hhs.model.FaqFormMasterBean">
+		  UPDATE MAINTENANCE_FAQ_MASTER SET TOPIC_NAME=#{msTopicName}, MODIFIED_BY=#{msModifiedBy}, MODIFIED_DATE=#{moModifiedDate} WHERE TOPIC_ID=#{miTopicId}
+	</update>
+	  
+	
+	<update id="updateQuesAns" parameterType="com.nyc.hhs.model.FaqFormDetailBean">
+		  UPDATE MAINTENANCE_FAQ_DETAILS SET QUESTION =#{msQuestion}, ANSWER =#{msAnswer}, MODIFIED_BY=#{msModifiedBy},MODIFIED_DATE=#{moModifiedDate} WHERE QUESTION_ID=#{miQuestionId}
+	</update>
+	
+	
+	<insert id="insertTopicDetails" parameterType="com.nyc.hhs.model.FaqFormDetailBean">
+		INSERT INTO MAINTENANCE_FAQ_DETAILS (QUESTION_ID, QUESTION, ANSWER, TOPIC_ID, CREATED_BY, MODIFIED_BY, MODIFIED_DATE,CREATED_DATE)
+		VALUES 
+		(SEQ_FAQ_QUESTION_ID.NEXTVAL, #{msQuestion}, #{msAnswer}, #{miTopicId}, #{msCreatedBy}, #{msModifiedBy}, #{moModifiedDate},current_timestamp)
+	</insert> 
+	
+	
+	<delete id="deleteTopicByTopicId" parameterType="com.nyc.hhs.model.FaqFormMasterBean">
+	  DELETE FROM MAINTENANCE_FAQ_MASTER WHERE TOPIC_ID = #{miTopicId} 
+	</delete>
+	
+	
+	<delete id="deleteTopicByTopicIdFromDetail" parameterType="com.nyc.hhs.model.FaqFormDetailBean">
+	  DELETE FROM MAINTENANCE_FAQ_DETAILS WHERE TOPIC_ID = #{miTopicId} 
+	</delete>
+	
+	
+	<delete id="deleteQuestionByQuestionId" parameterType="com.nyc.hhs.model.FaqFormDetailBean">
+	  DELETE FROM MAINTENANCE_FAQ_DETAILS WHERE QUESTION_ID = #{miQuestionId} 
+	</delete>
+	
+	<update id="updateTopicNameInMaster" parameterType="com.nyc.hhs.model.FaqFormMasterBean">
+	  UPDATE MAINTENANCE_FAQ_MASTER SET TOPIC_NAME=#{msTopicName} WHERE TOPIC_ID=#{miTopicId} 
+	</update>	
+    
+    <select id="getTopicName" parameterType="String" resultType="String">
+			SELECT TOPIC_NAME FROM MAINTENANCE_FAQ_MASTER WHERE TOPIC_ID=#{asTopicId} 
+	</select>
+ 	
+</mapper>

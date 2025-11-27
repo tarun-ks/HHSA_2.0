@@ -1,0 +1,54 @@
+.wizardUploadTabs ul li.last{
+	padding: 0px; 
+	width:30%;
+}
+.iconQuestion-align{
+	 margin-top: 5px;
+}
+.graphHelpText li{
+	margin-left:20px;
+}
+.wizardUploadTabs ul li.active,.ie8 .wizardUploadTabs ul li.activeLast{
+    height:33px; 
+    width:30%;
+}
+.leftTree .jstree-default-large .jstree-icon:empty{
+	width:24px !important;
+}
+.leftTree .jstree-default .jstree-wholerow-clicked,.leftTree .jstree-default .jstree-wholerow.jstree-wholerow-clicked.jstree-wholerow-hovered{
+	background-image:url('../images/hover_icon_selected.png') !important;
+	background-repeat:no-repeat !important;
+	background-color:#F1F0EE !important;
+}
+.leftTree .jstree-wholerow.jstree-wholerow-hovered{
+	background-image:url("../images/on_hover_image.png") !important;
+	background-repeat:no-repeat !important	;
+	background-color:#F1F0EE !important;
+	} 
+.leftTreeOverlay .jstree-wholerow.jstree-wholerow-clicked,.leftTreeOverlay .jstree-default.jstree-wholerow.jstree-wholerow-clicked.jstree-wholerow-hovered{
+	background-image:url('../images/hover_icon_selected.png') !important;
+	background-repeat:no-repeat !important;
+	background-color:#F1F0EE !important;
+}
+.leftTreeOverlay .jstree-wholerow.jstree-wholerow-hovered{
+	background-image:url("../images/on_hover_image.png") !important;
+	background-repeat:no-repeat !important	;
+	background-color:#F1F0EE !important;
+	}
+.jstree-default-large .jstree-wholerow{
+	height:30px;
+}
+ .step2selectOrg-align{
+    padding-left:25px;
+    }
+#container1,#container2{
+	left:131px !important;
+}
+/* .iconQuestion{
+	margin-top:25px !important;
+} */
+li#findOrgDoc:hover,li#SelectOrgDoc:hover{
+	background-image:url('../images/on_hover_image.png') !important;
+	background-repeat:no-repeat !important;
+	background-color:#F1F0EE !important;
+}

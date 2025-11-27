@@ -1,0 +1,7 @@
+<contract_types>
+	<contract  type="Foundation"/>
+	<contract  type="Corporation"/>
+	<contract  type="Individual Donor"/>
+	<contract  type="NYC Government"/>
+	<contract  type="Other Government"/>
+</contract_types>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<netuix:markupDefinition xmlns:netuix="http://www.bea.com/servers/netuix/xsd/controls/netuix/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.bea.com/servers/netuix/xsd/controls/netuix/1.0.0 markup-netuix-1_0_0.xsd">
+    <netuix:locale language="en"/>
+    <netuix:markup>
+        <netuix:flowLayout
+                           title="Two Same Width Column Flow Layout" description="This layout uses the flowLayout control to create two columns in which placeables flow vertically."
+                           orientation="horizontal" htmlLayoutUri="/framework/markup/layout/twosamewidthcolumn.html.txt" iconUri="/framework/markup/layout/twocolumn.gif"
+                           markupType="Layout" markupName="twoSameWidthColumnFlowLayout">
+            <netuix:placeholder title="left" description="The left most placeholder in this layout."
+                                usingFlow="false" width="49%"  presentationStyle="padding-right:5px;padding-bottom:10px;width:49%"
+                                markupType="Placeholder" markupName="twoSameWidthColumnFlow_left">
+            </netuix:placeholder>
+            <netuix:placeholder title="right" description="The right most placeholder in this layout."
+                                usingFlow="false" width="49%" presentationStyle="padding-left:5px;padding-bottom:10px;width:49%"
+                                markupType="Placeholder" markupName="twoSameWidthColumnFlow_right">
+            </netuix:placeholder>
+
+        </netuix:flowLayout>
+         
+    </netuix:markup>
+</netuix:markupDefinition>

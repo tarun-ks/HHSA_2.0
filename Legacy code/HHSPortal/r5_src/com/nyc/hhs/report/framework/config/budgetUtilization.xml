@@ -1,0 +1,61 @@
+<charts>
+		<chart width="500pt" height="500pt" id="budgetUtilization"
+		chart_design_id="budgetUtilizationScriptedUpdated.rptdesign" 
+		export_design_id="export/budgetUtilizationExport.rptdesign"
+		dashboard_chart_design_id="budgetUtilizationScriptedUpdated.rptdesign"
+		 exportdata="true" exportformat="csv" datasource="scripted" sqlID="getBudgetUtlizationDetailsUpdated" exportsqlID="getBudgetUtlizationDetails" allowedUserGroup=""  exporttablename="data"
+		emitterClass="com.nyc.hhs.report.extension.ExportCSVReport">
+		<report-params>
+			<param name="organizationId" scope="" target="ORGANIZATION_ID" />
+			<param name="fyYearId" scope="" target="fyYearId" />
+		</report-params>
+		<report-variables>
+			<variable name="reportList" scope="global" target="reportList" />
+		</report-variables>
+		<data-columns sqlID="getBudgetUtlizationDetails_ForGrid">
+			<column headingName="Agency" columnName="agencyName" size="10%" userType="provider_org,city_org"/>
+			<column headingName="Provider" columnName="provider" size="20%" userType="agency_org,city_org"/>
+			<column headingName="CT#" columnName="ctNumber" size="20%" userType=""/>
+			<column headingName="Contract Title" columnName="contractTitle" size="30%" userType=""/>
+			<column headingName="FY Budget Amount ($)" columnName="fyYearAmount" size="10%" userType=""/>
+			<column headingName="Invoiced Amount ($)" columnName="invoicedAmount" size="10%" userType=""/>
+			<column headingName="Disbursed Amount ($)" columnName="paymentAmountGrid" size="10%" userType=""/>
+			<column headingName="Percent Utilized (%)" columnName="percentUtilized" size="5%" userType=""/>
+			<column headingName="Over/Under (%)" columnName="overUnder" size="5%" userType=""/>
+		</data-columns>
+		
+		<table-columns/>
+	</chart>
+	
+	
+	<chart width="500pt" height="500pt" id="budgetUtilizationInvoice"
+		chart_design_id="budgetUtilizationScriptedUpdated.rptdesign" 
+		export_design_id="export/budgetUtilizationInvoiceExport.rptdesign"
+		dashboard_chart_design_id="budgetUtilizationScriptedUpdated.rptdesign"
+		 exportdata="true" exportformat="csv" datasource="scripted" sqlID="getBudgetUtlizationDetails" exportsqlID="getBudgetUtlizationDetails" allowedUserGroup="" exporttablename="data"
+		emitterClass="com.nyc.hhs.report.extension.ExportCSVReport">
+		<report-params>
+			<param name="organizationId" scope="" target="ORGANIZATION_ID" />
+			<param name="fyYearId" scope="" target="fyYearId" />
+		</report-params>
+		<report-variables>
+			<variable name="reportList" scope="global" target="reportList" />
+		</report-variables>
+		<data-columns sqlID="getBudgetUtlizationDetails_ForGridInvoice">
+			<column headingName="Agency" columnName="agencyName" size="10%" userType="provider_org,city_org"/>
+			<column headingName="Provider" columnName="provider" size="25%" userType="agency_org,city_org"/>
+			<column headingName="CT#" columnName="ctNumber" size="20%" userType=""/>
+			<column headingName="Contract Title" columnName="contractTitle" size="25%" userType=""/>
+			<column headingName="Invoice Number" columnName="invoiceNumber" size="10%" />
+<!-- 		<column headingName="Provider Invoice #" columnName="providerInvoiceNumber" size="10%" userType="provider_org"/>-->
+<!--  		<column headingName="Agency Invoice #" columnName="agencyInvoiceNumber" size="10%" userType="agency_org,city_org"/> -->
+			<column headingName="Service From" columnName="serviceStartDate" size="5%" userType=""/>
+			<column headingName="Service To" columnName="serviceEndDate" size="5%" userType=""/>
+			<column headingName="Status" columnName="status" size="5%" userType=""/>
+			<column headingName="Amount ($)" columnName="invociedAmount" size="10%" userType=""/>
+		</data-columns>
+		
+		<table-columns/>
+	</chart>
+	
+</charts>

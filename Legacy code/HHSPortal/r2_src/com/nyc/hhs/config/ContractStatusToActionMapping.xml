@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapping>
+	<page name="contractList">
+		<status name="62">
+			<action>View Contract CoF</action>
+			<action>View Contract Configuration</action>
+			<action>Update Contract Configuration</action>
+			<action>Amend Contract</action>
+			<!-- Start R8.5.0 QC 9497 Remove Renew Contract Action for all users
+			<action>Renew Contract</action>
+				End R8.5.0 QC 9497 Remove Renew Contract Action for all users
+			-->
+			<action>Suspend Contract</action>
+			<action>Close Contract</action>
+		</status>
+		<status name="61">
+			<action>View Contract CoF</action>
+			<action>View Contract Configuration</action>
+			<!-- Release 3.8.0 Enhancement 6481 -->
+			<action>Update Contract Configuration</action>
+			<!-- Start || Added for QC9122 R7.11.0 reopen in R 8.1 -->
+			<action>View Amendments</action>
+			<action>Amend Contract</action>
+			<!-- End || Added for QC9122 R7.11.0 reopen in R 8.1 -->
+			<action>Suspend Contract</action>
+			<action>Cancel Contract</action>
+			<!-- Start || Changes made for enhancement 6000 for Release 3.8.0 -->
+			<action>Delete Contract</action>
+			<!-- End || Changes made for enhancement 6000 for Release 3.8.0 -->
+			<!-- Start || Changes made for enhancement 6482 for Release 3.8.0 -->
+			<action>Update Contract Information</action>
+			<!-- End || Changes made for enhancement 6482 for Release 3.8.0 -->
+			<!--Start : Added in R7 for Flag/Unflag Contract-->
+			<action>Flag Contract</action>
+			<action>Unflag Contract</action>
+			<!-- End : Added in R7 -->
+			<!--Start : Added in R5 -->
+			<action>View Budgets</action>
+			<action>User Access</action>
+			<!--End : Added in R5 -->
+		</status>
+		<!-- Begin Release 6.3 QC5690 - add new contract status Pending Notification 
+		<status name="194">
+			<action>View Contract CoF</action>
+			<action>View Contract Configuration</action>
+			<action>Update Contract Configuration</action>
+			<action>Suspend Contract</action>
+			<action>Update Contract Information</action>
+			<action>View Budgets</action>
+			<action>User Access</action>
+		</status>
+		-->
+		<!-- End Release 6.3 QC5690 - add new contract status Pending Notification -->
+		<status name="67">
+			<action>View Contract CoF</action>
+			<action>View Contract Configuration</action>
+			<action>Unsuspend Contract</action>
+			<!--Start : Added in R7 -->
+			<action>Flag Contract</action>
+			<action>Unflag Contract</action>
+			<!-- End : Added in R7 -->
+			<!--Start : Added in R5 -->
+			<action>View Budgets</action>
+			<action>View Invoices</action>
+			<action>View Payments</action>
+			<action>User Access</action>
+			<!--End : Added in R5 -->
+		</status>
+		<status name="69">
+			<action>View Contract CoF</action>
+			<action>View Contract Configuration</action>
+			<!--Start : Added in R7 -->
+			<action>Flag Contract</action>
+			<action>Unflag Contract</action>
+			<!-- End : Added in R7 -->			
+			<!--Start : Added in R5 -->
+			<action>View Budgets</action>
+			<action>User Access</action>
+			<!--End : Added in R5 -->
+		</status>
+		<status name="68">
+			<action>View Contract CoF</action>
+			<action>View Contract Configuration</action>
+			<!--Start : Added in R7 -->
+			<action>Flag Contract</action>
+			<action>Unflag Contract</action>
+			<!-- End : Added in R7 -->
+			<!--Start : Added in R5 -->
+			<action>View Budgets</action>
+			<action>View Invoices</action>
+			<action>View Payments</action>
+			<action>User Access</action>
+			<!--End : Added in R5 -->
+		</status>
+		<!-- Start || Changes made for enhancement 6482 for Release 3.8.0 -->
+		<!-- Start || Changes made for enhancement 6000 for Release 3.8.0 -->
+		<status name="59">
+			<action>Cancel Contract</action>
+			<action>Delete Contract</action>
+			<action>Update Contract Information</action>
+			<!--Start : Added in R7 -->
+			<action>Flag Contract</action>
+			<action>Unflag Contract</action>
+			<!-- End : Added in R7 -->			
+			<action>User Access</action>
+		</status>
+		<status name="60">
+			<action>Cancel Contract</action>
+			<action>Delete Contract</action>
+			<action>Update Contract Information</action>
+			<!--Start : Added in R7 -->
+			<action>Flag Contract</action>
+			<action>Unflag Contract</action>
+			<!-- End : Added in R7 -->			
+			<action>User Access</action>
+		</status>
+		<status name="62">
+			<action>Delete Contract</action>
+			<action>Update Contract Information</action>
+			<!--Start : Added in R7 -->
+			<action>Flag Contract</action>
+			<action>Unflag Contract</action>
+			<!-- End : Added in R7 -->
+			<!--Start : Added in R5 -->
+			<action>View Budgets</action>
+			<action>View Invoices</action>
+			<action>View Payments</action>
+			<action>View Amendments</action>
+			<action>User Access</action>
+			<!--End : Added in R5 -->
+		</status>
+		<!-- End || Changes made for enhancement 6000 for Release 3.8.0 -->
+		<!-- Start || Changes made for enhancement 6482 for Release 3.8.0 -->
+		
+		<status name="129">
+			<!--Start : Added in R7 -->
+			<action>Flag Contract</action>
+			<action>Unflag Contract</action>
+			<!-- End : Added in R7 -->			
+			<action>View Invoices</action>
+			<action>View Payments</action>
+		</status>
+	</page>
+	<!--Start : Added in R5 -->
+	<page name="contractListProvider">
+		<status name="61">
+			<action>View Budgets</action>
+			<action>User Access</action>
+		</status>
+		<!-- Begin R6.3 QC5690  
+		<status name="194">
+			<action>View Budgets</action>
+			<action>User Access</action>
+		</status>
+		-->
+		<!-- End R6.3 QC5690  -->
+		<status name="62">
+			<action>View Budgets</action>
+			<action>View Invoices</action>
+			<action>View Payments</action>
+			<action>View Amendments</action>
+			<action>User Access</action>
+		</status>
+		<status name="68">
+			<action>View Budgets</action>
+			<action>View Invoices</action>
+			<action>View Payments</action>
+			<action>User Access</action>
+		</status>
+		<status name="67">
+			<action>View Budgets</action>
+			<action>View Invoices</action>
+			<action>View Payments</action>
+			<action>User Access</action>
+		</status>
+		<status name="69">
+			<action>View Budgets</action>
+			<action>User Access</action>
+		</status>
+		<status name="128">
+			<action>View Invoices</action>
+		</status>
+		<status name="129">
+			<action>View Invoices</action>
+			<action>View Payments</action>
+		</status>
+	</page>
+	<!--Start : Added in R5 -->
+</mapping>

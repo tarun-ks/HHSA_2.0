@@ -1,0 +1,77 @@
+<charts>
+		<chart width="500pt" height="500pt" id="receivablesReport"
+		chart_design_id="receivablesReportScripted_provider.rptdesign" 
+		export_design_id="export/receivablesExport.rptdesign"
+		dashboard_chart_design_id="receivablesReportScripted_provider.rptdesign"
+		 exportdata="true" exportformat="csv" datasource="scripted" sqlID="getRecievablesDetailsChart" exportsqlID="getRecievablesDetails" exporttablename="data"
+		emitterClass="com.nyc.hhs.report.extension.ExportCSVReport">
+		<report-params>
+			<param name="organizationId" scope="" target="ORGANIZATION_ID" />
+			<param name="fyYearId" scope="" target="fyYearId" />
+			<param name="organizationType" scope="" target="organizationType" />
+		</report-params>
+		<report-variables>
+			<variable name="reportList" scope="global" target="reportList" />
+		</report-variables>
+		<data-columns sqlID="getRecievablesDetails_ForGrid">
+				<column headingName="Agency" columnName="agencyName" size="10%" userType="provider_org,city_org"/>
+				<column headingName="CT#" columnName="ctNumber" size="15%" userType="provider_org"/>
+				<column headingName="Contract Title" columnName="contractTitle" size="40%" userType="provider_org"/>
+				<column headingName="Approved Invoices Pending Disbursement ($)*" columnName="approvedInvoicedPendingDsiburesement" size="15%" userType="provider_org"/>
+				<column headingName="Approved Advances Pending Disbursement ($)**" columnName="approvedAdvancePendingDsiburesement" size="15%" userType="provider_org"/>
+		</data-columns>
+		
+		<table-columns/>
+	</chart>
+	
+	
+	<chart width="500pt" height="500pt" id="receivablesReport_city"
+		chart_design_id="receivablesReportScripted.rptdesign" 
+		export_design_id="export/receivablesExport.rptdesign"
+		dashboard_chart_design_id="receivablesReportScripted.rptdesign"
+		 exportdata="true" exportformat="csv" datasource="scripted"  sqlID="getRecievablesDetailsChart" exportsqlID="getRecievablesDetails" exporttablename="data"
+		emitterClass="com.nyc.hhs.report.extension.ExportCSVReport">
+		<report-params>
+			<param name="organizationId" scope="" target="ORGANIZATION_ID" />
+			<param name="fyYearId" scope="" target="fyYearId" />
+			<param name="organizationType" scope="" target="organizationType" />
+		</report-params>
+		<report-variables>
+			<variable name="reportList" scope="global" target="reportList" />
+		</report-variables>
+		<data-columns sqlID="getRecievablesDetails_ForGrid">
+				<column headingName="Agency" columnName="agencyName" size="10%" userType="city_org"/>
+				<column headingName="Provider" columnName="provider" size="15%" userType="city_org,agency_org"/>
+				<column headingName="CT#" columnName="ctNumber" size="15%" userType="city_org,agency_org"/>
+				<column headingName="Contract Title" columnName="contractTitle" size="40%" userType="city_org,agency_org"/>
+				<column headingName="Approved Invoices Pending Disbursement ($)*" columnName="approvedInvoicedPendingDsiburesement" size="15%" userType="city_org,agency_org"/>
+				<column headingName="Approved Advances Pending Disbursement ($)**" columnName="approvedAdvancePendingDsiburesement" size="15%" userType="city_org,agency_org"/>
+		</data-columns>
+		
+		<table-columns/>
+	</chart>
+	<chart width="500pt" height="500pt" id="receivablesReport_agency"
+		chart_design_id="receivablesReportScripted_city.rptdesign" 
+		export_design_id="export/receivablesExportAgency.rptdesign"
+		dashboard_chart_design_id="receivablesReportScripted_city.rptdesign"
+		 exportdata="true" exportformat="csv" datasource="scripted"  sqlID="getRecievablesDetailsChart" exportsqlID="getRecievablesDetails" exporttablename="data"
+		emitterClass="com.nyc.hhs.report.extension.ExportCSVReport">
+		<report-params>
+			<param name="organizationId" scope="" target="ORGANIZATION_ID" />
+			<param name="fyYearId" scope="" target="fyYearId" />
+			<param name="organizationType" scope="" target="organizationType" />
+		</report-params>
+		<report-variables>
+			<variable name="reportList" scope="global" target="reportList" />
+		</report-variables>
+		<data-columns sqlID="getRecievablesDetails_ForGrid">
+				<column headingName="Provider" columnName="provider" size="15%" userType="city_org,agency_org"/>
+				<column headingName="CT#" columnName="ctNumber" size="15%" userType="city_org,agency_org"/>
+				<column headingName="Contract Title" columnName="contractTitle" size="40%" userType="city_org,agency_org"/>
+				<column headingName="Approved Invoices Pending Disbursement ($)*" columnName="approvedInvoicedPendingDsiburesement" size="15%" userType="city_org,agency_org"/>
+				<column headingName="Approved Advances Pending Disbursement ($)**" columnName="approvedAdvancePendingDsiburesement" size="15%" userType="city_org,agency_org"/>
+		</data-columns>
+		
+		<table-columns/>
+	</chart>
+</charts>

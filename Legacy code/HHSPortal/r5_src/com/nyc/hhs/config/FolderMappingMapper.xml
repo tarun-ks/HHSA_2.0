@@ -1,0 +1,1332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.FolderMappingMapper">
+
+	<delete id="deleteFolder" parameterType="hashmap">
+		DELETE FROM
+		FOLDER_MAPPING WHERE FOLDER_FILENET_ID IN
+			<foreach item="items" index="index" collection="docIdList"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach>
+	</delete>
+	
+	<delete id="emptyRecycleBin" parameterType="string">
+		DELETE FROM
+		FOLDER_MAPPING WHERE ORGANIZATION_ID = #{aoOrgId} AND MOVED_TO_RECYCLE_BIN = '1'
+	</delete>
+	
+	<delete id="deleteFolderSingleRow" parameterType="hashmap">
+	DELETE FROM
+		FOLDER_MAPPING WHERE FOLDER_FILENET_ID = #{folderFileNetId} AND ORGANIZATION_ID = #{orgId}
+	</delete>
+	
+	<delete id="deleteFolderChildList" parameterType="hashmap">
+	DELETE FROM
+		FOLDER_MAPPING WHERE PARENT_FOLDER_FILENET_ID = #{folderFileNetId} AND ORGANIZATION_ID = #{orgId}
+	</delete>
+	
+	<resultMap id="jstree" type="com.nyc.hhs.model.FolderMappingBean">
+	  <result property="id" column="FOLDER_FILENET_ID" />
+	  <result property="text" column="FOLDER_NAME"/>
+	  <result property="type" column="File_Type"/>
+	  <result property="parent" column="PARENT_FOLDER_FILENET_ID"/>
+	  <result property="movedToRecycleBin" column="MOVED_TO_RECYCLE_BIN"/>
+	  <collection property="state" ofType="com.nyc.hhs.model.FolderTreeState">
+			<id property="folderId" column="FOLDER_FILENET_ID" />
+			<result property="hidden" column="MOVED_TO_RECYCLE_BIN" />
+		</collection>
+	</resultMap>
+
+	<select id="fetchFolderMapList" parameterType="hashmap" resultMap="jstree">
+		SELECT FOLDER_FILENET_ID,
+		FOLDER_NAME,
+		DECODE(TYPE,'1','folder','2','file') AS File_Type,
+		PARENT_FOLDER_FILENET_ID, MOVED_TO_RECYCLE_BIN
+		FROM FOLDER_MAPPING 
+		WHERE ORGANIZATION_ID = #{orgId} AND MOVED_TO_RECYCLE_BIN = '0'
+		start with parent_folder_filenet_id='#'
+  		CONNECT BY PRIOR folder_filenet_id = parent_folder_filenet_id and moved_to_recycle_bin = 0
+		ORDER BY lower(FOLDER_NAME) asc
+	</select>
+	
+	<select id="fetchFolderMapListOrg" parameterType="hashmap" resultMap="jstree">
+		SELECT FOLDER_FILENET_ID,
+		FOLDER_NAME,
+		DECODE(TYPE,'1','folder','2','file') AS File_Type,
+		PARENT_FOLDER_FILENET_ID, MOVED_TO_RECYCLE_BIN
+		FROM FOLDER_MAPPING 
+		WHERE ORGANIZATION_ID = #{orgId} AND MOVED_TO_RECYCLE_BIN = '0'
+		start with FOLDER_FILENET_ID                     = #{folderFilenetId}
+  		CONNECT BY PRIOR folder_filenet_id = parent_folder_filenet_id and moved_to_recycle_bin = 0
+		ORDER BY lower(FOLDER_NAME) asc 
+		
+	</select>
+	
+	<resultMap id="foldermap" type="com.nyc.hhs.model.FolderMappingBean">
+	  <result property="folderFilenetId" column="FOLDER_FILENET_ID"/>
+	</resultMap>
+	
+	<select id="checkFolderNameExists" parameterType="hashmap" resultMap="foldermap">
+		
+		select FOLDER_FILENET_ID from FOLDER_MAPPING  WHERE FOLDER_NAME = #{DocumentTitle}
+		AND ORGANIZATION_ID = #{organizationId} AND 
+    PARENT_FOLDER_FILENET_ID IN (select PARENT_FOLDER_FILENET_ID from FOLDER_MAPPING where  
+    FOLDER_FILENET_ID = #{folderId})
+	</select>
+	
+	<select id="getDuplicateId" parameterType="string" resultMap="foldermap">
+		
+		select FOLDER_FILENET_ID from folder_mapping  WHERE FOLDER_NAME = 'Document Vault'
+		AND ORGANIZATION_ID = #{aoOrgId} AND PARENT_FOLDER_FILENET_ID = '#'
+	</select>
+	
+	
+	
+	<update id="updateFolderMapping" parameterType="com.nyc.hhs.model.FolderMappingBean">
+		UPDATE FOLDER_MAPPING SET MODIFIED_DATE = SYSTIMESTAMP
+		<if test="organizationType != null and organizationType !='provider_org'">
+			<if test="modifiedBy != null and modifiedBy !=''">
+				,MODIFIED_BY_USERID = #{modifiedBy}
+			</if>
+			<if test="createdBy != null and createdBy !=''">
+				,CREATED_BY_USERID = #{createdBy}
+			</if>
+		</if>
+		<if test="organizationType != null and organizationType == 'provider_org'">
+			<if test="modifiedBy != null and modifiedBy !=''">
+				,MODIFIED_BY_STAFFID  = #{modifiedBy}
+			</if>
+			<if test="createdBy != null and createdBy !=''">
+				,CREATED_BY_STAFFID  = #{createdBy}
+			</if>
+		</if> 
+		<if test="attachmentFlag != null and attachmentFlag !=''">
+			,ATTACHMENT_FLAG = #{attachmentFlag}
+		</if>
+		<if test="createdBy != null and createdBy !=''">
+			,CREATED_DATE = SYSTIMESTAMP
+		</if>
+		<if test="documentCount != null and documentCount !=''">
+			,DOCUMENT_COUNT = #{documentCount}
+		</if>
+		<if test="folderCount != null and folderCount !=''">
+			,FOLDER_COUNT = #{folderCount}
+		</if>
+		<if test="folderName != null and folderName !=''">
+			,FOLDER_NAME = #{folderName}
+		</if>
+		<if test="movedToRecycleBin != null and movedToRecycleBin !=''">
+			,MOVED_TO_RECYCLE_BIN = #{movedToRecycleBin}
+		</if>
+		<if test="parentFolderFilenetId != null and parentFolderFilenetId !=''">
+			,PARENT_FOLDER_FILENET_ID = #{parentFolderFilenetId}
+		</if>
+		<if test="processing != null and processing !=''">
+			,PROCESSING = #{processing}
+		</if>
+		<if test="sharedFlag != null and sharedFlag !=''">
+			,SHARED_FLAG = #{sharedFlag}
+		</if>
+		<if test="type != null and type !=''">
+			,TYPE = #{type}
+		</if>
+		WHERE
+		FOLDER_FILENET_ID = #{folderFilenetId}
+	</update>
+	<insert id="insertForFilenet" parameterType="com.nyc.hhs.model.FolderMappingBean">
+		Insert into FOLDER_MAPPING (FOLDER_MAPPING_ID,FOLDER_NAME,FOLDER_FILENET_ID,
+		PARENT_FOLDER_FILENET_ID,FOLDER_COUNT,DOCUMENT_COUNT,SHARED_FLAG,ATTACHMENT_FLAG,
+		ORGANIZATION_ID,CREATED_DATE,MODIFIED_DATE,
+		<if test="organizationType != null and organizationType !='provider_org'">
+			CREATED_BY_USERID,MODIFIED_BY_USERID,
+		</if>
+		<if test="organizationType != null and organizationType == 'provider_org'">
+			CREATED_BY_STAFFID,MODIFIED_BY_STAFFID,
+		</if>
+		TYPE,MOVED_TO_RECYCLE_BIN)
+		values (SEQ_FOLDER_MAPPING_ID.NEXTVAL,#{folderName,jdbcType=VARCHAR},#{folderFilenetId,jdbcType=VARCHAR},#{parentFolderFilenetId,jdbcType=VARCHAR},#{folderCount,jdbcType=VARCHAR},#{documentCount,jdbcType=VARCHAR},#{sharedFlag,jdbcType=VARCHAR},#{attachmentFlag,jdbcType=VARCHAR},
+		#{organizationId,jdbcType=VARCHAR},systimestamp,systimestamp,#{createdBy,jdbcType=VARCHAR},#{modifiedBy,jdbcType=VARCHAR},#{type,jdbcType=VARCHAR},#{movedToRecycleBin,jdbcType=VARCHAR})
+	</insert>
+	
+	 <insert id="insertForFilenetInBatch" parameterType="com.nyc.hhs.model.FolderMappingBean">
+           Insert into FOLDER_MAPPING (FOLDER_MAPPING_ID,FOLDER_NAME,FOLDER_FILENET_ID,PARENT_FOLDER_FILENET_ID,FOLDER_COUNT,
+     DOCUMENT_COUNT,SHARED_FLAG,ATTACHMENT_FLAG,ORGANIZATION_ID,CREATED_DATE,
+     <if test="organizationType != null and organizationType !='provider_org'">
+			CREATED_BY_USERID,MODIFIED_BY_USERID,
+		</if>
+		<if test="organizationType != null and organizationType == 'provider_org'">
+			CREATED_BY_STAFFID,MODIFIED_BY_STAFFID,
+		</if>
+     MODIFIED_DATE,TYPE,MOVED_TO_RECYCLE_BIN)
+           values (SEQ_FOLDER_MAPPING_ID.NEXTVAL,'Document Vault',#{folderFilenetId,jdbcType=VARCHAR},'#',0,#{documentCount,jdbcType=VARCHAR},
+           '0','0',#{organizationId,jdbcType=VARCHAR},systimestamp,'system','system',systimestamp,1,'0')
+     </insert>
+	 
+	 
+	<!--  <insert id="insertForFilenetInBatch" parameterType="com.nyc.hhs.model.FolderMappingBean">
+           Insert into FOLDER_MAPPING (FOLDER_MAPPING_ID,FOLDER_NAME,FOLDER_FILENET_ID,PARENT_FOLDER_FILENET_ID,FOLDER_COUNT,
+     DOCUMENT_COUNT,SHARED_FLAG,ATTACHMENT_FLAG,ORGANIZATION_ID,CREATED_DATE,CREATED_BY,MODIFIED_DATE,MODIFIED_BY,TYPE,MOVED_TO_RECYCLE_BIN)
+           values (SEQ_FOLDER_MAPPING_ID.NEXTVAL,'Document Vault',#{folderFilenetId},'#',0,#{documentCount},'0','0',#{organizationId},systimestamp,'system',systimestamp,'system',1,'0')
+     </insert>
+	 -->
+	<update id="updateFolderCount" parameterType="com.nyc.hhs.model.FolderMappingBean">
+        UPDATE FOLDER_MAPPING SET FOLDER_COUNT  =FOLDER_COUNT+1,MODIFIED_DATE = systimestamp,
+		<if test="organizationType != null and organizationType !='provider_org'">
+			MODIFIED_BY_USERID = #{modifiedBy}
+		</if>
+		<if test="organizationType != null and organizationType == 'provider_org'">
+			MODIFIED_BY_STAFFID = #{modifiedBy}
+		</if> 
+        where FOLDER_FILENET_ID =#{parentFolderFilenetId}
+    </update>
+    
+    <update id="updateDocCount" parameterType="com.nyc.hhs.model.FolderMappingBean">
+        UPDATE FOLDER_MAPPING SET DOCUMENT_COUNT  =DOCUMENT_COUNT+1,MODIFIED_DATE = systimestamp,
+        <if test="organizationType != null and organizationType !='provider_org'">
+			MODIFIED_BY_USERID = #{modifiedBy}
+		</if>
+		<if test="organizationType != null and organizationType == 'provider_org'">
+			MODIFIED_BY_STAFFID = #{modifiedBy}
+		</if> 
+        where FOLDER_FILENET_ID =#{folderFilenetId}
+    </update>
+    
+      <update id="updateDocCountDynamic" parameterType="hashmap">
+        UPDATE FOLDER_MAPPING SET DOCUMENT_COUNT  =DOCUMENT_COUNT+#{docCount},MODIFIED_DATE = systimestamp,
+		<if test="organizationType != null and organizationType !='provider_org'">
+			MODIFIED_BY_USERID = #{modifiedBy}
+		</if>
+		<if test="organizationType != null and organizationType == 'provider_org'">
+			MODIFIED_BY_STAFFID = #{modifiedBy}
+		</if> 
+        where FOLDER_FILENET_ID =#{folderId}
+    </update>
+    
+    <update id="increaseCount" parameterType="com.nyc.hhs.model.FolderMappingBean">
+        UPDATE FOLDER_MAPPING SET MODIFIED_DATE = systimestamp
+        <if test="documentCount != null and documentCount !=''">
+			,DOCUMENT_COUNT = DOCUMENT_COUNT + #{documentCount}
+		</if>
+		<if test="folderCount != null and folderCount !=''">
+			,FOLDER_COUNT = FOLDER_COUNT + #{folderCount}
+		</if>
+        <if test="organizationType != null and organizationType !='provider_org'">
+			,MODIFIED_BY_USERID = #{modifiedBy}
+		</if>
+		<if test="organizationType != null and organizationType == 'provider_org'">
+			,MODIFIED_BY_STAFFID = #{modifiedBy}
+		</if> 
+        where FOLDER_FILENET_ID =#{folderFilenetId}
+    </update>
+    
+    <update id="decreaseCount" parameterType="com.nyc.hhs.model.FolderMappingBean">
+        UPDATE FOLDER_MAPPING SET MODIFIED_DATE = systimestamp
+        <if test="documentCount != null and documentCount !=''">
+			,DOCUMENT_COUNT =  
+		    CASE
+		      WHEN DOCUMENT_COUNT = 0
+		      THEN (0)
+		      ELSE (DOCUMENT_COUNT - #{documentCount})
+		    END 
+		</if>
+		<if test="folderCount != null and folderCount !=''">
+			,FOLDER_COUNT = CASE
+		      WHEN FOLDER_COUNT = 0
+		      THEN (0)
+		      ELSE (FOLDER_COUNT - #{folderCount})
+		    END 
+		</if>
+        <if test="organizationType != null and organizationType !='provider_org'">
+			,MODIFIED_BY_USERID = #{modifiedBy}
+		</if>
+		<if test="organizationType != null and organizationType == 'provider_org'">
+			,MODIFIED_BY_STAFFID = #{modifiedBy}
+		</if> 
+        where FOLDER_FILENET_ID =#{folderFilenetId}
+    </update>
+    
+    <resultMap id="countResult" type="com.nyc.hhs.model.FolderMappingBean">
+	  <result property="folderName" column="FOLDER_NAME"/>
+	  <result property="documentCount" column="TOTAL_DOC_COUNT"/>
+	  <result property="folderFilenetId" column="FOLDER_FILENET_ID"/>
+	  <result property="createdBy" column="CREATED_BY"/>
+	  <result property="createdDate" column="CREATED_DATE"/>
+	  <result property="modifiedDate" column="MODIFIED_DATE"/>
+	  <result property="modifiedBy" column="MODIFIED_BY"/>
+	  <result property="parentFolderFilenetId" column="PARENT_FOLDER_FILENET_ID"/>
+	  </resultMap>
+	
+	<select id="getFolderProp" parameterType="hashmap" resultMap="countResult">
+		SELECT fm.FOLDER_FILENET_ID,
+		  fm_main.PARENT_FOLDER_FILENET_ID,
+		  fm_main.FOLDER_NAME,
+		  fm_main.CREATED_BY CREATED_BY,
+		  fm_main.CREATED_DATE,
+		  fm_main.MODIFIED_DATE,
+		  fm_main.MODIFIED_BY,
+		  fm.Total_Doc_Count
+		FROM
+		  (SELECT FOLDER_FILENET_ID,
+		    SUM(DOCUMENT_COUNT) Total_Doc_Count
+		  FROM
+		    (SELECT CONNECT_BY_ROOT FOLDER_FILENET_ID AS FOLDER_FILENET_ID,
+		      DOCUMENT_COUNT
+		    FROM
+		      ( SELECT * FROM FOLDER_MAPPING WHERE ORGANIZATION_ID = #{orgId}
+		      )
+		      CONNECT BY PRIOR TO_CHAR(FOLDER_FILENET_ID) = PARENT_FOLDER_FILENET_ID
+		    )
+		  GROUP BY FOLDER_FILENET_ID
+		  ) fm,
+		  (SELECT f.FOLDER_FILENET_ID,
+		    f.DOCUMENT_COUNT,
+		    f.FOLDER_NAME,
+		    f.PARENT_FOLDER_FILENET_ID,
+		    s.first_name || ' ' || s.last_name CREATED_BY,
+		    f.CREATED_DATE,
+		    f.MODIFIED_DATE,
+		    s1.first_name || ' ' || s1.last_name MODIFIED_BY
+		  FROM FOLDER_MAPPING f LEFT JOIN staff_city_user_details s ON nvl(f.created_by_userid, f.created_by_staffid) = s.user_id 
+		  LEFT JOIN staff_city_user_details s1 ON nvl(f.modified_by_userid, f.modified_by_staffid)  = s1.user_id
+		  WHERE f.FOLDER_FILENET_ID = #{fldrId}
+		  AND f.ORGANIZATION_ID     = #{orgId}
+		  ) fm_main
+		WHERE fm_main.FOLDER_FILENET_ID = fm.FOLDER_FILENET_ID
+		ORDER BY fm.FOLDER_FILENET_ID
+	</select>
+	
+<resultMap type="com.nyc.hhs.model.DocumentBean" id="linkedResult">
+	  	<result property="entityLinked" column="OBJECT_NAME"/>
+	  	<result property="date" column="LINKED_DATE"/>
+	  	<result property="entityId" column="ENTITY_ID"/>
+	  	<result property="parentId" column="PARENT_ID"/>
+	  	<result property="parentEntityName" column="PARENT_ENTITY_NAME"/>
+	  	  	<result property="statusIdProcurement" column="STATUS_ID_PROCUREMENT"/>
+	  	  	  	<result property="contractId" column="CONTRACT_ID"/>
+	  	  	  	  	<result property="organizationId" column="ORGANIZATION_ID"/>
+	  	  	  	  	<result property="fiscalYearId" column="FISCAL_YEAR_ID"/>
+	  	  	  	  	<result property="budgetTypeId" column="BUDGET_TYPE_ID"/>
+	  	  	  	  	<result property="ctNum" column="CT_NUBMER"/>
+	  	  	  	  	<result property="appStatus" column="APPLICATION_STATUS"/>
+	  	  	  	  	<result property="businessId" column="BUS_ID"/>
+	  	  	  	  	<result property="businessAppId" column="BUS_APP_ID"/>
+	  	  	  	  	<result property="serviceAppId" column="SER_APP_ID"/>
+	  	  	  	  	<result property="appId" column="APP_ID"/>
+	</resultMap>
+
+	<select id="fetchData" parameterType="hashmap" resultMap="linkedResult">
+		SELECT
+		OBJECT_NAME,LINKED_DATE,ENTITY_ID,PARENT_ID,PARENT_ENTITY_NAME,STATUS_ID_PROCUREMENT,CONTRACT_ID,
+		ORGANIZATION_ID,FISCAL_YEAR_ID,BUDGET_TYPE_ID,CT_NUBMER,APPLICATION_STATUS,BUS_ID,BUS_APP_ID,SER_APP_ID,APP_ID
+		FROM (SELECT DISTINCT ADDMDOC.DOCUMENT_IDENTIFIER_ID,
+	  'Procurement'          AS OBJECT_NAME,
+	  proc.status_id         AS status_id,
+	  ADDMDOC.CREATED_DATE   AS LINKED_DATE,
+	  proc.procurement_id    AS ENTITY_ID,
+	  proc.procurement_id    AS PARENT_ID,
+	  proc.procurement_title AS PARENT_ENTITY_NAME,
+	  proc.status_id         AS STATUS_ID_PROCUREMENT,
+	  NULL                   AS CONTRACT_ID,
+	  NULL                   AS ORGANIZATION_ID,
+	  NULL                   AS FISCAL_YEAR_ID,
+	  NULL                   AS BUDGET_TYPE_ID,
+	  NULL                   AS CT_NUBMER,
+	  NULL                   AS APPLICATION_STATUS,
+	  NULL                   AS BUS_ID,
+	  NULL                   AS BUS_APP_ID,
+	  NULL                   AS SER_APP_ID,
+	  NULL                   AS APP_ID
+	FROM PRCRMNT_ADDM_RFP_DOCUMENT ADDMDOC,
+	  procurement PROC
+	WHERE addmdoc.procurement_id=proc.procurement_id
+	UNION
+	SELECT DISTINCT PRODOC.DOCUMENT_IDENTIFIER_ID,
+	  'Proposal'              AS OBJECT_NAME,
+	  prop.proposal_status_id AS status_id,
+	  PRODOC.CREATED_DATE     AS LINKED_DATE,
+	  prop.proposal_id        AS ENTITY_ID,
+	  prop.procurement_id     AS PARENT_ID,
+	  proc.procurement_title  AS PARENT_ENTITY_NAME,
+	  prop.proposal_status_id AS STATUS_ID_PROCUREMENT,
+	  NULL                    AS CONTRACT_ID,
+	  NULL                    AS ORGANIZATION_ID,
+	  NULL                    AS FISCAL_YEAR_ID,
+	  NULL                    AS BUDGET_TYPE_ID,
+	  NULL                    AS CT_NUBMER,
+	  NULL                    AS APPLICATION_STATUS,
+	  NULL                    AS BUS_ID,
+	  NULL                    AS BUS_APP_ID,
+	  NULL                    AS SER_APP_ID,
+	  NULL                    AS APP_ID
+	FROM PROPOSAL_DOCUMENT PRODOC,
+	  proposal_config prop
+	JOIN procurement PROC
+	ON prop.procurement_id  = proc.procurement_id
+	WHERE prodoc.proposal_id=prop.proposal_id
+	UNION
+	SELECT DISTINCT rfpdoc.DOCUMENT_IDENTIFIER_ID,
+	  'Procurement'       AS OBJECT_NAME,
+	  proc.status_id      AS status_id,
+	  rfpdoc.CREATED_DATE AS LINKED_DATE,
+	  proc.procurement_id AS ENTITY_ID,
+	  proc.procurement_id AS PARENT_ID,
+	  proc.procurement_title       AS PARENT_ENTITY_NAME,
+	  proc.status_id      AS STATUS_ID_PROCUREMENT,
+	  NULL                AS CONTRACT_ID,
+	  NULL                AS ORGANIZATION_ID,
+	  NULL                AS FISCAL_YEAR_ID,
+	  NULL                AS BUDGET_TYPE_ID,
+	  NULL                AS CT_NUBMER,
+	  NULL                AS APPLICATION_STATUS,
+	  NULL                AS BUS_ID,
+	  NULL                AS BUS_APP_ID,
+	  NULL                AS SER_APP_ID,
+	  NULL                AS APP_ID
+	FROM RFP_DOCUMENT rfpdoc,
+	  procurement PROC
+	WHERE rfpdoc.procurement_id=proc.procurement_id
+	and rfpdoc.rfp_doc_flag = 1 
+	UNION
+	SELECT DISTINCT buddoc.DOCUMENT_IDENTIFIER_ID,
+	  'Budget' AS OBJECT_NAME,
+	  bud.status_id,
+	  buddoc.CREATED_DATE AS LINKED_DATE,
+	  bud.budget_id       AS ENTITY_ID,
+	  bud.budget_id       AS PARENT_ID,
+	  con.ext_epin        AS PARENT_ENTITY_NAME,
+	  NULL                AS STATUS_ID_PROCUREMENT,
+	  con.contract_id     AS CONTRACT_ID,
+	  NULL                AS ORGANIZATION_ID,
+	  bud.fiscal_year_id  AS FISCAL_YEAR_ID,
+	  budtype.BUDGET_TYPE AS BUDGET_TYPE_ID,
+	  bud.CT_NUMBER       AS CT_NUBMER,
+	  NULL                AS APPLICATION_STATUS,
+	  NULL                AS BUS_ID,
+	  NULL                AS BUS_APP_ID,
+	  NULL                AS SER_APP_ID,
+	  NULL                AS APP_ID
+	FROM BUDGET_DOCUMENT buddoc,
+	  budget bud
+	JOIN budget_type budtype
+	ON bud.budget_type_id = budtype.budget_type_id
+	JOIN contract con
+	ON bud.contract_id    = con.contract_id
+	WHERE buddoc.budget_id=bud.budget_id
+	UNION
+	SELECT DISTINCT invdoc.DOCUMENT_IDENTIFIER_ID,
+	  'Invoice' AS OBJECT_NAME,
+	  inv.status_id,
+	  invDoc.CREATED_DATE         AS LINKED_DATE,
+	  inv.invoice_id              AS ENTITY_ID,
+	  inv.invoice_id              AS PARENT_ID,
+	  TO_CHAR(inv.invoice_number) AS PARENT_ENTITY_NAME,
+	  inv.status_id               AS STATUS_ID_PROCUREMENT,
+	  NULL                        AS CONTRACT_ID,
+	  NULL                        AS ORGANIZATION_ID,
+	  NULL                        AS FISCAL_YEAR_ID,
+	  NULL                        AS BUDGET_TYPE_ID,
+	  NULL                        AS CT_NUBMER,
+	  NULL                        AS APPLICATION_STATUS,
+	  NULL                        AS BUS_ID,
+	  NULL                        AS BUS_APP_ID,
+	  NULL                        AS SER_APP_ID,
+	  NULL                        AS APP_ID
+	FROM INVOICE_DOCUMENT invDoc,
+	  invoice inv
+	WHERE invdoc.invoice_id=inv.invoice_id
+	UNION
+	SELECT DISTINCT conDoc.DOCUMENT_IDENTIFIER_ID,
+	  'Amendment' AS OBJECT_NAME,
+	  con.status_id,
+	  conDoc.CREATED_DATE AS LINKED_DATE,
+	  con.contract_id     AS ENTITY_ID,
+	  con.contract_id     AS PARENT_ID,
+	  con.ext_epin   	  AS PARENT_ENTITY_NAME,
+	  con.status_id       AS STATUS_ID_PROCUREMENT,
+	  NULL                AS CONTRACT_ID,
+	  NULL                AS ORGANIZATION_ID,
+	  NULL                AS FISCAL_YEAR_ID,
+	  NULL                AS BUDGET_TYPE_ID,
+	  CON.EXT_CT_NUMBER   AS CT_NUBMER,
+	  NULL                AS APPLICATION_STATUS,
+	  NULL                AS BUS_ID,
+	  NULL                AS BUS_APP_ID,
+	  NULL                AS SER_APP_ID,
+	  NULL                AS APP_ID
+	FROM CONTRACT_DOCUMENT conDoc,
+	  contract con
+	WHERE condoc.contract_id=con.contract_id
+	and con.contract_type_id in (2)
+	UNION
+	SELECT DISTINCT conDoc.DOCUMENT_IDENTIFIER_ID,
+	  'Contract' AS OBJECT_NAME,
+	  con.status_id,
+	  conDoc.CREATED_DATE AS LINKED_DATE,
+	  con.contract_id     AS ENTITY_ID,
+	  con.contract_id     AS PARENT_ID,
+	  <!-- Start Emergency release 4.0.2 changes done for defect 8376 -->
+	  con.ext_epin   AS PARENT_ENTITY_NAME,
+	  <!-- End Emergency release 4.0.2 changes done for defect 8376 -->
+	  con.status_id       AS STATUS_ID_PROCUREMENT,
+	  NULL                AS CONTRACT_ID,
+	  NULL                AS ORGANIZATION_ID,
+	  NULL                AS FISCAL_YEAR_ID,
+	  NULL                AS BUDGET_TYPE_ID,
+	  CON.EXT_CT_NUMBER   AS CT_NUBMER,
+	  NULL                AS APPLICATION_STATUS,
+	  NULL                AS BUS_ID,
+	  NULL                AS BUS_APP_ID,
+	  NULL                AS SER_APP_ID,
+	  NULL                AS APP_ID
+	FROM CONTRACT_DOCUMENT conDoc,
+	  contract con
+	WHERE condoc.contract_id=con.contract_id
+	and con.contract_type_id in (1,3)
+	UNION
+	SELECT DISTINCT AWDDOC.DOCUMENT_IDENTIFIER_ID,
+	  'Award'                        AS OBJECT_NAME,
+	  AWD.award_review_status_id     AS status_id,
+	  AWDDOC.CREATED_DATE            AS LINKED_DATE,
+	  proc.procurement_id            AS ENTITY_ID,
+	  awd.EVALUATION_POOL_MAPPING_ID AS PARENT_ID,
+	  proc.procurement_title         AS PARENT_ENTITY_NAME,
+	  proc.status_id                 AS STATUS_ID_PROCUREMENT,
+	  NULL                           AS CONTRACT_ID,
+	  NULL                           AS ORGANIZATION_ID,
+	  NULL                           AS FISCAL_YEAR_ID,
+	  NULL                           AS BUDGET_TYPE_ID,
+	  NULL                           AS CT_NUBMER,
+	  NULL                           AS APPLICATION_STATUS,
+	  NULL                           AS BUS_ID,
+	  NULL                           AS BUS_APP_ID,
+	  NULL                           AS SER_APP_ID,
+	  NULL                           AS APP_ID
+	FROM AWARD_DOCUMENT AWDDOC,
+	  Award Awd
+	JOIN procurement PROC
+	ON Awd.procurement_id = proc.procurement_id
+	WHERE AWDDOC.award_id =AWD.award_id
+	UNION
+	SELECT DISTINCT rfpdoc.DOCUMENT_IDENTIFIER_ID,
+	  'Provider Award'       AS OBJECT_NAME,
+	  proc.status_id      AS status_id,
+	  rfpdoc.CREATED_DATE AS LINKED_DATE,
+	  proc.procurement_id AS ENTITY_ID,
+	  proc.procurement_id AS PARENT_ID,
+	  proc.procurement_title       AS PARENT_ENTITY_NAME,
+	  proc.status_id      AS STATUS_ID_PROCUREMENT,
+	  NULL                AS CONTRACT_ID,
+	  NULL                AS ORGANIZATION_ID,
+	  NULL                AS FISCAL_YEAR_ID,
+	  NULL                AS BUDGET_TYPE_ID,
+	  NULL                AS CT_NUBMER,
+	  NULL                AS APPLICATION_STATUS,
+	  NULL                AS BUS_ID,
+	  NULL                AS BUS_APP_ID,
+	  NULL                AS SER_APP_ID,
+	  NULL                AS APP_ID
+	FROM RFP_DOCUMENT rfpdoc,
+	  procurement PROC
+	WHERE rfpdoc.procurement_id=proc.procurement_id
+	and rfpdoc.rfp_doc_flag = 0
+	UNION
+	SELECT DISTINCT BAFODOC.DOCUMENT_IDENTIFIER_ID,
+	  'Proposal'           AS OBJECT_NAME,
+	  0                    AS STATUS_ID,
+	  BAFODOC.CREATED_DATE AS LINKED_DATE,
+	  prop.proposal_id     AS ENTITY_ID,
+	  prop.proposal_id     AS PARENT_ID,
+	  'Proposal'           AS PARENT_ENTITY_NAME,
+	  0                    AS STATUS_ID_PROCUREMENT,
+	  NULL                 AS CONTRACT_ID,
+	  NULL                 AS ORGANIZATION_ID,
+	  NULL                 AS FISCAL_YEAR_ID,
+	  NULL                 AS BUDGET_TYPE_ID,
+	  NULL                 AS CT_NUBMER,
+	  NULL                 AS APPLICATION_STATUS,
+	  NULL                 AS BUS_ID,
+	  NULL                 AS BUS_APP_ID,
+	  NULL                 AS SER_APP_ID,
+	  NULL                 AS APP_ID
+	FROM BAFO_DOCUMENT BAFODOC,
+	  proposal_config prop
+	WHERE BAFODOC.proposal_id=prop.proposal_id
+	UNION
+	SELECT DISTINCT agencyAward.DOCUMENT_IDENTIFIER_ID,
+	  'Agency Award'                    AS OBJECT_NAME,
+	  0                                AS STATUS_ID,
+	  agencyAward.CREATED_DATE         AS LINKED_DATE,
+	  proc.procurement_id              AS ENTITY_ID,
+	  award.EVALUATION_POOL_MAPPING_ID AS PARENT_ID,
+	  cont.ext_epin			           AS PARENT_ENTITY_NAME,
+	  proc.status_id                   AS STATUS_ID_PROCUREMENT,
+	  cont.contract_id                 AS CONTRACT_ID,
+	  cont.organization_id             AS ORGANIZATION_ID,
+	  NULL                             AS FISCAL_YEAR_ID,
+	  NULL                             AS BUDGET_TYPE_ID,
+	  NULL                             AS CT_NUBMER,
+	  NULL                             AS APPLICATION_STATUS,
+	  NULL                             AS BUS_ID,
+	  NULL                             AS BUS_APP_ID,
+	  NULL                             AS SER_APP_ID,
+	  NULL                             AS APP_ID
+	FROM AGENCY_AWARD_DOCUMENT agencyAward inner join  Award Award on agencyAward.award_id=award.award_id
+	JOIN procurement PROC
+	ON Award.procurement_id = proc.procurement_id
+	LEFT JOIN contract cont
+	ON Award.evaluation_pool_mapping_id    = cont.evaluation_pool_mapping_id and agencyAward.ORGANIZATION_ID=cont.organization_id
+	UNION
+	SELECT DISTINCT doc.DOCUMENT_ID  AS DOCUMENT_IDENTIFIER_ID,
+	  'Service Application'          AS OBJECT_NAME,
+	  0                              AS STATUS_ID,
+	  doc.CREATED_DATE               AS LINKED_DATE,
+	  NULL                           AS ENTITY_ID,
+	  NULL                           AS PARENT_ID,
+	  tm.element_name                AS PARENT_ENTITY_NAME,
+	  NULL                           AS STATUS_ID_PROCUREMENT,
+	  NULL                           AS CONTRACT_ID,
+	  NULL                           AS ORGANIZATION_ID,
+	  NULL                           AS FISCAL_YEAR_ID,
+	  NULL                           AS BUDGET_TYPE_ID,
+	  NULL                           AS CT_NUBMER,
+	  serApp.SERVICE_STATUS          AS APPLICATION_STATUS,
+	  serApp.ELEMENT_ID              AS BUS_ID,
+	  serApp.BUSINESS_APPLICATION_ID AS BUS_APP_ID,
+	  serApp.SERVICE_APPLICATION_ID  AS SER_APP_ID,
+	  serApp.APPLICATION_ID          AS APP_ID
+	FROM DOCUMENT doc
+	JOIN SERVICE_APPLICATION serApp JOIN taxonomy_master tm on serApp.element_id = tm.element_id
+	ON doc.SERVICE_APPLICATION_ID     = serApp.SERVICE_APPLICATION_ID
+	WHERE doc.SERVICE_APPLICATION_ID IS NOT NULL
+	UNION
+	<!-- Added for Release 6 Returned payment task -->
+	SELECT DISTINCT RPD.DOCUMENT_IDENTIFIER_ID,
+	  'Returned Payment' AS OBJECT_NAME,
+	  bud.status_id,
+	  rpd.CREATED_DATE AS LINKED_DATE,
+	  bud.budget_id       AS ENTITY_ID,
+	  bud.budget_id       AS PARENT_ID,
+	  con.ext_epin        AS PARENT_ENTITY_NAME,
+	  NULL                AS STATUS_ID_PROCUREMENT,
+	  con.contract_id     AS CONTRACT_ID,
+	  NULL                AS ORGANIZATION_ID,
+	  bud.fiscal_year_id  AS FISCAL_YEAR_ID,
+	  budtype.BUDGET_TYPE AS BUDGET_TYPE_ID,
+	  bud.CT_NUMBER       AS CT_NUBMER,
+	  NULL                AS APPLICATION_STATUS,
+	  NULL                AS BUS_ID,
+	  NULL                AS BUS_APP_ID,
+	  NULL                AS SER_APP_ID,
+	  NULL                AS APP_ID
+  	FROM RETURN_PAYMENT_DOCUMENT RPD
+    JOIN RETURN_PAYMENT RP on RPD.RETURN_PAYMENT_ID=RP.RETURN_PAYMENT_ID
+    JOIN BUDGET BUD ON BUD.budget_id = RP.BUDGET_ID
+    JOIN budget_type budtype
+	ON bud.budget_type_id = budtype.budget_type_id
+    JOIN CONTRACT con ON con.contract_id = bud.contract_id 
+    WHERE RPD.RETURN_PAYMENT_ID=RP.RETURN_PAYMENT_ID
+    <!-- Added for Release 6 Returned payment task end-->
+	UNION
+	SELECT DISTINCT doc.DOCUMENT_ID  AS DOCUMENT_IDENTIFIER_ID,
+	  'Business Application'         AS OBJECT_NAME,
+	  0                              AS STATUS_ID,
+	  doc.CREATED_DATE               AS LINKED_DATE,
+	  NULL                           AS ENTITY_ID,
+	  NULL                           AS PARENT_ID,
+	  NULL                           AS PARENT_ENTITY_NAME,
+	  NULL                           AS STATUS_ID_PROCUREMENT,
+	  NULL                           AS CONTRACT_ID,
+	  NULL                           AS ORGANIZATION_ID,
+	  NULL                           AS FISCAL_YEAR_ID,
+	  NULL                           AS BUDGET_TYPE_ID,
+	  NULL                           AS CT_NUBMER,
+	  busApp.APPLICATION_STATUS      AS APPLICATION_STATUS,
+	  busApp.BUSINESS_APPLICATION_ID AS BUS_ID,
+	  busApp.APPLICATION_ID          AS BUS_APP_ID,
+	  NULL                           AS SER_APP_ID,
+	  NULL                           AS APP_ID
+	FROM DOCUMENT doc
+	JOIN BUSINESS_APPLICATION busApp
+	ON doc.BUSINESS_APPLICATION_ID    = busApp.BUSINESS_APPLICATION_ID
+	WHERE doc.SERVICE_APPLICATION_ID IS NULL)
+	WHERE DOCUMENT_IDENTIFIER_ID like #{docData}
+	ORDER BY TO_DATE (TO_CHAR (LINKED_DATE, 'YYYY-MON-DD'),'YYYY-MON-DD') ASC, lower(OBJECT_NAME || '('|| PARENT_ENTITY_NAME || ')') ASC
+	</select>
+	
+	<update id="getParentId" parameterType="hashmap">
+	update FOLDER_MAPPING set FOLDER_COUNT = FOLDER_COUNT-1, MODIFIED_DATE = systimestamp
+	WHERE ORGANIZATION_ID = #{organizationId}
+	AND FOLDER_FILENET_ID in 
+	(SELECT PARENT_FOLDER_FILENET_ID FROM FOLDER_MAPPING WHERE FOLDER_FILENET_ID IN
+			<foreach item="items" index="index" collection="fileNetIdList"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach>)
+	</update>
+	
+	<update id="setTreeFlag" parameterType="hashmap">
+	update FOLDER_MAPPING set MOVED_TO_RECYCLE_BIN = 1
+	WHERE FOLDER_FILENET_ID in 
+			<foreach item="items" index="index" collection="fileNetIdList"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach>
+	</update>
+	
+	<update id="setParentId" parameterType="hashmap">
+	update FOLDER_MAPPING set PARENT_FOLDER_FILENET_ID = #{parentId}
+	WHERE FOLDER_FILENET_ID = #{fileNetId}
+	</update>
+	
+	
+	<update id="setMoveFlag" parameterType="hashmap">
+	update FOLDER_MAPPING set MOVED_TO_RECYCLE_BIN = #{moveToRecycleBinFlag}
+	WHERE FOLDER_FILENET_ID in 
+			(SELECT CONNECT_BY_ROOT
+		FOLDER_FILENET_ID
+		FROM
+		(SELECT * FROM FOLDER_MAPPING WHERE ORGANIZATION_ID = #{organizationId}
+		)
+		WHERE FOLDER_FILENET_ID = #{fileNetId}
+		CONNECT BY PRIOR PARENT_FOLDER_FILENET_ID = FOLDER_FILENET_ID)
+	</update>
+	
+	<select id="getProcurementInfo" parameterType="hashmap" resultType="string">
+	<!-- Changing below query for Emergency Build 4.0.2 as rfp_doc_flag check was missing from Linked Search -->
+	<if test="entityType != null and entityType !='' and entityType == 'Procurement' and orgId == 'city_org' ">
+		select rfp.DOCUMENT_IDENTIFIER_ID from rfp_document rfp left join procurement proc on proc.procurement_id = rfp.procurement_id 
+		where proc.procurement_id = #{procurementId} and rfp_doc_flag=1
+		UNION
+		select prp.DOCUMENT_IDENTIFIER_ID from PRCRMNT_ADDM_RFP_DOCUMENT prp left join procurement proc on proc.procurement_id = prp.procurement_id 
+		where proc.procurement_id = #{procurementId}
+		</if>
+		<if test="entityType != null and entityType !='' and entityType == 'agencyAward' and orgId == 'agency_org' ">
+		select awd.DOCUMENT_IDENTIFIER_ID from AGENCY_AWARD_DOCUMENT awd left join contract cont on awd.procurement_id = cont.procurement_id  
+		where cont.ext_epin = #{awardepinTitle}
+		</if>
+		<!-- Changing below query for Emergency Build 4.0.2 as document_id not null check Added -->
+		<if test="entityType != null and entityType !='' and entityType == 'Business Application' and orgId == 'provider_org' ">
+		select DOCUMENT_ID from DOCUMENT where section_id != 'servicessummary' and organization_id = #{provider_id} AND modified_date BETWEEN
+			#{submittedFrom,jdbcType=DATE} AND #{submittedTo,jdbcType=DATE} AND DOCUMENT_ID IS NOT NULL
+		</if>
+		
+		<if test="entityType != null and entityType !='' and entityType == 'amendment' and orgId == 'agency_org' ">
+		
+		select contdoc.DOCUMENT_IDENTIFIER_ID from contract_document contdoc left join contract cont on contdoc.contract_id = cont.contract_id where cont.ext_epin = #{amendmentId} 
+		and cont.contract_type_id = '2'
+		</if>
+		<!-- Changing below query for Emergency Build 4.0.2 as as document_id not null check Added -->
+		<if test="entityType != null and entityType !='' and entityType == 'Service Application' and orgId == 'provider_org' ">
+		select DOCUMENT_ID from DOCUMENT where section_id = 'servicessummary' and organization_id = #{provider_id}  AND modified_date BETWEEN
+			#{submittedFrom,jdbcType=DATE} AND	#{submittedTo,jdbcType=DATE} AND DOCUMENT_ID IS NOT NULL
+		</if>
+		<!-- Changing below query for Emergency Build 4.0.2 as organization check was missing from Linked Search -->
+		<if test="entityType != null and entityType !='' and entityType == 'Award' and orgId == 'provider_org' ">
+		select awddoc.DOCUMENT_IDENTIFIER_ID from award_document awddoc left join award awd on awddoc.award_id = awd.award_id 
+		where awd.procurement_id = #{procurementId} and awddoc.organization_id = #{provider_id}
+		</if>
+		<if test="entityType != null and entityType !='' and entityType == 'providerAward' and orgId == 'agency_org' ">
+		select rfpdoc.DOCUMENT_IDENTIFIER_ID FROM RFP_DOCUMENT rfpdoc,procurement PROC WHERE rfpdoc.procurement_id=proc.procurement_id
+		and rfpdoc.rfp_doc_flag = 0 and proc.procurement_id = #{procurementId}
+		</if>
+		<!-- Changing below query for Emergency Build 4.0.2 as organization check was missing from Linked Search -->
+		<if test="entityType != null and entityType !='' and entityType == 'Proposal' and orgId == 'provider_org' ">
+            select pd.DOCUMENT_IDENTIFIER_ID from proposal_document pd,proposal_config pc WHERE pc.proposal_id=pd.proposal_id and pc.procurement_id= #{procurementId} 
+            and pc.organization_id = #{provider_id}
+            </if>
+            <!-- Changing below query for Emergency Build 4.0.2 as invoice number check was missing from Linked Search -->
+		<if test="entityType != null and entityType !='' and entityType == 'Invoice' and orgId == 'provider_org' ">
+		select DOCUMENT_IDENTIFIER_ID from invoice_document invdoc ,invoice inv where invdoc.invoice_id = inv.invoice_id and  inv.invoice_number = #{invoiceNumber}
+		</if>
+		<if test="entityType != null and entityType !='' and entityType == 'Budget' and orgId == 'provider_org' ">
+		select bud.DOCUMENT_IDENTIFIER_ID from budget_document bud left join contract con on bud.contract_id = con.contract_id
+		where con.ext_epin = #{awardepinTitle}
+		</if>
+		<if test="entityType != null and entityType !='' and entityType == 'Contract' and orgId == 'agency_org' ">
+		select contdoc.DOCUMENT_IDENTIFIER_ID from contract_document contdoc left join contract cont on contdoc.contract_id = cont.contract_id 
+		where cont.ext_epin = #{awardepinTitle}
+		</if>
+		<!-- Added for Release 6 returned payment task -->
+		<if test="entityType != null and entityType !='' and entityType == 'returnedPayment' and orgId == 'agency_org' ">
+		select rpd.DOCUMENT_IDENTIFIER_ID from RETURN_PAYMENT_DOCUMENT rpd JOIN RETURN_PAYMENT RP on RPD.RETURN_PAYMENT_ID=RP.RETURN_PAYMENT_ID
+		JOIN BUDGET BUD ON BUD.budget_id =RP.BUDGET_ID 
+		JOIN CONTRACT con ON con.contract_id = bud.contract_id 
+		where con.ext_epin = #{awardepinTitle}
+		</if>
+		<!-- Added for Release 6 returned payment task end-->
+		</select>
+		
+		<resultMap type="com.nyc.hhs.model.ExtendedDocument" id="procurementMap">
+	  	<result property="procurementId" column="procurement_id"/>
+	  	<result property="procurementTitle" column="procurement_title"/>
+	</resultMap>
+		
+		<select id="getProcurementTitle" parameterType="hashmap" resultMap="procurementMap">
+	select p.procurement_id, nvl(pa.procurement_title, p.procurement_title) as procurement_title from procurement p, procurement_addendum pa 
+	where p.procurement_id = pa.procurement_id(+) and p.status_id not in 
+	<foreach item="items" index="index" collection="statusId"
+				open="(" separator="," close=")">
+				#{items}
+    		</foreach>
+	and lower(nvl(pa.procurement_title, p.procurement_title)) like lower(#{partialString})
+		</select>
+		
+		<select id="getAwardEPin" parameterType="hashmap" resultType="string">
+			select distinct ext_epin from contract where contract_type_id in('1','3') and lower(ext_epin) LIKE (lower(#{partialString}))
+			<if test="OrgType != null and OrgType !='' and OrgType == 'provider_org'">
+				and organization_id = #{orgId}
+			</if>
+			<if test="OrgType != null and OrgType !='' and OrgType == 'agency_org'">
+				and agency_id = #{orgId}
+			</if>
+		</select>
+		
+			<select id="getContractAwardEPin" parameterType="hashmap" resultType="string">
+			select distinct ext_epin from contract where CONTRACT_SOURCE_ID ='2' and lower(ext_epin) LIKE (lower(#{partialString}))
+			<if test="OrgType != null and OrgType !='' and OrgType == 'provider_org'">
+				and organization_id = #{orgId}
+			</if>
+			<if test="OrgType != null and OrgType !='' and OrgType == 'agency_org'">
+				and agency_id = #{orgId}
+			</if>
+		</select>
+		
+		
+		<!-- Download All -->
+		
+		<insert id="insertForDownloadAll" parameterType="hashmap">
+		Insert into BULK_DOCUMENT_DOWNLOAD (DOWNLOAD_REQUEST_ID,STATUS_ID,FILTER_DOCUMENT_NAME,
+		FILTER_DOCUMENT_TYPE,FILTER_MODIFIED_DATE_FROM,FILTER_MODIFIED_DATE_TO,FILTER_AGENCY_ID,MODIFIED_BY_USER_ID,
+		CREATED_BY_USER_ID,CREATED_DATE,MODIFIED_DATE)
+		values (SEQ_BULK_DOCUMENT_DOWNLOAD.NEXTVAL,#{statusId,jdbcType=VARCHAR},#{documentName,jdbcType=VARCHAR},#{documentType,jdbcType=VARCHAR},#{modifiedFrom,jdbcType=VARCHAR},
+		#{modifiedTo,jdbcType=VARCHAR},#{sharedWith,jdbcType=VARCHAR},#{modifiedBy},#{createdBy},systimestamp,systimestamp)
+	</insert>
+		
+		<!-- End -->
+		
+		<!-- Batch -->
+		<!--  Added for Release 5 -->
+	<resultMap type="com.nyc.hhs.model.OrganizationBean" id="OrganizationParamsMap">
+		<result property="msOrgId" column="ORGANIZATION_ID" />
+		<result property="msOrgLegalName" column="ORGANIZATION_LEGAL_NAME" />
+		<result property="msEinId" column="EIN_ID_NN" />
+	</resultMap>
+
+
+	<select id="fetchOrganizationDetails" resultMap="OrganizationParamsMap">
+		Select ORGANIZATION_ID,ORGANIZATION_LEGAL_NAME,EIN_ID_NN from
+		ORGANIZATION
+	</select>
+	
+	<resultMap type="com.nyc.hhs.model.BulkDownloadBean" id="DownloadParamsList">
+		<result property="msDownloadId" column="DOWNLOAD_REQUEST_ID" />
+		<result property="msStatusId" column="STATUS_ID" />
+		<result property="msFilterDocName" column="FILTER_DOCUMENT_NAME" />
+		<result property="msFilterDocType" column="FILTER_DOCUMENT_TYPE" />
+		<result property="msModifiedFrom" column="FILTER_MODIFIED_DATE_FROM" />
+		<result property="msModifiedTo" column="FILTER_MODIFIED_DATE_TO" />
+		<result property="msAgentId" column="FILTER_AGENCY_ID" />
+		<result property="msModifiedBy" column="MODIFIED_BY_USER_ID" />
+		<result property="msCreatedBy" column="CREATED_BY_USER_ID" />
+		<result property="msCreatedDate" column="CREATED_DATE" />
+		<result property="msModifiedDate" column="MODIFIED_DATE" />
+	</resultMap>
+
+
+	<select id="getDownloadList" resultMap="DownloadParamsList">
+		Select DOWNLOAD_REQUEST_ID,STATUS_ID,FILTER_DOCUMENT_NAME,FILTER_DOCUMENT_TYPE, 
+		to_char(FILTER_MODIFIED_DATE_FROM,'mm/dd/yyyy') as FILTER_MODIFIED_DATE_FROM,to_char(FILTER_MODIFIED_DATE_TO,'mm/dd/yyyy') as FILTER_MODIFIED_DATE_TO,FILTER_AGENCY_ID,
+		MODIFIED_BY_USER_ID,CREATED_BY_USER_ID,CREATED_DATE,MODIFIED_DATE  
+		from BULK_DOCUMENT_DOWNLOAD 
+		WHERE (STATUS_ID= #{aoStatusId} and (LOCK_INFO is null or 
+		systimestamp  - LOCK_INFO > interval '4' hour))
+	</select>
+	
+	<update id="updateStatusFlag" parameterType="string">
+		update BULK_DOCUMENT_DOWNLOAD set STATUS_ID = '3' where DOWNLOAD_REQUEST_ID = #{aoReqId}
+	</update>
+	
+	<update id="updateExportStatusFlag" parameterType="string">
+	update bulk_task_export set STATUS_ID = '184',MODIFIED_BY_USER_ID='system',MODIFIED_DATE=systimestamp where EXPORT_REQUEST_ID = #{aoReqId}
+	</update>
+	
+	<update id="updateStatusFlagDownload" parameterType="string">
+		update BULK_DOCUMENT_DOWNLOAD set LOCK_INFO = systimestamp WHERE (STATUS_ID= #{aoStatusId} and (LOCK_INFO is null or 
+		systimestamp  - LOCK_INFO > interval '4' hour))
+	</update>
+	
+	<select id="getZipPath" parameterType="hashmap" resultType="hashmap">
+		SELECT ZIP_PATH,to_char(CREATED_DATE,'mm/dd/yyyy') CREATED_DATE FROM DOWNLOAD_ZIP WHERE ZIP_ID = #{requestedZipId} AND REQUEST_ID = #{requestId}
+	</select>
+	
+	
+	
+	<select id="getExportInfoFromDB" parameterType="hashmap" resultType="hashmap">
+		SELECT export_request_id,to_char(CREATED_DATE,'mm/dd/yyyy hh24:mi:ss') CREATED_DATE FROM bulk_task_export WHERE  export_request_id = #{requestId}
+	</select>
+	
+	<insert id="setentryintoZipTable" parameterType="hashmap">
+		Insert into DOWNLOAD_ZIP (ZIP_ID,REQUEST_ID,ZIP_PATH,CREATED_BY,MODIFIED_BY,CREATED_DATE,MODIFIED_DATE)
+		values (SEQ_DOWNLOAD_ZIP.NEXTVAL,#{requestID,jdbcType=VARCHAR},#{zipFilePath,jdbcType=VARCHAR},#{createdBy,jdbcType=VARCHAR},#{modifiedBy,jdbcType=VARCHAR},
+		systimestamp,systimestamp)
+	</insert>
+	
+	
+	<select id="getZipId" parameterType="String" resultType="string">
+		SELECT ZIP_ID FROM DOWNLOAD_ZIP WHERE REQUEST_ID = #{requestId}
+	</select>
+	
+	<select id="getOrgId" parameterType="String" resultType="string">
+		SELECT ORGANIZATION_ID FROM FOLDER_MAPPING WHERE FOLDER_FILENET_ID = #{aoFolderId} and rownum = 1
+	</select>
+	
+	<!--  TOTAL Folder count -->
+	<resultMap id="folderPropResult" type="com.nyc.hhs.model.FolderMappingBean">
+	  <result property="folderName" column="FOLDER_NAME"/>
+	  <result property="documentCount" column="TOTAL_DOC_COUNT"/>
+	  <result property="folderCount" column="TOTAL_FOLDER_COUNT"/>
+	  <result property="folderFilenetId" column="FOLDER_FILENET_ID"/>
+	  <result property="createdBy" column="CREATED_BY"/>
+	  <result property="createdDate" column="CREATED_DATE"/>
+	  <result property="modifiedDate" column="MODIFIED_DATE"/>
+	  <result property="modifiedBy" column="MODIFIED_BY"/>
+	  <result property="parentFolderFilenetId" column="PARENT_FOLDER_FILENET_ID"/>
+	  </resultMap>
+	
+	<select id="getFolderCount" parameterType="hashmap" resultMap="folderPropResult">
+	SELECT
+                fm.FOLDER_FILENET_ID,
+                fm_main.PARENT_FOLDER_FILENET_ID,
+                fm_main.FOLDER_NAME,
+                fm.Total_Doc_Count,
+                fm.Total_Folder_Count
+                FROM
+                (
+                SELECT
+                FOLDER_FILENET_ID,
+                SUM(DOCUMENT_COUNT) Total_Doc_Count,
+                 SUM(FOLDER_COUNT) Total_Folder_Count
+                FROM
+                (
+                SELECT
+                CONNECT_BY_ROOT FOLDER_FILENET_ID AS FOLDER_FILENET_ID,
+                DOCUMENT_COUNT,FOLDER_COUNT
+                FROM
+                (
+                SELECT
+                *
+                FROM
+                FOLDER_MAPPING
+                WHERE
+                ORGANIZATION_ID = #{orgId}
+                )
+                CONNECT BY PRIOR to_char(FOLDER_FILENET_ID) = PARENT_FOLDER_FILENET_ID
+                )
+                GROUP BY
+               FOLDER_FILENET_ID
+                )
+                fm,
+                (         
+                SELECT
+                f.FOLDER_FILENET_ID,
+                f.DOCUMENT_COUNT,
+                f.FOLDER_COUNT,
+                f.FOLDER_NAME,f.PARENT_FOLDER_FILENET_ID 
+                FROM
+                FOLDER_MAPPING f 
+                WHERE
+                f.FOLDER_FILENET_ID = #{fldrId}   AND f.ORGANIZATION_ID = #{orgId}
+                )
+                fm_main
+                WHERE
+                fm_main.FOLDER_FILENET_ID = fm.FOLDER_FILENET_ID
+                ORDER BY
+                fm.FOLDER_FILENET_ID
+		
+	</select>
+	<select id="getAmendmentEpin" parameterType="map" resultType="string">
+		select ext_epin from contract where contract_type_id = '2' and lower(ext_epin) LIKE #{partialKeyWord}
+		<if test="userOrgType != null and userOrgType=='agency_org' ">
+			and agency_id=#{userOrg}
+		</if>
+		<if test="userOrgType != null and userOrgType=='provider_org' ">
+		 and organization_id=#{userOrg} 
+		</if>
+	</select>
+	
+	<select id="fetchChar500LinkageInfo" parameterType="hashmap" resultType="string">
+	<!-- Removing Union from below Qeury in Emergency Release 4.0.2 -->
+        		select modified_date from (select modified_date from  DOC_LAPSING_RULES_TRANS
+        		WHERE DOCUMENT_ID = #{documentId}
+				<!-- Start: Fix for 8504 -->
+        		AND PROC_STATUS != 'Returned' AND WORKFLOW_ID IS NOT NULL
+        		<!-- End: Fix for 8504 -->
+        		AND DOCUMENT_TYPE = #{DOC_TYPE} order by created_date desc) where rownum = 1
+	</select>
+	
+	<select id="fetchFolderPathLength" parameterType="hashmap" resultType="int">
+	select MAX_PATH_LENGTH from
+	(SELECT folder_name, max(length(folder_name1)-1) MAX_PATH_LENGTH
+	FROM
+	(SELECT CONNECT_BY_ROOT folder_name AS folder_name,
+	sys_connect_by_path(folder_name, '\') folder_name1,
+	sys_connect_by_path(FOLDER_FILENET_ID, '\') FOLDER_FILENET_ID_path
+	FROM
+	( SELECT * FROM FOLDER_MAPPING WHERE ORGANIZATION_ID = #{orgId}
+	)
+	CONNECT BY PRIOR TO_CHAR(FOLDER_FILENET_ID) = PARENT_FOLDER_FILENET_ID
+	)
+	where FOLDER_FILENET_ID_path like #{folderId}
+	GROUP BY folder_name
+	) where folder_name = 'Document Vault'
+			
+	</select>
+	<!--  Release 5 ends -->
+	<select id="getOrgLegalName" parameterType="string" resultType="string">
+	select organization_legal_name from organization where organization_id = #{lsProviderId}
+	</select>
+	
+	<select id="checkFolderExistsInDb" parameterType="string" resultType="string">
+	select MOVED_TO_RECYCLE_BIN from FOLDER_MAPPING where FOLDER_FILENET_ID = #{aoFolderId}
+	</select>
+	
+	
+	<select id="docIdForLinkage" parameterType="string" resultType="string">
+	SELECT
+		DOCUMENT_IDENTIFIER_ID
+		FROM (SELECT DISTINCT ADDMDOC.DOCUMENT_IDENTIFIER_ID AS DOCUMENT_IDENTIFIER_ID,
+	  'Procurement'          AS OBJECT_NAME,
+	  proc.status_id         AS status_id,
+	  ADDMDOC.CREATED_DATE   AS LINKED_DATE,
+	  proc.procurement_id    AS ENTITY_ID,
+	  proc.procurement_id    AS PARENT_ID,
+	  proc.procurement_title AS PARENT_ENTITY_NAME,
+	  proc.status_id         AS STATUS_ID_PROCUREMENT,
+	  NULL                   AS CONTRACT_ID,
+	  NULL                   AS ORGANIZATION_ID,
+	  NULL                   AS FISCAL_YEAR_ID,
+	  NULL                   AS BUDGET_TYPE_ID,
+	  NULL                   AS CT_NUBMER,
+	  NULL                   AS APPLICATION_STATUS,
+	  NULL                   AS BUS_ID,
+	  NULL                   AS BUS_APP_ID,
+	  NULL                   AS SER_APP_ID,
+	  NULL                   AS APP_ID
+	FROM PRCRMNT_ADDM_RFP_DOCUMENT ADDMDOC,
+	  procurement PROC
+	WHERE addmdoc.procurement_id=proc.procurement_id
+	UNION
+	SELECT DISTINCT PRODOC.DOCUMENT_IDENTIFIER_ID AS DOCUMENT_IDENTIFIER_ID,
+	  'Proposal'              AS OBJECT_NAME,
+	  prop.proposal_status_id AS status_id,
+	  PRODOC.CREATED_DATE     AS LINKED_DATE,
+	  prop.proposal_id        AS ENTITY_ID,
+	  prop.procurement_id     AS PARENT_ID,
+	  proc.procurement_title  AS PARENT_ENTITY_NAME,
+	  prop.proposal_status_id AS STATUS_ID_PROCUREMENT,
+	  NULL                    AS CONTRACT_ID,
+	  NULL                    AS ORGANIZATION_ID,
+	  NULL                    AS FISCAL_YEAR_ID,
+	  NULL                    AS BUDGET_TYPE_ID,
+	  NULL                    AS CT_NUBMER,
+	  NULL                    AS APPLICATION_STATUS,
+	  NULL                    AS BUS_ID,
+	  NULL                    AS BUS_APP_ID,
+	  NULL                    AS SER_APP_ID,
+	  NULL                    AS APP_ID
+	FROM PROPOSAL_DOCUMENT PRODOC,
+	  proposal_config prop
+	JOIN procurement PROC
+	ON prop.procurement_id  = proc.procurement_id
+	WHERE prodoc.proposal_id=prop.proposal_id
+	UNION
+	SELECT DISTINCT rfpdoc.DOCUMENT_IDENTIFIER_ID AS DOCUMENT_IDENTIFIER_ID,
+	  'Procurement'       AS OBJECT_NAME,
+	  proc.status_id      AS status_id,
+	  rfpdoc.CREATED_DATE AS LINKED_DATE,
+	  proc.procurement_id AS ENTITY_ID,
+	  proc.procurement_id AS PARENT_ID,
+	  proc.procurement_title       AS PARENT_ENTITY_NAME,
+	  proc.status_id      AS STATUS_ID_PROCUREMENT,
+	  NULL                AS CONTRACT_ID,
+	  NULL                AS ORGANIZATION_ID,
+	  NULL                AS FISCAL_YEAR_ID,
+	  NULL                AS BUDGET_TYPE_ID,
+	  NULL                AS CT_NUBMER,
+	  NULL                AS APPLICATION_STATUS,
+	  NULL                AS BUS_ID,
+	  NULL                AS BUS_APP_ID,
+	  NULL                AS SER_APP_ID,
+	  NULL                AS APP_ID
+	FROM RFP_DOCUMENT rfpdoc,
+	  procurement PROC
+	WHERE rfpdoc.procurement_id=proc.procurement_id
+	and rfpdoc.rfp_doc_flag = 1 
+	UNION
+	SELECT DISTINCT buddoc.DOCUMENT_IDENTIFIER_ID AS DOCUMENT_IDENTIFIER_ID,
+	  'Budget' AS OBJECT_NAME,
+	  bud.status_id,
+	  buddoc.CREATED_DATE AS LINKED_DATE,
+	  bud.budget_id       AS ENTITY_ID,
+	  bud.budget_id       AS PARENT_ID,
+	  con.ext_epin        AS PARENT_ENTITY_NAME,
+	  NULL                AS STATUS_ID_PROCUREMENT,
+	  con.contract_id     AS CONTRACT_ID,
+	  NULL                AS ORGANIZATION_ID,
+	  bud.fiscal_year_id  AS FISCAL_YEAR_ID,
+	  budtype.BUDGET_TYPE AS BUDGET_TYPE_ID,
+	  bud.CT_NUMBER       AS CT_NUBMER,
+	  NULL                AS APPLICATION_STATUS,
+	  NULL                AS BUS_ID,
+	  NULL                AS BUS_APP_ID,
+	  NULL                AS SER_APP_ID,
+	  NULL                AS APP_ID
+	FROM BUDGET_DOCUMENT buddoc,
+	  budget bud
+	JOIN budget_type budtype
+	ON bud.budget_type_id = budtype.budget_type_id
+	JOIN contract con
+	ON bud.contract_id    = con.contract_id
+	WHERE buddoc.budget_id=bud.budget_id
+	UNION
+	SELECT DISTINCT invdoc.DOCUMENT_IDENTIFIER_ID AS DOCUMENT_IDENTIFIER_ID,
+	  'Invoice' AS OBJECT_NAME,
+	  inv.status_id,
+	  invDoc.CREATED_DATE         AS LINKED_DATE,
+	  inv.invoice_id              AS ENTITY_ID,
+	  inv.invoice_id              AS PARENT_ID,
+	  TO_CHAR(inv.invoice_number) AS PARENT_ENTITY_NAME,
+	  inv.status_id               AS STATUS_ID_PROCUREMENT,
+	  NULL                        AS CONTRACT_ID,
+	  NULL                        AS ORGANIZATION_ID,
+	  NULL                        AS FISCAL_YEAR_ID,
+	  NULL                        AS BUDGET_TYPE_ID,
+	  NULL                        AS CT_NUBMER,
+	  NULL                        AS APPLICATION_STATUS,
+	  NULL                        AS BUS_ID,
+	  NULL                        AS BUS_APP_ID,
+	  NULL                        AS SER_APP_ID,
+	  NULL                        AS APP_ID
+	FROM INVOICE_DOCUMENT invDoc,
+	  invoice inv
+	WHERE invdoc.invoice_id=inv.invoice_id
+	UNION
+	SELECT DISTINCT conDoc.DOCUMENT_IDENTIFIER_ID AS DOCUMENT_IDENTIFIER_ID,
+	  'Amendment' AS OBJECT_NAME,
+	  con.status_id,
+	  conDoc.CREATED_DATE AS LINKED_DATE,
+	  con.contract_id     AS ENTITY_ID,
+	  con.contract_id     AS PARENT_ID,
+	  con.ext_epin   	  AS PARENT_ENTITY_NAME,
+	  con.status_id       AS STATUS_ID_PROCUREMENT,
+	  NULL                AS CONTRACT_ID,
+	  NULL                AS ORGANIZATION_ID,
+	  NULL                AS FISCAL_YEAR_ID,
+	  NULL                AS BUDGET_TYPE_ID,
+	  CON.EXT_CT_NUMBER   AS CT_NUBMER,
+	  NULL                AS APPLICATION_STATUS,
+	  NULL                AS BUS_ID,
+	  NULL                AS BUS_APP_ID,
+	  NULL                AS SER_APP_ID,
+	  NULL                AS APP_ID
+	FROM CONTRACT_DOCUMENT conDoc,
+	  contract con
+	WHERE condoc.contract_id=con.contract_id
+	and con.contract_type_id in (2)
+	UNION
+	SELECT DISTINCT conDoc.DOCUMENT_IDENTIFIER_ID AS DOCUMENT_IDENTIFIER_ID,
+	  'Contract' AS OBJECT_NAME,
+	  con.status_id,
+	  conDoc.CREATED_DATE AS LINKED_DATE,
+	  con.contract_id     AS ENTITY_ID,
+	  con.contract_id     AS PARENT_ID,
+	  con.ext_ct_number   AS PARENT_ENTITY_NAME,
+	  con.status_id       AS STATUS_ID_PROCUREMENT,
+	  NULL                AS CONTRACT_ID,
+	  NULL                AS ORGANIZATION_ID,
+	  NULL                AS FISCAL_YEAR_ID,
+	  NULL                AS BUDGET_TYPE_ID,
+	  CON.EXT_CT_NUMBER   AS CT_NUBMER,
+	  NULL                AS APPLICATION_STATUS,
+	  NULL                AS BUS_ID,
+	  NULL                AS BUS_APP_ID,
+	  NULL                AS SER_APP_ID,
+	  NULL                AS APP_ID
+	FROM CONTRACT_DOCUMENT conDoc,
+	  contract con
+	WHERE condoc.contract_id=con.contract_id
+	and con.contract_type_id in (1,3)
+	UNION
+	SELECT DISTINCT AWDDOC.DOCUMENT_IDENTIFIER_ID AS DOCUMENT_IDENTIFIER_ID,
+	  'Award'                        AS OBJECT_NAME,
+	  AWD.award_review_status_id     AS status_id,
+	  AWDDOC.CREATED_DATE            AS LINKED_DATE,
+	  proc.procurement_id            AS ENTITY_ID,
+	  awd.EVALUATION_POOL_MAPPING_ID AS PARENT_ID,
+	  proc.procurement_title         AS PARENT_ENTITY_NAME,
+	  proc.status_id                 AS STATUS_ID_PROCUREMENT,
+	  NULL                           AS CONTRACT_ID,
+	  NULL                           AS ORGANIZATION_ID,
+	  NULL                           AS FISCAL_YEAR_ID,
+	  NULL                           AS BUDGET_TYPE_ID,
+	  NULL                           AS CT_NUBMER,
+	  NULL                           AS APPLICATION_STATUS,
+	  NULL                           AS BUS_ID,
+	  NULL                           AS BUS_APP_ID,
+	  NULL                           AS SER_APP_ID,
+	  NULL                           AS APP_ID
+	FROM AWARD_DOCUMENT AWDDOC,
+	  Award Awd
+	JOIN procurement PROC
+	ON Awd.procurement_id = proc.procurement_id
+	WHERE AWDDOC.award_id =AWD.award_id
+	UNION
+	SELECT DISTINCT rfpdoc.DOCUMENT_IDENTIFIER_ID AS DOCUMENT_IDENTIFIER_ID,
+	  'Provider Award'       AS OBJECT_NAME,
+	  proc.status_id      AS status_id,
+	  rfpdoc.CREATED_DATE AS LINKED_DATE,
+	  proc.procurement_id AS ENTITY_ID,
+	  proc.procurement_id AS PARENT_ID,
+	  proc.procurement_title       AS PARENT_ENTITY_NAME,
+	  proc.status_id      AS STATUS_ID_PROCUREMENT,
+	  NULL                AS CONTRACT_ID,
+	  NULL                AS ORGANIZATION_ID,
+	  NULL                AS FISCAL_YEAR_ID,
+	  NULL                AS BUDGET_TYPE_ID,
+	  NULL                AS CT_NUBMER,
+	  NULL                AS APPLICATION_STATUS,
+	  NULL                AS BUS_ID,
+	  NULL                AS BUS_APP_ID,
+	  NULL                AS SER_APP_ID,
+	  NULL                AS APP_ID
+	FROM RFP_DOCUMENT rfpdoc,
+	  procurement PROC
+	WHERE rfpdoc.procurement_id=proc.procurement_id
+	and rfpdoc.rfp_doc_flag = 0
+	UNION
+	SELECT DISTINCT BAFODOC.DOCUMENT_IDENTIFIER_ID AS DOCUMENT_IDENTIFIER_ID,
+	  'Proposal'           AS OBJECT_NAME,
+	  0                    AS STATUS_ID,
+	  BAFODOC.CREATED_DATE AS LINKED_DATE,
+	  prop.proposal_id     AS ENTITY_ID,
+	  prop.proposal_id     AS PARENT_ID,
+	  'Proposal'           AS PARENT_ENTITY_NAME,
+	  0                    AS STATUS_ID_PROCUREMENT,
+	  NULL                 AS CONTRACT_ID,
+	  NULL                 AS ORGANIZATION_ID,
+	  NULL                 AS FISCAL_YEAR_ID,
+	  NULL                 AS BUDGET_TYPE_ID,
+	  NULL                 AS CT_NUBMER,
+	  NULL                 AS APPLICATION_STATUS,
+	  NULL                 AS BUS_ID,
+	  NULL                 AS BUS_APP_ID,
+	  NULL                 AS SER_APP_ID,
+	  NULL                 AS APP_ID
+	FROM BAFO_DOCUMENT BAFODOC,
+	  proposal_config prop
+	WHERE BAFODOC.proposal_id=prop.proposal_id
+	UNION
+	SELECT DISTINCT agencyAward.DOCUMENT_IDENTIFIER_ID AS DOCUMENT_IDENTIFIER_ID,
+	  'Agency Award'                    AS OBJECT_NAME,
+	  0                                AS STATUS_ID,
+	  agencyAward.CREATED_DATE         AS LINKED_DATE,
+	  proc.procurement_id              AS ENTITY_ID,
+	  award.EVALUATION_POOL_MAPPING_ID AS PARENT_ID,
+	  cont.ext_epin			           AS PARENT_ENTITY_NAME,
+	  proc.status_id                   AS STATUS_ID_PROCUREMENT,
+	  cont.contract_id                 AS CONTRACT_ID,
+	  cont.organization_id             AS ORGANIZATION_ID,
+	  NULL                             AS FISCAL_YEAR_ID,
+	  NULL                             AS BUDGET_TYPE_ID,
+	  NULL                             AS CT_NUBMER,
+	  NULL                             AS APPLICATION_STATUS,
+	  NULL                             AS BUS_ID,
+	  NULL                             AS BUS_APP_ID,
+	  NULL                             AS SER_APP_ID,
+	  NULL                             AS APP_ID
+	FROM AGENCY_AWARD_DOCUMENT agencyAward inner join  Award Award on agencyAward.award_id=award.award_id
+	JOIN procurement PROC
+	ON Award.procurement_id = proc.procurement_id
+	LEFT JOIN contract cont
+	ON Award.evaluation_pool_mapping_id    = cont.evaluation_pool_mapping_id and agencyAward.ORGANIZATION_ID=cont.organization_id
+	UNION
+	SELECT DISTINCT doc.DOCUMENT_ID  AS DOCUMENT_IDENTIFIER_ID,
+	  'Service Application'          AS OBJECT_NAME,
+	  0                              AS STATUS_ID,
+	  doc.CREATED_DATE               AS LINKED_DATE,
+	  NULL                           AS ENTITY_ID,
+	  NULL                           AS PARENT_ID,
+	  tm.element_name                AS PARENT_ENTITY_NAME,
+	  NULL                           AS STATUS_ID_PROCUREMENT,
+	  NULL                           AS CONTRACT_ID,
+	  NULL                           AS ORGANIZATION_ID,
+	  NULL                           AS FISCAL_YEAR_ID,
+	  NULL                           AS BUDGET_TYPE_ID,
+	  NULL                           AS CT_NUBMER,
+	  serApp.SERVICE_STATUS          AS APPLICATION_STATUS,
+	  serApp.ELEMENT_ID              AS BUS_ID,
+	  serApp.BUSINESS_APPLICATION_ID AS BUS_APP_ID,
+	  serApp.SERVICE_APPLICATION_ID  AS SER_APP_ID,
+	  serApp.APPLICATION_ID          AS APP_ID
+	FROM DOCUMENT doc
+	JOIN SERVICE_APPLICATION serApp JOIN taxonomy_master tm on serApp.element_id = tm.element_id
+	ON doc.SERVICE_APPLICATION_ID     = serApp.SERVICE_APPLICATION_ID
+	WHERE doc.SERVICE_APPLICATION_ID IS NOT NULL
+	UNION
+	SELECT DISTINCT doc.DOCUMENT_ID  AS DOCUMENT_IDENTIFIER_ID,
+	  'Business Application'         AS OBJECT_NAME,
+	  0                              AS STATUS_ID,
+	  doc.CREATED_DATE               AS LINKED_DATE,
+	  NULL                           AS ENTITY_ID,
+	  NULL                           AS PARENT_ID,
+	  NULL                           AS PARENT_ENTITY_NAME,
+	  NULL                           AS STATUS_ID_PROCUREMENT,
+	  NULL                           AS CONTRACT_ID,
+	  NULL                           AS ORGANIZATION_ID,
+	  NULL                           AS FISCAL_YEAR_ID,
+	  NULL                           AS BUDGET_TYPE_ID,
+	  NULL                           AS CT_NUBMER,
+	  busApp.APPLICATION_STATUS      AS APPLICATION_STATUS,
+	  busApp.BUSINESS_APPLICATION_ID AS BUS_ID,
+	  busApp.APPLICATION_ID          AS BUS_APP_ID,
+	  NULL                           AS SER_APP_ID,
+	  NULL                           AS APP_ID
+	FROM DOCUMENT doc
+	JOIN BUSINESS_APPLICATION busApp
+	ON doc.BUSINESS_APPLICATION_ID    = busApp.BUSINESS_APPLICATION_ID
+	WHERE doc.SERVICE_APPLICATION_ID IS NULL)
+	
+	UNION ALL
+	select DOC.DOCUMENT_ID  from BUSINESS_APPLICATION BA
+				inner join filing_form FF ON BA.BUSINESS_APPLICATION_ID = FF.BUSINESS_APPLICATION_ID
+				INNER JOIN DOCUMENT DOC ON BA.BUSINESS_APPLICATION_ID = DOC.BUSINESS_APPLICATION_ID
+        		WHERE DOCUMENT_TYPE like '%CHAR%'
+        		UNION ALL  select dtar.DOCUMENT_ID from  DOC_LAPSING_RULES_TRANS dtar
+        		WHERE DOCUMENT_TYPE like '%CHAR%'
+	</select>
+	
+	<insert id="insertFilenetAudit" parameterType="com.nyc.hhs.model.FolderMappingBean">
+		Insert into FOLDER_MAPPING_AUDIT (FOLDER_MAPPING_AUDIT_ID,	
+		PARENT_ID,
+		OPERATION,ENTITY_ID,
+		CREATED_DATE,MODIFIED_DATE,CREATED_BY_USERID,MODIFIED_BY_USERID)
+		values (SEQ_FOLDER_MAPPING_AUDIT_ID.NEXTVAL,#{parentFolderFilenetId,jdbcType=VARCHAR}, 
+		#{entityName,jdbcType=VARCHAR},#{folderFilenetId,jdbcType=VARCHAR},systimestamp,systimestamp,#{createdBy,jdbcType=VARCHAR},#{modifiedBy,jdbcType=VARCHAR})
+	</insert>
+	
+	<insert id="insertFilenetAuditForBatch" parameterType="hashmap">
+		Insert into FOLDER_MAPPING_AUDIT (FOLDER_MAPPING_AUDIT_ID,	
+		PARENT_ID,
+		OPERATION,ENTITY_ID,
+		CREATED_DATE,MODIFIED_DATE,CREATED_BY_USERID,MODIFIED_BY_USERID,NEW_VALUE)
+		values (SEQ_FOLDER_MAPPING_AUDIT_ID.NEXTVAL,#{parentFolderFilenetId,jdbcType=VARCHAR}, 
+		#{entityName,jdbcType=VARCHAR},#{folderFilenetId,jdbcType=VARCHAR},systimestamp,systimestamp,'system','system',#{newVal,jdbcType=VARCHAR})
+	</insert>
+	
+	
+		
+</mapper>

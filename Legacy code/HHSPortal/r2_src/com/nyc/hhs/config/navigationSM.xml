@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--RULE E added for open ended RFP, zero value Procurement(internal not updated in functional yet)-->
+<navigation>
+	<status id="0" user_type="city_org,agency_org">
+		<tab id="ProcurementRoadmapDetails" screen="ProcurementSummary" state="E">
+			<tab id="ProcurementSummary" screen="ProcurementSummary" state="E" />
+			<tab id="ServiceSelection" screen="ServiceSelection" state="D" />
+			<tab id="ApprovedProviders" screen="ApprovedProviders" state="D" />
+			<tab id="PublishProcurement" screen="PublishProcurement" state="D" />
+		</tab>
+		<tab id="RFPDetails" screen="Financials,ProposalConfiguration" state="D" />
+		<tab id="ProposalsandEvaluations" screen="EvaluationSummary" state="D" />
+		<tab id="AwardsandContracts" screen="EvaluationGroupsSummaryAward,AwardsandContractsSummary,AwardsandContractsScreen" state="D" />
+	</status>
+	<status id="1" user_type="city_org,agency_org">
+		<tab id="ProcurementRoadmapDetails" screen="ProcurementSummary" state="E">
+			<tab id="ProcurementSummary" screen="ProcurementSummary" state="E" />
+			<tab id="ServiceSelection" screen="ServiceSelection" state="E" />
+			<tab id="ApprovedProviders" screen="ApprovedProviders" state="E" />
+			<tab id="PublishProcurement" screen="PublishProcurement" state="E" />
+		</tab>
+		<tab id="RFPDetails" screen="Financials,ProposalConfiguration" state="D" />
+		<tab id="ProposalsandEvaluations" screen="EvaluationSummary" state="D" />
+		<tab id="AwardsandContracts" screen="EvaluationGroupsSummaryAward,AwardsandContractsSummary,AwardsandContractsScreen" state="D" />
+	</status>
+	<status id="2" user_type="city_org,agency_org">
+		<tab id="ProcurementRoadmapDetails" screen="ProcurementSummary" state="E4">
+			<tab id="ProcurementSummary" screen="ProcurementSummary" state="E4" />
+			<tab id="ServiceSelection" screen="ServiceSelection" state="E" />
+			<tab id="ApprovedProviders" screen="ApprovedProviders" state="E4" />
+			<tab id="PublishProcurement" screen="PublishProcurement" state="E" />
+		</tab>
+		<tab id="RFPDetails" screen="Financials,ProposalConfiguration" state="E4">
+			<tab id="Financials" screen="Financials" state="E" />
+			<tab id="ProposalConfiguration" screen="ProposalConfiguration" state="E4" />
+			<tab id="CompetitionConfiguration" screen="CompetitionConfiguration" state="E4" />
+			<tab id="RFPDocuments" screen="RFPDocuments" state="E" />
+			<tab id="EvaluationCriteria" screen="EvaluationCriteria" state="E" />
+			<tab id="ReleaseRFP" screen="ReleaseRFP" state="E" />
+		</tab>
+		<tab id="ProposalsandEvaluations" screen="EvaluationSummary" state="D" />
+		<tab id="AwardsandContracts" screen="EvaluationGroupsSummaryAward,AwardsandContractsSummary,AwardsandContractsScreen" state="D" />
+	</status>
+	<status id="3" user_type="city_org,agency_org">
+		<tab id="ProcurementInformation" screen="ProcurementSummary" state="E4">
+			<tab id="ProcurementSummary" screen="ProcurementSummary" state="E4" />
+			<tab id="ApprovedProviders" screen="ApprovedProviders" state="E4" />
+			<tab id="Financials" screen="Financials" state="E4" />
+			<tab id="ProposalConfiguration" screen="ProposalConfiguration" state="E4" />
+			<tab id="CompetitionConfiguration" screen="CompetitionConfiguration" state="E4" />
+			<tab id="RFPDocuments" screen="RFPDocuments" state="E" />
+			<tab id="EvaluationCriteria" screen="EvaluationCriteria" state="E" />
+			<tab id="ReleaseAddendum" screen="ReleaseAddendum" state="E" />
+			<tab id="PublishProcurement" screen="PublishProcurement" state="H" />
+		</tab>
+		<tab id="ProposalsandEvaluations" screen="EvaluationGroupsSummary,EvaluationSummary,EvaluationSettings,EvaluationResultsandSelections" state="E11">
+			<tab id="EvaluationGroupsSummary" screen="EvaluationGroupsSummary" state="EG" />
+			<tab id="EvaluationSummary" screen="EvaluationSummary" state="ES" />
+			<tab id="EvaluationSettings" screen="EvaluationSettings" state="E" />
+			<tab id="EvaluationStatus" screen="EvaluationStatus" state="E" />
+			<tab id="EvaluationResultsandSelections" screen="EvaluationResultsandSelections" state="E" additionRuleName="EvaluationResultsandSelections"/>
+		</tab>
+		<tab id="AwardsandContracts" screen="EvaluationGroupsSummaryAward,AwardsandContractsSummary,AwardsandContractsScreen" state="E10">
+			<tab id="EvaluationGroupsSummaryAward" screen="EvaluationGroupsSummaryAward" state="EG" />
+			<tab id="AwardsandContractsSummary" screen="AwardsandContractsSummary" state="ES" />
+			<tab id="AwardsandContractsScreen" screen="AwardsandContractsScreen" state="E10" />
+		</tab>
+	</status>
+	<status id="4" user_type="city_org,agency_org">
+		<tab id="ProcurementInformation" screen="ProcurementSummary" state="E4">
+			<tab id="ProcurementSummary" screen="ProcurementSummary" state="E4" />
+			<tab id="ApprovedProviders" screen="ApprovedProviders" state="E4" />
+			<tab id="Financials" screen="Financials" state="E4" />
+			<tab id="ProposalConfiguration" screen="ProposalConfiguration" state="E4" />
+			<tab id="CompetitionConfiguration" screen="CompetitionConfiguration" state="E4" />
+			<tab id="RFPDocuments" screen="RFPDocuments" state="E4" />
+			<tab id="EvaluationCriteria" screen="EvaluationCriteria" state="E4" />
+			<tab id="ReleaseAddendum" screen="ReleaseAddendum" state="H" />
+			<tab id="PublishProcurement" screen="PublishProcurement" state="E" />
+		</tab>
+		<tab id="ProposalsandEvaluations" screen="EvaluationGroupsSummary,EvaluationSummary,EvaluationSettings,EvaluationResultsandSelections" state="E11">
+			<tab id="EvaluationGroupsSummary" screen="EvaluationGroupsSummary" state="EG" />
+			<tab id="EvaluationSummary" screen="EvaluationSummary" state="ES" />
+			<tab id="EvaluationSettings" screen="EvaluationSettings" state="E" />
+			<tab id="EvaluationStatus" screen="EvaluationStatus" state="E" />
+			<tab id="EvaluationResultsandSelections" screen="EvaluationResultsandSelections" state="E" additionRuleName="EvaluationResultsandSelections"/>
+		</tab>
+		<tab id="AwardsandContracts" screen="EvaluationGroupsSummaryAward,AwardsandContractsSummary,AwardsandContractsScreen" state="E10">
+			<tab id="EvaluationGroupsSummaryAward" screen="EvaluationGroupsSummaryAward" state="EG" />
+			<tab id="AwardsandContractsSummary" screen="AwardsandContractsSummary" state="ES" />
+			<tab id="AwardsandContractsScreen" screen="AwardsandContractsScreen" state="E10" />
+		</tab>
+	</status>
+	<status id="5" user_type="city_org,agency_org">
+		<tab id="ProcurementInformation" screen="ProcurementSummary" state="E4">
+			<tab id="ProcurementSummary" screen="ProcurementSummary" state="E4" />
+			<tab id="ApprovedProviders" screen="ApprovedProviders" state="E4" />
+			<tab id="Financials" screen="Financials" state="E4" />
+			<tab id="ProposalConfiguration" screen="ProposalConfiguration" state="E4" />
+			<tab id="CompetitionConfiguration" screen="CompetitionConfiguration" state="E4" />
+			<tab id="RFPDocuments" screen="RFPDocuments" state="E4" />
+			<tab id="EvaluationCriteria" screen="EvaluationCriteria" state="E4" />
+			<tab id="ReleaseAddendum" screen="ReleaseAddendum" state="H" />
+			<tab id="PublishProcurement" screen="PublishProcurement" state="E" />
+		</tab>
+		<tab id="ProposalsandEvaluations" screen="EvaluationGroupsSummary,EvaluationSummary,EvaluationSettings,EvaluationResultsandSelections" state="E11">
+			<tab id="EvaluationGroupsSummary" screen="EvaluationGroupsSummary" state="EG" />
+			<tab id="EvaluationSummary" screen="EvaluationSummary" state="ES" />
+			<tab id="EvaluationSettings" screen="EvaluationSettings" state="E" />
+			<tab id="EvaluationStatus" screen="EvaluationStatus" state="E" />
+			<tab id="EvaluationResultsandSelections" screen="EvaluationResultsandSelections" state="E" additionRuleName="EvaluationResultsandSelections"/>
+		</tab>
+		<tab id="AwardsandContracts" screen="EvaluationGroupsSummaryAward,AwardsandContractsSummary,AwardsandContractsScreen" state="E10">
+			<tab id="EvaluationGroupsSummaryAward" screen="EvaluationGroupsSummaryAward" state="EG" />
+			<tab id="AwardsandContractsSummary" screen="AwardsandContractsSummary" state="ES" />
+			<tab id="AwardsandContractsScreen" screen="AwardsandContractsScreen" state="E10" />
+		</tab>
+	</status>
+	<status id="6" user_type="city_org,agency_org">
+		<tab id="ProcurementInformation" screen="ProcurementSummary" state="E4">
+			<tab id="ProcurementSummary" screen="ProcurementSummary" state="E4" />
+			<tab id="ApprovedProviders" screen="ApprovedProviders" state="E4" />
+			<tab id="Financials" screen="Financials" state="E4" />
+			<tab id="ProposalConfiguration" screen="ProposalConfiguration" state="E4" />
+			<tab id="CompetitionConfiguration" screen="CompetitionConfiguration" state="E4" />
+			<tab id="RFPDocuments" screen="RFPDocuments" state="E4" />
+			<tab id="EvaluationCriteria" screen="EvaluationCriteria" state="E4" />
+			<tab id="ReleaseAddendum" screen="ReleaseAddendum" state="H" />
+			<tab id="PublishProcurement" screen="PublishProcurement" state="E" />
+		</tab>
+		<tab id="ProposalsandEvaluations" screen="EvaluationGroupsSummary,EvaluationSummary,EvaluationSettings,EvaluationResultsandSelections" state="E">
+			<tab id="EvaluationGroupsSummary" screen="EvaluationGroupsSummary" state="EG" />
+			<tab id="EvaluationSummary" screen="EvaluationSummary" state="ES" />
+			<tab id="EvaluationSettings" screen="EvaluationSettings" state="E" />
+			<tab id="EvaluationStatus" screen="EvaluationStatus" state="E" />
+			<tab id="EvaluationResultsandSelections" screen="EvaluationResultsandSelections" state="E" additionRuleName="EvaluationResultsandSelections"/>
+		</tab>
+		<tab id="AwardsandContracts" screen="EvaluationGroupsSummaryAward,AwardsandContractsSummary,AwardsandContractsScreen" state="E">
+			<tab id="EvaluationGroupsSummaryAward" screen="EvaluationGroupsSummaryAward" state="EG" />
+			<tab id="AwardsandContractsSummary" screen="AwardsandContractsSummary" state="ES" />
+			<tab id="AwardsandContractsScreen" screen="AwardsandContractsScreen" state="E" />
+		</tab>
+	</status>
+	<status id="7" user_type="city_org,agency_org">
+		<tab id="ProcurementRoadmapDetails" screen="ProcurementSummary" state="P">
+			<tab id="ProcurementSummary" screen="ProcurementSummary" state="P" />
+			<tab id="ServiceSelection" screen="ServiceSelection" state="P" />
+			<tab id="ApprovedProviders" screen="ApprovedProviders" state="P" />
+			<tab id="PublishProcurement" screen="PublishProcurement" state="H" />
+		</tab>
+		<tab id="RFPDetails" screen="Financials,ProposalConfiguration" state="P">
+			<tab id="Financials" screen="Financials" state="P" />
+			<tab id="ProposalConfiguration" screen="ProposalConfiguration" state="P" />
+			<tab id="CompetitionConfiguration" screen="CompetitionConfiguration" state="P" />
+			<tab id="RFPDocuments" screen="RFPDocuments" state="P" />
+			<tab id="EvaluationCriteria" screen="EvaluationCriteria" state="P" />
+			<tab id="ReleaseRFP" screen="ReleaseRFP" state="H" />
+		</tab>
+		<tab id="ProcurementInformation" screen="ProcurementSummary" state="P">
+			<tab id="ProcurementSummary" screen="ProcurementSummary" state="P" />
+			<tab id="ApprovedProviders" screen="ApprovedProviders" state="P" />
+			<tab id="Financials" screen="Financials" state="P" />
+			<tab id="ProposalConfiguration" screen="ProposalConfiguration" state="P" />
+			<tab id="CompetitionConfiguration" screen="CompetitionConfiguration" state="P" />
+			<tab id="RFPDocuments" screen="RFPDocuments" state="P" />
+			<tab id="EvaluationCriteria" screen="EvaluationCriteria" state="P" />
+			<tab id="ReleaseAddendum" screen="ReleaseAddendum" state="H" />
+			<tab id="PublishProcurement" screen="PublishProcurement" state="H" />
+		</tab>
+		<tab id="ProposalsandEvaluations" screen="EvaluationGroupsSummary,EvaluationSummary,EvaluationSettings,EvaluationResultsandSelections" state="P">
+			<tab id="EvaluationGroupsSummary" screen="EvaluationGroupsSummary" state="P" />
+			<tab id="EvaluationSummary" screen="EvaluationSummary" state="P" />
+			<tab id="EvaluationSettings" screen="EvaluationSettings" state="P" />
+			<tab id="EvaluationStatus" screen="EvaluationStatus" state="P" />
+			<tab id="EvaluationResultsandSelections" screen="EvaluationResultsandSelections" state="P" />
+		</tab>
+		<tab id="AwardsandContracts" screen="EvaluationGroupsSummaryAward,AwardsandContractsSummary,AwardsandContractsScreen" state="P">
+			<tab id="EvaluationGroupsSummaryAward" screen="EvaluationGroupsSummaryAward" state="P" />
+			<tab id="AwardsandContractsSummary" screen="AwardsandContractsSummary" state="P" />
+			<tab id="AwardsandContractsScreen" screen="AwardsandContractsScreen" state="P" />
+		</tab>
+	</status>
+	<status id="8" user_type="city_org,agency_org">
+		<tab id="ProcurementInformation" screen="ProcurementSummary" state="E4">
+			<tab id="ProcurementSummary" screen="ProcurementSummary" state="E4" />
+			<tab id="ApprovedProviders" screen="ApprovedProviders" state="E4" />
+			<tab id="Financials" screen="Financials" state="E4" />
+			<tab id="ProposalConfiguration" screen="ProposalConfiguration" state="E4" />
+			<tab id="CompetitionConfiguration" screen="CompetitionConfiguration" state="E4" />
+			<tab id="RFPDocuments" screen="RFPDocuments" state="E4" />
+			<tab id="EvaluationCriteria" screen="EvaluationCriteria" state="E4" />
+			<tab id="ReleaseAddendum" screen="ReleaseAddendum" state="H" />
+			<tab id="PublishProcurement" screen="PublishProcurement" state="H" />
+		</tab>
+		<tab id="ProposalsandEvaluations" screen="EvaluationGroupsSummary,EvaluationSummary,EvaluationSettings,EvaluationResultsandSelections" state="E">
+			<tab id="EvaluationGroupsSummary" screen="EvaluationGroupsSummary" state="EG" />
+			<tab id="EvaluationSummary" screen="EvaluationSummary" state="ES" />
+			<tab id="EvaluationSettings" screen="EvaluationSettings" state="E" />
+			<tab id="EvaluationStatus" screen="EvaluationStatus" state="E" />
+			<tab id="EvaluationResultsandSelections" screen="EvaluationResultsandSelections" state="E"/>
+		</tab>
+		<tab id="AwardsandContracts" screen="EvaluationGroupsSummaryAward,AwardsandContractsSummary,AwardsandContractsScreen" state="E">
+			<tab id="EvaluationGroupsSummaryAward" screen="EvaluationGroupsSummaryAward" state="EG" />
+			<tab id="AwardsandContractsSummary" screen="AwardsandContractsSummary" state="ES" />
+			<tab id="AwardsandContractsScreen" screen="AwardsandContractsScreen" state="E" />
+		</tab>
+	</status>
+	<status id="1" user_type="provider_org">
+		<tab id="ProcurementSummaryHeader" screen="ProcurementSummaryHeader" state="H" />
+		<tab id="ServicesAndProviders" screen="ServicesAndProviders" state="H" />
+		<tab id="RFPDocumentsHeader" screen="RFPDocumentsHeader" state="H" />
+		<tab id="ProposalSummary" screen="ProposalSummary" state="H" />
+		<tab id="SelectionDetails" screen="SelectionDetails" state="H" />
+	</status>
+	<status id="2" user_type="provider_org">
+		<tab id="ProcurementSummaryHeader" screen="ProcurementSummaryHeader" state="E7" />
+		<tab id="ServicesAndProviders" screen="ServicesAndProviders" state="E7" />
+		<tab id="RFPDocumentsHeader" screen="RFPDocumentsHeader" state="D" />
+		<tab id="ProposalSummary" screen="ProposalSummary" state="D" />
+		<tab id="SelectionDetails" screen="SelectionDetails" state="H" />
+	</status>
+	<status id="3" user_type="provider_org">
+		<tab id="ProcurementSummaryHeader" screen="ProcurementSummaryHeader" state="E7" />
+		<tab id="ServicesAndProviders" screen="ServicesAndProviders" state="E7" />
+		<tab id="RFPDocumentsHeader" screen="RFPDocumentsHeader" state="E" />
+		<tab id="ProposalSummary" screen="ProposalSummary" state="E">
+			<tab id="ProposalDetails" screen="ProposalDetails" state="E" />
+			<tab id="ProposalDocuments" screen="ProposalDocuments" state="E" />
+			<tab id="SubmitProposal" screen="SubmitProposal" state="E5" />
+		</tab>
+		<tab id="SelectionDetails" screen="SelectionDetailsSummary,SelectionDetailsScreen" state="E8" >
+			<tab id="SelectionDetailsSummary" screen="SelectionDetailsSummary" state="E" />
+			<tab id="SelectionDetailsScreen" screen="SelectionDetailsScreen" state="E" />
+		</tab>
+	</status>
+	<status id="4" user_type="provider_org">
+		<tab id="ProcurementSummaryHeader" screen="ProcurementSummaryHeader" state="E7" />
+		<tab id="ServicesAndProviders" screen="ServicesAndProviders" state="E7" />
+		<tab id="RFPDocumentsHeader" screen="RFPDocumentsHeader" state="E" />
+		<tab id="ProposalSummary" screen="ProposalSummary" state="E">
+			<tab id="ProposalDetails" screen="ProposalDetails" state="E" />
+			<tab id="ProposalDocuments" screen="ProposalDocuments" state="E" />
+			<tab id="SubmitProposal" screen="SubmitProposal" state="E5" />
+		</tab>
+		<tab id="SelectionDetails" screen="SelectionDetailsSummary,SelectionDetailsScreen" state="E8" >
+			<tab id="SelectionDetailsSummary" screen="SelectionDetailsSummary" state="E" />
+			<tab id="SelectionDetailsScreen" screen="SelectionDetailsScreen" state="E" />
+		</tab>
+	</status>
+	<status id="5" user_type="provider_org">
+		<tab id="ProcurementSummaryHeader" screen="ProcurementSummaryHeader" state="E7" />
+		<tab id="ServicesAndProviders" screen="ServicesAndProviders" state="E7" />
+		<tab id="RFPDocumentsHeader" screen="RFPDocumentsHeader" state="E" />
+		<tab id="ProposalSummary" screen="ProposalSummary" state="E">
+			<tab id="ProposalDetails" screen="ProposalDetails" state="E" />
+			<tab id="ProposalDocuments" screen="ProposalDocuments" state="E" />
+			<tab id="SubmitProposal" screen="SubmitProposal" state="H" />
+		</tab>
+		<tab id="SelectionDetails" screen="SelectionDetailsSummary,SelectionDetailsScreen" state="E8" >
+			<tab id="SelectionDetailsSummary" screen="SelectionDetailsSummary" state="E" />
+			<tab id="SelectionDetailsScreen" screen="SelectionDetailsScreen" state="E" />
+		</tab>
+	</status>
+	<status id="6" user_type="provider_org">
+		<tab id="ProcurementSummaryHeader" screen="ProcurementSummaryHeader" state="E7" />
+		<tab id="ServicesAndProviders" screen="ServicesAndProviders" state="E7" />
+		<tab id="RFPDocumentsHeader" screen="RFPDocumentsHeader" state="E" />
+		<tab id="ProposalSummary" screen="ProposalSummary" state="E">
+			<tab id="ProposalDetails" screen="ProposalDetails" state="E" />
+			<tab id="ProposalDocuments" screen="ProposalDocuments" state="E" />
+			<tab id="SubmitProposal" screen="SubmitProposal" state="H" />
+		</tab>
+		<tab id="SelectionDetails" screen="SelectionDetailsSummary,SelectionDetailsScreen" state="E6" >
+			<tab id="SelectionDetailsSummary" screen="SelectionDetailsSummary" state="E" />
+			<tab id="SelectionDetailsScreen" screen="SelectionDetailsScreen" state="E" />
+		</tab>
+	</status>
+	<status id="7" user_type="provider_org">
+		<tab id="ProcurementSummaryHeader" screen="ProcurementSummaryHeader" state="P" />
+		<tab id="ServicesAndProviders" screen="ServicesAndProviders" state="P" />
+		<tab id="RFPDocumentsHeader" screen="RFPDocumentsHeader" state="P" />
+		<tab id="ProposalSummary" screen="ProposalSummary" state="P">
+			<tab id="ProposalDetails" screen="ProposalDetails" state="P" />
+			<tab id="ProposalDocuments" screen="ProposalDocuments" state="P" />
+			<tab id="SubmitProposal" screen="SubmitProposal" state="H" />
+		</tab>
+		<tab id="SelectionDetails" screen="SelectionDetailsSummary,SelectionDetailsScreen" state="P" >
+			<tab id="SelectionDetailsSummary" screen="SelectionDetailsSummary" state="P" />
+			<tab id="SelectionDetailsScreen" screen="SelectionDetailsScreen" state="P" />
+		</tab>
+	</status>
+	<status id="8" user_type="provider_org">
+		<tab id="ProcurementSummaryHeader" screen="ProcurementSummaryHeader" state="E7" />
+		<tab id="ServicesAndProviders" screen="ServicesAndProviders" state="E7" />
+		<tab id="RFPDocumentsHeader" screen="RFPDocumentsHeader" state="E7" />
+		<tab id="ProposalSummary" screen="ProposalSummary" state="E">
+			<tab id="ProposalDetails" screen="ProposalDetails" state="E" />
+			<tab id="ProposalDocuments" screen="ProposalDocuments" state="E" />
+			<tab id="SubmitProposal" screen="SubmitProposal" state="H" />
+		</tab>
+		<tab id="SelectionDetails" screen="SelectionDetailsSummary,SelectionDetails" state="E6" >
+			<tab id="SelectionDetailsSummary" screen="SelectionDetailsSummary" state="E" />
+			<tab id="SelectionDetailsScreen" screen="SelectionDetailsScreen" state="E" />
+		</tab>
+	</status>
+	
+	<add-rule id="EvaluationResultsandSelections">
+		<status id="136" state="H"/>
+		<status id="137" state="EA8"/>
+		<status id="138" state="EA8"/>
+		<status id="139" state="E"/>
+		<status id="140" state="H"/>
+		<status id="154" state="H"/>
+		<!-- enhancement 6577 release 3.10.0 -->
+		<status id="167" state="EA8"/>
+	</add-rule>
+</navigation>

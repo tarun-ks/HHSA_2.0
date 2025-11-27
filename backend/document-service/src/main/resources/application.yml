@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: document-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/eprocurement
+    username: postgres
+    password: admin
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  flyway:
+    enabled: false
+    # Documents table already exists, no migrations needed
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+server:
+  port: 8092
+
+# Document Storage Configuration
+document:
+  storage:
+    provider: local  # local, s3 (future)
+    local:
+      base-path: ${DOCUMENT_STORAGE_PATH:./documents}
+      create-directories: true
+    s3:
+      bucket-name: ${S3_BUCKET_NAME:}
+      region: ${S3_REGION:us-east-1}
+      access-key: ${S3_ACCESS_KEY:}
+      secret-key: ${S3_SECRET_KEY:}
+
+logging:
+  level:
+    root: INFO
+    com.hhsa: DEBUG
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html

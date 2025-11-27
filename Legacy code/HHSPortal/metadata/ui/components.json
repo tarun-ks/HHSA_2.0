@@ -1,0 +1,1245 @@
+{
+  "component_library": {
+    "version": "2.0.0",
+    "description": "Reusable UI Component Library - Common components for building modern web applications",
+    "categories": [
+      {
+        "name": "layout",
+        "display_name": "Layout Components",
+        "description": "Core layout and structure components",
+        "components": [
+          {
+            "id": "global_action_bar",
+            "name": "GlobalActionBar",
+            "description": "Global action bar with save, cancel, close buttons and form state management",
+            "category": "layout",
+            "props": {
+              "actions": {
+                "type": "array",
+                "items": "ActionButton",
+                "required": true,
+                "description": "Array of action buttons to display"
+              },
+              "position": {
+                "type": "string",
+                "enum": ["top", "bottom", "sticky_top", "sticky_bottom"],
+                "default": "sticky_bottom",
+                "description": "Position of the action bar"
+              },
+              "show_dirty_indicator": {
+                "type": "boolean",
+                "default": true,
+                "description": "Show indicator when forms have unsaved changes"
+              }
+            },
+            "template": "components/layout/GlobalActionBar.tsx.template",
+            "styles": "components/layout/GlobalActionBar.module.css"
+          },
+          {
+            "id": "breadcrumbs",
+            "name": "Breadcrumbs",
+            "description": "Navigation breadcrumbs for showing current location in hierarchy",
+            "category": "layout",
+            "props": {
+              "items": {
+                "type": "array",
+                "items": "BreadcrumbItem",
+                "required": true,
+                "description": "Array of breadcrumb links"
+              }
+            },
+            "template": "components/layout/Breadcrumbs.tsx.template",
+            "styles": "components/layout/Breadcrumbs.module.css"
+          },
+          {
+            "id": "object_tabs",
+            "name": "ObjectTabs",
+            "description": "Tabbed navigation for object details (Overview, Documents, Workflow, History, Budget)",
+            "category": "layout",
+            "props": {
+              "tabs": {
+                "type": "array",
+                "items": "TabItem",
+                "required": true,
+                "description": "List of tabs"
+              },
+              "active_tab": {
+                "type": "string",
+                "description": "Currently active tab ID"
+              }
+            },
+            "template": "components/layout/ObjectTabs.tsx.template",
+            "styles": "components/layout/ObjectTabs.module.css"
+          },
+          {
+            "id": "dashboard_layout",
+            "name": "DashboardLayout",
+            "description": "Main dashboard layout with summary cards, charts, and activity feed",
+            "category": "layout",
+            "props": {
+              "summary_cards": {
+                "type": "array",
+                "items": "SummaryCard",
+                "required": true,
+                "description": "Array of summary cards for key metrics"
+              },
+              "charts": {
+                "type": "array",
+                "items": "ChartConfig",
+                "description": "Chart configurations for status distribution"
+              },
+              "activity_feed": {
+                "type": "object",
+                "description": "Activity feed configuration"
+              }
+            },
+            "template": "components/layout/DashboardLayout.tsx.template",
+            "styles": "components/layout/DashboardLayout.module.css"
+          },
+          {
+            "id": "responsive_sidebar",
+            "name": "ResponsiveSidebar",
+            "description": "Collapsible sidebar navigation with mobile-first responsive design",
+            "category": "layout",
+            "props": {
+              "is_collapsed": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether sidebar is collapsed"
+              },
+              "breakpoint": {
+                "type": "string",
+                "enum": ["mobile", "tablet", "desktop"],
+                "default": "desktop",
+                "description": "Current breakpoint"
+              }
+            },
+            "template": "components/layout/ResponsiveSidebar.tsx.template",
+            "styles": "components/layout/ResponsiveSidebar.module.css"
+          }
+        ]
+      },
+      {
+        "name": "navigation",
+        "display_name": "Navigation Components",
+        "description": "Global and module-level navigation",
+        "components": [
+          {
+            "id": "global_nav_menu",
+            "name": "GlobalNavMenu",
+            "description": "Primary navigation menu for switching between modules (Contracts, Procurement, Invoices, Reports)",
+            "category": "navigation",
+            "props": {
+              "items": {
+                "type": "array",
+                "items": "NavItem",
+                "required": true,
+                "description": "Navigation items with icons and labels"
+              }
+            },
+            "template": "components/navigation/GlobalNavMenu.tsx.template",
+            "styles": "components/navigation/GlobalNavMenu.module.css"
+          },
+          {
+            "id": "side_nav",
+            "name": "SideNav",
+            "description": "Collapsible side navigation for module-specific pages",
+            "category": "navigation",
+            "props": {
+              "sections": {
+                "type": "array",
+                "items": "NavSection",
+                "description": "Sections with nested links"
+              }
+            },
+            "template": "components/navigation/SideNav.tsx.template",
+            "styles": "components/navigation/SideNav.module.css"
+          },
+          {
+            "id": "role_based_nav",
+            "name": "RoleBasedNav",
+            "description": "Navigation that adapts based on user role (ACCO, Finance, Provider, Admin)",
+            "category": "navigation",
+            "props": {
+              "user_role": {
+                "type": "string",
+                "enum": ["ACCO_MANAGER", "ACCO_STAFF", "FINANCE_MANAGER", "PROVIDER_MANAGER", "SYSTEM_ADMIN"],
+                "required": true,
+                "description": "Current user role"
+              },
+              "organization_type": {
+                "type": "string",
+                "enum": ["AGENCY", "PROVIDER", "CITY"],
+                "required": true,
+                "description": "User organization type"
+              }
+            },
+            "template": "components/navigation/RoleBasedNav.tsx.template",
+            "styles": "components/navigation/RoleBasedNav.module.css"
+          }
+        ]
+      },
+      {
+        "name": "forms",
+        "display_name": "Form Components",
+        "description": "Form and input components",
+        "components": [
+          {
+            "id": "form_state_manager",
+            "name": "FormStateManager",
+            "description": "Global form state manager for tracking dirty state and managing form actions",
+            "category": "forms",
+            "props": {
+              "track_dirty_state": {
+                "type": "boolean",
+                "default": true,
+                "description": "Track which forms have unsaved changes"
+              },
+              "auto_save_interval": {
+                "type": "number",
+                "default": 30000,
+                "description": "Auto-save interval in milliseconds"
+              }
+            },
+            "template": "components/state/FormStateManager.tsx.template",
+            "styles": "components/state/FormStateManager.module.css"
+          },
+          {
+            "id": "object_form",
+            "name": "ObjectForm",
+            "description": "Schema-driven form generator for Contracts, Invoices, etc.",
+            "category": "forms",
+            "props": {
+              "schema": {
+                "type": "object",
+                "required": true,
+                "description": "Form schema definition"
+              },
+              "initial_values": {
+                "type": "object",
+                "description": "Initial form values"
+              }
+            },
+            "template": "components/forms/ObjectForm.tsx.template",
+            "styles": "components/forms/ObjectForm.module.css"
+          },
+          {
+            "id": "attachment_uploader",
+            "name": "AttachmentUploader",
+            "description": "Drag & drop uploader for contract and invoice documents",
+            "category": "forms",
+            "props": {
+              "max_size_mb": {
+                "type": "number",
+                "default": 20,
+                "description": "Max file size in MB"
+              },
+              "allowed_types": {
+                "type": "array",
+                "items": "string",
+                "default": ["pdf", "docx", "xlsx"],
+                "description": "Allowed file extensions"
+              }
+            },
+            "template": "components/forms/AttachmentUploader.tsx.template",
+            "styles": "components/forms/AttachmentUploader.module.css"
+          },
+          {
+            "id": "file_uploader",
+            "name": "FileUploader",
+            "description": "Reusable file upload component with drag & drop support",
+            "category": "forms",
+            "props": {
+              "max_size_mb": {
+                "type": "number",
+                "default": 20,
+                "description": "Maximum file size in MB"
+              },
+              "allowed_types": {
+                "type": "array",
+                "items": "string",
+                "default": ["pdf", "docx", "xlsx", "jpg", "png"],
+                "description": "Allowed file extensions"
+              },
+              "multiple": {
+                "type": "boolean",
+                "default": false,
+                "description": "Allow multiple file selection"
+              },
+              "on_upload": {
+                "type": "function",
+                "required": true,
+                "description": "Callback function when files are uploaded"
+              }
+            },
+            "template": "components/forms/FileUploader.tsx.template",
+            "styles": "components/forms/FileUploader.module.css"
+          },
+          {
+            "id": "form_field",
+            "name": "FormField",
+            "description": "Reusable form field wrapper with label, validation, and error handling",
+            "category": "forms",
+            "props": {
+              "label": {
+                "type": "string",
+                "required": true,
+                "description": "Field label"
+              },
+              "name": {
+                "type": "string",
+                "required": true,
+                "description": "Field name"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["text", "email", "password", "number", "date", "select", "textarea"],
+                "default": "text",
+                "description": "Input type"
+              },
+              "required": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether field is required"
+              },
+              "error": {
+                "type": "string",
+                "description": "Error message to display"
+              },
+              "help_text": {
+                "type": "string",
+                "description": "Help text below the field"
+              }
+            },
+            "template": "components/forms/FormField.tsx.template",
+            "styles": "components/forms/FormField.module.css"
+          },
+          {
+            "id": "select_dropdown",
+            "name": "SelectDropdown",
+            "description": "Reusable select dropdown component with search and multi-select support",
+            "category": "forms",
+            "props": {
+              "options": {
+                "type": "array",
+                "items": "SelectOption",
+                "required": true,
+                "description": "Dropdown options"
+              },
+              "placeholder": {
+                "type": "string",
+                "description": "Placeholder text"
+              },
+              "searchable": {
+                "type": "boolean",
+                "default": false,
+                "description": "Enable search functionality"
+              },
+              "multiple": {
+                "type": "boolean",
+                "default": false,
+                "description": "Allow multiple selections"
+              },
+              "on_change": {
+                "type": "function",
+                "required": true,
+                "description": "Change handler function"
+              }
+            },
+            "template": "components/forms/SelectDropdown.tsx.template",
+            "styles": "components/forms/SelectDropdown.module.css"
+          }
+        ]
+      },
+      {
+        "name": "data_display",
+        "display_name": "Data Display Components",
+        "description": "Reusable data visualization and display elements",
+        "components": [
+          {
+            "id": "object_card",
+            "name": "ObjectCard",
+            "description": "Summary card for objects like Contracts, Invoices, or Suppliers",
+            "category": "data_display",
+            "props": {
+              "title": { "type": "string", "required": true },
+              "subtitle": { "type": "string" },
+              "status": { "type": "string" },
+              "metadata": {
+                "type": "array",
+                "items": "KeyValuePair",
+                "description": "Extra metadata"
+              }
+            },
+            "template": "components/data/ObjectCard.tsx.template",
+            "styles": "components/data/ObjectCard.module.css"
+          },
+          {
+            "id": "data_table",
+            "name": "DataTable",
+            "description": "Table for line items, lists, and approvals",
+            "category": "data_display",
+            "props": {
+              "columns": {
+                "type": "array",
+                "items": "TableColumn",
+                "required": true
+              },
+              "rows": {
+                "type": "array",
+                "items": "TableRow",
+                "required": true
+              }
+            },
+            "template": "components/data/DataTable.tsx.template",
+            "styles": "components/data/DataTable.module.css"
+          },
+          {
+            "id": "status_badge",
+            "name": "StatusBadge",
+            "description": "Colored badge representing object status",
+            "category": "data_display",
+            "props": {
+              "status": {
+                "type": "string",
+                "enum": ["draft", "pending", "approved", "active", "closed", "archived"],
+                "required": true
+              }
+            },
+            "template": "components/data/StatusBadge.tsx.template",
+            "styles": "components/data/StatusBadge.module.css"
+          },
+          {
+            "id": "approval_stepper",
+            "name": "ApprovalStepper",
+            "description": "Stepper showing workflow progress (Draft → Review → Approved)",
+            "category": "data_display",
+            "props": {
+              "steps": {
+                "type": "array",
+                "items": "Step",
+                "required": true
+              },
+              "active_step": {
+                "type": "number",
+                "required": true
+              }
+            },
+            "template": "components/data/ApprovalStepper.tsx.template",
+            "styles": "components/data/ApprovalStepper.module.css"
+          },
+          {
+            "id": "timeline",
+            "name": "Timeline",
+            "description": "Activity log timeline of contract events",
+            "category": "data_display",
+            "props": {
+              "events": {
+                "type": "array",
+                "items": "TimelineEvent",
+                "required": true
+              }
+            },
+            "template": "components/data/Timeline.tsx.template",
+            "styles": "components/data/Timeline.module.css"
+          },
+          {
+            "id": "metric_card",
+            "name": "MetricCard",
+            "description": "Reusable metric card component for displaying key statistics",
+            "category": "data_display",
+            "props": {
+              "title": {
+                "type": "string",
+                "required": true,
+                "description": "Card title"
+              },
+              "value": {
+                "type": "string",
+                "required": true,
+                "description": "Main metric value"
+              },
+              "subtitle": {
+                "type": "string",
+                "description": "Subtitle or additional context"
+              },
+              "trend": {
+                "type": "object",
+                "description": "Trend indicator with direction and percentage"
+              },
+              "icon": {
+                "type": "string",
+                "description": "Icon name for the card"
+              },
+              "color": {
+                "type": "string",
+                "enum": ["blue", "green", "orange", "red", "purple", "gray"],
+                "default": "blue"
+              },
+              "on_click": {
+                "type": "function",
+                "description": "Click handler function"
+              }
+            },
+            "template": "components/data/MetricCard.tsx.template",
+            "styles": "components/data/MetricCard.module.css"
+          },
+          {
+            "id": "donut_chart",
+            "name": "DonutChart",
+            "description": "Reusable donut chart component for data visualization",
+            "category": "data_display",
+            "props": {
+              "data": {
+                "type": "array",
+                "items": "ChartDataPoint",
+                "required": true,
+                "description": "Chart data points"
+              },
+              "colors": {
+                "type": "array",
+                "items": "string",
+                "description": "Color palette for chart segments"
+              },
+              "size": {
+                "type": "number",
+                "default": 200,
+                "description": "Chart size in pixels"
+              },
+              "show_legend": {
+                "type": "boolean",
+                "default": true,
+                "description": "Show legend"
+              },
+              "interactive": {
+                "type": "boolean",
+                "default": true,
+                "description": "Enable click interactions"
+              },
+              "on_segment_click": {
+                "type": "function",
+                "description": "Callback when segment is clicked"
+              }
+            },
+            "template": "components/data/DonutChart.tsx.template",
+            "styles": "components/data/DonutChart.module.css"
+          },
+          {
+            "id": "task_list",
+            "name": "TaskList",
+            "description": "Reusable task list component with assignment and status management",
+            "category": "data_display",
+            "props": {
+              "tasks": {
+                "type": "array",
+                "items": "Task",
+                "required": true,
+                "description": "List of tasks"
+              },
+              "show_assignee": {
+                "type": "boolean",
+                "default": true,
+                "description": "Show assignee information"
+              },
+              "show_priority": {
+                "type": "boolean",
+                "default": true,
+                "description": "Show priority indicators"
+              },
+              "show_actions": {
+                "type": "boolean",
+                "default": true,
+                "description": "Show action buttons"
+              },
+              "on_task_click": {
+                "type": "function",
+                "description": "Callback when task is clicked"
+              },
+              "on_status_change": {
+                "type": "function",
+                "description": "Callback when task status changes"
+              }
+            },
+            "template": "components/data/TaskList.tsx.template",
+            "styles": "components/data/TaskList.module.css"
+          },
+          {
+            "id": "file_list",
+            "name": "FileList",
+            "description": "Reusable file list component with metadata and actions",
+            "category": "data_display",
+            "props": {
+              "files": {
+                "type": "array",
+                "items": "File",
+                "required": true,
+                "description": "List of files"
+              },
+              "show_metadata": {
+                "type": "boolean",
+                "default": true,
+                "description": "Show file metadata"
+              },
+              "show_actions": {
+                "type": "boolean",
+                "default": true,
+                "description": "Show action buttons"
+              },
+              "group_by": {
+                "type": "string",
+                "enum": ["none", "type", "date", "category"],
+                "default": "none",
+                "description": "Group files by property"
+              },
+              "on_file_click": {
+                "type": "function",
+                "description": "Callback when file is clicked"
+              },
+              "on_file_download": {
+                "type": "function",
+                "description": "Callback when file is downloaded"
+              }
+            },
+            "template": "components/data/FileList.tsx.template",
+            "styles": "components/data/FileList.module.css"
+          },
+          {
+            "id": "progress_stepper",
+            "name": "ProgressStepper",
+            "description": "Reusable progress stepper component for showing workflow or process steps",
+            "category": "data_display",
+            "props": {
+              "steps": {
+                "type": "array",
+                "items": "Step",
+                "required": true,
+                "description": "List of steps"
+              },
+              "current_step": {
+                "type": "number",
+                "required": true,
+                "description": "Current active step index"
+              },
+              "orientation": {
+                "type": "string",
+                "enum": ["horizontal", "vertical"],
+                "default": "horizontal",
+                "description": "Stepper orientation"
+              },
+              "show_labels": {
+                "type": "boolean",
+                "default": true,
+                "description": "Show step labels"
+              },
+              "on_step_click": {
+                "type": "function",
+                "description": "Callback when step is clicked"
+              }
+            },
+            "template": "components/data/ProgressStepper.tsx.template",
+            "styles": "components/data/ProgressStepper.module.css"
+          }
+        ]
+      },
+      {
+        "name": "buttons",
+        "display_name": "Button Components",
+        "description": "Action buttons and interactive elements",
+        "components": [
+          {
+            "id": "global_save_button",
+            "name": "GlobalSaveButton",
+            "description": "Global save button with form state awareness",
+            "category": "buttons",
+            "props": {
+              "variant": {
+                "type": "string",
+                "enum": ["primary", "secondary", "success", "warning", "danger"],
+                "default": "primary"
+              },
+              "size": {
+                "type": "string",
+                "enum": ["small", "medium", "large"],
+                "default": "large"
+              },
+              "action": {
+                "type": "string",
+                "default": "save_all_forms"
+              }
+            },
+            "template": "components/buttons/GlobalSaveButton.tsx.template",
+            "styles": "components/buttons/GlobalSaveButton.module.css"
+          },
+          {
+            "id": "global_cancel_button",
+            "name": "GlobalCancelButton",
+            "description": "Global cancel button with unsaved changes handling",
+            "category": "buttons",
+            "props": {
+              "variant": {
+                "type": "string",
+                "enum": ["primary", "secondary", "outline", "ghost"],
+                "default": "outline"
+              },
+              "action": {
+                "type": "string",
+                "default": "cancel_all_forms"
+              }
+            },
+            "template": "components/buttons/GlobalCancelButton.tsx.template",
+            "styles": "components/buttons/GlobalCancelButton.module.css"
+          },
+          {
+            "id": "global_close_button",
+            "name": "GlobalCloseButton",
+            "description": "Global close button with navigation and cleanup",
+            "category": "buttons",
+            "props": {
+              "variant": {
+                "type": "string",
+                "enum": ["primary", "secondary", "outline", "ghost"],
+                "default": "ghost"
+              },
+              "action": {
+                "type": "string",
+                "default": "close_all_forms"
+              }
+            },
+            "template": "components/buttons/GlobalCloseButton.tsx.template",
+            "styles": "components/buttons/GlobalCloseButton.module.css"
+          },
+          {
+            "id": "submit_for_approval_button",
+            "name": "SubmitForApprovalButton",
+            "description": "Button to submit object for approval workflow",
+            "category": "buttons",
+            "props": {
+              "action": { "type": "string", "default": "submit_for_approval" }
+            },
+            "template": "components/buttons/SubmitForApprovalButton.tsx.template",
+            "styles": "components/buttons/SubmitForApprovalButton.module.css"
+          },
+          {
+            "id": "download_pdf_button",
+            "name": "DownloadPDFButton",
+            "description": "Download object as PDF",
+            "category": "buttons",
+            "props": {
+              "file_name": { "type": "string" }
+            },
+            "template": "components/buttons/DownloadPDFButton.tsx.template",
+            "styles": "components/buttons/DownloadPDFButton.module.css"
+          },
+          {
+            "id": "action_button",
+            "name": "ActionButton",
+            "description": "Reusable action button with customizable variants and states",
+            "category": "buttons",
+            "props": {
+              "variant": {
+                "type": "string",
+                "enum": ["primary", "secondary", "outline", "ghost", "danger", "success", "warning"],
+                "default": "primary",
+                "description": "Button visual variant"
+              },
+              "size": {
+                "type": "string",
+                "enum": ["small", "medium", "large"],
+                "default": "medium",
+                "description": "Button size"
+              },
+              "disabled": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether button is disabled"
+              },
+              "loading": {
+                "type": "boolean",
+                "default": false,
+                "description": "Show loading state"
+              },
+              "icon": {
+                "type": "string",
+                "description": "Icon name to display"
+              },
+              "icon_position": {
+                "type": "string",
+                "enum": ["left", "right"],
+                "default": "left",
+                "description": "Icon position relative to text"
+              },
+              "on_click": {
+                "type": "function",
+                "required": true,
+                "description": "Click handler function"
+              }
+            },
+            "template": "components/buttons/ActionButton.tsx.template",
+            "styles": "components/buttons/ActionButton.module.css"
+          },
+          {
+            "id": "icon_button",
+            "name": "IconButton",
+            "description": "Reusable icon-only button for actions and navigation",
+            "category": "buttons",
+            "props": {
+              "icon": {
+                "type": "string",
+                "required": true,
+                "description": "Icon name to display"
+              },
+              "variant": {
+                "type": "string",
+                "enum": ["primary", "secondary", "outline", "ghost"],
+                "default": "ghost",
+                "description": "Button visual variant"
+              },
+              "size": {
+                "type": "string",
+                "enum": ["small", "medium", "large"],
+                "default": "medium",
+                "description": "Button size"
+              },
+              "disabled": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether button is disabled"
+              },
+              "tooltip": {
+                "type": "string",
+                "description": "Tooltip text for accessibility"
+              },
+              "on_click": {
+                "type": "function",
+                "required": true,
+                "description": "Click handler function"
+              }
+            },
+            "template": "components/buttons/IconButton.tsx.template",
+            "styles": "components/buttons/IconButton.module.css"
+          },
+          {
+            "id": "toggle_button",
+            "name": "ToggleButton",
+            "description": "Reusable toggle button for on/off states",
+            "category": "buttons",
+            "props": {
+              "checked": {
+                "type": "boolean",
+                "required": true,
+                "description": "Whether button is checked/toggled"
+              },
+              "variant": {
+                "type": "string",
+                "enum": ["primary", "secondary", "outline"],
+                "default": "primary",
+                "description": "Button visual variant"
+              },
+              "size": {
+                "type": "string",
+                "enum": ["small", "medium", "large"],
+                "default": "medium",
+                "description": "Button size"
+              },
+              "disabled": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether button is disabled"
+              },
+              "on_toggle": {
+                "type": "function",
+                "required": true,
+                "description": "Toggle handler function"
+              }
+            },
+            "template": "components/buttons/ToggleButton.tsx.template",
+            "styles": "components/buttons/ToggleButton.module.css"
+          }
+        ]
+      },
+      {
+        "name": "search",
+        "display_name": "Search & Filter Components",
+        "description": "Search and filtering for global and module-level objects",
+        "components": [
+          {
+            "id": "global_search_bar",
+            "name": "GlobalSearchBar",
+            "description": "Universal search bar for Contracts, Invoices, Suppliers",
+            "category": "search",
+            "props": {
+              "placeholder": { "type": "string", "default": "Search contracts, invoices, suppliers..." }
+            },
+            "template": "components/search/GlobalSearchBar.tsx.template",
+            "styles": "components/search/GlobalSearchBar.module.css"
+          },
+          {
+            "id": "filter_panel",
+            "name": "FilterPanel",
+            "description": "Advanced filtering sidebar",
+            "category": "search",
+            "props": {
+              "filters": {
+                "type": "array",
+                "items": "FilterConfig",
+                "description": "Available filters"
+              }
+            },
+            "template": "components/search/FilterPanel.tsx.template",
+            "styles": "components/search/FilterPanel.module.css"
+          },
+          {
+            "id": "sort_dropdown",
+            "name": "SortDropdown",
+            "description": "Sorting dropdown for tables and lists",
+            "category": "search",
+            "props": {
+              "options": {
+                "type": "array",
+                "items": "SortOption",
+                "required": true
+              }
+            },
+            "template": "components/search/SortDropdown.tsx.template",
+            "styles": "components/search/SortDropdown.module.css"
+          }
+        ]
+      },
+      {
+        "name": "notifications",
+        "display_name": "Notification Components",
+        "description": "Notification and communication components",
+        "components": [
+          {
+            "id": "notification_center",
+            "name": "NotificationCenter",
+            "description": "Real-time notification center with workflow and system notifications",
+            "category": "notifications",
+            "props": {
+              "notifications": {
+                "type": "array",
+                "items": "Notification",
+                "required": true,
+                "description": "List of notifications"
+              },
+              "user_role": {
+                "type": "string",
+                "required": true,
+                "description": "User role for notification filtering"
+              },
+              "real_time": {
+                "type": "boolean",
+                "default": true,
+                "description": "Enable real-time updates"
+              }
+            },
+            "template": "components/notifications/NotificationCenter.tsx.template",
+            "styles": "components/notifications/NotificationCenter.module.css"
+          },
+          {
+            "id": "notification_item",
+            "name": "NotificationItem",
+            "description": "Reusable notification item component for displaying individual notifications",
+            "category": "notifications",
+            "props": {
+              "id": {
+                "type": "string",
+                "required": true,
+                "description": "Unique notification ID"
+              },
+              "title": {
+                "type": "string",
+                "required": true,
+                "description": "Notification title"
+              },
+              "message": {
+                "type": "string",
+                "description": "Notification message"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["info", "success", "warning", "error"],
+                "default": "info",
+                "description": "Notification type"
+              },
+              "timestamp": {
+                "type": "string",
+                "required": true,
+                "description": "Notification timestamp"
+              },
+              "read": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether notification is read"
+              },
+              "on_click": {
+                "type": "function",
+                "description": "Click handler function"
+              },
+              "on_dismiss": {
+                "type": "function",
+                "description": "Dismiss handler function"
+              }
+            },
+            "template": "components/notifications/NotificationItem.tsx.template",
+            "styles": "components/notifications/NotificationItem.module.css"
+          },
+          {
+            "id": "toast_notification",
+            "name": "ToastNotification",
+            "description": "Reusable toast notification component for temporary messages",
+            "category": "notifications",
+            "props": {
+              "message": {
+                "type": "string",
+                "required": true,
+                "description": "Toast message"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["info", "success", "warning", "error"],
+                "default": "info",
+                "description": "Toast type"
+              },
+              "duration": {
+                "type": "number",
+                "default": 5000,
+                "description": "Auto-dismiss duration in milliseconds"
+              },
+              "position": {
+                "type": "string",
+                "enum": ["top-left", "top-right", "bottom-left", "bottom-right"],
+                "default": "top-right",
+                "description": "Toast position"
+              },
+              "on_dismiss": {
+                "type": "function",
+                "description": "Dismiss handler function"
+              }
+            },
+            "template": "components/notifications/ToastNotification.tsx.template",
+            "styles": "components/notifications/ToastNotification.module.css"
+          }
+        ]
+      },
+      {
+        "name": "accessibility",
+        "display_name": "Accessibility Components",
+        "description": "WCAG 2.1 AA compliant accessibility components",
+        "components": [
+          {
+            "id": "accessible_button",
+            "name": "AccessibleButton",
+            "description": "WCAG 2.1 AA compliant button with proper ARIA labels and keyboard navigation",
+            "category": "accessibility",
+            "props": {
+              "aria_label": {
+                "type": "string",
+                "required": true,
+                "description": "ARIA label for screen readers"
+              },
+              "aria_describedby": {
+                "type": "string",
+                "description": "ARIA describedby for additional context"
+              },
+              "keyboard_shortcut": {
+                "type": "string",
+                "description": "Keyboard shortcut key combination"
+              }
+            },
+            "template": "components/accessibility/AccessibleButton.tsx.template",
+            "styles": "components/accessibility/AccessibleButton.module.css"
+          },
+          {
+            "id": "screen_reader_text",
+            "name": "ScreenReaderText",
+            "description": "Screen reader only text for accessibility",
+            "category": "accessibility",
+            "props": {
+              "text": {
+                "type": "string",
+                "required": true,
+                "description": "Text visible only to screen readers"
+              }
+            },
+            "template": "components/accessibility/ScreenReaderText.tsx.template",
+            "styles": "components/accessibility/ScreenReaderText.module.css"
+          }
+        ]
+      },
+      {
+        "name": "feedback",
+        "display_name": "Feedback Components",
+        "description": "User feedback and interaction components",
+        "components": [
+          {
+            "id": "loading_spinner",
+            "name": "LoadingSpinner",
+            "description": "Reusable loading spinner component",
+            "category": "feedback",
+            "props": {
+              "size": {
+                "type": "string",
+                "enum": ["small", "medium", "large"],
+                "default": "medium",
+                "description": "Spinner size"
+              },
+              "color": {
+                "type": "string",
+                "enum": ["primary", "secondary", "white", "gray"],
+                "default": "primary",
+                "description": "Spinner color"
+              },
+              "message": {
+                "type": "string",
+                "description": "Loading message to display"
+              }
+            },
+            "template": "components/feedback/LoadingSpinner.tsx.template",
+            "styles": "components/feedback/LoadingSpinner.module.css"
+          },
+          {
+            "id": "progress_bar",
+            "name": "ProgressBar",
+            "description": "Reusable progress bar component",
+            "category": "feedback",
+            "props": {
+              "value": {
+                "type": "number",
+                "required": true,
+                "description": "Progress value (0-100)"
+              },
+              "max": {
+                "type": "number",
+                "default": 100,
+                "description": "Maximum value"
+              },
+              "variant": {
+                "type": "string",
+                "enum": ["primary", "success", "warning", "danger"],
+                "default": "primary",
+                "description": "Progress bar variant"
+              },
+              "show_percentage": {
+                "type": "boolean",
+                "default": false,
+                "description": "Show percentage text"
+              },
+              "animated": {
+                "type": "boolean",
+                "default": false,
+                "description": "Enable animation"
+              }
+            },
+            "template": "components/feedback/ProgressBar.tsx.template",
+            "styles": "components/feedback/ProgressBar.module.css"
+          },
+          {
+            "id": "tooltip",
+            "name": "Tooltip",
+            "description": "Reusable tooltip component for additional information",
+            "category": "feedback",
+            "props": {
+              "content": {
+                "type": "string",
+                "required": true,
+                "description": "Tooltip content"
+              },
+              "position": {
+                "type": "string",
+                "enum": ["top", "bottom", "left", "right"],
+                "default": "top",
+                "description": "Tooltip position"
+              },
+              "trigger": {
+                "type": "string",
+                "enum": ["hover", "click", "focus"],
+                "default": "hover",
+                "description": "Tooltip trigger"
+              },
+              "disabled": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether tooltip is disabled"
+              }
+            },
+            "template": "components/feedback/Tooltip.tsx.template",
+            "styles": "components/feedback/Tooltip.module.css"
+          }
+        ]
+      },
+      {
+        "name": "overlay",
+        "display_name": "Overlay Components",
+        "description": "Modal, popup, and overlay components",
+        "components": [
+          {
+            "id": "modal",
+            "name": "Modal",
+            "description": "Reusable modal dialog component",
+            "category": "overlay",
+            "props": {
+              "is_open": {
+                "type": "boolean",
+                "required": true,
+                "description": "Whether modal is open"
+              },
+              "title": {
+                "type": "string",
+                "description": "Modal title"
+              },
+              "size": {
+                "type": "string",
+                "enum": ["small", "medium", "large", "fullscreen"],
+                "default": "medium",
+                "description": "Modal size"
+              },
+              "closable": {
+                "type": "boolean",
+                "default": true,
+                "description": "Whether modal can be closed"
+              },
+              "on_close": {
+                "type": "function",
+                "description": "Close handler function"
+              }
+            },
+            "template": "components/overlay/Modal.tsx.template",
+            "styles": "components/overlay/Modal.module.css"
+          },
+          {
+            "id": "dropdown_menu",
+            "name": "DropdownMenu",
+            "description": "Reusable dropdown menu component",
+            "category": "overlay",
+            "props": {
+              "trigger": {
+                "type": "element",
+                "required": true,
+                "description": "Trigger element"
+              },
+              "items": {
+                "type": "array",
+                "items": "MenuItem",
+                "required": true,
+                "description": "Menu items"
+              },
+              "position": {
+                "type": "string",
+                "enum": ["bottom-left", "bottom-right", "top-left", "top-right"],
+                "default": "bottom-left",
+                "description": "Menu position"
+              },
+              "on_item_click": {
+                "type": "function",
+                "description": "Item click handler"
+              }
+            },
+            "template": "components/overlay/DropdownMenu.tsx.template",
+            "styles": "components/overlay/DropdownMenu.module.css"
+          }
+        ]
+      }
+    ]
+  }
+}

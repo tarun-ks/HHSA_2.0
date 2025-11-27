@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                   xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                   xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                   xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+                   xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   id="Definitions_2"
+                   targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="ContractCOF" name="Contract Certification of Funds Workflow" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_COF" name="Configuration Approved">
+      <bpmn:outgoing>Flow_ToFinanceReview</bpmn:outgoing>
+    </bpmn:startEvent>
+    
+    <bpmn:userTask id="UserTask_FinanceReview" name="Finance Staff Review">
+      <bpmn:extensionElements>
+        <zeebe:candidateGroups>FINANCE_STAFF</zeebe:candidateGroups>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_ToFinanceReview</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToFinanceManager</bpmn:outgoing>
+    </bpmn:userTask>
+    
+    <bpmn:userTask id="UserTask_FinanceManagerReview" name="Finance Manager Review">
+      <bpmn:extensionElements>
+        <zeebe:candidateGroups>FINANCE_MANAGER</zeebe:candidateGroups>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_ToFinanceManager</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToFinalApproval</bpmn:outgoing>
+    </bpmn:userTask>
+    
+    <bpmn:userTask id="UserTask_FinalApproval" name="Final Approval">
+      <bpmn:extensionElements>
+        <zeebe:candidateGroups>ACCO_MANAGER</zeebe:candidateGroups>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_ToFinalApproval</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToGateway</bpmn:outgoing>
+    </bpmn:userTask>
+    
+    <bpmn:exclusiveGateway id="Gateway_FinalDecision" name="Final Decision">
+      <bpmn:incoming>Flow_ToGateway</bpmn:incoming>
+      <bpmn:outgoing>Flow_Approved</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Rejected</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    
+    <bpmn:serviceTask id="ServiceTask_GenerateDocument" name="Generate COF Document">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="generate-cof-document" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Approved</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToUpdateStatus</bpmn:outgoing>
+    </bpmn:serviceTask>
+    
+    <bpmn:serviceTask id="ServiceTask_UpdateStatus" name="Update Contract Status">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="update-contract-status" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_ToUpdateStatus</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToEnd</bpmn:outgoing>
+    </bpmn:serviceTask>
+    
+    <bpmn:serviceTask id="ServiceTask_RejectStatus" name="Update Rejected Status">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="update-contract-status" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Rejected</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToEndRejected</bpmn:outgoing>
+    </bpmn:serviceTask>
+    
+    <bpmn:endEvent id="EndEvent_Approved" name="COF Approved">
+      <bpmn:incoming>Flow_ToEnd</bpmn:incoming>
+    </bpmn:endEvent>
+    
+    <bpmn:endEvent id="EndEvent_Rejected" name="COF Rejected">
+      <bpmn:incoming>Flow_ToEndRejected</bpmn:incoming>
+    </bpmn:endEvent>
+    
+    <bpmn:sequenceFlow id="Flow_ToFinanceReview" sourceRef="StartEvent_COF" targetRef="UserTask_FinanceReview" />
+    <bpmn:sequenceFlow id="Flow_ToFinanceManager" sourceRef="UserTask_FinanceReview" targetRef="UserTask_FinanceManagerReview" />
+    <bpmn:sequenceFlow id="Flow_ToFinalApproval" sourceRef="UserTask_FinanceManagerReview" targetRef="UserTask_FinalApproval" />
+    <bpmn:sequenceFlow id="Flow_ToGateway" sourceRef="UserTask_FinalApproval" targetRef="Gateway_FinalDecision" />
+    <bpmn:sequenceFlow id="Flow_Approved" name="Approved" sourceRef="Gateway_FinalDecision" targetRef="ServiceTask_GenerateDocument">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=approved = true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_Rejected" name="Rejected" sourceRef="Gateway_FinalDecision" targetRef="ServiceTask_RejectStatus">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=approved = false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_ToUpdateStatus" sourceRef="ServiceTask_GenerateDocument" targetRef="ServiceTask_UpdateStatus" />
+    <bpmn:sequenceFlow id="Flow_ToEnd" sourceRef="ServiceTask_UpdateStatus" targetRef="EndEvent_Approved" />
+    <bpmn:sequenceFlow id="Flow_ToEndRejected" sourceRef="ServiceTask_RejectStatus" targetRef="EndEvent_Rejected" />
+  </bpmn:process>
+  
+  <bpmndi:BPMNDiagram id="BPMNDiagram_2">
+    <bpmndi:BPMNPlane id="BPMNPlane_2" bpmnElement="ContractCOF">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_COF" bpmnElement="StartEvent_COF">
+        <dc:Bounds x="179" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_FinanceReview" bpmnElement="UserTask_FinanceReview">
+        <dc:Bounds x="270" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_FinanceManager" bpmnElement="UserTask_FinanceManagerReview">
+        <dc:Bounds x="430" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_FinalApproval" bpmnElement="UserTask_FinalApproval">
+        <dc:Bounds x="590" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_FinalDecision_di" bpmnElement="Gateway_FinalDecision" isMarkerVisible="true">
+        <dc:Bounds x="752" y="92" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_GenerateDocument" bpmnElement="ServiceTask_GenerateDocument">
+        <dc:Bounds x="860" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_UpdateStatus_COF" bpmnElement="ServiceTask_UpdateStatus">
+        <dc:Bounds x="1020" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_RejectStatus" bpmnElement="ServiceTask_RejectStatus">
+        <dc:Bounds x="860" y="200" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_Approved_COF" bpmnElement="EndEvent_Approved">
+        <dc:Bounds x="1182" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_Rejected_COF" bpmnElement="EndEvent_Rejected">
+        <dc:Bounds x="1022" y="222" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_ToFinanceReview_di" bpmnElement="Flow_ToFinanceReview">
+        <di:waypoint x="215" y="117" />
+        <di:waypoint x="270" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToFinanceManager_di" bpmnElement="Flow_ToFinanceManager">
+        <di:waypoint x="370" y="117" />
+        <di:waypoint x="430" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToFinalApproval_di" bpmnElement="Flow_ToFinalApproval">
+        <di:waypoint x="530" y="117" />
+        <di:waypoint x="590" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToGateway_di" bpmnElement="Flow_ToGateway">
+        <di:waypoint x="690" y="117" />
+        <di:waypoint x="752" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Approved_di" bpmnElement="Flow_Approved">
+        <di:waypoint x="802" y="117" />
+        <di:waypoint x="860" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Rejected_di" bpmnElement="Flow_Rejected">
+        <di:waypoint x="777" y="142" />
+        <di:waypoint x="777" y="240" />
+        <di:waypoint x="860" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToUpdateStatus_di" bpmnElement="Flow_ToUpdateStatus">
+        <di:waypoint x="960" y="117" />
+        <di:waypoint x="1020" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToEnd_di" bpmnElement="Flow_ToEnd">
+        <di:waypoint x="1120" y="117" />
+        <di:waypoint x="1182" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToEndRejected_di" bpmnElement="Flow_ToEndRejected">
+        <di:waypoint x="960" y="240" />
+        <di:waypoint x="1022" y="240" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
+
+

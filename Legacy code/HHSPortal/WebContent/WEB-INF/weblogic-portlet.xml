@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<weblogic-portlet-app
+   xmlns="http://www.bea.com/servers/portal/weblogic-portlet/8.0"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.bea.com/servers/portal/weblogic-portlet/8.0 weblogic-portlet.xsd">
+    <portal-container/>
+<portlet>
+    <portlet-name>applicationsubmit</portlet-name>
+    <supports>
+        <mime-type>text/html</mime-type>
+    </supports>
+</portlet>
+</weblogic-portlet-app>

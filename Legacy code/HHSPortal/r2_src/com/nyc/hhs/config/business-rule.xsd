@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:tns="http://localhost:7001/R2/portal/hhsweb.portal/business-rule"
+	elementFormDefault="qualified">
+
+	<xs:element name="rules">
+		<xs:complexType>
+			<xs:sequence maxOccurs="unbounded" minOccurs="0">
+				<xs:element type="ruleType" name="rule" />
+			</xs:sequence>
+		</xs:complexType>
+		<xs:unique name="unique-id">
+			<xs:selector xpath="rule" />
+			<xs:field xpath="@id" />
+		</xs:unique>
+	</xs:element>
+
+	<xs:complexType name="ruleType" mixed="true">
+		<xs:sequence minOccurs="1" maxOccurs="unbounded">
+			<xs:element type="expressionType" name="expression" />
+		</xs:sequence>
+		<xs:attribute name="id" use="required">
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:pattern value="[a-zA-Z0-9]+" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="expressionType" mixed="true">
+		<xs:sequence minOccurs="0" maxOccurs="unbounded">
+			<xs:element type="expressionType" name="expression" />
+		</xs:sequence>
+		<xs:attribute name="method" use="optional">
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:enumeration value="equals" />
+					<xs:enumeration value="notEquals" />
+					<xs:enumeration value="greaterThan" />
+					<xs:enumeration value="notGreaterThan" />
+					<xs:enumeration value="greaterThanEquals" />
+					<xs:enumeration value="lessThan" />
+					<xs:enumeration value="notLessThan" />
+					<xs:enumeration value="lessThanEquals" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="channel_variable" type="xs:string" use="optional" />
+		<xs:attribute name="channel_variable2" type="xs:string"	use="optional" />
+		<xs:attribute type="xs:string" name="value" use="optional" />
+		<xs:attribute name="type" use="optional" default="String">
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:enumeration value="String" />
+					<xs:enumeration value="Integer" />
+					<xs:enumeration value="Float" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="operator" use="optional">
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:enumeration value="and" />
+					<xs:enumeration value="or" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+	</xs:complexType>
+
+</xs:schema>

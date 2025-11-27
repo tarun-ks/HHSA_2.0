@@ -1,0 +1,1555 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.23" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 4.2.2.v201301221637 Build &lt;4.2.2.v20130206-1509></property>
+    <property name="units">in</property>
+    <property name="iconFile">/templates/blank_report.gif</property>
+    <property name="layoutPreference">auto layout</property>
+    <property name="bidiLayoutOrientation">ltr</property>
+    <property name="imageDPI">96</property>
+    <data-sources>
+        <script-data-source name="fundingSummaryDataSource" id="13"/>
+    </data-sources>
+    <data-sets>
+        <script-data-set name="budgetUtilizationDataSetInvoice" id="14">
+            <list-property name="resultSetHints">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">type</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">amount</property>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">fy</property>
+                    <property name="dataType">integer</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
+                    <property name="name">Agency</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">Program</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">6</property>
+                    <property name="name">Provider</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">7</property>
+                    <property name="name">ContractTitle</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">8</property>
+                    <property name="name">CTNumber</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">9</property>
+                    <property name="name">ContractEPIN</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">10</property>
+                    <property name="name">AmendmentEPIN</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">11</property>
+                    <property name="name">AmendmentTitle</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">12</property>
+                    <property name="name">Budgetstatus</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">13</property>
+                    <property name="name">contractType</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">14</property>
+                    <property name="name">contractStartDate</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">15</property>
+                    <property name="name">contractEndDate</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">16</property>
+                    <property name="name">advanceAmount</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">17</property>
+                    <property name="name">invociedAmount</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">18</property>
+                    <property name="name">advanceRecouped</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">19</property>
+                    <property name="name">assignmentAmount</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">20</property>
+                    <property name="name">paymentAmount</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">21</property>
+                    <property name="name">percentUtilized</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">22</property>
+                    <property name="name">overUnder</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">23</property>
+                    <property name="name">providerInvoiceNumber</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">24</property>
+                    <property name="name">desc</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">25</property>
+                    <property name="name">serviceStartDate</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">26</property>
+                    <property name="name">serviceEndDate</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">27</property>
+                    <property name="name">submitDate</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">28</property>
+                    <property name="name">dateApproved</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">29</property>
+                    <property name="name">disbursmentNumber</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">30</property>
+                    <property name="name">paymentVoucherNumber</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">31</property>
+                    <property name="name">disbursmentDate</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">32</property>
+                    <property name="name">invoiceNumber</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">33</property>
+                    <property name="name">status</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">34</property>
+                    <property name="name">invoiceId</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">35</property>
+                    <property name="name">show</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">36</property>
+                    <property name="name">showInvoice</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">37</property>
+                    <property name="name">budgetId</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">38</property>
+                    <property name="name">recoupedAmount</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">39</property>
+                    <property name="name">agencyInvoiceNumber</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">40</property>
+                    <property name="name">fyID</property>
+                    <property name="dataType">string</property>
+                </structure>
+            </list-property>
+            <list-property name="columnHints">
+                <structure>
+                    <property name="columnName">type</property>
+                    <text-property name="displayName">type</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">amount</property>
+                    <text-property name="displayName">amount</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">fy</property>
+                    <text-property name="displayName">fy</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">Agency</property>
+                    <text-property name="displayName">Agency</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">Program</property>
+                    <text-property name="displayName">Program</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">Provider</property>
+                    <text-property name="displayName">Provider</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">ContractTitle</property>
+                    <text-property name="displayName">ContractTitle</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">CTNumber</property>
+                    <text-property name="displayName">CTNumber</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">ContractEPIN</property>
+                    <text-property name="displayName">ContractEPIN</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">AmendmentEPIN</property>
+                    <text-property name="displayName">AmendmentEPIN</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">AmendmentTitle</property>
+                    <text-property name="displayName">AmendmentTitle</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">Budgetstatus</property>
+                    <text-property name="displayName">Budgetstatus</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">contractType</property>
+                    <text-property name="displayName">contractType</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">contractStartDate</property>
+                    <text-property name="displayName">contractStartDate</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">contractEndDate</property>
+                    <text-property name="displayName">contractEndDate</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">advanceAmount</property>
+                    <text-property name="displayName">advanceAmount</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">invociedAmount</property>
+                    <text-property name="displayName">invociedAmount</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">advanceRecouped</property>
+                    <text-property name="displayName">advanceRecouped</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">assignmentAmount</property>
+                    <text-property name="displayName">assignmentAmount</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">paymentAmount</property>
+                    <text-property name="displayName">paymentAmount</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">percentUtilized</property>
+                    <text-property name="displayName">percentUtilized</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">overUnder</property>
+                    <text-property name="displayName">overUnder</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">providerInvoiceNumber</property>
+                    <text-property name="displayName">providerInvoiceNumber</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">desc</property>
+                    <text-property name="displayName">desc</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">serviceStartDate</property>
+                    <text-property name="displayName">serviceStartDate</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">serviceEndDate</property>
+                    <text-property name="displayName">serviceEndDate</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">submitDate</property>
+                    <text-property name="displayName">submitDate</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">dateApproved</property>
+                    <text-property name="displayName">dateApproved</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">disbursmentNumber</property>
+                    <text-property name="displayName">disbursmentNumber</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">paymentVoucherNumber</property>
+                    <text-property name="displayName">paymentVoucherNumber</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">disbursmentDate</property>
+                    <text-property name="displayName">disbursmentDate</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">invoiceNumber</property>
+                    <text-property name="displayName">invoiceNumber</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">status</property>
+                    <text-property name="displayName">status</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">invoiceId</property>
+                    <text-property name="displayName">invoiceId</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">show</property>
+                    <text-property name="displayName">show</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">showInvoice</property>
+                    <text-property name="displayName">showInvoice</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">budgetId</property>
+                    <text-property name="displayName">budgetId</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">recoupedAmount</property>
+                    <text-property name="displayName">recoupedAmount</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">agencyInvoiceNumber</property>
+                    <text-property name="displayName">agencyInvoiceNumber</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">fyID</property>
+                </structure>
+            </list-property>
+            <list-property name="filter"/>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">type</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">amount</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">fy</property>
+                        <property name="dataType">integer</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">Agency</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">Program</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">Provider</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
+                        <property name="name">ContractTitle</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">8</property>
+                        <property name="name">CTNumber</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">9</property>
+                        <property name="name">ContractEPIN</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">10</property>
+                        <property name="name">AmendmentEPIN</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">11</property>
+                        <property name="name">AmendmentTitle</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">12</property>
+                        <property name="name">Budgetstatus</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">13</property>
+                        <property name="name">contractType</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">14</property>
+                        <property name="name">contractStartDate</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">15</property>
+                        <property name="name">contractEndDate</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">16</property>
+                        <property name="name">advanceAmount</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">17</property>
+                        <property name="name">invociedAmount</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">18</property>
+                        <property name="name">advanceRecouped</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">19</property>
+                        <property name="name">assignmentAmount</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">20</property>
+                        <property name="name">paymentAmount</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">21</property>
+                        <property name="name">percentUtilized</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">22</property>
+                        <property name="name">overUnder</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">23</property>
+                        <property name="name">providerInvoiceNumber</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">24</property>
+                        <property name="name">desc</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">25</property>
+                        <property name="name">serviceStartDate</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">26</property>
+                        <property name="name">serviceEndDate</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">27</property>
+                        <property name="name">submitDate</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">28</property>
+                        <property name="name">dateApproved</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">29</property>
+                        <property name="name">disbursmentNumber</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">30</property>
+                        <property name="name">paymentVoucherNumber</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">31</property>
+                        <property name="name">disbursmentDate</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">32</property>
+                        <property name="name">invoiceNumber</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">33</property>
+                        <property name="name">status</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">34</property>
+                        <property name="name">invoiceId</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">35</property>
+                        <property name="name">show</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">36</property>
+                        <property name="name">showInvoice</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">37</property>
+                        <property name="name">budgetId</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">38</property>
+                        <property name="name">recoupedAmount</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">39</property>
+                        <property name="name">agencyInvoiceNumber</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">40</property>
+                        <property name="name">fyID</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <property name="dataSource">fundingSummaryDataSource</property>
+            <method name="open"><![CDATA[var request = reportContext.getHttpServletRequest();
+var session = request.getSession();
+aMap = session.getAttribute("reportList");
+
+dataIterator = aMap.iterator();
+myArray = new java.util.ArrayList();
+myArrayPaymentVoucher = new java.util.ArrayList();]]></method>
+            <method name="fetch"><![CDATA[while (dataIterator.hasNext()) {
+	   dataObject = dataIterator.next();
+      row["show"] ="show";
+	   myArray.add(dataObject.getInvoiceNumber());
+	   myArrayPaymentVoucher.add(dataObject.getPaymentVoucherNumber());
+	   
+	   row["budgetId"]= dataObject.getBudgetId();
+	   row["invoiceId"]= dataObject.getInvoiceId();
+       row["fy"] = dataObject.getFyYear();
+       row["Agency"] = dataObject.getAgencyName();
+       row["Program"] = dataObject.getProgramName();
+       row["Provider"] = dataObject.getProvider();
+       row["ContractTitle"] = dataObject.getContractTitle();
+       row["CTNumber"] = dataObject.getCtNumber();
+       row["ContractEPIN"] = dataObject.getContractEPIN();
+       row["amount"] = dataObject.getFyYearAmount();
+       row["advanceAmount"] = dataObject.getAdvanceAmount();
+       if(dataObject.getPaymentVoucherNumber() ==null || dataObject.getPaymentVoucherNumber().contains("P1") || dataObject.getPaymentVoucherNumber().contains("A1") || dataObject.getPaymentVoucherNumber().contains("HAC"))
+       {
+       row["invociedAmount"] = dataObject.getInvociedAmount();
+       row["recoupedAmount"]= dataObject.getRecoupedAmount();    
+       row["assignmentAmount"] = dataObject.getAssignmentAmount();
+       }
+       row["advanceRecouped"] = dataObject.getAdvanceRecouped();
+       row["paymentAmount"] = dataObject.getPaymentAmount();
+       row["percentUtilized"] = dataObject.getPercentUtilized();
+       row["overUnder"] = dataObject.getOverUnder();
+       row["status"] = dataObject.getStatus();
+       row["statusId"] = dataObject.getStatusId();
+       row["type"]= dataObject.getAmountType();
+       row["invoiceNumber"]= dataObject.getInvoiceNumber();
+       row["providerInvoiceNumber"]= dataObject.getProviderInvoiceNumber();
+       row["agencyInvoiceNumber"]= dataObject.getAgencyInvoiceNumber();
+       row["desc"]= dataObject.getDesc();
+       row["serviceStartDate"]= dataObject.getServiceStartDate();              
+       row["serviceEndDate"]= dataObject.getServiceEndDate();              
+       row["status"]= dataObject.getStatus();              
+       row["submitDate"]= dataObject.getSubmitDate();              
+       row["dateApproved"]= dataObject.getDateApproved();              
+       row["paymentVoucherNumber"]= dataObject.getPaymentVoucherNumber();              
+       row["disbursmentNumber"]= dataObject.getDisbursmentNumber();              
+       row["disbursmentDate"]= dataObject.getDisbursmentDate();              
+       row["paymentAmount"]= dataObject.getPaymentAmount();  
+       row["fyID"]= dataObject.getFyID();                          
+        return true;
+}
+return false; 
+]]></method>
+        </script-data-set>
+    </data-sets>
+    <styles>
+        <style name="report" id="4">
+            <property name="fontFamily">"Arial"</property>
+        </style>
+        <style name="crosstab-cell" id="5">
+            <property name="borderBottomColor">#CCCCCC</property>
+            <property name="borderBottomStyle">solid</property>
+            <property name="borderBottomWidth">1pt</property>
+            <property name="borderLeftColor">#CCCCCC</property>
+            <property name="borderLeftStyle">solid</property>
+            <property name="borderLeftWidth">1pt</property>
+            <property name="borderRightColor">#CCCCCC</property>
+            <property name="borderRightStyle">solid</property>
+            <property name="borderRightWidth">1pt</property>
+            <property name="borderTopColor">#CCCCCC</property>
+            <property name="borderTopStyle">solid</property>
+            <property name="borderTopWidth">1pt</property>
+        </style>
+        <style name="crosstab" id="6">
+            <property name="borderBottomColor">#CCCCCC</property>
+            <property name="borderBottomStyle">solid</property>
+            <property name="borderBottomWidth">1pt</property>
+            <property name="borderLeftColor">#CCCCCC</property>
+            <property name="borderLeftStyle">solid</property>
+            <property name="borderLeftWidth">1pt</property>
+            <property name="borderRightColor">#CCCCCC</property>
+            <property name="borderRightStyle">solid</property>
+            <property name="borderRightWidth">1pt</property>
+            <property name="borderTopColor">#CCCCCC</property>
+            <property name="borderTopStyle">solid</property>
+            <property name="borderTopWidth">1pt</property>
+        </style>
+        <style name="reportInfoLabel" id="454">
+            <property name="fontFamily">"Arial"</property>
+            <property name="paddingLeft">10pt</property>
+        </style>
+        <style name="chartInfoCurrency" id="455">
+            <property name="fontFamily">"Arial"</property>
+            <property name="fontSize">12pt</property>
+            <property name="fontWeight">bold</property>
+            <property name="paddingLeft">10pt</property>
+            <structure name="numberFormat">
+                <property name="category">Currency</property>
+                <property name="pattern">$#,##0.00;$(#,##0.00){RoundingMode=HALF_UP}</property>
+                <property name="locale">en_US_POSIX</property>
+            </structure>
+        </style>
+    </styles>
+    <page-setup>
+        <simple-master-page name="Simple MasterPage" id="2">
+            <page-footer>
+                <text id="3">
+                    <property name="contentType">html</property>
+                    <text-property name="content"><![CDATA[<value-of>new Date()</value-of>]]></text-property>
+                </text>
+            </page-footer>
+        </simple-master-page>
+    </page-setup>
+    <body>
+        <table name="data" id="462">
+            <property name="dataSet">budgetUtilizationDataSetInvoice</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">type</property>
+                    <text-property name="displayName">type</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["type"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">amount</property>
+                    <text-property name="displayName">amount</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["amount"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">fy</property>
+                    <text-property name="displayName">fy</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["fy"]</expression>
+                    <property name="dataType">integer</property>
+                </structure>
+                <structure>
+                    <property name="name">Agency</property>
+                    <text-property name="displayName">Agency</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Agency"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Program</property>
+                    <text-property name="displayName">Program</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Program"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Provider</property>
+                    <text-property name="displayName">Provider</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Provider"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">ContractTitle</property>
+                    <text-property name="displayName">ContractTitle</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["ContractTitle"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">CTNumber</property>
+                    <text-property name="displayName">CTNumber</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["CTNumber"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">ContractEPIN</property>
+                    <text-property name="displayName">ContractEPIN</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["ContractEPIN"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">AmendmentEPIN</property>
+                    <text-property name="displayName">AmendmentEPIN</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["AmendmentEPIN"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">AmendmentTitle</property>
+                    <text-property name="displayName">AmendmentTitle</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["AmendmentTitle"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Budgetstatus</property>
+                    <text-property name="displayName">Budgetstatus</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Budgetstatus"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">contractType</property>
+                    <text-property name="displayName">contractType</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["contractType"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">contractStartDate</property>
+                    <text-property name="displayName">contractStartDate</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["contractStartDate"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">contractEndDate</property>
+                    <text-property name="displayName">contractEndDate</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["contractEndDate"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">advanceAmount</property>
+                    <text-property name="displayName">advanceAmount</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["advanceAmount"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">invociedAmount</property>
+                    <text-property name="displayName">invociedAmount</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["invociedAmount"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">advanceRecouped</property>
+                    <text-property name="displayName">advanceRecouped</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["advanceRecouped"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">assignmentAmount</property>
+                    <text-property name="displayName">assignmentAmount</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["assignmentAmount"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">paymentAmount</property>
+                    <text-property name="displayName">paymentAmount</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["paymentAmount"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">percentUtilized</property>
+                    <text-property name="displayName">percentUtilized</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["percentUtilized"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">overUnder</property>
+                    <text-property name="displayName">overUnder</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["overUnder"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">providerInvoiceNumber</property>
+                    <text-property name="displayName">providerInvoiceNumber</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["providerInvoiceNumber"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">desc</property>
+                    <text-property name="displayName">desc</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["desc"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">serviceStartDate</property>
+                    <text-property name="displayName">serviceStartDate</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["serviceStartDate"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">serviceEndDate</property>
+                    <text-property name="displayName">serviceEndDate</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["serviceEndDate"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">submitDate</property>
+                    <text-property name="displayName">submitDate</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["submitDate"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">dateApproved</property>
+                    <text-property name="displayName">dateApproved</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["dateApproved"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">disbursmentNumber</property>
+                    <text-property name="displayName">disbursmentNumber</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["disbursmentNumber"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">paymentVoucherNumber</property>
+                    <text-property name="displayName">paymentVoucherNumber</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["paymentVoucherNumber"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">disbursmentDate</property>
+                    <text-property name="displayName">disbursmentDate</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["disbursmentDate"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">invoiceNumber</property>
+                    <text-property name="displayName">invoiceNumber</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["invoiceNumber"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">status</property>
+                    <text-property name="displayName">status</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["status"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">invoiceId</property>
+                    <text-property name="displayName">invoiceId</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["invoiceId"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">show</property>
+                    <text-property name="displayName">show</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["show"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">showInvoice</property>
+                    <text-property name="displayName">showInvoice</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["showInvoice"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding</property>
+                    <expression name="expression" type="javascript">dataSetRow["type"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_1</property>
+                    <expression name="expression" type="javascript">dataSetRow["fy"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_2</property>
+                    <expression name="expression" type="javascript">dataSetRow["Provider"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_3</property>
+                    <expression name="expression" type="javascript">dataSetRow["Agency"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_4</property>
+                    <expression name="expression" type="javascript">dataSetRow["Program"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_5</property>
+                    <expression name="expression" type="javascript">dataSetRow["ContractTitle"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_6</property>
+                    <expression name="expression" type="javascript">dataSetRow["CTNumber"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_7</property>
+                    <expression name="expression" type="javascript">dataSetRow["ContractEPIN"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_8</property>
+                    <expression name="expression" type="javascript">dataSetRow["type"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_9</property>
+                    <expression name="expression" type="javascript">dataSetRow["invoiceNumber"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_10</property>
+                    <expression name="expression" type="javascript">dataSetRow["providerInvoiceNumber"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_11</property>
+                    <expression name="expression" type="javascript">dataSetRow["desc"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_12</property>
+                    <expression name="expression" type="javascript">dataSetRow["serviceStartDate"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_13</property>
+                    <expression name="expression" type="javascript">dataSetRow["serviceEndDate"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_14</property>
+                    <expression name="expression" type="javascript">dataSetRow["status"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_15</property>
+                    <expression name="expression" type="javascript">dataSetRow["submitDate"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_16</property>
+                    <expression name="expression" type="javascript">dataSetRow["dateApproved"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_17</property>
+                    <expression name="expression" type="javascript">dataSetRow["amount"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_19</property>
+                    <expression name="expression" type="javascript">dataSetRow["paymentVoucherNumber"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_21</property>
+                    <expression name="expression" type="javascript">dataSetRow["disbursmentNumber"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_22</property>
+                    <expression name="expression" type="javascript">dataSetRow["disbursmentDate"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_InvoiceId</property>
+                    <expression name="expression" type="javascript">dataSetRow["invoiceId"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_BudgetId</property>
+                    <expression name="expression" type="javascript">dataSetRow["budgetId"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Aggregation</property>
+                    <property name="dataType">float</property>
+                    <simple-property-list name="aggregateOn">
+                        <value>invoiceId</value>
+                    </simple-property-list>
+                    <property name="aggregateFunction">SUM</property>
+                    <list-property name="arguments">
+                        <structure>
+                            <property name="name">Expression</property>
+                            <expression name="value" type="javascript">dataSetRow["invociedAmount"]</expression>
+                        </structure>
+                    </list-property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Aggregation_1</property>
+                    <property name="dataType">float</property>
+                    <simple-property-list name="aggregateOn">
+                        <value>invoiceId</value>
+                    </simple-property-list>
+                    <property name="aggregateFunction">SUM</property>
+                    <list-property name="arguments">
+                        <structure>
+                            <property name="name">Expression</property>
+                            <expression name="value" type="javascript">dataSetRow["recoupedAmount"]</expression>
+                        </structure>
+                    </list-property>
+                    <expression name="filterExpr" type="javascript">dataSetRow["type"]=='Invoice'</expression>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Aggregation_2</property>
+                    <property name="dataType">float</property>
+                    <simple-property-list name="aggregateOn">
+                        <value>invoiceId</value>
+                    </simple-property-list>
+                    <property name="aggregateFunction">SUM</property>
+                    <list-property name="arguments">
+                        <structure>
+                            <property name="name">Expression</property>
+                            <expression name="value" type="javascript">dataSetRow["assignmentAmount"]</expression>
+                        </structure>
+                    </list-property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Aggregation_3</property>
+                    <property name="dataType">float</property>
+                    <simple-property-list name="aggregateOn">
+                        <value>invoiceId</value>
+                    </simple-property-list>
+                    <property name="aggregateFunction">SUM</property>
+                    <list-property name="arguments">
+                        <structure>
+                            <property name="name">Expression</property>
+                            <expression name="value" type="javascript">dataSetRow["paymentAmount"]</expression>
+                        </structure>
+                    </list-property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_18</property>
+                    <expression name="expression" type="javascript">dataSetRow["agencyInvoiceNumber"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_20</property>
+                    <expression name="expression" type="javascript">dataSetRow["fyID"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+            </list-property>
+            <list-property name="filter">
+                <structure>
+                    <property name="operator">is-not-null</property>
+                    <expression name="expr" type="javascript">row["Column Binding_BudgetId"]</expression>
+                    <property name="updateAggregation">true</property>
+                </structure>
+                <structure>
+                    <property name="operator">eq</property>
+                    <expression name="expr" type="javascript">row["show"]</expression>
+                    <simple-property-list name="value1">
+                        <value>"show"</value>
+                    </simple-property-list>
+                    <property name="updateAggregation">true</property>
+                </structure>
+                <structure>
+                    <property name="operator">is-not-null</property>
+                    <expression name="expr" type="javascript">row["Column Binding_9"]</expression>
+                    <property name="updateAggregation">true</property>
+                </structure>
+            </list-property>
+            <column id="742">
+                <property name="width">0.2916666666666667in</property>
+                <list-property name="visibility">
+                    <structure>
+                        <property name="format">all</property>
+                        <expression name="valueExpr" type="javascript">true</expression>
+                    </structure>
+                </list-property>
+            </column>
+            <column id="746">
+                <property name="width">0.2916666666666667in</property>
+                <list-property name="visibility">
+                    <structure>
+                        <property name="format">all</property>
+                        <expression name="valueExpr" type="javascript">true</expression>
+                    </structure>
+                </list-property>
+            </column>
+            <column id="503">
+                <property name="width">0.2916666666666667in</property>
+            </column>
+            <column id="504"/>
+            <column id="505"/>
+            <column id="560">
+                <property name="width">0.5833333333333334in</property>
+                <property name="repeat">1</property>
+            </column>
+            <column id="507"/>
+            <column id="508"/>
+            <column id="509"/>
+            <column id="587"/>
+            <column id="583"/>
+            <column id="663"/>
+            <column id="924"/>
+            <column id="579"/>
+            <column id="575"/>
+            <column id="571"/>
+            <column id="567"/>
+            <column id="512"/>
+            <column id="547"/>
+            <column id="605"/>
+            <column id="617"/>
+            <column id="613"/>
+            <column id="609"/>
+            <column id="637"/>
+            <column id="633"/>
+            <column id="629"/>
+            <header>
+                <row id="463">
+                    <cell id="739"/>
+                    <cell id="743"/>
+                    <cell id="465">
+                        <text id="514">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[FY]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="466">
+                        <text id="515">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Agency]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="467">
+                        <text id="516">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Program]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="557">
+                        <text id="561">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Provider]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="469">
+                        <text id="518">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Contract Title]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="470">
+                        <text id="519">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[CT#]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="471">
+                        <text id="520">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Contract EPIN]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="584">
+                        <text id="588">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Type]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="580">
+                        <text id="589">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Inv/Adv #]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="660">
+                        <text id="664">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Provider Invoice #]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="921">
+                        <text id="925">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Agency Invoice #]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="576">
+                        <text id="590">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Advance Description]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="572">
+                        <text id="591">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Service Date From]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="568">
+                        <text id="592">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Service Date To]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="564">
+                        <text id="593">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Inv/Adv Status]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="474">
+                        <text id="523">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Date Submitted]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="544">
+                        <text id="552">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Date Approved]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="602">
+                        <text id="618">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Inv/Adv Amount]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="614">
+                        <text id="619">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Recoupment Amount]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="610">
+                        <text id="620">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Assigned Amount]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="606">
+                        <text id="621">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Payment Voucher Number]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="634">
+                        <text id="638">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Disbursement Number]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="630">
+                        <text id="639">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Disbursement Date]]></text-property>
+                        </text>
+                    </cell>
+                    <cell id="626">
+                        <text id="640">
+                            <property name="contentType">auto</property>
+                            <text-property name="content"><![CDATA[Disbursement Amount]]></text-property>
+                        </text>
+                    </cell>
+                </row>
+            </header>
+            <group id="804">
+                <property name="groupName">budgetId</property>
+                <expression name="keyExpr" type="javascript">row["Column Binding_BudgetId"]</expression>
+                <structure name="toc">
+                    <expression name="expressionValue" type="javascript">row["Column Binding_BudgetId"]</expression>
+                </structure>
+                <property name="hideDetail">false</property>
+            </group>
+            <group id="858">
+                <property name="groupName">invoiceId</property>
+                <expression name="keyExpr" type="javascript">if(row["Column Binding_19"]==null)&#13;
+row["Column Binding_9"]&#13;
+else&#13;
+row["Column Binding_19"]</expression>
+                <property name="hideDetail">false</property>
+            </group>
+            <detail>
+                <row id="476">
+                    <cell id="740">
+                        <data id="803">
+                            <property name="resultSetColumn">Column Binding_BudgetId</property>
+                        </data>
+                    </cell>
+                    <cell id="744">
+                        <data id="802">
+                            <property name="resultSetColumn">Column Binding_InvoiceId</property>
+                        </data>
+                    </cell>
+                    <cell id="478">
+                        <data id="927">
+                            <property name="resultSetColumn">Column Binding_20</property>
+                        </data>
+                    </cell>
+                    <cell id="479">
+                        <data id="667">
+                            <property name="resultSetColumn">Column Binding_3</property>
+                        </data>
+                    </cell>
+                    <cell id="480">
+                        <data id="668">
+                            <property name="resultSetColumn">Column Binding_4</property>
+                        </data>
+                    </cell>
+                    <cell id="558">
+                        <data id="666">
+                            <property name="resultSetColumn">Column Binding_2</property>
+                        </data>
+                    </cell>
+                    <cell id="482">
+                        <data id="669">
+                            <property name="resultSetColumn">Column Binding_5</property>
+                        </data>
+                    </cell>
+                    <cell id="483">
+                        <data id="670">
+                            <property name="resultSetColumn">Column Binding_6</property>
+                        </data>
+                    </cell>
+                    <cell id="484">
+                        <data id="671">
+                            <property name="resultSetColumn">Column Binding_7</property>
+                        </data>
+                    </cell>
+                    <cell id="585">
+                        <data id="672">
+                            <property name="resultSetColumn">Column Binding_8</property>
+                        </data>
+                    </cell>
+                    <cell id="581">
+                        <data id="673">
+                            <property name="resultSetColumn">Column Binding_9</property>
+                        </data>
+                    </cell>
+                    <cell id="661">
+                        <data id="674">
+                            <property name="resultSetColumn">Column Binding_10</property>
+                        </data>
+                    </cell>
+                    <cell id="922">
+                        <data id="926">
+                            <property name="resultSetColumn">Column Binding_18</property>
+                        </data>
+                    </cell>
+                    <cell id="577">
+                        <data id="675">
+                            <property name="resultSetColumn">Column Binding_11</property>
+                        </data>
+                    </cell>
+                    <cell id="573">
+                        <data id="676">
+                            <property name="resultSetColumn">Column Binding_12</property>
+                        </data>
+                    </cell>
+                    <cell id="569">
+                        <data id="677">
+                            <property name="resultSetColumn">Column Binding_13</property>
+                        </data>
+                    </cell>
+                    <cell id="565">
+                        <data id="678">
+                            <property name="resultSetColumn">Column Binding_14</property>
+                        </data>
+                    </cell>
+                    <cell id="487">
+                        <data id="679">
+                            <property name="resultSetColumn">Column Binding_15</property>
+                        </data>
+                    </cell>
+                    <cell id="545">
+                        <data id="680">
+                            <property name="resultSetColumn">Column Binding_16</property>
+                        </data>
+                    </cell>
+                    <cell id="603">
+                        <data id="913">
+                            <property name="resultSetColumn">Aggregation</property>
+                        </data>
+                    </cell>
+                    <cell id="615">
+                        <data id="914">
+                            <property name="resultSetColumn">Aggregation_1</property>
+                        </data>
+                    </cell>
+                    <cell id="611">
+                        <data id="915">
+                            <property name="resultSetColumn">Aggregation_2</property>
+                        </data>
+                    </cell>
+                    <cell id="607">
+                        <data id="683">
+                            <property name="resultSetColumn">Column Binding_19</property>
+                        </data>
+                    </cell>
+                    <cell id="635">
+                        <data id="685">
+                            <property name="resultSetColumn">Column Binding_21</property>
+                        </data>
+                    </cell>
+                    <cell id="631">
+                        <data id="686">
+                            <property name="resultSetColumn">Column Binding_22</property>
+                        </data>
+                    </cell>
+                    <cell id="627">
+                        <data id="916">
+                            <property name="resultSetColumn">Aggregation_3</property>
+                        </data>
+                    </cell>
+                </row>
+            </detail>
+            <footer>
+                <row id="489">
+                    <cell id="741"/>
+                    <cell id="745"/>
+                    <cell id="491"/>
+                    <cell id="492"/>
+                    <cell id="493"/>
+                    <cell id="559"/>
+                    <cell id="495"/>
+                    <cell id="496"/>
+                    <cell id="497"/>
+                    <cell id="586"/>
+                    <cell id="582"/>
+                    <cell id="662"/>
+                    <cell id="923"/>
+                    <cell id="578"/>
+                    <cell id="574"/>
+                    <cell id="570"/>
+                    <cell id="566"/>
+                    <cell id="500"/>
+                    <cell id="546"/>
+                    <cell id="604"/>
+                    <cell id="616"/>
+                    <cell id="612"/>
+                    <cell id="608"/>
+                    <cell id="636"/>
+                    <cell id="632"/>
+                    <cell id="628"/>
+                </row>
+            </footer>
+        </table>
+    </body>
+    <list-property name="images">
+        <structure>
+            <property name="name">u6033.png</property>
+            <property name="type">image/png</property>
+            <property name="data">
+                iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFn
+                ZVJlYWR5ccllPAAAA7tJREFUeNrEVjGL1UAQntndJO98IgoiFoK/wE7RRgRLvUKwsxALLRQsxMrGXhFE
+                UGyuEAsFG6uzUxBBiyttLQ9BBfE49cx72R1nNpv3kk1y3JN75x65u2Q2mW9mvvlmEba+zJuTR15q6xbJ
+                dW9ABWC1Wj797uM5vi229NEZACyI82OXLm66aeXJ07Oyl6/17QYwICIga+HHsyUALa9iMBGHXsDeC5dB
+                9sjeeQBA8q4QMEsZQMJPAgBxapW3Udi75brCzIvdaM1v6iYAcGUmZlyzAUBJg2O/qmQc1krA92Lbeuz/
+                mgHHGVDsXKlmBuSebYpovgDQB8uvqagEqnSeuGLOGeBao+7IgJYSWEiL0Zwz4AWnAwApSQIoN4b07vsv
+                e/KfoJ1tvisc4l+a3PLq7TNerLaPAwyAnANrHVw5dQIODr6DiQAIOzbWB7D09sNErMzM9Ze/0oYxANBe
+                BbxYcTfceb0GGdiGWBW87frRpCFWMwFQxCLEUaIQMCZhyA6FVA9TZA+qtgVhTOS7N+gFzswBbRH8T1cJ
+                So0MsRIMNANQWBdr/34fCZPFe/B55GA/B9jSM2GKke56Qd4Zou4QIghqWK7UICTYBCA3sUxUAIZjdv7g
+                /M1NM/Dt+SvmQQ8J6wOA051y9GkEQHWMiQpAannHhv0NK58eN7bxt8DxruOHr3KJqSRiRcL658WZC7OC
+                H2e6DUBjiZk6dUAGGo78E8So8XWwhWgVO6cIAEZikUgJIMoARt+OSVh0AJB/SQebL3WtBBEAZA5UXSAZ
+                iAE4bA9q0xTZHIRfrYlmShtA1QUmAKgDdRN33HyQsDQnzSKBU6WtE4A8tph3N6YOtliKo0pVfBS5zTjf
+                Js5AsPVnQNKsuwF4W1mQchihaul8/f/UZ4BiFfc8qLdiA4DFP77erTOQKW16Em0HAJq2ozjJmISGMJqj
+                YqOeEpCco0clBzoyIDZTdZw2LTpjAFSyXTjQBkAV+L4SWJ1DZA9DINhCRbEuQpMAppGp0AW6A0BvBkoO
+                5JtwIJ8UoBcAYdAJ8BmIAXhwoiGdAFCi3ADpHYraR56JjbXNP1BaxdyfZicoXsZqqeKhIocRnqK2Vucp
+                AHG8sMZ1g1bahISUrvEJYh94vdW698CQSQvypB8Pd/sjWhMiM2AhgZHZ1Wjf9Ma1W7lMwYIHgnPYjk4O
+                vMaClQutnwmd5wV+xfBhJClyUHYMSO3znBBUCYlVAvcfPsrEy5CvQ3wdEDCwM0tE5StfqxicDssi7Oga
+                8/UL/vf6K8AAsx1gRmpWPFIAAAAASUVORK5CYII=
+            </property>
+        </structure>
+    </list-property>
+</report>

@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mapping>
+	<page name="budgetAgencyAction">
+		<type name="Contract Budget">
+			<status name="84">
+				<action>View Budget</action>
+				<action>Update Budget Template</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<!--End : Added in R5 -->
+			</status>
+			<status name="83">
+				<action>View Budget</action>
+				<action>Update Budget Template</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<!--End : Added in R5 -->
+			</status>
+			<status name="82">
+				<action>View Budget</action>
+				<action>Update Budget Template</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<!--End : Added in R5 -->
+			</status>
+			<status name="85">
+				<action>View Budget</action>
+			</status>
+			<status name="85">
+				<action>Initiate Advance</action>
+			</status>
+			<!--Start : Added in R5 -->
+			<status name="85">
+				<action>View Contract</action>
+				<action>View Invoices</action>
+				<action>View Payments</action>
+			</status>
+			<!--End : Added in R5 -->
+			<status name="86">
+				<action>View Budget</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<!--End : Added in R5 -->
+			</status>
+			<status name="87">
+				<action>View Budget</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<action>View Invoices</action>
+				<action>View Payments</action>
+				<!--End : Added in R5 -->
+			</status>
+			<status name="88">
+				<action>View Budget</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<action>View Invoices</action>
+				<action>View Payments</action>
+				<!--End : Added in R5 -->
+			</status>
+			<status name="89">
+				<action>View Budget</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<!--End : Added in R5 -->
+			</status>
+		</type>
+
+		<type name="Budget Amendment">
+			<status name="86">
+				<action>View Budget</action>
+				<action>View Amendment</action>
+			</status>
+			<status name="84">
+				<action>View Budget</action>
+				<action>View Amendment</action>
+			</status>
+			<status name="83">
+				<action>View Budget</action>
+				<action>View Amendment</action>
+			</status>
+			<status name="82">
+				<action>View Budget</action>
+				<action>View Amendment</action>
+			</status>
+			<status name="89">
+				<action>View Budget</action>
+				<action>View Amendment</action>
+			</status>
+		</type>
+
+		<type name="Budget Modification">
+			<status name="82">
+				<action>View Budget</action>
+				<action>View Contract</action>
+			</status>
+			<status name="84">
+				<action>View Budget</action>
+				<action>View Contract</action>
+			</status>
+			<status name="83">
+				<action>View Budget</action>
+				<action>View Contract</action>
+			</status>
+			<!--Start : Added in R7 for approved modification action drop down-->
+			<status name="86">
+				<action>View Budget</action>
+				<action>View Contract</action>
+			</status>
+			<!--End : Added in R7 -->
+		</type>
+
+		<type name="Budget Update">
+			<status name="82">
+				<action>View Budget</action>
+			</status>
+			<status name="84">
+				<action>View Budget</action>
+			</status>
+			<status name="83">
+				<action>View Budget</action>
+			</status>
+		</type>
+	</page>
+
+	<page name="budgetProviderAction">
+		<type name="Contract Budget">
+			<status name="111">
+				<action>View Budget</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<!--End : Added in R5 -->
+			</status>
+			<status name="110">
+				<action>View Budget</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<!--End : Added in R5 -->
+			</status>
+			<status name="112">
+				<action>View Budget</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+			</status>
+			<status name="113">
+				<action>View Contract</action>
+				<action>View Invoices</action>
+				<action>View Payments</action>
+				<!--End : Added in R5 -->
+			</status>
+			
+			<status name="113">
+				<action>View Budget</action>
+			</status>
+
+			<status name="113">
+				<action>Submit Invoice</action>
+			</status>
+
+			<status name="113">
+				<action>Modify Budget</action>
+			</status>
+
+			<status name="113">
+				<action>Request Advance</action>
+			</status>
+
+			<status name="114">
+				<action>View Budget</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<!--End : Added in R5 -->
+			</status>
+			<status name="115">
+				<action>View Budget</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<action>View Invoices</action>
+				<action>View Payments</action>
+				<!--End : Added in R5 -->
+			</status>
+			<status name="116">
+				<action>View Budget</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<action>View Invoices</action>
+				<action>View Payments</action>
+				<!--End : Added in R5 -->
+			</status>
+			<status name="117">
+				<action>View Budget</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<!--End : Added in R5 -->
+			</status>
+		</type>
+
+		<type name="Budget Amendment">
+			<status name="112">
+				<action>View Budget</action>
+				<action>View Amendment</action>
+			</status>
+			<status name="111">
+				<action>View Budget</action>
+				<action>View Amendment</action>
+			</status>
+			<status name="110">
+				<action>View Budget</action>
+				<action>View Amendment</action>
+			</status>
+			<status name="114">
+				<action>View Budget</action>
+				<action>View Amendment</action>
+			</status>
+			<status name="117">
+				<action>View Budget</action>
+				<action>View Amendment</action>
+			</status>
+		</type>
+
+		<type name="Budget Modification">
+			<status name="111">
+				<action>View Budget</action>
+				<action>View Contract</action>
+			</status>
+			<status name="111">
+				<action>Cancel Modification</action>
+			</status>
+			<status name="112">
+				<action>View Budget</action>
+				<action>View Contract</action>
+			</status>
+			<status name="110">
+				<action>View Budget</action>
+				<action>View Contract</action>
+			</status>
+			<status name="110">
+				<action>Cancel Modification</action>
+			</status>
+			<!--Start : Added in R7 for approved modification action drop down-->
+			<status name="114">
+				<action>View Budget</action>
+				<action>View Contract</action>
+			</status>
+			<!--End : Added in R7 -->
+		</type>
+
+		<type name="Budget Update">
+			<status name="112">
+				<action>View Budget</action>
+			</status>
+			<status name="111">
+				<action>View Budget</action>
+			</status>
+			<status name="110">
+				<action>View Budget</action>
+			</status>
+		</type>
+	</page>
+	<page name="budgetCityAction">
+		<type name="Contract Budget">
+			<status name="82">
+				<action>View Budget</action>
+				<action>Update Budget Template</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<!--End : Added in R5 -->
+			</status>
+			<status name="83">
+				<action>View Budget</action>
+				<action>Update Budget Template</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<!--End : Added in R5 -->
+			</status>
+			<status name="84">
+				<action>View Budget</action>
+				<action>Update Budget Template</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<!--End : Added in R5 -->
+			</status>
+			<status name="85">
+				<action>View Budget</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<action>View Invoices</action>
+				<action>View Payments</action>
+				<!--End : Added in R5 -->
+			</status>
+			<status name="86">
+				<action>View Budget</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<!--End : Added in R5 -->
+			</status>
+		
+			<status name="87">
+				<action>View Budget</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<action>View Invoices</action>
+				<action>View Payments</action>
+				<!--End : Added in R5 -->
+			</status>
+		
+			<status name="88">
+				<action>View Budget</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<action>View Invoices</action>
+				<action>View Payments</action>
+				<!--End : Added in R5 -->
+			</status>
+		
+			<status name="89">
+				<action>View Budget</action>
+				<!--Start : Added in R5 -->
+				<action>View Contract</action>
+				<!--End : Added in R5 -->
+			</status>
+		</type>
+
+		<type name="Budget Amendment">
+			<status name="82">
+				<action>View Budget</action>
+				<action>View Amendment</action>
+			</status>
+			<status name="83">
+				<action>View Budget</action>
+				<action>View Amendment</action>
+			</status>
+			<status name="84">
+				<action>View Budget</action>
+				<action>View Amendment</action>
+			</status>
+			<status name="85">
+				<action>View Budget</action>
+			</status>
+			<status name="86">
+				<action>View Budget</action>
+				<action>View Amendment</action>
+			</status>
+
+			<status name="87">
+				<action>View Budget</action>
+			</status>
+
+			<status name="88">
+				<action>View Budget</action>
+			</status>
+
+			<status name="89">
+				<action>View Budget</action>
+				<action>View Amendment</action>
+			</status>
+		</type>
+
+		<type name="Budget Modification">
+				<status name="82">
+				<action>View Budget</action>
+				<action>View Contract</action>
+			</status>
+			<status name="83">
+				<action>View Budget</action>
+				<action>View Contract</action>
+			</status>
+			<status name="84">
+				<action>View Budget</action>
+				<action>View Contract</action>
+			</status>
+			<status name="85">
+				<action>View Budget</action>
+				<action>View Contract</action>
+			</status>
+			<status name="86">
+				<action>View Budget</action>
+				<action>View Contract</action>
+			</status>
+
+			<status name="87">
+				<action>View Budget</action>
+				<action>View Contract</action>
+			</status>
+
+			<status name="88">
+				<action>View Budget</action>
+				<action>View Contract</action>
+			</status>
+
+			<status name="89">
+				<action>View Budget</action>
+				<action>View Contract</action>
+			</status>
+		</type>
+
+		<type name="Budget Update">
+			<status name="82">
+				<action>View Budget</action>
+				<!--Start : Added in R7.4.0 QC9008 -->
+			<!-- 	<action>Delete Budget Update</action>   R 8.4.0 QC9490 -->
+				<!--End : Added in R7.4.0 QC9008 -->
+			</status>
+			<status name="83">
+				<action>View Budget</action>
+				<!--Start : Added in R7.4.0 QC9008 -->
+			<!-- 	<action>Delete Budget Update</action>  R 8.4.0 QC9490 -->
+				<!--End : Added in R7.4.0 QC9008 -->
+			</status>
+			<status name="84">
+				<action>View Budget</action>
+				<!--Start : Added in R7.4.0 QC9008 -->
+		<!-- 		<action>Delete Budget Update</action>  R 8.4.0 QC9490  --> 
+				<!--End : Added in R7.4.0 QC9008 -->
+			</status>
+			<status name="85">
+				<action>View Budget</action>
+			</status>
+			<status name="86">
+				<action>View Budget</action>
+			</status>
+
+			<status name="87">
+				<action>View Budget</action>
+			</status>
+
+			<status name="88">
+				<action>View Budget</action>
+			</status>
+
+			<status name="89">
+				<action>View Budget</action>
+			</status>
+		</type>
+	</page>
+</mapping>

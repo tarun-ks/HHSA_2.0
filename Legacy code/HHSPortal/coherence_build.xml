@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project basedir=".">
+
+	<path id="Coherence.classpath">
+		<pathelement location="build/classes" />
+		<pathelement location="WebContent/WEB-INF/lib/coherence.jar" />
+	</path>
+
+	<!--
+		Target that builds a HHSCoherenceConfig.jar file for coherence server configurations
+		and the CoherenceExtendServer.tar file which contains the libraries required to deploy
+		the Coherence*Extends proxy server.
+	-->
+	<target name="build-coherence-artifacts" description="Build HHSCoherenceConfig.jar and CoherenceExtendServer.tar">
+		<!-- Generate the /temp_build directory -->
+		<delete dir="build/classes/coherence_config" />
+		<mkdir dir="build/classes/coherence_config" />
+
+		<!-- Copy Coherence config files -->
+		<copy todir="build/classes/coherence_config">
+			<fileset dir="r2_src">
+				<include name="hhs-coherence-cache-config-*.xml" />
+			</fileset>
+		</copy>
+
+		<!-- Generate the Coherence server configurations tar file -->
+		<mkdir dir="target" />
+		<jar destfile="target/HHSCoherenceConfig.jar" basedir="build/classes/coherence_config" />
+		<delete dir="build/classes/coherence_config" />
+
+		<!-- Generate the tar with the files required by the Coherence Extends proxy server -->
+		<tar destfile="target/CoherenceExtendServer.tar">
+			<tarfileset dir="WebContent/WEB-INF/lib">
+				<include name="coherence.jar" />
+			</tarfileset>
+			<tarfileset dir="target">
+				<include name="HHSCoherenceConfig.jar" />
+			</tarfileset>
+		</tar>
+	</target>
+
+<!-- Building Batch and Component Jar -->
+<target name="build-HHSBatch-jar" description="Build Batch Jar">
+ <jar destfile="target/HHS_Batch.jar" basedir="build/classes" excludes="log4j.*" />
+ </target>
+ 
+  <target name="build-HHSComponent-jar" description="Build Component Jar">
+ <jar destfile="target/HHS_Component.jar" basedir="build/classes" excludes="log4j.*" />
+ </target>
+ 
+	<!--
+		Starts the Coherence*Extend proxy server.
+	-->
+	<target name="start-coherence-extend-proxy-server" description="Start the Coherence*Extend proxy server">
+		<java classname="com.tangosol.net.DefaultCacheServer" classpathref="Coherence.classpath" fork="true">
+			<jvmarg line="
+				-server
+				-showversion
+				-Xms256m
+				-Xmx256m
+				-Dtangosol.coherence.cluster=COHERENCE_EXTEND_CLUSTER_LOCAL
+				-Dtangosol.coherence.clusterport=7778
+				-Dtangosol.coherence.cacheconfig=hhs-coherence-cache-config-extend-server.xml
+				-Dtangosol.coherence.ttl=0
+				-Dtangosol.coherence.mode=prod
+				-Dtangosol.coherence.localhost=localhost
+				-Dtangosol.coherence.management=all
+				-Dtangosol.coherence.management.remote=true
+				-Dcom.sun.management.jmxremote
+				-Dcom.sun.management.jmxremote.port=8360
+				-Dcom.sun.management.jmxremote.ssl=false
+				-Dcom.sun.management.jmxremote.authenticate=false" />
+		</java>
+	</target>
+
+	<!--
+		Add the following VM arguments to run this locally against WebLogic or a standalone app.
+		-Dtangosol.coherence.cluster=COHERENCE_CLUSTER_LOCAL
+		-Dtangosol.coherence.clusterport=7777
+		-Dtangosol.coherence.extend.address.a=localhost
+		-Dtangosol.coherence.extend.address.b=localhost
+		-Dtangosol.coherence.cacheconfig=hhs-coherence-cache-config-extend.xml
+		-Dtangosol.coherence.ttl=0
+		-Dtangosol.coherence.mode=prod
+		-Dtangosol.coherence.distributed.localstorage=false
+	-->
+	<target name="start-coherence-extend-server" description="Start Coherence Server">
+		<java classname="com.tangosol.net.DefaultCacheServer" classpathref="Coherence.classpath" fork="true">
+			<jvmarg line="
+				-server
+				-showversion
+				-Xms256m
+				-Xmx256m
+				-Dtangosol.coherence.cluster=COHERENCE_CLUSTER_LOCAL
+				-Dtangosol.coherence.clusterport=7777
+				-Dtangosol.coherence.extend.address.a=localhost
+				-Dtangosol.coherence.extend.address.b=localhost
+				-Dtangosol.coherence.extend.address.c=localhost
+				-Dtangosol.coherence.extend.address.d=localhost
+				-Dtangosol.coherence.cacheconfig=hhs-coherence-cache-config-extend.xml
+				-Dtangosol.coherence.ttl=0
+				-Dtangosol.coherence.mode=prod
+				-Dtangosol.coherence.localhost=localhost
+				-Dtangosol.coherence.management=all
+				-Dtangosol.coherence.management.remote=true
+				-Dcom.sun.management.jmxremote
+				-Dcom.sun.management.jmxremote.port=8359
+				-Dcom.sun.management.jmxremote.ssl=false
+				-Dcom.sun.management.jmxremote.authenticate=false" />
+		</java>
+	</target>
+
+	<!--
+		Add the following VM arguments to run this locally against WebLogic or a standalone app.
+		-Dtangosol.coherence.cluster=COHERENCE_CLUSTER_LOCAL
+		-Dtangosol.coherence.clusterport=7777
+		-Dtangosol.coherence.cacheconfig=hhs-coherence-cache-config-dev-cluster.xml
+		-Dtangosol.coherence.ttl=0
+		-Dtangosol.coherence.mode=prod
+		-Dtangosol.coherence.distributed.localstorage=false
+	-->
+	<target name="start-coherence-server" description="Start Coherence Server">
+		<java classname="com.tangosol.net.DefaultCacheServer" classpathref="Coherence.classpath" fork="true">
+			<jvmarg line="
+				-server
+				-showversion
+				-Xms256m
+				-Xmx256m
+				-Dtangosol.coherence.cluster=COHERENCE_CLUSTER_LOCAL
+				-Dtangosol.coherence.clusterport=7777
+				-Dtangosol.coherence.cacheconfig=hhs-coherence-cache-config-dev-cluster.xml
+				-Dtangosol.coherence.ttl=0
+				-Dtangosol.coherence.mode=prod
+				-Dtangosol.coherence.localhost=localhost
+				-Dtangosol.coherence.management=all
+				-Dtangosol.coherence.management.remote=true
+				-Dcom.sun.management.jmxremote
+				-Dcom.sun.management.jmxremote.port=8359
+				-Dcom.sun.management.jmxremote.ssl=false
+				-Dcom.sun.management.jmxremote.authenticate=false" />
+		</java>
+	</target>
+
+</project>

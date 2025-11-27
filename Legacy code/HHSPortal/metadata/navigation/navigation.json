@@ -1,0 +1,1003 @@
+{
+  "version": "1.0.0",
+  "description": "Complete Contract Management Navigation Structure",
+  "navigation": {
+    "type": "sidebar",
+    "collapsible": true,
+    "default_collapsed": false,
+    "logo": {
+      "src": "",
+      "alt": "Enterprise Application Builder",
+      "height": 40,
+      "collapsed_height": 32
+    },
+    "items": [
+      {
+        "id": "dashboard",
+        "label": "Dashboard",
+        "icon": "DashboardIcon",
+        "path": "/contracts/dashboard",
+        "roles": [
+          "contract:view"
+        ],
+        "order": 1
+      },
+      {
+        "id": "contracts",
+        "label": "Contracts",
+        "icon": "ContractIcon",
+        "roles": [
+          "contract:view"
+        ],
+        "order": 2,
+        "children": [
+          {
+            "id": "contract_list",
+            "label": "All Contracts",
+            "icon": "ListIcon",
+            "path": "/contracts",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 1
+          },
+          {
+            "id": "my_contracts",
+            "label": "My Contracts",
+            "icon": "UserIcon",
+            "path": "/contracts/my",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 2
+          },
+          {
+            "id": "pending_approval",
+            "label": "Pending Approval",
+            "icon": "ClockIcon",
+            "path": "/contracts?status={{references.contract_statuses.PENDING_APPROVAL.code}}",
+            "roles": [
+              "contract:approve"
+            ],
+            "order": 3
+          },
+          {
+            "id": "active_contracts",
+            "label": "Active Contracts",
+            "icon": "CheckIcon",
+            "path": "/contracts?status={{references.contract_statuses.REGISTERED.code}},{{references.contract_statuses.IN_PROGRESS.code}}",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 4
+          },
+          {
+            "id": "suspended_contracts",
+            "label": "Suspended Contracts",
+            "icon": "PauseIcon",
+            "path": "/contracts?status={{references.contract_statuses.SUSPENDED.code}}",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 5
+          },
+          {
+            "id": "closed_contracts",
+            "label": "Closed Contracts",
+            "icon": "ArchiveIcon",
+            "path": "/contracts?status={{references.contract_statuses.CLOSED.code}}",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 6
+          }
+        ]
+      },
+      {
+        "id": "create_contract",
+        "label": "Create Contract",
+        "icon": "AddIcon",
+        "path": "/contracts/create",
+        "roles": [
+          "contract:create"
+        ],
+        "order": 3,
+        "highlight": true
+      },
+      {
+        "id": "amendments",
+        "label": "Amendments",
+        "icon": "EditIcon",
+        "roles": [
+          "contract:create_amendment"
+        ],
+        "order": 4,
+        "children": [
+          {
+            "id": "create_amendment",
+            "label": "Create Amendment",
+            "icon": "AddIcon",
+            "path": "/contracts/amendments/create",
+            "roles": [
+              "contract:create_amendment"
+            ],
+            "order": 1
+          },
+          {
+            "id": "amendment_list",
+            "label": "All Amendments",
+            "icon": "ListIcon",
+            "path": "/contracts/amendments",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 2
+          }
+        ]
+      },
+      {
+        "id": "procurements",
+        "label": "Procurements",
+        "icon": "ProcurementIcon",
+        "roles": [
+          "contract:view"
+        ],
+        "order": 5,
+        "children": [
+          {
+            "id": "procurement_list",
+            "label": "All Procurements",
+            "icon": "ListIcon",
+            "path": "/procurements",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 1
+          },
+          {
+            "id": "create_procurement",
+            "label": "Create Procurement",
+            "icon": "AddIcon",
+            "path": "/procurements/create",
+            "roles": [
+              "contract:create"
+            ],
+            "order": 2
+          },
+          {
+            "id": "procurement_reports",
+            "label": "Procurement Reports",
+            "icon": "ReportIcon",
+            "path": "/procurements/reports",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 3
+          }
+        ]
+      },
+      {
+        "id": "invoices",
+        "label": "Invoices",
+        "icon": "InvoiceIcon",
+        "roles": [
+          "contract:view"
+        ],
+        "order": 6,
+        "children": [
+          {
+            "id": "invoice_list",
+            "label": "All Invoices",
+            "icon": "ListIcon",
+            "path": "/invoices",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 1
+          },
+          {
+            "id": "pending_invoices",
+            "label": "Pending Approval",
+            "icon": "ClockIcon",
+            "path": "/invoices?status=pending",
+            "roles": [
+              "contract:approve"
+            ],
+            "order": 2
+          },
+          {
+            "id": "invoice_reports",
+            "label": "Invoice Reports",
+            "icon": "ReportIcon",
+            "path": "/invoices/reports",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 3
+          }
+        ]
+      },
+      {
+        "id": "documents",
+        "label": "Documents",
+        "icon": "DocumentIcon",
+        "roles": [
+          "contract:view"
+        ],
+        "order": 7,
+        "children": [
+          {
+            "id": "document_library",
+            "label": "Document Library",
+            "icon": "LibraryIcon",
+            "path": "/documents",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 1
+          },
+          {
+            "id": "document_categories",
+            "label": "Categories",
+            "icon": "FolderIcon",
+            "path": "/documents/categories",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 2
+          },
+          {
+            "id": "document_workflows",
+            "label": "Workflows",
+            "icon": "WorkflowIcon",
+            "path": "/documents/workflows",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 3
+          },
+          {
+            "id": "upload_document",
+            "label": "Upload Document",
+            "icon": "UploadIcon",
+            "path": "/documents/upload",
+            "roles": [
+              "contract:create"
+            ],
+            "order": 4
+          }
+        ]
+      },
+      {
+        "id": "workflows",
+        "label": "Workflows",
+        "icon": "WorkflowIcon",
+        "roles": [
+          "contract:view"
+        ],
+        "order": 8,
+        "children": [
+          {
+            "id": "workflow_dashboard",
+            "label": "Dashboard",
+            "icon": "DashboardIcon",
+            "path": "/workflows",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 1
+          },
+          {
+            "id": "workflow_tasks",
+            "label": "My Tasks",
+            "icon": "TaskIcon",
+            "path": "/workflows/tasks",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 2
+          },
+          {
+            "id": "workflow_instances",
+            "label": "Active Workflows",
+            "icon": "ActivityIcon",
+            "path": "/workflows/instances",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 3
+          },
+          {
+            "id": "workflow_definitions",
+            "label": "Workflow Definitions",
+            "icon": "SettingsIcon",
+            "path": "/workflows/definitions",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 4
+          }
+        ]
+      },
+      {
+        "id": "reports",
+        "label": "Reports",
+        "icon": "ReportIcon",
+        "roles": [
+          "contract:view"
+        ],
+        "order": 9,
+        "children": [
+          {
+            "id": "contract_summary",
+            "label": "Contract Summary",
+            "icon": "ContractIcon",
+            "route": "/contracts/reports/summary",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 1
+          },
+          {
+            "id": "financial_report",
+            "label": "Financial Report",
+            "icon": "FinancialIcon",
+            "route": "/contracts/reports/financial",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 2
+          },
+          {
+            "id": "status_report",
+            "label": "Status Report",
+            "icon": "FinancialReportIcon",
+            "path": "/contracts/reports/status",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 3
+          },
+          {
+            "id": "workflow_report",
+            "label": "Workflow Report",
+            "icon": "WorkflowIcon",
+            "path": "/reports/workflow",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 4
+          },
+          {
+            "id": "document_report",
+            "label": "Document Report",
+            "icon": "DocumentIcon",
+            "path": "/reports/documents",
+            "roles": [
+              "contract:view"
+            ],
+            "order": 5
+          }
+        ]
+      },
+      {
+        "id": "admin",
+        "label": "Admin",
+        "icon": "AdminIcon",
+        "roles": [
+          "system:admin"
+        ],
+        "order": 10,
+        "children": [
+          {
+            "id": "user_management",
+            "label": "User Management",
+            "icon": "UserIcon",
+            "path": "/admin/users",
+            "roles": [
+              "system:admin"
+            ],
+            "order": 1
+          },
+          {
+            "id": "role_management",
+            "label": "Role Management",
+            "icon": "ShieldIcon",
+            "path": "/admin/roles",
+            "roles": [
+              "system:admin"
+            ],
+            "order": 2
+          },
+          {
+            "id": "system_config",
+            "label": "System Configuration",
+            "icon": "SettingsIcon",
+            "path": "/admin/config",
+            "roles": [
+              "system:admin"
+            ],
+            "order": 3
+          },
+          {
+            "id": "workflow_admin",
+            "label": "Workflow Administration",
+            "icon": "WorkflowIcon",
+            "path": "/admin/workflows",
+            "roles": [
+              "system:admin"
+            ],
+            "order": 4
+          },
+          {
+            "id": "system_monitoring",
+            "label": "System Monitoring",
+            "icon": "MonitorIcon",
+            "path": "/admin/monitoring",
+            "roles": [
+              "system:admin"
+            ],
+            "order": 5
+          }
+        ]
+      }
+    ],
+    "mobile": {
+      "bottom_navigation": false,
+      "drawer": true,
+      "items": []
+    },
+    "user_menu": {
+      "enabled": true,
+      "items": [
+         {
+           "id": "profile",
+           "label": "Profile",
+           "icon": "UserIcon",
+           "path": "/profile",
+           "roles": [
+             "all"
+           ]
+         },
+         {
+           "id": "settings",
+           "label": "Settings",
+           "icon": "SettingsIcon",
+           "path": "/settings",
+           "roles": [
+             "all"
+           ]
+         },
+         {
+           "id": "logout",
+           "label": "Logout",
+           "icon": "LogoutIcon",
+           "action": "logout",
+           "roles": [
+             "all"
+           ]
+         }
+      ]
+    },
+    "notifications": {
+      "enabled": true,
+      "max_display": 5,
+      "data_source": "/api/notifications",
+      "types": [
+        {
+          "type": "info",
+          "icon": "InfoIcon",
+          "color": "blue"
+        },
+        {
+          "type": "warning",
+          "icon": "AlertIcon",
+          "color": "yellow"
+        },
+        {
+          "type": "error",
+          "icon": "AlertIcon",
+          "color": "red"
+        }
+      ]
+    },
+    "global_search": {
+      "enabled": true,
+      "placeholder": "Search contracts, amendments, documents, workflows...",
+      "data_sources": [
+        {
+          "name": "contracts",
+          "label": "Contracts",
+          "fields": [
+            "title",
+            "contract_id",
+            "description"
+          ],
+          "icon": "FileText"
+        },
+        {
+          "name": "amendments",
+          "label": "Amendments",
+          "fields": [
+            "title",
+            "amendment_id",
+            "description"
+          ],
+          "icon": "Edit"
+        },
+        {
+          "name": "documents",
+          "label": "Documents",
+          "fields": [
+            "title",
+            "file_name",
+            "description"
+          ],
+          "icon": "Document"
+        },
+        {
+          "name": "workflows",
+          "label": "Workflows",
+          "fields": [
+            "workflow_name",
+            "workflow_id",
+            "description"
+          ],
+          "icon": "Workflow"
+        },
+        {
+          "name": "procurements",
+          "label": "Procurements",
+          "fields": [
+            "title",
+            "procurement_id",
+            "description"
+          ],
+          "icon": "ShoppingCart"
+        },
+        {
+          "name": "invoices",
+          "label": "Invoices",
+          "fields": [
+            "invoice_number",
+            "vendor_name",
+            "description"
+          ],
+          "icon": "Receipt"
+        }
+      ],
+      "max_results": 10
+    }
+  },
+  "breadcrumbs": {
+    "id": "breadcrumbs",
+    "type": "breadcrumb_navigation",
+    "separator": ">",
+    "home_label": "Home",
+    "home_route": "/",
+    "templates": {
+      "contract_dashboard": [
+        {
+          "label": "Home",
+          "route": "/"
+        },
+        {
+          "label": "Contract Management",
+          "route": "/contracts"
+        },
+        {
+          "label": "Dashboard",
+          "route": "/contracts/dashboard"
+        }
+      ],
+      "contract_list": [
+        {
+          "label": "Home",
+          "route": "/"
+        },
+        {
+          "label": "Contract Management",
+          "route": "/contracts"
+        },
+        {
+          "label": "Contracts",
+          "route": "/contracts"
+        }
+      ],
+      "contract_create": [
+        {
+          "label": "Home",
+          "route": "/"
+        },
+        {
+          "label": "Contract Management",
+          "route": "/contracts"
+        },
+        {
+          "label": "Create Contract",
+          "route": "/contracts/create"
+        }
+      ],
+      "contract_details": [
+        {
+          "label": "Home",
+          "route": "/"
+        },
+        {
+          "label": "Contract Management",
+          "route": "/contracts"
+        },
+        {
+          "label": "Contracts",
+          "route": "/contracts"
+        },
+        {
+          "label": "{{contract.title}}",
+          "route": "/contracts/{{id}}"
+        }
+      ],
+      "contract_edit": [
+        {
+          "label": "Home",
+          "route": "/"
+        },
+        {
+          "label": "Contract Management",
+          "route": "/contracts"
+        },
+        {
+          "label": "Contracts",
+          "route": "/contracts"
+        },
+        {
+          "label": "{{contract.title}}",
+          "route": "/contracts/{{id}}"
+        },
+        {
+          "label": "Edit",
+          "route": "/contracts/{{id}}/edit"
+        }
+      ],
+      "amendment_create": [
+        {
+          "label": "Home",
+          "route": "/"
+        },
+        {
+          "label": "Contract Management",
+          "route": "/contracts"
+        },
+        {
+          "label": "Contracts",
+          "route": "/contracts"
+        },
+        {
+          "label": "{{contract.title}}",
+          "route": "/contracts/{{id}}"
+        },
+        {
+          "label": "Create Amendment",
+          "route": "/contracts/{{id}}/amendments/create"
+        }
+      ],
+      "procurement_list": [
+        {
+          "label": "Home",
+          "route": "/"
+        },
+        {
+          "label": "Procurements",
+          "route": "/procurements"
+        }
+      ],
+      "procurement_create": [
+        {
+          "label": "Home",
+          "route": "/"
+        },
+        {
+          "label": "Procurements",
+          "route": "/procurements"
+        },
+        {
+          "label": "Create Procurement",
+          "route": "/procurements/create"
+        }
+      ],
+      "invoice_list": [
+        {
+          "label": "Home",
+          "route": "/"
+        },
+        {
+          "label": "Invoices",
+          "route": "/invoices"
+        }
+      ],
+      "document_library": [
+        {
+          "label": "Home",
+          "route": "/"
+        },
+        {
+          "label": "Documents",
+          "route": "/documents"
+        }
+      ],
+      "workflow_dashboard": [
+        {
+          "label": "Home",
+          "route": "/"
+        },
+        {
+          "label": "Workflows",
+          "route": "/workflows"
+        }
+      ],
+      "admin": [
+        {
+          "label": "Home",
+          "route": "/"
+        },
+        {
+          "label": "Admin",
+          "route": "/admin"
+        }
+      ]
+    }
+  },
+  "context_menu": {
+    "id": "context_menu",
+    "type": "context_menu",
+    "items": {
+      "contract_list_item": [
+        {
+          "id": "view_contract",
+          "label": "View Contract",
+          "icon": "EyeIcon",
+          "action": "navigate",
+          "target": "/contracts/{{id}}",
+          "permissions": [
+            "contract:view"
+          ]
+        },
+        {
+          "id": "edit_contract",
+          "label": "Edit Contract",
+          "icon": "EditIcon",
+          "action": "navigate",
+          "target": "/contracts/{{id}}/edit",
+          "permissions": [
+            "contract:edit"
+          ],
+          "conditions": {
+            "status": [
+              "DRAFT",
+              "PENDING_CONFIGURATION"
+            ]
+          }
+        },
+        {
+          "id": "create_amendment",
+          "label": "Create Amendment",
+          "icon": "AddIcon",
+          "action": "navigate",
+          "target": "/contracts/{{id}}/amendments/create",
+          "roles": [
+            "contract:create_amendment"
+          ],
+          "conditions": {
+            "status": [
+              "REGISTERED",
+              "IN_PROGRESS"
+            ]
+          }
+        },
+        {
+          "id": "change_status",
+          "label": "Change Status",
+          "icon": "ChevronRightIcon",
+          "action": "modal",
+          "target": "change_status_modal",
+          "permissions": [
+            "contract:change_status"
+          ]
+        },
+        {
+          "id": "export_contract",
+          "label": "Export Contract",
+          "icon": "DownloadIcon",
+          "action": "export",
+          "permissions": [
+            "contract:export"
+          ]
+        },
+        {
+          "id": "delete_contract",
+          "label": "Delete Contract",
+          "icon": "DeleteIcon",
+          "action": "confirm",
+          "target": "delete_contract",
+          "permissions": [
+            "contract:delete"
+          ],
+          "conditions": {
+            "status": [
+              "DRAFT"
+            ]
+          },
+          "danger": true
+        }
+      ],
+      "contract_detail_actions": [
+        {
+          "id": "edit_contract",
+          "label": "Edit Contract",
+          "icon": "EditIcon",
+          "action": "navigate",
+          "target": "/contracts/{{id}}/edit",
+          "permissions": [
+            "contract:edit"
+          ],
+          "conditions": {
+            "status": [
+              "DRAFT",
+              "PENDING_CONFIGURATION"
+            ]
+          }
+        },
+        {
+          "id": "create_amendment",
+          "label": "Create Amendment",
+          "icon": "AddIcon",
+          "action": "navigate",
+          "target": "/contracts/{{id}}/amendments/create",
+          "roles": [
+            "contract:create_amendment"
+          ],
+          "conditions": {
+            "status": [
+              "REGISTERED",
+              "IN_PROGRESS"
+            ]
+          }
+        },
+        {
+          "id": "change_status",
+          "label": "Change Status",
+          "icon": "ChevronRightIcon",
+          "action": "modal",
+          "target": "change_status_modal",
+          "permissions": [
+            "contract:change_status"
+          ]
+        },
+        {
+          "id": "suspend_contract",
+          "label": "Suspend Contract",
+          "icon": "Pause",
+          "action": "confirm",
+          "target": "suspend_contract",
+          "permissions": [
+            "contract:change_status"
+          ],
+          "conditions": {
+            "status": [
+              "REGISTERED",
+              "IN_PROGRESS"
+            ]
+          }
+        },
+        {
+          "id": "close_contract",
+          "label": "Close Contract",
+          "icon": "Archive",
+          "action": "confirm",
+          "target": "close_contract",
+          "permissions": [
+            "contract:change_status"
+          ],
+          "conditions": {
+            "status": [
+              "REGISTERED",
+              "IN_PROGRESS"
+            ]
+          }
+        },
+        {
+          "id": "export_contract",
+          "label": "Export Contract",
+          "icon": "DownloadIcon",
+          "action": "export",
+          "permissions": [
+            "contract:export"
+          ]
+        }
+      ]
+    }
+  },
+  "quick_actions": {
+    "id": "quick_actions",
+    "type": "quick_actions",
+    "items": [
+      {
+        "id": "create_contract",
+        "label": "Create Contract",
+        "icon": "AddIcon",
+        "action": "navigate",
+        "target": "/contracts/create",
+        "roles": [
+          "contract:create"
+        ],
+        "shortcut": "Ctrl+N"
+      },
+      {
+        "id": "search_contracts",
+        "label": "Search Contracts",
+        "icon": "SearchIcon",
+        "action": "focus",
+        "target": "search_input",
+        "shortcut": "Ctrl+K"
+      },
+      {
+        "id": "view_dashboard",
+        "label": "View Dashboard",
+        "icon": "DashboardIcon",
+        "action": "navigate",
+        "target": "/contracts/dashboard",
+        "roles": [
+          "contract:view"
+        ],
+        "shortcut": "Ctrl+D"
+      }
+    ]
+  },
+  "status_filters": {
+    "id": "status_filters",
+    "type": "status_filter_bar",
+    "items": [
+      {
+        "id": "all_contracts",
+        "label": "All Contracts",
+        "status": null,
+        "count": "{{contracts.total_count}}",
+        "color": "gray"
+      },
+      {
+        "id": "draft_contracts",
+        "label": "Draft",
+        "status": "{{references.contract_statuses.DRAFT.code}}",
+        "count": "{{contracts.draft_count}}",
+        "color": "#6B7280"
+      },
+      {
+        "id": "pending_contracts",
+        "label": "Pending",
+        "status": "{{references.contract_statuses.PENDING_CONFIGURATION.code}},{{references.contract_statuses.PENDING_COF.code}},{{references.contract_statuses.PENDING_SUBMISSION.code}},{{references.contract_statuses.PENDING_APPROVAL.code}}",
+        "count": "{{contracts.pending_count}}",
+        "color": "#F59E0B"
+      },
+      {
+        "id": "active_contracts",
+        "label": "Active",
+        "status": "{{references.contract_statuses.REGISTERED.code}},{{references.contract_statuses.IN_PROGRESS.code}}",
+        "count": "{{contracts.active_count}}",
+        "color": "#10B981"
+      },
+      {
+        "id": "suspended_contracts",
+        "label": "Suspended",
+        "status": "{{references.contract_statuses.SUSPENDED.code}}",
+        "count": "{{contracts.suspended_count}}",
+        "color": "#EF4444"
+      },
+      {
+        "id": "closed_contracts",
+        "label": "Closed",
+        "status": "{{references.contract_statuses.CLOSED.code}}",
+        "count": "{{contracts.closed_count}}",
+        "color": "#6B7280"
+      }
+    ]
+  }
+}

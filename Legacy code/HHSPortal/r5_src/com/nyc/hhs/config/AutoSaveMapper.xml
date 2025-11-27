@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.AutoSaveMapper">
+
+	<!-- Added for autoSave -->
+
+	<resultMap id="AutoSaveList" type="com.nyc.hhs.model.AutoSaveBean">
+		<result property="entityId" column="ENTITY_ID" />
+		<result property="userId" column="USER_ID" />
+		<result property="jspName" column="PAGE_NAME" />
+		<result property="textareaName" column="TEXT_AREA_ID" />
+		<result property="textareaValue" column="TEXT_AREA_VAL" />
+		<result property="entityName" column="ENTITY_NAME" />
+
+	</resultMap>
+
+	<insert id="insertAutoSave" parameterType="com.nyc.hhs.model.AutoSaveBean">
+		INSERT INTO
+		AUTOSAVE
+		(autosave_id,ENTITY_ID,ENTITY_NAME, USER_ID,
+		PAGE_NAME,
+		TEXT_AREA_ID,
+		TEXT_AREA_VAL, created_date, modified_date, 
+		<choose>
+			<when test="orgType == 'provider_org'">
+				CREATED_BY_STAFFID, MODIFIED_BY_STAFFID
+			</when>
+			<otherwise>
+				CREATED_BY_USERID, MODIFIED_BY_USERID
+			</otherwise>
+		</choose>
+		)
+		VALUES(SEQ_AUTOSAVE.NEXTVAL,
+		#{entityId},
+		#{entityName},
+		#{userId},#{jspName},#{textareaName},#{textareaValue},
+		systimestamp,systimestamp,#{userId},#{userId})
+	</insert>
+
+	<update id="updateAutoSave" parameterType="com.nyc.hhs.model.AutoSaveBean">
+		UPDATE AUTOSAVE
+		SET
+		TEXT_AREA_VAL =#{textareaValue},
+		modified_date = systimestamp,
+		<choose>
+			<when test="orgType == 'provider_org'">
+				MODIFIED_BY_STAFFID=#{userId}
+			</when>
+			<otherwise>
+				MODIFIED_BY_USERID=#{userId}
+			</otherwise>
+		</choose>
+		WHERE ENTITY_NAME=#{entityName} AND
+		ENTITY_ID=#{entityId} AND PAGE_NAME=#{jspName} AND
+		TEXT_AREA_ID=#{textareaName} AND USER_ID=#{userId}
+	</update>
+
+	<select id="getAutoSaveInfo" parameterType="com.nyc.hhs.model.AutoSaveBean"
+		resultMap="AutoSaveList">
+		select TEXT_AREA_VAL,TEXT_AREA_ID FROM AUTOSAVE WHERE
+		USER_ID = #{userId}
+		AND ENTITY_ID = #{entityId} AND PAGE_NAME =
+		#{jspName}
+	</select>
+
+	<delete id="deleteAutoSave" parameterType="com.nyc.hhs.model.AutoSaveBean">
+		DELETE FROM
+		AUTOSAVE WHERE ENTITY_ID = #{entityId} AND entity_NAME = #{entityName}
+		<if test="textareaName != null">
+			AND TEXT_AREA_ID = #{textareaName}
+		</if>
+	</delete>
+	<!-- End -->
+</mapper>

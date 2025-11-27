@@ -1,0 +1,295 @@
+{
+  "version": "1.0.0",
+  "description": "Enterprise Notification & Communication System",
+  "notification_engine": {
+    "channels": {
+      "email": {
+        "enabled": true,
+        "providers": {
+          "primary": {
+            "type": "smtp",
+            "host": "smtp.company.com",
+            "port": 587,
+            "security": "tls",
+            "auth": {
+              "username": "{{env.NOTIFICATION_EMAIL_USER}}",
+              "password": "{{env.NOTIFICATION_EMAIL_PASS}}"
+            }
+          },
+          "backup": {
+            "type": "sendgrid",
+            "api_key": "{{env.SENDGRID_API_KEY}}",
+            "fallback_enabled": true
+          }
+        },
+        "templates": {
+          "base_template": "email/base_template.html",
+          "styles": "email/styles.css",
+          "footer": "email/footer.html"
+        }
+      },
+      "sms": {
+        "enabled": true,
+        "provider": {
+          "type": "twilio",
+          "account_sid": "{{env.TWILIO_ACCOUNT_SID}}",
+          "auth_token": "{{env.TWILIO_AUTH_TOKEN}}",
+          "from_number": "{{env.TWILIO_FROM_NUMBER}}"
+        },
+        "rate_limiting": {
+          "max_per_user_per_hour": 10,
+          "max_per_user_per_day": 50
+        }
+      },
+      "push": {
+        "enabled": true,
+        "providers": {
+          "fcm": {
+            "server_key": "{{env.FCM_SERVER_KEY}}",
+            "project_id": "{{env.FCM_PROJECT_ID}}"
+          },
+          "apns": {
+            "certificate_path": "{{env.APNS_CERT_PATH}}",
+            "key_id": "{{env.APNS_KEY_ID}}",
+            "team_id": "{{env.APNS_TEAM_ID}}"
+          }
+        }
+      },
+      "slack": {
+        "enabled": true,
+        "webhook_url": "{{env.SLACK_WEBHOOK_URL}}",
+        "channels": {
+          "contracts": "#contracts-alerts",
+          "finance": "#finance-alerts",
+          "legal": "#legal-alerts"
+        }
+      },
+      "teams": {
+        "enabled": true,
+        "webhook_url": "{{env.TEAMS_WEBHOOK_URL}}",
+        "adaptive_cards": true
+      }
+    },
+    "notification_templates": {
+      "contract_created": {
+        "id": "contract_created",
+        "name": "Contract Created",
+        "description": "Notification when a new contract is created",
+        "triggers": ["contract.created"],
+        "channels": ["{{references.notification_channels.EMAIL.code}}", "{{references.notification_channels.IN_APP.code}}", "{{references.notification_channels.SLACK.code}}"],
+        "templates": {
+          "email": {
+            "subject": "New Contract Created: {{title}}",
+            "template": "contracts/created_email.html",
+            "variables": ["title", "contract_id", "agency.name", "provider.name"],
+            "attachments": ["contract_document.pdf"]
+          },
+          "in_app": {
+            "title": "Contract Created",
+            "message": "{{title}} has been created and is pending configuration",
+            "icon": "contract",
+            "priority": "normal",
+            "actions": [
+              {
+                "label": "View Contract",
+                "action": "navigate",
+                "url": "/contracts/{{id}}"
+              }
+            ]
+          },
+          "slack": {
+            "channel": "contracts",
+            "template": "contracts/created_slack.json",
+            "variables": ["title", "contract_id", "created_by.first_name"]
+          }
+        },
+        "recipients": {
+          "primary": ["created_by", "agency_id"],
+          "secondary": ["program_id"],
+          "conditional": [
+            {
+              "condition": "current_contract_amount > 100000",
+              "recipients": ["{{references.user_roles.FINANCE_MANAGER.code}}"]
+            }
+          ]
+        },
+        "timing": {
+          "immediate": true,
+          "digest": false
+        }
+      },
+      "approval_required": {
+        "id": "approval_required",
+        "name": "Approval Required",
+        "description": "Notification when contract requires approval",
+        "triggers": ["contract.pending_approval"],
+        "channels": ["{{references.notification_channels.EMAIL.code}}", "{{references.notification_channels.IN_APP.code}}", "{{references.notification_channels.PUSH.code}}", "{{references.notification_channels.SLACK.code}}"],
+        "templates": {
+          "email": {
+            "subject": "URGENT: Contract Approval Required - {{title}}",
+            "template": "contracts/approval_required_email.html",
+            "priority": "high",
+            "variables": ["title", "contract_id", "approver", "deadline"]
+          },
+          "in_app": {
+            "title": "Approval Required",
+            "message": "{{title}} requires your approval",
+            "icon": "approval",
+            "priority": "high",
+            "badge": true,
+            "actions": [
+              {
+                "label": "Review & Approve",
+                "action": "navigate",
+                "url": "/contracts/{{id}}/approve"
+              }
+            ]
+          },
+          "push": {
+            "title": "Contract Approval Required",
+            "body": "{{title}} needs your approval",
+            "data": {
+              "contract_id": "{{id}}",
+              "action": "approve"
+            }
+          }
+        },
+        "recipients": {
+          "primary": ["{{workflow.assignee}}"],
+          "escalation": [
+            {
+              "after_hours": 24,
+              "recipients": ["{{workflow.escalation_assignee}}"]
+            },
+            {
+              "after_hours": 48,
+              "recipients": ["{{workflow.manager}}"]
+            }
+          ]
+        },
+        "timing": {
+          "immediate": true,
+          "reminder": {
+            "enabled": true,
+            "intervals": [24, 48, 72],
+            "max_reminders": 3
+          }
+        }
+      },
+      "contract_expiring": {
+        "id": "contract_expiring",
+        "name": "Contract Expiring",
+        "description": "Notification when contract is approaching expiration",
+        "triggers": ["contract.expiring_soon"],
+        "channels": ["{{references.notification_channels.EMAIL.code}}", "{{references.notification_channels.IN_APP.code}}"],
+        "templates": {
+          "email": {
+            "subject": "Contract Expiring Soon: {{title}}",
+            "template": "contracts/expiring_email.html",
+            "variables": ["title", "contract_id", "end_date", "days_remaining"]
+          }
+        },
+        "recipients": {
+          "primary": ["agency_id", "program_id"],
+          "secondary": ["provider_id"]
+        },
+        "timing": {
+          "scheduled": {
+            "days_before_expiration": [90, 60, 30, 14, 7, 1]
+          }
+        }
+      },
+      "amendment_created": {
+        "id": "amendment_created",
+        "name": "Amendment Created",
+        "description": "Notification when contract amendment is created",
+        "triggers": ["amendment.created"],
+        "channels": ["{{references.notification_channels.EMAIL.code}}", "{{references.notification_channels.IN_APP.code}}"],
+        "templates": {
+          "email": {
+            "subject": "Contract Amendment: {{amendment.title}}",
+            "template": "amendments/created_email.html",
+            "variables": ["amendment.title", "amendment.amendment_amount", "title", "created_by.first_name"]
+          }
+        },
+        "recipients": {
+          "primary": ["agency_id", "provider_id"],
+          "conditional": [
+            {
+              "condition": "amendment.amendment_amount > 50000",
+              "recipients": ["{{references.user_roles.FINANCE_MANAGER.code}}"]
+            }
+          ]
+        }
+      },
+      "status_changed": {
+        "id": "status_changed",
+        "name": "Status Changed",
+        "description": "Notification when contract status changes",
+        "triggers": ["contract.status_changed"],
+        "channels": ["{{references.notification_channels.EMAIL.code}}", "{{references.notification_channels.IN_APP.code}}"],
+        "templates": {
+          "email": {
+            "subject": "Contract Status Changed: {{title}} - {{status.name}}",
+            "template": "contracts/status_changed_email.html",
+            "variables": ["title", "contract_id", "status.name", "previous_status.name", "updated_by.first_name"]
+          },
+          "in_app": {
+            "title": "Status Changed",
+            "message": "{{title}} status changed to {{status.name}}",
+            "icon": "status_change",
+            "priority": "normal"
+          }
+        },
+        "recipients": {
+          "primary": ["created_by", "updated_by", "agency_id", "provider_id"]
+        }
+      }
+    },
+    "notification_rules": {
+      "user_preferences": {
+        "enabled": true,
+        "default_channels": ["email", "in_app"],
+        "allow_override": true,
+        "quiet_hours": {
+          "enabled": true,
+          "start": "22:00",
+          "end": "08:00",
+          "timezone": "{{user.timezone}}"
+        }
+      },
+      "rate_limiting": {
+        "global": {
+          "max_per_minute": 1000,
+          "max_per_hour": 10000
+        },
+        "per_user": {
+          "max_per_minute": 10,
+          "max_per_hour": 100
+        },
+        "per_channel": {
+          "email": {
+            "max_per_minute": 500,
+            "max_per_hour": 5000
+          },
+          "sms": {
+            "max_per_minute": 100,
+            "max_per_hour": 1000
+          }
+        }
+      },
+      "delivery_guarantee": {
+        "retry_attempts": 3,
+        "retry_delay": 300,
+        "dead_letter_queue": true,
+        "fallback_channel": "email"
+      }
+    },
+    "analytics": {
+      "track_delivery": true,
+      "track_opens": true,
+      "track_clicks": true,
+      "retention_days": 90
+    }
+  }
+}

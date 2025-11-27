@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="build" name="HHSPortal">
+	<property environment="env" />
+
+	<property name="ECLIPSE_HOME" value="../CommonLib" />
+	<property name="MODULES" value="../CommonLib/modules"/>
+	<property name="MIDDLEWARE" value="../CommonLib/MiddleWare"/>
+	<property name="LIBDIR" value="WebContent/WEB-INF/lib"/>
+	
+	
+	<property name="debuglevel" value="source,lines,vars" />
+	<property name="target" value="1.6" />
+	<property name="source" value="1.6" />
+	<path id="WebLogic System Libraries.libraryclasspath">
+		<fileset dir="${MODULES}">		
+						<include name="weblogic_patch.jar" />
+						<include name="BUG13000612_1034.jar" />
+						<include name="api.jar" />
+						<include name="glassfish.jstl_1.2.0.1.jar" />
+						<include name="javax.jsf_1.1.0.0_1-2.jar" />
+						<include name="javax.ejb_3.0.1.jar" />
+						<include name="javax.enterprise.deploy_1.2.jar" />
+						<include name="javax.interceptor_1.0.jar" />
+						<include name="javax.jms_1.1.1.jar" />
+						<include name="javax.jsp_1.2.0.0_2-1.jar" />
+						<include name="javax.jws_2.0.jar" />
+						<include name="javax.activation_1.1.0.0_1-1.jar" />
+						<include name="javax.mail_1.1.0.0_1-4-1.jar" />
+						<include name="javax.xml.soap_1.3.1.0.jar" />
+						<include name="javax.xml.rpc_1.2.1.jar" />
+						<include name="javax.xml.ws_2.1.1.jar" />
+						<include name="javax.management.j2ee_1.0.jar" />
+						<include name="javax.resource_1.5.1.jar" />
+						<include name="javax.servlet_1.0.0.0_2-5.jar" />
+						<include name="javax.transaction_1.0.0.0_1-1.jar" />
+						<include name="javax.xml.stream_1.1.1.0.jar" />
+						<include name="javax.security.jacc_1.0.0.0_1-1.jar" />
+						<include name="javax.xml.registry_1.0.0.0_1-0.jar" />
+						<include name="wls-api.jar" />
+						<include name="com.bea.core.apache_1.2.0.1.jar" />
+						<include name="com.bea.core.i18n_1.8.0.0.jar" />
+						<include name="com.bea.core.logging_1.8.0.0.jar" />
+						<include name="com.bea.core.utils.full_1.9.0.0.jar" />
+						<include name="com.bea.core.utils.wrapper_1.4.0.0.jar" />
+						<include name="com.bea.core.utils.classloaders_1.8.0.0.jar" />
+						<include name="com.bea.core.common.security.providers.env_1.0.0.0_6-1-0-0.jar" />
+						<include name="com.bea.core.common.security.saml2.manage_1.0.0.0_6-1-0-0.jar" />
+						<include name="com.bea.core.weblogic.web.api_1.4.0.0.jar" />
+						<include name="com.bea.core.weblogic.rmi.client_1.8.0.0.jar" />
+						<include name="com.bea.core.transaction_2.7.0.0.jar" />
+						<include name="com.bea.core.workarea_1.7.0.0.jar" />
+						<include name="com.bea.core.xml.weblogic.xpath_1.4.0.0.jar" />
+						<include name="com.bea.core.datasource6_1.9.0.0.jar" />
+						<include name="com.bea.core.weblogic.stax_1.8.0.0.jar" />
+						<include name="javax.persistence_1.0.0.0_1-0-2.jar" />
+        </fileset>
+
+	</path>
+	<path id="Web App Libraries.libraryclasspath">
+		
+			<fileset dir="${LIBDIR}">
+	        		<include name="**/*.jar"/>
+	      		</fileset>
+	</path>
+	<path id="EAR Libraries.libraryclasspath" />
+	<path id="Enterprise Application Libraries [HHSPortalEar].libraryclasspath">
+		<pathelement location="../../HHSPortalEar/EarContent/APP-INF/classes" />
+	</path>
+	<path id="Apache XMLBeans v2.3.libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/plugins/oracle.eclipse.tools.xmlbeans.library.v23_3.1.1.201010012100.jar" />
+	</path>
+	<path id="Shared Library [jsf].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/jsf_1.2_1.2.9.0/1/WEB-INF/lib/glassfish.jsf_1.0.0.0_1-2-15.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/jsf_1.2_1.2.9.0/1/WEB-INF/lib/glassfish.jstl_1.2.0.1.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/jsf_1.2_1.2.9.0/1/WEB-INF/lib/javax.jsf_1.1.0.0_1-2.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/jsf_1.2_1.2.9.0/1/WEB-INF/lib/wls.jsf.di.jar" />
+	</path>
+	<path id="Oracle WebLogic Portal Server.libraryclasspath">
+		<pathelement location="${MIDDLEWARE}/p13n_common.jar" />
+		<pathelement location="${MIDDLEWARE}/p13n_system.jar" />
+		<pathelement location="${MIDDLEWARE}/p13n-schemas.jar" />
+		<pathelement location="${MIDDLEWARE}/p13n_app.jar" />
+		<pathelement location="${MIDDLEWARE}/wlp_services.jar" />
+		<pathelement location="${MIDDLEWARE}/wsrp-common.jar" />
+		<pathelement location="${MIDDLEWARE}/wsrp-client.jar" />
+		<pathelement location="${MIDDLEWARE}/netuix_common.jar" />
+		<pathelement location="${MIDDLEWARE}/netuix_schemas.jar" />
+		<pathelement location="${MIDDLEWARE}/netuix_system.jar" />
+		<pathelement location="${MIDDLEWARE}/netuix_system-full.jar" />
+		<pathelement location="${MIDDLEWARE}/content_system.jar" />
+		<pathelement location="${MIDDLEWARE}/wps_system.jar" />
+		<pathelement location="${MIDDLEWARE}/wlp_content_system.jar" />
+		<pathelement location="${MIDDLEWARE}/wlp-schemas.jar" />
+		<pathelement location="${MIDDLEWARE}/groupspace_system.jar" />
+		<pathelement location="${MIDDLEWARE}/analytics_sys.jar" />
+		<pathelement location="${MIDDLEWARE}/wls-api.jar" />
+	</path>
+	<path id="Shared Library [content-management-faces-web-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/content-management-faces-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/content_faces.jar" />
+	</path>
+	<path id="Shared Library [wlp-tools-dvt-web-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-tools-dvt-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/war-classes.jar" />
+	</path>
+	<path id="Shared Library [wlp-framework-full-web-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-framework-full-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/netuix_servlet-full.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-framework-full-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/wsrp-complex-producer.jar" />
+	</path>
+	<path id="Shared Library [jaxrs-framework-web-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/jaxrs-framework-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/jackson-core-asl-1.1.0.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/jaxrs-framework-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/jackson-jaxrs-1.1.0.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/jaxrs-framework-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/jackson-mapper-asl-1.1.0.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/jaxrs-framework-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/rest-framework.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/jaxrs-framework-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/token-manager.jar" />
+	</path>
+	<path id="Shared Library [jersey-web-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/jersey-web-lib_1.0_1.0.2/1/WEB-INF/lib/asm-3.1.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/jersey-web-lib_1.0_1.0.2/1/WEB-INF/lib/jersey-core-1.0.2.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/jersey-web-lib_1.0_1.0.2/1/WEB-INF/lib/jersey-server-1.0.2.jar" />
+		<pathelement location="${ECLIPSE_HOME}./.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/jersey-web-lib_1.0_1.0.2/1/WEB-INF/lib/jsr311-api-1.0.jar" />
+	</path>
+	<path id="Shared Library [content-management-app-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/content-management-app-lib_10.3.4_10.3.4/1/APP-INF/lib/content_wlp.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/content-management-app-lib_10.3.4_10.3.4/1/APP-INF/lib/jcrspi-1.0.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/content-management-app-lib_10.3.4_10.3.4/1/content_repo.jar" />
+	</path>
+	<path id="Shared Library [wlp-services-web-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-services-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/ad_taglib.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-services-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/content_servlet.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-services-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/dt_taglib.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-services-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/ph_taglib.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-services-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/pz_taglib.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-services-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/um_taglib.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-services-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/wlp_content.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-services-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/wps_servlet.jar" />
+	</path>
+	<path id="Shared Library [content-management-web-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/content-management-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/cmwsrp_taglib.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/content-management-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/content_functions.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/content-management-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/content_servlet.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/content-management-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/content_web_common.jar" />
+	</path>
+	<path id="Shared Library [wlp-services-app-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-services-app-lib_10.3.4_10.3.4/1/APP-INF/lib/classes.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-services-app-lib_10.3.4_10.3.4/1/wps.jar" />
+	</path>
+	<path id="Shared Library [vcr-app-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/vcr-app-lib_10.3.4_10.3.4/1/APP-INF/lib/content_system.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/vcr-app-lib_10.3.4_10.3.4/1/content.jar" />
+	</path>
+	<path id="Shared Library [wls-commonslogging-bridge-war].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wls-commonslogging-bridge-war_1.0_1.1/1/WEB-INF/lib/commons-logging.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wls-commonslogging-bridge-war_1.0_1.1/1/WEB-INF/lib/wlcommons-logging.jar" />
+	</path>
+	<path id="Shared Library [wlp-jsf-portlet-bridge-2.0-web-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-jsf-portlet-bridge-2.0-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/portlet-bridge-api-2.0.0-SNAPSHOT.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-jsf-portlet-bridge-2.0-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/portlet-bridge-impl-2.0.0-SNAPSHOT.jar" />
+	</path>
+	<path id="Shared Library [wlp-clipper-web-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-clipper-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/netuix_clipper.jar" />
+	</path>
+	<path id="Shared Library [wlp-lookandfeel-web-lib].libraryclasspath" />
+	<path id="Shared Library [wlp-rest-full-web-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-rest-full-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/netuix_rest-full.jar" />
+	</path>
+	<path id="Shared Library [wlp-framework-rest-web-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-framework-rest-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/netuix_rest.jar" />
+	</path>
+	<path id="Shared Library [wlp-rest-web-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-rest-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/rest_servlet.jar" />
+	</path>
+	<path id="Shared Library [wlp-light-web-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-light-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/ccpp-1_0.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-light-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/ccpp-ri-1_0.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-light-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/classes.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-light-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/client_taglib.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-light-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/jena-1.4.0.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-light-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/l10n_taglib.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-light-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/netuix_servlet.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-light-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/portlet-container.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-light-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/prefs-spi.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-light-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/prefs_taglib.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-light-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/rdffilter.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-light-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/render_taglib.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-light-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/skeleton_taglib.jar" />
+	</path>
+	<path id="Shared Library [wlp-wsrp-producer-web-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-wsrp-producer-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/wsrp-producer.jar" />
+	</path>
+	<path id="Shared Library [wlp-framework-common-web-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-framework-common-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/faces-adapter.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-framework-common-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/netui-adapter.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-framework-common-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/netuix_common_web.jar" />
+	</path>
+	<path id="Shared Library [jstl].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/jstl_1.2_1.2.0.1/1/WEB-INF/lib/glassfish.jstl_1.2.0.1.jar" />
+	</path>
+	<path id="Shared Library [p13n-rest-web-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-rest-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/p13n_rest.jar" />
+	</path>
+	<path id="Shared Library [p13n-web-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/auth_taglib.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/es_taglib.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/i18n_taglib.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/profile_taglib.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/ps_taglib.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/tracking_taglib.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/ugm_taglib.jar" />
+	</path>
+	<path id="Shared Library [p13n-core-web-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-core-web-lib_10.3.4_10.3.4/1/WEB-INF/lib/p13n_web_app.jar" />
+	</path>
+	<path id="Shared Library [wlp-framework-full-app-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-framework-full-app-lib_10.3.4_10.3.4/1/APP-INF/lib/classes.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-framework-full-app-lib_10.3.4_10.3.4/1/netuix.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/wlp-framework-full-app-lib_10.3.4_10.3.4/1/prefs.jar" />
+	</path>
+	<path id="Shared Library [p13n-app-lib].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-app-lib_10.3.4_10.3.4/1/APP-INF/lib/credentialvault_service.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-app-lib_10.3.4_10.3.4/1/p13n_ejb.jar" />
+	</path>
+	<path id="Shared Library [p13n-app-lib-base].libraryclasspath">
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-app-lib-base_10.3.4_10.3.4/1/APP-INF/lib/p13n-schemas.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-app-lib-base_10.3.4_10.3.4/1/APP-INF/lib/p13n_app.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-app-lib-base_10.3.4_10.3.4/1/APP-INF/lib/p13n_common.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-app-lib-base_10.3.4_10.3.4/1/APP-INF/lib/p13n_system.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-app-lib-base_10.3.4_10.3.4/1/APP-INF/lib/p13n_common.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-app-lib-base_10.3.4_10.3.4/1/APP-INF/lib/p13n-schemas.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-app-lib-base_10.3.4_10.3.4/1/APP-INF/lib/wlp_services.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-app-lib-base_10.3.4_10.3.4/1/APP-INF/lib/wlp_services.jar" />
+		<pathelement location="${ECLIPSE_HOME}/.metadata/.plugins/oracle.eclipse.tools.weblogic/libraries/p13n-app-lib-base_10.3.4_10.3.4/1/p13n_ejb_base.jar" />
+	</path>
+	<path id="HHSPortal.classpath">
+		<pathelement location="build/classes" />
+		<path refid="WebLogic System Libraries.libraryclasspath" />
+		<path refid="Web App Libraries.libraryclasspath" />
+		<path refid="EAR Libraries.libraryclasspath" />
+		<path refid="Enterprise Application Libraries [HHSPortalEar].libraryclasspath" />
+		<path refid="Apache XMLBeans v2.3.libraryclasspath" />
+		<path refid="Shared Library [jsf].libraryclasspath" />
+		<path refid="Oracle WebLogic Portal Server.libraryclasspath" />
+		<path refid="Shared Library [content-management-faces-web-lib].libraryclasspath" />
+		<path refid="Shared Library [wlp-tools-dvt-web-lib].libraryclasspath" />
+		<path refid="Shared Library [wlp-framework-full-web-lib].libraryclasspath" />
+		<path refid="Shared Library [jaxrs-framework-web-lib].libraryclasspath" />
+		<path refid="Shared Library [jersey-web-lib].libraryclasspath" />
+		<path refid="Shared Library [content-management-app-lib].libraryclasspath" />
+		<path refid="Shared Library [wlp-services-web-lib].libraryclasspath" />
+		<path refid="Shared Library [content-management-web-lib].libraryclasspath" />
+		<path refid="Shared Library [wlp-services-app-lib].libraryclasspath" />
+		<path refid="Shared Library [vcr-app-lib].libraryclasspath" />
+		<path refid="Shared Library [wls-commonslogging-bridge-war].libraryclasspath" />
+		<path refid="Shared Library [wlp-jsf-portlet-bridge-2.0-web-lib].libraryclasspath" />
+		<path refid="Shared Library [wlp-clipper-web-lib].libraryclasspath" />
+		<path refid="Shared Library [wlp-lookandfeel-web-lib].libraryclasspath" />
+		<path refid="Shared Library [wlp-rest-full-web-lib].libraryclasspath" />
+		<path refid="Shared Library [wlp-framework-rest-web-lib].libraryclasspath" />
+		<path refid="Shared Library [wlp-rest-web-lib].libraryclasspath" />
+		<path refid="Shared Library [wlp-light-web-lib].libraryclasspath" />
+		<path refid="Shared Library [wlp-wsrp-producer-web-lib].libraryclasspath" />
+		<path refid="Shared Library [wlp-framework-common-web-lib].libraryclasspath" />
+		<path refid="Shared Library [jstl].libraryclasspath" />
+		<path refid="Shared Library [p13n-rest-web-lib].libraryclasspath" />
+		<path refid="Shared Library [p13n-web-lib].libraryclasspath" />
+		<path refid="Shared Library [p13n-core-web-lib].libraryclasspath" />
+		<path refid="Shared Library [wlp-framework-full-app-lib].libraryclasspath" />
+		<path refid="Shared Library [p13n-app-lib].libraryclasspath" />
+		<path refid="Shared Library [p13n-app-lib-base].libraryclasspath" />
+	</path>
+	<target name="init">
+
+		<delete dir="tmp_src" />
+		<antcall target="clean" />
+		<mkdir dir="tmp_src" />
+		<copy includeemptydirs="false" todir="tmp_src">
+			<fileset dir="src">
+				<exclude name="**/*.launch" />
+
+			</fileset>
+
+
+			<fileset dir="r2_src">
+				<exclude name="**/*.launch" />
+
+			</fileset>
+			<fileset dir="src_p8component">
+				<exclude name="**/*.launch" />
+			</fileset>
+			<fileset dir="r5_src">
+				<exclude name="**/*.launch" />
+			</fileset>
+		</copy>
+		<echo message="copy src" />
+		<mkdir dir="build/classes" />
+		<copy includeemptydirs="false" todir="build/classes">
+			<fileset dir="tmp_src">
+				<exclude name="**/*.launch" />
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+	</target>
+	<target name="clean">
+		<delete dir="build/classes" />
+	</target>
+	<target depends="clean" name="cleanall" />
+	<target depends="build-subprojects,build-project" name="build" />
+	<target name="build-subprojects" />
+	<target depends="init" name="build-project">
+		<echo message="${ant.project.name}: ${ant.file}" />
+		<javac debug="true" debuglevel="${debuglevel}" destdir="build/classes" source="${source}" target="${target}" encoding="cp1252">
+			<src path="tmp_src" />
+			<classpath refid="HHSPortal.classpath" />
+		</javac>
+		<antcall target="build-artifacts"/>
+	</target>
+
+	<target name="build-artifacts">
+
+		<mkdir dir="archives/war" />
+		<mkdir dir="archives/ear" />
+
+		<war destfile="archives/war/HHSPortal.war" webxml="./WebContent/WEB-INF/web.xml">
+
+			<fileset dir="./WebContent" />
+			<classes dir="build/classes" />
+
+		</war>
+
+
+		<ear destfile="archives/ear/HHSPortalEAR.ear" appxml="../HHSPortalEar/EarContent/META-INF/application.xml">
+			<metainf dir="../HHSPortalEar/EarContent/META-INF" />
+			<fileset dir="archives/war" includes="HHSPortal.war" />
+
+			<zipfileset dir="../HHSPortalEar/EarContent/APP-INF" prefix="APP-INF">
+			</zipfileset>
+
+		</ear>
+
+		<antcall target="build-coherence-artifacts"/>
+		<!--<antcall target="build-HHSBatch-jar"/>
+		<antcall target="build-HHSComponent-jar"/>
+		
+		-->
+
+	</target>
+
+	<!--
+	Target that builds a HHSCoherenceConfig.jar file for coherence server configurations
+	and the CoherenceExtendServer.tar file which contains the libraries required to deploy
+	the Coherence*Extends proxy server.
+	-->
+	<target name="build-coherence-artifacts" description="Build HHSCoherenceConfig.jar and CoherenceExtendServer.tar">
+		<!-- Generate the /temp_build directory -->
+		<delete dir="build/classes/coherence_config" />
+		<mkdir dir="build/classes/coherence_config" />
+
+		<!-- Copy Coherence config files -->
+		<copy todir="build/classes/coherence_config">
+			<fileset dir="r2_src">
+				<include name="hhs-coherence-cache-config-*.xml" />
+			</fileset>
+		</copy>
+
+		<!-- Generate the Coherence server configurations tar file -->
+		<mkdir dir="target" />
+		<jar destfile="target/HHSCoherenceConfig.jar" basedir="build/classes/coherence_config" />
+		<delete dir="build/classes/coherence_config" />
+
+		<!-- Generate the tar with the files required by the Coherence Extends proxy server -->
+		<tar destfile="target/CoherenceExtendServer.tar">
+			<tarfileset dir="WebContent/WEB-INF/lib">
+				<include name="coherence.jar" />
+			</tarfileset>
+			<tarfileset dir="target">
+				<include name="HHSCoherenceConfig.jar" />
+			</tarfileset>
+		</tar>
+
+	</target>
+
+		<target name="build-HHSBatch-jar" description="Build Batch Jar">
+			<jar destfile="target/HHS_Batch.jar" basedir="build/classes" excludes="log4j.*" />
+		</target>
+ 
+		<target name="build-HHSComponent-jar" description="Build Component Jar">
+			<jar destfile="target/HHS_Component.jar" basedir="build/classes" excludes="log4j.*" />
+		</target>
+
+	<target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects" />
+	<target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
+		<copy todir="${ant.library.dir}">
+			<fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar" />
+		</copy>
+		<unzip dest="${ant.library.dir}">
+			<patternset includes="jdtCompilerAdapter.jar" />
+			<fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar" />
+		</unzip>
+	</target>
+	<target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+		<property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter" />
+		<antcall target="build" />
+	</target>
+</project>

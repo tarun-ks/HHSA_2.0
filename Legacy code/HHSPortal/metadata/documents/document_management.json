@@ -1,0 +1,278 @@
+{
+  "version": "1.0.0",
+  "description": "Enterprise Document Management System",
+  "document_management": {
+    "document_types": {
+      "contract_agreement": {
+        "id": "contract_agreement",
+        "name": "Contract Agreement",
+        "description": "Main contract document",
+        "required": true,
+        "file_types": ["pdf", "docx"],
+        "max_size_mb": 50,
+        "min_size_kb": 10,
+        "validation": {
+          "virus_scan": true,
+          "content_validation": true,
+          "digital_signature_required": true,
+          "watermark": "CONFIDENTIAL - {{contract_id}}"
+        },
+        "retention": {
+          "policy": "7_years_after_contract_end",
+          "archive_after": "1_year_after_contract_end",
+          "disposal_method": "secure_deletion"
+        },
+        "access_control": {
+          "view": ["agency_id", "provider_id", "{{references.user_roles.FINANCE_MANAGER.code}}"],
+          "edit": ["agency_id"],
+          "download": ["agency_id", "provider_id"],
+          "print": ["agency_id"]
+        },
+        "version_control": {
+          "enabled": true,
+          "auto_version": true,
+          "max_versions": 10,
+          "version_naming": "{{title}}_v{{version}}"
+        },
+        "workflow": {
+          "approval_required": true,
+          "approvers": ["{{references.user_roles.ACCO_MANAGER.code}}", "{{references.user_roles.FINANCE_MANAGER.code}}"],
+          "sla_hours": 72
+        }
+      },
+      "amendment_document": {
+        "id": "amendment_document",
+        "name": "Amendment Document",
+        "description": "Contract amendment document",
+        "required": true,
+        "file_types": ["pdf"],
+        "max_size_mb": 25,
+        "validation": {
+          "virus_scan": true,
+          "digital_signature_required": true,
+          "reference_validation": true
+        },
+        "retention": {
+          "policy": "7_years_after_contract_end",
+          "archive_after": "1_year_after_contract_end"
+        },
+        "access_control": {
+          "view": ["agency_id", "provider_id"],
+          "edit": ["agency_id"],
+          "download": ["agency_id", "provider_id"]
+        },
+        "version_control": {
+          "enabled": true,
+          "auto_version": true,
+          "max_versions": 5
+        }
+      },
+      "supporting_document": {
+        "id": "supporting_document",
+        "name": "Supporting Document",
+        "description": "Supporting documentation for contract",
+        "required": false,
+        "file_types": ["pdf", "docx", "xlsx", "jpg", "png"],
+        "max_size_mb": 10,
+        "validation": {
+          "virus_scan": true,
+          "file_type_validation": true
+        },
+        "retention": {
+          "policy": "3_years_after_contract_end"
+        },
+        "access_control": {
+          "view": ["agency_id", "provider_id"],
+          "edit": ["agency_id"],
+          "download": ["agency_id", "provider_id"]
+        }
+      },
+      "legal_document": {
+        "id": "legal_document",
+        "name": "Legal Document",
+        "description": "Legal documentation and certificates",
+        "required": false,
+        "file_types": ["pdf"],
+        "max_size_mb": 20,
+        "validation": {
+          "virus_scan": true,
+          "digital_signature_required": true,
+          "notarization_required": false
+        },
+        "retention": {
+          "policy": "10_years_after_contract_end"
+        },
+        "access_control": {
+          "view": ["{{references.user_roles.ACCO_MANAGER.code}}", "agency_id"],
+          "edit": ["{{references.user_roles.ACCO_MANAGER.code}}"],
+          "download": ["{{references.user_roles.ACCO_MANAGER.code}}", "agency_id"]
+        },
+        "workflow": {
+          "legal_review_required": true,
+          "approvers": ["{{references.user_roles.ACCO_MANAGER.code}}"],
+          "sla_hours": 48
+        }
+      }
+    },
+    "storage_configuration": {
+      "primary_storage": {
+        "type": "aws_s3",
+        "bucket": "{{env.DOCUMENT_S3_BUCKET}}",
+        "region": "{{env.AWS_REGION}}",
+        "encryption": "AES256",
+        "access_tier": "STANDARD"
+      },
+      "backup_storage": {
+        "type": "aws_s3",
+        "bucket": "{{env.DOCUMENT_BACKUP_BUCKET}}",
+        "region": "{{env.AWS_BACKUP_REGION}}",
+        "encryption": "AES256",
+        "access_tier": "GLACIER"
+      },
+      "local_cache": {
+        "enabled": true,
+        "max_size_gb": 10,
+        "ttl_hours": 24
+      }
+    },
+    "folder_structure": {
+      "root_path": "/contracts",
+      "structure": {
+        "year": "{{created_date.year}}",
+        "agency": "{{agency.name}}",
+        "contract_id": "{{contract_id}}",
+        "document_type": "{{document.type}}",
+        "version": "{{document.version}}"
+      },
+      "example": "/contracts/2024/Department of Parks and Recreation/CON-001-2024/contract_agreement/v1.pdf"
+    },
+    "document_workflow": {
+      "upload_workflow": {
+        "steps": [
+          {
+            "id": "file_validation",
+            "name": "File Validation",
+            "type": "automated",
+            "actions": ["virus_scan", "file_type_check", "size_validation"]
+          },
+          {
+            "id": "content_validation",
+            "name": "Content Validation",
+            "type": "automated",
+            "actions": ["text_extraction", "keyword_check", "format_validation"]
+          },
+          {
+            "id": "approval",
+            "name": "Document Approval",
+            "type": "manual",
+            "assign_to": "{{document.type.approvers}}",
+            "sla_hours": 72
+          },
+          {
+            "id": "finalization",
+            "name": "Document Finalization",
+            "type": "automated",
+            "actions": ["watermark", "metadata_extraction", "indexing"]
+          }
+        ]
+      },
+      "approval_workflow": {
+        "parallel_approval": true,
+        "approvers": {
+          "contract_agreement": ["{{references.user_roles.ACCO_MANAGER.code}}", "{{references.user_roles.FINANCE_MANAGER.code}}"],
+          "amendment_document": ["{{references.user_roles.ACCO_MANAGER.code}}"],
+          "legal_document": ["{{references.user_roles.ACCO_MANAGER.code}}"]
+        },
+        "escalation": {
+          "after_hours": 48,
+          "escalate_to": "{{references.user_roles.ACCO_MANAGER.code}}"
+        }
+      }
+    },
+    "search_and_indexing": {
+      "full_text_search": {
+        "enabled": true,
+        "engine": "elasticsearch",
+        "index_name": "contract_documents",
+        "searchable_fields": ["title", "content", "metadata", "tags"]
+      },
+      "metadata_extraction": {
+        "enabled": true,
+        "extract_fields": [
+          "title",
+          "author",
+          "creation_date",
+          "modification_date",
+          "page_count",
+          "word_count"
+        ]
+      },
+      "ocr": {
+        "enabled": true,
+        "languages": ["en", "es", "fr"],
+        "confidence_threshold": 0.8
+      }
+    },
+    "security": {
+      "encryption": {
+        "at_rest": "AES256",
+        "in_transit": "TLS1.2",
+        "key_management": "aws_kms"
+      },
+      "access_control": {
+        "rbac_enabled": true,
+        "attribute_based_access": true,
+        "time_based_access": true
+      },
+      "audit_logging": {
+        "enabled": true,
+        "log_events": [
+          "document_uploaded",
+          "document_downloaded",
+          "document_viewed",
+          "document_modified",
+          "document_deleted",
+          "access_denied"
+        ],
+        "retention_days": 2555
+      }
+    },
+    "compliance": {
+      "gdpr": {
+        "enabled": true,
+        "data_subject_rights": true,
+        "consent_tracking": true,
+        "right_to_be_forgotten": true
+      },
+      "sox": {
+        "enabled": true,
+        "audit_trail": true,
+        "immutable_logs": true,
+        "retention_years": 7
+      },
+      "hipaa": {
+        "enabled": false,
+        "phi_protection": false
+      }
+    },
+    "api_endpoints": {
+      "upload": {
+        "endpoint": "/api/documents/upload",
+        "method": "POST",
+        "content_type": "multipart/form-data",
+        "max_file_size": "50MB"
+      },
+      "download": {
+        "endpoint": "/api/documents/{id}/download",
+        "method": "GET",
+        "authentication": "required",
+        "rate_limiting": "100_per_hour"
+      },
+      "search": {
+        "endpoint": "/api/documents/search",
+        "method": "GET",
+        "query_parameters": ["q", "type", "date_range", "contract_id"]
+      }
+    }
+  }
+}

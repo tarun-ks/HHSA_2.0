@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nyc.hhs.service.db.services.application.UserRoleMapper">
+
+	<delete id="deleteDafaultRessignment" parameterType="com.nyc.hhs.model.DefaultAssignment">
+		delete from
+		DEFAULT_ASSIGNMENT where CONTRACT_ID = #{contractId} and
+		REVIEW_PROCESS_ID =
+		(select review_process_id from review_process where
+		review_process = #{taskType} )
+	</delete>
+
+
+	<delete id="deleteDafaultAssignment" parameterType="com.nyc.hhs.model.DefaultAssignment">
+		delete from
+		DEFAULT_ASSIGNMENT where CONTRACT_ID = #{contractId} and
+		REVIEW_PROCESS_ID =
+		(select review_process_id from review_process where
+		review_process = #{taskType} ) and task_level = #{taskLevel}
+	</delete>
+	
+	<!-- [Start] R9.6.0 QC9663 System Allowing Duplicate Records in DEFAULT_ASSIGNMENT Table - Task Details Not Appearing as a Result -->
+	<insert id="insertDafaultAssignment" parameterType="com.nyc.hhs.model.DefaultAssignment">
+		INSERT INTO
+		DEFAULT_ASSIGNMENT (DEFAULT_ASSIGNMENT_ID, CONTRACT_ID,
+		ASSIGNEE_USER_ID, REVIEW_PROCESS_ID, TASK_LEVEL, CREATED_DATE,
+		CREATED_BY_USER_ID, MODIFIED_DATE, MODIFIED_BY_USER_ID, ASK_FLAG)
+		SELECT SEQ_DEFAULT_ASSIGNMENT_ID.nextval, #{contractId},
+		#{assigneeUserId,jdbcType=VARCHAR},
+		(select review_process_id from
+		review_process where review_process = #{taskType} ), #{taskLevel},
+		systimestamp, #{createdByUserId}, systimestamp, #{modifiedByUserId},
+		#{askFlag,jdbcType=VARCHAR}
+		FROM DUAL WHERE NOT EXISTS 
+		(SELECT * FROM DEFAULT_ASSIGNMENT WHERE CONTRACT_ID=#{contractId} AND ASSIGNEE_USER_ID=#{assigneeUserId,jdbcType=VARCHAR} AND
+		REVIEW_PROCESS_ID=(select review_process_id from review_process where review_process = #{taskType} )
+		AND TASK_LEVEL=#{taskLevel}		
+		)
+	</insert>
+	<!-- [End] R9.6.0 QC9663 System Allowing Duplicate Records in DEFAULT_ASSIGNMENT Table - Task Details Not Appearing as a Result -->	
+	
+
+	<update id="updateDafaultAssignment" parameterType="com.nyc.hhs.model.DefaultAssignment">
+		update
+		DEFAULT_ASSIGNMENT set ASSIGNEE_USER_ID
+		=#{assigneeUserId,jdbcType=VARCHAR},MODIFIED_BY_USER_ID=#{modifiedByUserId}
+		,MODIFIED_DATE=systimestamp
+		where CONTRACT_ID = #{contractId} and
+		REVIEW_PROCESS_ID = (select review_process_id from review_process
+		where review_process = #{taskType} ) and
+		task_level = #{taskLevel}
+	</update>
+
+	<update id="updateDafaultAssignmentAskAgain" parameterType="com.nyc.hhs.model.DefaultAssignment">
+		update DEFAULT_ASSIGNMENT set ASK_FLAG
+		=#{askFlag,jdbcType=VARCHAR},MODIFIED_BY_USER_ID=#{modifiedByUserId}
+		,MODIFIED_DATE=systimestamp
+		where CONTRACT_ID = #{contractId} and
+		REVIEW_PROCESS_ID = (select review_process_id from review_process
+		where review_process = #{taskType}) and
+		task_level = #{taskLevel}
+	</update>
+
+	<select id="getContractForAdvanceReviewTask" parameterType="String"
+		resultType="String">
+		select contract_id from budget_advance where
+		budget_advance_id =
+		#{loEntityId}
+	</select>
+
+	<select id="getContractForContractReviewTask" parameterType="String"
+		resultType="String">
+		select decode(contract_type_id,3,contract_id, parent_contract_id) from contract where contract_id =
+		#{loEntityId}
+	</select>
+	<select id="getContractForBudgetReviewTask" parameterType="String"
+		resultType="String">
+		select contract_id from budget where budget_id in (select
+		parent_id from
+		budget where budget_id = #{loEntityId})
+	</select>
+	<!-- Added for R6- Return Payment Review Task -->
+		<select id="getContractForReturnPaymentReviewTask" parameterType="String"
+		resultType="String">
+		select contract_id from budget where budget_id in (select
+		budget_id from
+		RETURN_PAYMENT where RETURN_PAYMENT_ID = #{loEntityId})
+	</select>
+	<!-- Added for R6- Return Payment Review Task end -->
+	<select id="getContractForInvoiceReviewTask" parameterType="String"
+		resultType="String">
+		select contract_id from invoice where invoice_id =
+		#{loEntityId}
+	</select>
+	<select id="getContractForPaymentReviewTask" parameterType="String"
+		resultType="String">
+		select contract_id from payment where payment_id =
+		#{loEntityId}
+	</select>
+	<!-- [Start] R9.6.0 QC9663 System Allowing Duplicate Records in DEFAULT_ASSIGNMENT Table - Task Details Not Appearing as a Result -->
+	<select id="checkAskAgainFlag" parameterType="hashmap"
+		resultType="String">
+		SELECT ask_flag FROM default_assignment WHERE
+		contract_id=#{contractId} AND
+		REVIEW_PROCESS_ID=(select
+		review_process_id from review_process where review_process =
+		#{taskType} )
+		and
+		task_level=#{taskLevel}
+		order by MODIFIED_DATE desc
+		fetch first 1 row only
+	</select>
+	<!-- [End] R9.6.0 QC9663 System Allowing Duplicate Records in DEFAULT_ASSIGNMENT Table - Task Details Not Appearing as a Result -->
+	<select id="getReassigneeList" parameterType="hashmap"
+		resultMap="selectAssigneeList">
+		select * from (select rp.review_process,
+		aslu.level_id task_level,
+		aslu.level_reviewer_id,
+		da.added_by,
+		cud.first_name
+		||' '
+		||cud.last_name name ,
+		da.ASK_FLAG,
+		TO_CHAR(da.MODIFIED_DATE,'MM/DD/YYYY') MODIFIED_DATE,
+		cud.user_id,
+		ase.level_of_review,
+		da.ASSIGNEE_USER_ID level_selected_id
+		FROM
+		agency_setting ase
+		JOIN agency_setting_level_users aslu
+		ON ase.agency_setting_id = aslu.agency_setting_id
+		LEFT JOIN review_process rp
+		ON ase.review_process_id = rp.review_process_id
+		LEFT JOIN city_user_details cud
+		ON cud.user_id = aslu.level_reviewer_id
+		LEFT JOIN contract c
+		ON c.agency_id = ase.agency_id
+		LEFT JOIN
+		(SELECT da.*,
+		cud.first_name
+		||' '
+		||cud.last_name added_by,
+		MODIFIED_DATE added_on
+		FROM default_assignment da,
+		city_user_details cud
+		WHERE da.contract_id =#{contractId}
+		AND da.REVIEW_PROCESS_ID =
+		(SELECT review_process_id
+		FROM review_process
+		WHERE review_process = #{taskType}
+		)
+		AND cud.user_id = da.MODIFIED_BY_USER_ID
+		) da
+		ON da.task_level = 'Level '
+		|| aslu.level_id
+		WHERE rp.review_process_id =
+		(SELECT review_process_id
+		FROM review_process
+		WHERE review_process = #{taskType}
+		)
+		AND c.contract_id = #{contractId}) ase,
+		(SELECT LEVEL dummylevel
+		FROM DUAL
+		CONNECT BY LEVEL &lt;= #{totalReviewLevels}) lor
+		where ase.task_level(+) = lor.dummylevel
+		ORDER BY lor.dummylevel,
+		name
+	</select>
+	<resultMap id="selectAssigneeList" type="com.nyc.hhs.model.AssigneeList">
+		<id property="taskLevel" column="DUMMYLEVEL" />
+		<result property="reviewerId" column="LEVEL_REVIEWER_ID" />
+		<result property="taskType" column="TASK_TYPE" />
+		<result property="askFlag" column="ASK_FLAG" />
+		<result property="userId" column="LEVEL_SELECTED_ID" />
+		<result property="msTotalLevel" column="LEVEL_OF_REVIEW" />
+		<result property="msModifiedDate" column="MODIFIED_DATE" />
+		<result property="addedBy" column="ADDED_BY" />
+		<collection property="userDetailBean" ofType="com.nyc.hhs.model.UserDetailBean"
+			javaType="List">
+			<id property="msUserId" column="user_id" />
+			<result property="msFirstName" column="NAME" />
+		</collection>
+	</resultMap>
+
+	<select id="fetchReviewLevelsDefaulAssignment" parameterType="hashmap"
+		resultType="String">
+		SELECT ags.level_of_review FROM
+		agency_setting ags
+		join review_process rvp on
+		rvp.review_process_id=ags.review_process_id
+		and
+		rvp.review_process=#{taskType}
+		and ags.agency_id = #{agencyName}
+		and rownum=1
+	</select>
+	<!-- [Start] R9.6.0 QC9663 System Allowing Duplicate Records in DEFAULT_ASSIGNMENT Table - Task Details Not Appearing as a Result -->
+	<select id="getAssigneeData" parameterType="hashmap" resultMap="fetchAssigneeData">
+		select da.assignee_user_id userId, cud.first_name||' '||cud.last_name
+		name
+		from default_assignment da , city_user_details cud, review_process
+		revp
+		where cud.user_id=da.assignee_user_id
+		and
+		revp.review_process_id=da.review_process_id
+		and
+		da.task_level=#{taskLevel}
+		and revp.review_process=#{taskType}
+		and
+		da.contract_id=#{contractId}
+		order by da.MODIFIED_DATE desc
+		fetch first 1 row only
+	</select>
+	<!-- [End] R9.6.0 QC9663 System Allowing Duplicate Records in DEFAULT_ASSIGNMENT Table - Task Details Not Appearing as a Result -->
+	<resultMap id="fetchAssigneeData" type="com.nyc.hhs.model.TaskDetailsBean">
+		<result property="reassignUserId" column="USERID" />
+		<result property="reassignUserName" column="NAME" />
+	</resultMap>
+	<!-- Start: Updated for Defect 8609 -->
+	<delete id="updateReviewLevelsDetails">
+		DELETE
+		FROM default_assignment da
+		Where
+		(Da.Task_Level, Da.Assignee_User_Id, Da.Review_Process_Id )  In
+		( Select Task_Level task_level,
+  		Assignee_User_Id user_id, review_process_id
+		FROM Default_Assignment
+		Minus
+  		Select 'Level '
+    	||aslu.Level_Id task_level,
+    	Aslu.Level_Reviewer_Id user_id, 
+    	Ags.Review_Process_Id
+  		From Agency_Setting_Level_Users Aslu, Agency_Setting Ags 
+		where ags.Agency_Setting_Id = Aslu.Agency_Setting_Id
+    	) and Da.Assignee_User_Id is not null
+	</delete>
+	<!-- End: Updated for Defect 8609 -->
+	<select id="getAssigneeReturnForRevision" parameterType="hashmap" resultMap="fetchAssigneeReturnForRevision">
+	select defa.assignee_user_id userid,cud.first_name||' '||cud.last_name name
+	from default_assignment defa, city_user_details cud 
+	where cud.user_Id=defa.assignee_user_id
+	and defa.contract_id=#{contractId}
+	and defa.review_process_id=#{taskReviewProcessId}
+	and defa.task_level='Level 1'
+	</select>
+		<resultMap id="fetchAssigneeReturnForRevision" type="com.nyc.hhs.model.DefaultAssignment">
+		<result property="defaultAssignmentId" column="USERID" />
+		<result property="orgName" column="NAME" />
+	</resultMap>
+</mapper>
