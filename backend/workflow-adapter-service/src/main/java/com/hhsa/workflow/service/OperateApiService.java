@@ -82,10 +82,15 @@ public class OperateApiService {
 
     /**
      * Get tasks for a user from Operate API
-     * Queries tasks by:
-     * 1. Tasks directly assigned to the user (assignee = userId)
-     * 2. Tasks with candidateUser = userId
-     * 3. Tasks with candidateGroups matching user's roles
+     * Framework-based: Admin users see ALL in-progress tasks, regular users see only their assigned tasks
+     * 
+     * For admin users:
+     *   - Returns all CREATED/ASSIGNED tasks (no filtering)
+     * 
+     * For regular users:
+     *   - Tasks directly assigned to the user (assignee = userId)
+     *   - Tasks with candidateUser = userId
+     *   - Tasks with candidateGroups matching user's roles
      */
     public List<TaskDTO> getTasksForUser(String userId) {
         try {
@@ -95,82 +100,140 @@ public class OperateApiService {
             List<String> userRoles = getUserRoles();
             logger.debug("User roles for task filtering: {}", userRoles);
 
-            // Query ALL CREATED tasks (no assignee filter) to get tasks with candidateGroups
-            // We'll filter in memory by assignee, candidateUser, or candidateGroup
-            Mono<Map> response = addAuthHeader(operateClient.get()
-                .uri(uriBuilder -> uriBuilder
-                    .path("/v1/tasks")
-                    .queryParam("state", "CREATED")
-                    // Don't filter by assignee - we need to see all tasks to check candidateGroups
-                    .build()))
+            // Framework-based: Check if user has admin role (works for any admin role pattern)
+            boolean isAdmin = isAdminUser(userRoles);
+            logger.debug("User {} is admin: {}", userId, isAdmin);
+
+            // Query Elasticsearch directly (bypass Operate API 401 issue)
+            // Tasklist stores tasks in tasklist-task-8.4.0_ index
+            String elasticsearchUrl = operateBaseUrl.replace(":8081", ":9200");
+            WebClient esClient = WebClient.builder()
+                .baseUrl(elasticsearchUrl)
+                .defaultHeader("Content-Type", "application/json")
+                .build();
+
+            // Query ALL CREATED/ASSIGNED tasks (no assignee filter) to get tasks with candidateGroups
+            // We'll filter in memory by assignee, candidateUser, or candidateGroup (unless admin)
+            Map<String, Object> queryBody = new HashMap<>();
+            // Query for in-progress tasks (CREATED, ASSIGNED, CLAIMED)
+            queryBody.put("query", Map.of(
+                "terms", Map.of("state", List.of("CREATED", "ASSIGNED", "CLAIMED"))
+            ));
+            queryBody.put("size", 100);
+            queryBody.put("sort", List.of(Map.of("creationTime", Map.of("order", "desc"))));
+
+            Mono<Map> response = esClient.post()
+                .uri("/tasklist-task-8.4.0*/_search")  // Use wildcard to match dated indices
+                .bodyValue(queryBody)
                 .retrieve()
                 .bodyToMono(Map.class)
                 .onErrorResume(ex -> {
-                    logger.warn("Could not query Operate API for user tasks: {} - {}", userId, ex.getMessage());
-                    return Mono.just(Map.of("items", new ArrayList<>()));
+                    logger.warn("Could not query Elasticsearch for user tasks: {} - {}", userId, ex.getMessage());
+                    return Mono.just(Map.of("hits", Map.of("hits", new ArrayList<>())));
                 });
 
-            Map<String, Object> result = response.block();
+            Map<String, Object> result = response.block(Duration.ofSeconds(10));
             List<TaskDTO> allTasks = new ArrayList<>();
 
-            if (result != null && result.containsKey("items")) {
-                Object itemsObj = result.get("items");
-                if (itemsObj instanceof List) {
-                    List<Map<String, Object>> items = (List<Map<String, Object>>) itemsObj;
-                    for (Map<String, Object> item : items) {
+            if (result != null && result.containsKey("hits")) {
+                Map<String, Object> hits = (Map<String, Object>) result.get("hits");
+                Object hitsListObj = hits.get("hits");
+                if (hitsListObj instanceof List) {
+                    List<Map<String, Object>> hitsList = (List<Map<String, Object>>) hitsListObj;
+                    for (Map<String, Object> hit : hitsList) {
                         try {
-                            TaskDTO task = mapToTaskDTO(item);
-                            allTasks.add(task);
+                            Map<String, Object> source = (Map<String, Object>) hit.get("_source");
+                            TaskDTO task = mapTaskFromElasticsearch(source);
+                            if (task != null) {
+                                allTasks.add(task);
+                            }
                         } catch (Exception e) {
-                            logger.warn("Failed to map task: {}", e.getMessage());
+                            logger.warn("Failed to map task from Elasticsearch: {}", e.getMessage());
                         }
                     }
                 }
             }
 
-            // Filter tasks: assignee = userId OR candidateUser = userId OR candidateGroup IN userRoles
-            List<TaskDTO> filteredTasks = allTasks.stream()
-                .filter(task -> {
-                    // Task is assigned to user
-                    if (userId.equals(task.getAssignee())) {
-                        logger.debug("Task {} matched by assignee: {}", task.getTaskId(), task.getAssignee());
-                        return true;
-                    }
-                    // Task has candidateUser matching userId
-                    if (userId.equals(task.getCandidateUser())) {
-                        logger.debug("Task {} matched by candidateUser: {}", task.getTaskId(), task.getCandidateUser());
-                        return true;
-                    }
-                    // Task has candidateGroup matching one of user's roles
-                    if (task.getCandidateGroup() != null && userRoles.contains(task.getCandidateGroup())) {
-                        logger.debug("Task {} matched by candidateGroup: {} (user roles: {})", 
-                            task.getTaskId(), task.getCandidateGroup(), userRoles);
-                        return true;
-                    }
-                    // Check if candidateGroup contains comma-separated groups (e.g., "FINANCE_MANAGER,ACCO_MANAGER")
-                    if (task.getCandidateGroup() != null && task.getCandidateGroup().contains(",")) {
-                        String[] groups = task.getCandidateGroup().split(",");
-                        for (String group : groups) {
-                            String trimmedGroup = group.trim();
-                            if (userRoles.contains(trimmedGroup)) {
-                                logger.debug("Task {} matched by candidateGroup (comma-separated): {} (user roles: {})", 
-                                    task.getTaskId(), trimmedGroup, userRoles);
-                                return true;
+            // Framework-based: Admin users see all tasks, regular users see filtered tasks
+            List<TaskDTO> filteredTasks;
+            if (isAdmin) {
+                // Admin: Return all in-progress tasks (CREATED/ASSIGNED)
+                filteredTasks = allTasks.stream()
+                    .filter(task -> {
+                        String state = task.getState();
+                        return "CREATED".equals(state) || "ASSIGNED".equals(state) || "CLAIMED".equals(state);
+                    })
+                    .collect(Collectors.toList());
+                logger.info("Admin user {}: Returning all {} in-progress tasks (from {} total tasks)", 
+                    userId, filteredTasks.size(), allTasks.size());
+            } else {
+                // Regular user: Filter tasks by assignee, candidateUser, or candidateGroup
+                filteredTasks = allTasks.stream()
+                    .filter(task -> {
+                        // Task is assigned to user
+                        if (userId.equals(task.getAssignee())) {
+                            logger.debug("Task {} matched by assignee: {}", task.getTaskId(), task.getAssignee());
+                            return true;
+                        }
+                        // Task has candidateUser matching userId
+                        if (userId.equals(task.getCandidateUser())) {
+                            logger.debug("Task {} matched by candidateUser: {}", task.getTaskId(), task.getCandidateUser());
+                            return true;
+                        }
+                        // Task has candidateGroup matching one of user's roles
+                        if (task.getCandidateGroup() != null && userRoles.contains(task.getCandidateGroup())) {
+                            logger.debug("Task {} matched by candidateGroup: {} (user roles: {})", 
+                                task.getTaskId(), task.getCandidateGroup(), userRoles);
+                            return true;
+                        }
+                        // Check if candidateGroup contains comma-separated groups (e.g., "FINANCE_MANAGER,ACCO_MANAGER")
+                        if (task.getCandidateGroup() != null && task.getCandidateGroup().contains(",")) {
+                            String[] groups = task.getCandidateGroup().split(",");
+                            for (String group : groups) {
+                                String trimmedGroup = group.trim();
+                                if (userRoles.contains(trimmedGroup)) {
+                                    logger.debug("Task {} matched by candidateGroup (comma-separated): {} (user roles: {})", 
+                                        task.getTaskId(), trimmedGroup, userRoles);
+                                    return true;
+                                }
                             }
                         }
-                    }
-                    return false;
-                })
-                .collect(Collectors.toList());
+                        return false;
+                    })
+                    .collect(Collectors.toList());
+                logger.info("Regular user {}: Found {} tasks (filtered from {} total tasks, user roles: {})", 
+                    userId, filteredTasks.size(), allTasks.size(), userRoles);
+            }
 
-            logger.info("Found {} tasks for user: {} (filtered from {} total tasks, user roles: {})", 
-                filteredTasks.size(), userId, allTasks.size(), userRoles);
             return filteredTasks;
 
         } catch (Exception e) {
             logger.error("Failed to get tasks for user: {}", userId, e);
             return new ArrayList<>();
         }
+    }
+
+    /**
+     * Check if user has admin role (framework-based, works for any admin role pattern)
+     * Common admin role patterns: ADMIN, ADMIN_STAFF, ACCO_ADMIN, SYSTEM_ADMIN, etc.
+     */
+    private boolean isAdminUser(List<String> userRoles) {
+        if (userRoles == null || userRoles.isEmpty()) {
+            return false;
+        }
+        
+        // Framework-based: Check for common admin role patterns (case-insensitive)
+        // Works for: ADMIN, ADMIN_STAFF, ACCO_ADMIN, SYSTEM_ADMIN, etc.
+        for (String role : userRoles) {
+            String upperRole = role.toUpperCase();
+            // Check if role contains "ADMIN" (works for ADMIN, ADMIN_STAFF, ACCO_ADMIN, etc.)
+            if (upperRole.contains("ADMIN")) {
+                logger.debug("User has admin role: {}", role);
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     /**
@@ -323,6 +386,82 @@ public class OperateApiService {
             logger.error("Failed to get process instance: {}", processInstanceKey, e);
             return Map.of();
         }
+    }
+
+    /**
+     * Map Elasticsearch task document to TaskDTO
+     * Framework-based: works for any task structure from Elasticsearch
+     */
+    private TaskDTO mapTaskFromElasticsearch(Map<String, Object> source) {
+        TaskDTO task = new TaskDTO();
+        
+        if (source.containsKey("key")) {
+            task.setTaskKey(Long.valueOf(source.get("key").toString()));
+        }
+        if (source.containsKey("id")) {
+            task.setTaskId(source.get("id").toString());
+        }
+        if (source.containsKey("flowNodeBpmnId")) {
+            task.setTaskType(source.get("flowNodeBpmnId").toString());
+        } else if (source.containsKey("name")) {
+            task.setTaskType(source.get("name").toString());
+        }
+        if (source.containsKey("processInstanceId")) {
+            task.setProcessInstanceKey(Long.valueOf(source.get("processInstanceId").toString()));
+        }
+        if (source.containsKey("processDefinitionId")) {
+            task.setProcessDefinitionId(source.get("processDefinitionId").toString());
+        }
+        if (source.containsKey("assignee")) {
+            Object assigneeObj = source.get("assignee");
+            if (assigneeObj != null && !assigneeObj.toString().equals("null")) {
+                task.setAssignee(assigneeObj.toString());
+            }
+        }
+        if (source.containsKey("candidateUser")) {
+            Object candidateUserObj = source.get("candidateUser");
+            if (candidateUserObj != null && !candidateUserObj.toString().equals("null")) {
+                task.setCandidateUser(candidateUserObj.toString());
+            }
+        }
+        if (source.containsKey("candidateGroup")) {
+            Object candidateGroupObj = source.get("candidateGroup");
+            if (candidateGroupObj != null && !candidateGroupObj.toString().equals("null")) {
+                task.setCandidateGroup(candidateGroupObj.toString());
+            }
+        }
+        // Also check for candidateGroups (plural) - some APIs return as array
+        if (source.containsKey("candidateGroups")) {
+            Object candidateGroupsObj = source.get("candidateGroups");
+            if (candidateGroupsObj != null) {
+                if (candidateGroupsObj instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    List<String> groups = (List<String>) candidateGroupsObj;
+                    task.setCandidateGroup(String.join(",", groups));
+                } else {
+                    task.setCandidateGroup(candidateGroupsObj.toString());
+                }
+            }
+        }
+        if (source.containsKey("creationTime")) {
+            Object creationTimeObj = source.get("creationTime");
+            if (creationTimeObj != null && !creationTimeObj.toString().equals("null")) {
+                task.setCreationTime(parseTimestamp(creationTimeObj.toString()));
+            }
+        }
+        if (source.containsKey("state")) {
+            task.setState(source.get("state").toString());
+        }
+        if (source.containsKey("variables")) {
+            Object varsObj = source.get("variables");
+            if (varsObj instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> variables = (Map<String, Object>) varsObj;
+                task.setVariables(variables);
+            }
+        }
+
+        return task;
     }
 
     /**
