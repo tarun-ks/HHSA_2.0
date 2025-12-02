@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '../../components/atoms/Button';
+import { Card } from '../../components/atoms/Card';
 import { Input } from '../../components/atoms/Input';
 import { contractService, ContractCreateRequest } from '../../services/contractService';
 import { useToast } from '../../hooks/useToast';
@@ -103,122 +104,130 @@ export const ContractCreatePage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Create Contract</h1>
-        <Button variant="outline" onClick={() => navigate('/contracts')}>
+    <div className="container-page section-spacing">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <h1 className="text-responsive-xl font-bold text-gray-900 dark:text-white">Create Contract</h1>
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/contracts')}
+          className="w-full sm:w-auto"
+        >
           Cancel
         </Button>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit, handleFormError)} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Input
-            {...register('contractNumber')}
-            label="Contract Number"
-            error={errors.contractNumber?.message}
-            placeholder="CT-2024-001"
-          />
-          <Input
-            {...register('ePin')}
-            label="E-PIN"
-            error={errors.ePin?.message}
-            placeholder="E-PIN from APT system"
-          />
-        </div>
+      <Card>
+        <form onSubmit={handleSubmit(onSubmit, handleFormError)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+            <Input
+              {...register('contractNumber')}
+              label="Contract Number"
+              error={errors.contractNumber?.message}
+              placeholder="CT-2024-001"
+            />
+            <Input
+              {...register('ePin')}
+              label="E-PIN"
+              error={errors.ePin?.message}
+              placeholder="E-PIN from APT system"
+            />
+          </div>
 
-        <Input
-          {...register('contractTitle')}
-          label="Contract Title"
-          error={errors.contractTitle?.message}
-          placeholder="Procurement/Contract title"
-        />
+          <Input
+            {...register('contractTitle')}
+            label="Contract Title"
+            error={errors.contractTitle?.message}
+            placeholder="Procurement/Contract title"
+          />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Input
-            {...register('contractValue', { valueAsNumber: true })}
-            label="Contract Value"
-            type="number"
-            step="0.01"
-            error={errors.contractValue?.message}
-            placeholder="0.00"
-          />
-          <Input
-            {...register('contractAmount', { valueAsNumber: true })}
-            label="Contract Amount"
-            type="number"
-            step="0.01"
-            error={errors.contractAmount?.message}
-            placeholder="0.00"
-          />
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+            <Input
+              {...register('contractValue', { valueAsNumber: true })}
+              label="Contract Value"
+              type="number"
+              step="0.01"
+              error={errors.contractValue?.message}
+              placeholder="0.00"
+            />
+            <Input
+              {...register('contractAmount', { valueAsNumber: true })}
+              label="Contract Amount"
+              type="number"
+              step="0.01"
+              error={errors.contractAmount?.message}
+              placeholder="0.00"
+            />
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Input
-            {...register('contractStartDate')}
-            label="Start Date"
-            type="date"
-            error={errors.contractStartDate?.message}
-          />
-          <Input
-            {...register('contractEndDate')}
-            label="End Date"
-            type="date"
-            error={errors.contractEndDate?.message}
-          />
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+            <Input
+              {...register('contractStartDate')}
+              label="Start Date"
+              type="date"
+              error={errors.contractStartDate?.message}
+            />
+            <Input
+              {...register('contractEndDate')}
+              label="End Date"
+              type="date"
+              error={errors.contractEndDate?.message}
+            />
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Input
-            {...register('agencyId')}
-            label="Agency ID"
-            error={errors.agencyId?.message}
-          />
-          <Input
-            {...register('programId')}
-            label="Program ID"
-            error={errors.programId?.message}
-          />
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+            <Input
+              {...register('agencyId')}
+              label="Agency ID"
+              error={errors.agencyId?.message}
+            />
+            <Input
+              {...register('programId')}
+              label="Program ID"
+              error={errors.programId?.message}
+            />
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Input
-            {...register('providerId')}
-            label="Provider ID"
-            error={errors.providerId?.message}
-          />
-          <Input
-            {...register('organizationId')}
-            label="Organization ID"
-            error={errors.organizationId?.message}
-          />
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+            <Input
+              {...register('providerId')}
+              label="Provider ID"
+              error={errors.providerId?.message}
+            />
+            <Input
+              {...register('organizationId')}
+              label="Organization ID"
+              error={errors.organizationId?.message}
+            />
+          </div>
 
-        <Input
-          {...register('procurementId')}
-          label="Procurement ID"
-          error={errors.procurementId?.message}
-        />
+          <Input
+            {...register('procurementId')}
+            label="Procurement ID"
+            error={errors.procurementId?.message}
+          />
 
-        <div className="flex justify-end space-x-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate('/contracts')}
-            disabled={createMutation.isPending}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            isLoading={createMutation.isPending || isSubmitting}
-            disabled={createMutation.isPending || isSubmitting}
-          >
-            Create Contract
-          </Button>
-        </div>
-      </form>
+          <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate('/contracts')}
+              disabled={createMutation.isPending}
+              className="w-full sm:w-auto order-2 sm:order-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              isLoading={createMutation.isPending || isSubmitting}
+              disabled={createMutation.isPending || isSubmitting}
+              className="w-full sm:w-auto order-1 sm:order-2"
+            >
+              Create Contract
+            </Button>
+          </div>
+        </form>
+      </Card>
     </div>
   );
 };

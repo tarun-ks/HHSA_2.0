@@ -1,0 +1,92 @@
+# Zeebe External Access via Network Load Balancer
+# 
+# Rename this file to zeebe-nlb.tf to enable external Zeebe access
+# Cost: +$16/month for NLB
+#
+# After renaming, run: terraform apply
+
+# Network Load Balancer for Zeebe (gRPC)
+resource "aws_lb" "zeebe" {
+  name               = "zeebe-nlb"
+  internal           = false
+  load_balancer_type = "network"
+  subnets            = [aws_subnet.public_a.id, aws_subnet.public_b.id]
+
+  tags = {
+    Name = "zeebe-nlb"
+  }
+}
+
+# Target Group for Zeebe
+resource "aws_lb_target_group" "zeebe" {
+  name        = "zeebe-tg"
+  port        = 26500
+  protocol    = "TCP"
+  vpc_id      = aws_vpc.main.id
+  target_type = "ip"
+
+  health_check {
+    protocol            = "TCP"
+    port                = 26500
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    interval            = 30
+  }
+
+  tags = {
+    Name = "zeebe-tg"
+  }
+}
+
+# NLB Listener for Zeebe
+resource "aws_lb_listener" "zeebe" {
+  load_balancer_arn = aws_lb.zeebe.arn
+  port              = 26500
+  protocol          = "TCP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.zeebe.arn
+  }
+}
+
+# Security Group Rule to allow Zeebe traffic
+resource "aws_security_group_rule" "zeebe_from_your_ip" {
+  type              = "ingress"
+  from_port         = 26500
+  to_port           = 26500
+  protocol          = "tcp"
+  cidr_blocks       = ["${chomp(data.http.myip.response_body)}/32"]
+  security_group_id = aws_security_group.ecs_tasks.id
+  description       = "Zeebe gRPC from your IP"
+}
+
+# Output Zeebe connection details
+output "zeebe_gateway_address" {
+  description = "Zeebe gateway address for external connections"
+  value       = "${aws_lb.zeebe.dns_name}:26500"
+}
+
+output "zeebe_connection_example" {
+  description = "Example Zeebe connection configuration"
+  value       = <<-EOT
+    
+    Zeebe Gateway: ${aws_lb.zeebe.dns_name}:26500
+    
+    Java Example:
+    zeebe:
+      client:
+        broker:
+          gateway-address: ${aws_lb.zeebe.dns_name}:26500
+        security:
+          plaintext: true
+    
+    Node.js Example:
+    const zbc = new ZBClient({
+      hostname: '${aws_lb.zeebe.dns_name}',
+      port: 26500,
+      useTLS: false
+    });
+    
+  EOT
+}

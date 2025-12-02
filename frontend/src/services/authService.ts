@@ -60,6 +60,11 @@ export const authService = {
 
   /**
    * Get current user info
+   * Validates JWT token with backend (Keycloak validation via Spring Security)
+   * 
+   * Note: The token parameter is used to ensure we're validating the specific token.
+   * The apiClient interceptor will also add the token from localStorage, but
+   * we explicitly pass it here for clarity and to ensure the correct token is validated.
    */
   async getCurrentUser(token: string): Promise<ApiResponse<LoginResponse['user']>> {
     return apiClient.get<ApiResponse<LoginResponse['user']>>('/api/v1/auth/me', {

@@ -16,6 +16,8 @@ import { permissionCache } from '../utils/permissionCache';
  */
 export function useAuthorization() {
   const user = useAppSelector((state) => state.auth.user);
+  const accessToken = useAppSelector((state) => state.auth.accessToken);
+  
   // Use string comparison to prevent unnecessary re-renders when array reference changes but content is same
   const userRolesString = useMemo(() => user?.roles?.join(',') || '', [user?.roles?.join(',')]);
   const userRoles = useMemo(() => {
@@ -59,14 +61,17 @@ export function useAuthorization() {
     () => ({
       user,
       userRoles: userRoles as Role[],
-      isAuthenticated: !!user,
+      // Enterprise-level: User must be validated by backend AND token must exist
+      // This follows "Never trust client-side authorization" rule
+      // User is only set after successful validation via /api/v1/auth/me
+      isAuthenticated: !!user && !!accessToken,
       hasRole: (role: Role) => hasRole(userRoles as Role[], role),
       hasAnyRole: (roles: Role[]) => hasAnyRole(userRoles as Role[], roles),
       hasAllRoles: (roles: Role[]) => hasAllRoles(userRoles as Role[], roles),
       hasPermission: cachedHasPermission, // Use cached version
       hasAnyPermission: (permissions: Permission[]) => hasAnyPermission(userRoles as Role[], permissions),
     }),
-    [user, userRoles, cachedHasPermission]
+    [user, accessToken, userRoles, cachedHasPermission]
   );
 }
 

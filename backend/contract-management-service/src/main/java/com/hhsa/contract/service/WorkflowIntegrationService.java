@@ -45,7 +45,8 @@ public class WorkflowIntegrationService {
      */
     public String launchConfigurationWorkflow(Contract contract, String userId) {
         try {
-            logger.info("Launching WF302 workflow for contract: {}", contract.getId());
+            logger.info("Launching WF302 workflow for contract: {} (ID: {}), userId: {}", 
+                contract.getContractNumber(), contract.getId(), userId);
 
             Map<String, Object> variables = new HashMap<>();
             variables.put("contractId", contract.getId());
@@ -57,6 +58,8 @@ public class WorkflowIntegrationService {
                 variables.put("contractValue", contract.getContractValue().doubleValue());
             }
             variables.put("initiator", userId);
+            logger.debug("WF302 workflow variables - initiator: {}, contractId: {}, contractNumber: {}", 
+                userId, contract.getId(), contract.getContractNumber());
             if (contract.getOrganizationId() != null) {
                 variables.put("organizationId", contract.getOrganizationId());
             }
@@ -88,13 +91,20 @@ public class WorkflowIntegrationService {
                 Map<String, Object> data = (Map<String, Object>) result.get("data");
                 if (data.containsKey("processInstanceKey")) {
                     String processInstanceKey = String.valueOf(data.get("processInstanceKey"));
-                    logger.info("WF302 workflow launched successfully for contract: {} (instance: {})",
-                        contract.getId(), processInstanceKey);
+                    logger.info("✅ WF302 workflow launched successfully for contract: {} (ID: {}) - Process Instance Key: {}, Initiator: {}",
+                        contract.getContractNumber(), contract.getId(), processInstanceKey, userId);
                     return processInstanceKey;
+                } else {
+                    logger.warn("⚠️ WF302 workflow launch response missing processInstanceKey for contract: {} - Response: {}", 
+                        contract.getId(), result);
                 }
+            } else {
+                logger.warn("⚠️ WF302 workflow launch returned null or missing data for contract: {} - Response: {}", 
+                    contract.getId(), result);
             }
 
-            logger.warn("WF302 workflow launch returned unexpected response for contract: {}", contract.getId());
+            logger.error("❌ WF302 workflow launch failed for contract: {} (ID: {}), userId: {}", 
+                contract.getContractNumber(), contract.getId(), userId);
             return null;
 
         } catch (Exception e) {

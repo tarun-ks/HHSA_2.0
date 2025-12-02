@@ -61,7 +61,6 @@ export const ContractDetailPage = () => {
         label: 'Workflow Details',
         content: <WorkflowDetailsTab contractId={contractId} />,
         lazy: true,
-        badge: contractForTabs?.configurationWorkflowInstanceKey || contractForTabs?.cofWorkflowInstanceKey ? '1' : undefined,
       },
       {
         id: 'documents',
@@ -70,7 +69,7 @@ export const ContractDetailPage = () => {
         lazy: true,
       },
     ],
-    [contractId, contractForTabs?.configurationWorkflowInstanceKey, contractForTabs?.cofWorkflowInstanceKey]
+    [contractId]
   );
 
   // Early returns AFTER all hooks
@@ -91,29 +90,34 @@ export const ContractDetailPage = () => {
   const contract = data.data.contract;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="container-page section-spacing">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-responsive-xl font-bold text-gray-900 dark:text-white truncate">
             Contract: {contract.contractNumber}
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate-2">
             {contract.contractTitle}
           </p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex flex-col sm:flex-row gap-2 sm:flex-shrink-0">
           {contract.statusId === 59 && (
             <RoleGate permission="CONTRACT_CONFIGURE">
               <Button
                 variant="primary"
                 onClick={() => navigate(`/contracts/${contractId}/configure`)}
+                className="w-full sm:w-auto"
               >
                 Configure
               </Button>
             </RoleGate>
           )}
-          <Button variant="outline" onClick={() => navigate('/contracts')}>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/contracts')}
+            className="w-full sm:w-auto"
+          >
             Back to List
           </Button>
         </div>
@@ -125,7 +129,7 @@ export const ContractDetailPage = () => {
         defaultTab="info"
         variant="underline"
         className="shadow-lg"
-        contentClassName="min-h-[500px]"
+        contentClassName="min-h-[400px] sm:min-h-[500px]"
       />
     </div>
   );

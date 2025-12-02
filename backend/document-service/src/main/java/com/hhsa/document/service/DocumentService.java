@@ -1,6 +1,5 @@
 package com.hhsa.document.service;
 
-import com.hhsa.common.core.dto.ApiResponse;
 import com.hhsa.common.infrastructure.service.BaseService;
 import com.hhsa.document.dto.DocumentDTO;
 import com.hhsa.document.entity.Document;
@@ -10,11 +9,8 @@ import com.hhsa.document.storage.StorageProvider;
 import com.hhsa.document.storage.StorageProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,15 +32,12 @@ public class DocumentService implements BaseService<Document, Long, DocumentRepo
 
     private final DocumentRepository documentRepository;
     private final StorageProviderFactory storageProviderFactory;
-    private final String defaultStorageProvider;
 
     public DocumentService(
             DocumentRepository documentRepository,
-            StorageProviderFactory storageProviderFactory,
-            @Value("${document.storage.provider:local}") String defaultStorageProvider) {
+            StorageProviderFactory storageProviderFactory) {
         this.documentRepository = documentRepository;
         this.storageProviderFactory = storageProviderFactory;
-        this.defaultStorageProvider = defaultStorageProvider;
     }
 
     @Override
@@ -117,6 +110,10 @@ public class DocumentService implements BaseService<Document, Long, DocumentRepo
 
         StorageProvider storageProvider = storageProviderFactory.getStorageProvider(document.getStorageProvider());
         InputStream inputStream = storageProvider.retrieve(storageKey);
+        
+        if (inputStream == null) {
+            throw new StorageException("Failed to retrieve document stream: " + storageKey);
+        }
 
         return new InputStreamResource(inputStream) {
             @Override

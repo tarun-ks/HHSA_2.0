@@ -129,13 +129,21 @@ public class ContractService implements BaseService<Contract, Long, ContractRepo
         contract.setCreatedBy(userId);
 
         contract = save(contract);
+        log.info("Contract created: {} (ID: {}), userId: {}", contract.getContractNumber(), contract.getId(), userId);
 
         // Launch WF302: Contract Configuration workflow (if COF needed)
         // In production, this would be conditional based on business rules
+        log.debug("Launching WF302 workflow for contract: {} (ID: {}), userId: {}", 
+            contract.getContractNumber(), contract.getId(), userId);
         String workflowInstanceKey = workflowIntegrationService.launchConfigurationWorkflow(contract, userId);
         if (workflowInstanceKey != null) {
             contract.setConfigurationWorkflowInstanceKey(workflowInstanceKey);
             save(contract);
+            log.info("✅ Contract {} (ID: {}) - WF302 workflow instance key saved: {}", 
+                contract.getContractNumber(), contract.getId(), workflowInstanceKey);
+        } else {
+            log.warn("⚠️ Contract {} (ID: {}) - WF302 workflow launch returned null, userId: {}", 
+                contract.getContractNumber(), contract.getId(), userId);
         }
 
         return toDTO(contract);

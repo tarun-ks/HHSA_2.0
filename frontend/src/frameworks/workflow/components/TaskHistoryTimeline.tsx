@@ -56,20 +56,27 @@ export const TaskHistoryTimeline = ({ processInstanceKey }: TaskHistoryTimelineP
 
   const getStateBadgeColor = (state: string) => {
     const colors: Record<string, string> = {
-      CREATED: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
+      CREATED: 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300',
       ASSIGNED: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
       CLAIMED: 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300',
       COMPLETED: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
       CANCELLED: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300',
+      ACTIVE: 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300',
     };
     return colors[state] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
   };
 
   return (
-    <div className="space-y-4">
-      <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-        Task History Timeline
-      </h4>
+    <div className="space-y-6">
+      <div className="mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+        <h4 className="text-base font-semibold text-gray-900 dark:text-white">
+          Task History Timeline
+        </h4>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          Complete timeline of task creation, assignment, and completion
+        </p>
+      </div>
+      
       <div className="relative">
         {/* Timeline line */}
         <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700"></div>
@@ -78,19 +85,20 @@ export const TaskHistoryTimeline = ({ processInstanceKey }: TaskHistoryTimelineP
           {taskHistory.map((task, index) => (
             <div key={task.taskKey || index} className="relative pl-12">
               {/* Timeline dot */}
-              <div className="absolute left-0 top-1.5 w-8 h-8 rounded-full bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center">
+              <div className="absolute left-0 top-1.5 w-8 h-8 rounded-full bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center shadow-sm">
                 <div className={`w-3 h-3 rounded-full ${
                   task.state === 'COMPLETED' ? 'bg-green-500' :
                   task.state === 'CANCELLED' ? 'bg-red-500' :
                   task.state === 'CLAIMED' ? 'bg-purple-500' :
                   task.state === 'ASSIGNED' ? 'bg-yellow-500' :
+                  task.state === 'CREATED' || task.state === 'ACTIVE' ? 'bg-orange-500' :
                   'bg-blue-500'
                 }`}></div>
               </div>
 
               {/* Task card */}
-              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm">
-                <div className="flex items-start justify-between mb-2">
+              <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
                   <div className="flex-1">
                     <h5 className="text-sm font-semibold text-gray-900 dark:text-white">
                       {task.taskName || task.taskType || 'Task'}
@@ -99,52 +107,56 @@ export const TaskHistoryTimeline = ({ processInstanceKey }: TaskHistoryTimelineP
                       Task ID: {task.taskId || task.taskKey}
                     </p>
                   </div>
-                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStateBadgeColor(task.state)}`}>
+                  <span className={`badge flex-shrink-0 ${getStateBadgeColor(task.state)}`}>
                     {task.state}
                   </span>
                 </div>
 
                 {/* Timeline events */}
-                <div className="space-y-2 mt-3 text-xs">
+                <div className="space-y-2.5 mt-3 text-xs">
                   {task.creationTime && (
-                    <div className="flex items-center text-gray-600 dark:text-gray-400">
-                      <span className="font-medium w-24">Created:</span>
+                    <div className="flex flex-wrap items-center gap-2 text-gray-600 dark:text-gray-400">
+                      <span className="font-medium text-gray-700 dark:text-gray-300">Started:</span>
                       <span>{formatDateTime(task.creationTime)}</span>
                       {task.createdBy && (
-                        <span className="ml-2 text-gray-500">by {task.createdBy}</span>
+                        <span className="text-gray-500 dark:text-gray-500">by <span className="font-medium">{task.createdBy}</span></span>
                       )}
                     </div>
                   )}
 
                   {task.assignmentTime && (
-                    <div className="flex items-center text-yellow-600 dark:text-yellow-400">
-                      <span className="font-medium w-24">Assigned:</span>
+                    <div className="flex flex-wrap items-center gap-2 text-yellow-600 dark:text-yellow-400">
+                      <span className="font-medium">Assigned:</span>
                       <span>{formatDateTime(task.assignmentTime)}</span>
                       {task.assignedTo && (
-                        <span className="ml-2">to {task.assignedTo}</span>
+                        <span>to <span className="font-medium">{task.assignedTo}</span></span>
                       )}
                     </div>
                   )}
 
                   {task.claimedTime && (
-                    <div className="flex items-center text-purple-600 dark:text-purple-400">
-                      <span className="font-medium w-24">Claimed:</span>
+                    <div className="flex flex-wrap items-center gap-2 text-purple-600 dark:text-purple-400">
+                      <span className="font-medium">Claimed:</span>
                       <span>{formatDateTime(task.claimedTime)}</span>
                       {task.claimedBy && (
-                        <span className="ml-2">by {task.claimedBy}</span>
+                        <span>by {task.claimedBy}</span>
                       )}
                     </div>
                   )}
 
                   {task.completionTime && (
-                    <div className="flex items-center text-green-600 dark:text-green-400">
-                      <span className="font-medium w-24">Completed:</span>
+                    <div className="flex flex-wrap items-center gap-2 text-green-600 dark:text-green-400">
+                      <span className="font-medium">
+                        {task.outcome === 'APPROVED' ? 'Approved' : 
+                         task.outcome === 'REJECTED' ? 'Rejected' : 
+                         'Completed'}:
+                      </span>
                       <span>{formatDateTime(task.completionTime)}</span>
                       {task.completedBy && (
-                        <span className="ml-2">by {task.completedBy}</span>
+                        <span>by <span className="font-medium">{task.completedBy}</span></span>
                       )}
                       {task.outcome && (
-                        <span className={`ml-2 px-2 py-0.5 rounded text-xs font-semibold ${
+                        <span className={`badge-sm ${
                           task.outcome === 'APPROVED' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300' :
                           task.outcome === 'REJECTED' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300' :
                           'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
@@ -156,15 +168,15 @@ export const TaskHistoryTimeline = ({ processInstanceKey }: TaskHistoryTimelineP
                   )}
 
                   {task.completionComment && (
-                    <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-700 rounded text-gray-700 dark:text-gray-300">
-                      <span className="font-medium">Comment: </span>
-                      {task.completionComment}
+                    <div className="mt-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300">
+                      <span className="font-medium text-gray-900 dark:text-white">Comment: </span>
+                      <span>{task.completionComment}</span>
                     </div>
                   )}
 
                   {task.dueDate && (
-                    <div className="flex items-center text-gray-500 dark:text-gray-400">
-                      <span className="font-medium w-24">Due Date:</span>
+                    <div className="flex flex-wrap items-center gap-2 text-gray-500 dark:text-gray-400">
+                      <span className="font-medium">Due Date:</span>
                       <span>{formatDateTime(task.dueDate)}</span>
                     </div>
                   )}

@@ -1,9 +1,10 @@
 /**
  * BPMN Diagram Viewer CSS Styles
  * Color coding for workflow status visualization
+ * Enhanced to match Camunda Operate UI style
  */
 
-/* Completed tasks/activities - Green */
+/* Completed tasks/activities - Green with checkmark */
 .djs-element.completed-task .djs-visual > :first-child {
   stroke: #10b981 !important; /* green-500 */
   stroke-width: 3px !important;
@@ -15,16 +16,52 @@
   stroke-width: 3px !important;
 }
 
-/* Active tasks/activities - Orange */
+/* Active tasks/activities - Orange (for CREATED/ACTIVE state) */
 .djs-element.active-task .djs-visual > :first-child {
   stroke: #f97316 !important; /* orange-500 */
   stroke-width: 3px !important;
-  fill: rgba(249, 115, 22, 0.1) !important;
+  fill: rgba(249, 115, 22, 0.15) !important;
 }
 
 .djs-element.active-task .djs-visual > :first-child path {
   stroke: #f97316 !important;
   stroke-width: 3px !important;
+}
+
+/* Badge overlay styles (for active task count) */
+.bpmn-badge {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  background-color: #10b981;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  padding: 0 4px;
+}
+
+.bpmn-badge-active {
+  background-color: #f97316; /* orange-500 */
+}
+
+/* Checkmark overlay styles (for completed elements) */
+.bpmn-checkmark {
+  width: 20px;
+  height: 20px;
+  background-color: #10b981;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Error/incident tasks - Red */
@@ -39,7 +76,7 @@
   stroke-width: 3px !important;
 }
 
-/* Add animation for active tasks */
+/* Add subtle animation for active tasks (matching Operate style) */
 .djs-element.active-task .djs-visual > :first-child {
   animation: pulse-active 2s ease-in-out infinite;
 }
@@ -49,8 +86,18 @@
     opacity: 1;
   }
   50% {
-    opacity: 0.7;
+    opacity: 0.85;
   }
+}
+
+/* Ensure badges and checkmarks are positioned correctly */
+.djs-element {
+  position: relative;
+}
+
+.djs-element.completed-task,
+.djs-element.active-task {
+  position: relative;
 }
 
 /* Add animation for error tasks */

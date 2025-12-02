@@ -4,6 +4,7 @@ import { QueryProvider } from './providers/QueryProvider';
 import { ThemeProvider } from './providers/ThemeProvider';
 import { ToastContainer } from './components/molecules/Toast';
 import { Layout } from './components/organisms/Layout';
+import { AppInitializer } from './components/organisms/AppInitializer';
 import { LoginPage } from './pages/auth/LoginPage';
 import { ContractListPage } from './pages/contracts/ContractListPage';
 import { ContractCreatePage } from './pages/contracts/ContractCreatePage';
@@ -15,6 +16,11 @@ import { ProtectedRoute as AuthProtectedRoute } from './frameworks/authorization
 
 /**
  * Main App component.
+ * 
+ * Enterprise-level authentication initialization:
+ * - AppInitializer validates tokens with backend on app mount
+ * - Follows "Never trust client-side authorization" rule
+ * - Validates JWT tokens with Keycloak via /api/v1/auth/me
  */
 function App() {
   return (
@@ -22,7 +28,8 @@ function App() {
       <QueryProvider>
         <ThemeProvider>
           <BrowserRouter>
-            <Routes>
+            <AppInitializer>
+              <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route
                 path="/dashboard"
@@ -97,9 +104,10 @@ function App() {
                   </AuthProtectedRoute>
                 }
               />
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
-            <ToastContainer />
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              </Routes>
+              <ToastContainer />
+            </AppInitializer>
           </BrowserRouter>
         </ThemeProvider>
       </QueryProvider>

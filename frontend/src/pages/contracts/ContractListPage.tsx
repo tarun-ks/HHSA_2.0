@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/atoms/Button';
+import { Card } from '../../components/atoms/Card';
 import { contractService, Contract } from '../../services/contractService';
 import { useToast } from '../../hooks/useToast';
 import { Loader } from '../../components/atoms/Loader';
@@ -152,8 +153,8 @@ export const ContractListPage = () => {
     >
 
       {contracts.length === 0 ? (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-12 text-center">
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
+        <Card className="text-center py-12">
+          <p className="text-gray-500 dark:text-gray-400 mb-4 text-responsive">
             {searchTerm || Object.keys(filters).some((key) => filters[key])
               ? 'No contracts match your search criteria'
               : 'No contracts found'}
@@ -165,103 +166,171 @@ export const ContractListPage = () => {
               </Button>
             </RoleGate>
           )}
-        </div>
+        </Card>
       ) : (
         <>
-          <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Contract #
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Title
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Value
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Start Date
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    End Date
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {contracts.map((contract: Contract) => (
-                  <tr key={contract.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                      {contract.contractNumber}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
-                      {contract.contractTitle}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      ${contract.contractValue.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                          contract.statusId === 59
-                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300'
-                            : contract.statusId === 60
-                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
-                            : contract.statusId === 62
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
-                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                        }`}
-                      >
-                        {contract.statusName}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      {new Date(contract.contractStartDate).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      {new Date(contract.contractEndDate).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleViewContract(contract.id)}
-                      >
-                        View
-                      </Button>
-                      {contract.statusId === 59 && (
-                        <RoleGate permission="CONTRACT_CONFIGURE">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleConfigureContract(contract.id)}
+          {/* Desktop Table View */}
+          <div className="desktop-only">
+            <Card padding="none" className="overflow-hidden">
+              <div className="table-container">
+                <table className="table">
+                  <thead className="table-header">
+                    <tr>
+                      <th className="table-header-cell">Contract #</th>
+                      <th className="table-header-cell">Title</th>
+                      <th className="table-header-cell">Value</th>
+                      <th className="table-header-cell">Status</th>
+                      <th className="table-header-cell">Start Date</th>
+                      <th className="table-header-cell">End Date</th>
+                      <th className="table-header-cell text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="table-body">
+                    {contracts.map((contract: Contract) => (
+                      <tr key={contract.id} className="table-row">
+                        <td className="table-cell font-medium">
+                          {contract.contractNumber}
+                        </td>
+                        <td className="table-cell truncate-2 max-w-xs">
+                          {contract.contractTitle}
+                        </td>
+                        <td className="table-cell">
+                          ${contract.contractValue.toLocaleString()}
+                        </td>
+                        <td className="table-cell">
+                          <span
+                            className={`badge ${
+                              contract.statusId === 59
+                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300'
+                                : contract.statusId === 60
+                                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
+                                : contract.statusId === 62
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+                                : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                            }`}
                           >
-                            Configure
-                          </Button>
-                        </RoleGate>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                            {contract.statusName}
+                          </span>
+                        </td>
+                        <td className="table-cell">
+                          {new Date(contract.contractStartDate).toLocaleDateString()}
+                        </td>
+                        <td className="table-cell">
+                          {new Date(contract.contractEndDate).toLocaleDateString()}
+                        </td>
+                        <td className="table-cell text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleViewContract(contract.id)}
+                            >
+                              View
+                            </Button>
+                            {contract.statusId === 59 && (
+                              <RoleGate permission="CONTRACT_CONFIGURE">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleConfigureContract(contract.id)}
+                                >
+                                  Configure
+                                </Button>
+                              </RoleGate>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="mobile-only space-y-4">
+            {contracts.map((contract: Contract) => (
+              <Card key={contract.id} hover className="section-spacing">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                      {contract.contractNumber}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 truncate-2">
+                      {contract.contractTitle}
+                    </p>
+                  </div>
+                  <span
+                    className={`badge ml-2 flex-shrink-0 ${
+                      contract.statusId === 59
+                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300'
+                        : contract.statusId === 60
+                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
+                        : contract.statusId === 62
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    {contract.statusName}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs">Value</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      ${contract.contractValue.toLocaleString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs">Start Date</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {new Date(contract.contractStartDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs">End Date</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {new Date(contract.contractEndDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleViewContract(contract.id)}
+                    className="flex-1"
+                  >
+                    View
+                  </Button>
+                  {contract.statusId === 59 && (
+                    <RoleGate permission="CONTRACT_CONFIGURE">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleConfigureContract(contract.id)}
+                        className="flex-1"
+                      >
+                        Configure
+                      </Button>
+                    </RoleGate>
+                  )}
+                </div>
+              </Card>
+            ))}
           </div>
 
           {/* Pagination */}
           {metadata && (
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-700 dark:text-gray-300">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
+              <div className="text-sm text-gray-700 dark:text-gray-300 text-center sm:text-left">
                 Showing {page * size + 1} to {Math.min((page + 1) * size, metadata.totalElements)} of{' '}
                 {metadata.totalElements} contracts
               </div>
-              <div className="flex space-x-2">
+              <div className="flex flex-wrap items-center justify-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"

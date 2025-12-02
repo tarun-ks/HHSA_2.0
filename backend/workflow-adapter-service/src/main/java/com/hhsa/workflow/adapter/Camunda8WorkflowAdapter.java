@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -228,11 +230,22 @@ public class Camunda8WorkflowAdapter implements WorkflowAdapter {
                 dto.setState(processInstanceData.get("state").toString());
             }
             if (processInstanceData.containsKey("startDate")) {
-                // Parse start date
-                dto.setStartTime(LocalDateTime.now()); // Simplified
+                // Parse start date from Operate API (ISO 8601 format)
+                try {
+                    String startDateStr = processInstanceData.get("startDate").toString();
+                    dto.setStartTime(parseTimestamp(startDateStr));
+                } catch (Exception e) {
+                    logger.warn("Failed to parse startDate for process instance {}: {}", processInstanceKey, e.getMessage());
+                }
             }
             if (processInstanceData.containsKey("endDate")) {
-                dto.setEndTime(LocalDateTime.now()); // Simplified
+                // Parse end date from Operate API (ISO 8601 format)
+                try {
+                    String endDateStr = processInstanceData.get("endDate").toString();
+                    dto.setEndTime(parseTimestamp(endDateStr));
+                } catch (Exception e) {
+                    logger.warn("Failed to parse endDate for process instance {}: {}", processInstanceKey, e.getMessage());
+                }
             }
             
             return dto;
@@ -240,6 +253,20 @@ public class Camunda8WorkflowAdapter implements WorkflowAdapter {
         } catch (Exception e) {
             logger.error("Failed to get process instance: {}", processInstanceKey, e);
             throw new WorkflowException("Failed to get process instance: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Parse ISO 8601 timestamp string to LocalDateTime
+     * Operate API returns timestamps in ISO 8601 format (e.g., "2024-01-15T10:30:00.000Z")
+     */
+    private LocalDateTime parseTimestamp(String timestamp) {
+        try {
+            ZonedDateTime zonedDateTime = ZonedDateTime.parse(timestamp, DateTimeFormatter.ISO_DATE_TIME);
+            return zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
+        } catch (Exception e) {
+            logger.warn("Failed to parse timestamp: {}", timestamp);
+            return null;
         }
     }
 

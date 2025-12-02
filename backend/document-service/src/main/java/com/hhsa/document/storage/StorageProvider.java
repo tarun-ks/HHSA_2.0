@@ -1,7 +1,6 @@
 package com.hhsa.document.storage;
 
 import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * Storage provider interface for pluggable document storage.

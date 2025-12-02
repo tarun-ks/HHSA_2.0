@@ -64,7 +64,24 @@ export const LoginPage = () => {
         toast.error(response.error?.description || 'Login failed');
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.error?.description || 'An error occurred during login');
+      console.error('Login error:', error);
+      
+      // Handle network errors (Failed to fetch)
+      if (error.message === 'Failed to fetch' || error.code === 'ERR_NETWORK' || !error.response) {
+        toast.error('Unable to connect to the server. Please check if the services are running.');
+      } else if (error.response?.data?.error?.description) {
+        // Handle API error responses
+        const errorMsg = error.response.data.error.description;
+        if (errorMsg.includes('Connection refused')) {
+          toast.error('Authentication service is not available. Please ensure Keycloak is running.');
+        } else {
+          toast.error(errorMsg);
+        }
+      } else if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error('An unexpected error occurred during login');
+      }
     } finally {
       setIsLoading(false);
     }

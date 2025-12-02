@@ -1,10 +1,8 @@
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { workflowService } from '../../../services/workflowService';
 import { getWorkflowByProcessKey } from '../workflowDefinitions';
 import { Loader } from '../../../components/atoms/Loader';
-import { Button } from '../../../components/atoms/Button';
-import { useNavigate } from 'react-router-dom';
+import { Card } from '../../../components/atoms/Card';
 import { BpmnDiagramViewer } from './BpmnDiagramViewer';
 import { TaskHistoryTimeline } from './TaskHistoryTimeline';
 
@@ -20,9 +18,6 @@ interface ProcessInstanceStatusProps {
  * Used by WorkflowStatusSection to avoid hook rules violations.
  */
 const ProcessInstanceStatus = ({ workflowId, instanceKey, entityId, entityType }: ProcessInstanceStatusProps) => {
-  const navigate = useNavigate();
-  const [showDiagram, setShowDiagram] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ['process-instance', instanceKey],
@@ -56,57 +51,45 @@ const ProcessInstanceStatus = ({ workflowId, instanceKey, entityId, entityType }
   }[processInstance.state] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
-        <div className="flex-1">
-          <div className="flex items-center space-x-2 mb-1">
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
-              {workflow?.displayName || workflowId}
-            </span>
-            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${statusColor}`}>
-              {processInstance.state}
-            </span>
-          </div>
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            Instance: {instanceKey} • Started: {processInstance.startTime ? new Date(processInstance.startTime).toLocaleString() : 'N/A'}
-          </div>
-        </div>
-        <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowDiagram(!showDiagram)}
-          >
-            {showDiagram ? 'Hide Diagram' : 'View Diagram'}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowHistory(!showHistory)}
-          >
-            {showHistory ? 'Hide History' : 'View History'}
-          </Button>
-        </div>
-      </div>
-      
-      {showDiagram && (
-        <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800">
-          <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-            Workflow Diagram: {workflow?.displayName || workflowId}
+    <div className="space-y-4">
+      <Card>
+        <div className="flex items-center flex-wrap gap-2 mb-2">
+          <h4 className="text-base font-semibold text-gray-900 dark:text-white">
+            {workflow?.displayName || workflowId}
           </h4>
+          <span className={`badge ${statusColor}`}>
+            {processInstance.state}
+          </span>
+        </div>
+        <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+          <p>Instance: <span className="font-medium text-gray-700 dark:text-gray-300">{instanceKey}</span></p>
+          <p>Started: <span className="font-medium text-gray-700 dark:text-gray-300">
+            {processInstance.startTime ? new Date(processInstance.startTime).toLocaleString() : 'N/A'}
+          </span></p>
+        </div>
+      </Card>
+      
+      <Card>
+        <div className="mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+          <h4 className="text-base font-semibold text-gray-900 dark:text-white">
+            Workflow Diagram
+          </h4>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {workflow?.displayName || workflowId} - Visual representation with status indicators
+          </p>
+        </div>
+        <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
           <BpmnDiagramViewer
             workflowId={workflowId}
             processInstanceKey={instanceKey}
             height="500px"
           />
         </div>
-      )}
+      </Card>
 
-      {showHistory && (
-        <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800">
-          <TaskHistoryTimeline processInstanceKey={instanceKey} />
-        </div>
-      )}
+      <Card>
+        <TaskHistoryTimeline processInstanceKey={instanceKey} />
+      </Card>
     </div>
   );
 };

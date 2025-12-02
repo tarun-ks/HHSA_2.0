@@ -77,7 +77,10 @@ alwaysApply: true
 - **RULE**: Use Camunda 8 (Zeebe) for BPMN and DMN - NO custom workflow engine
 - **RULE**: Zeebe Gateway: `localhost:26500`
 - **RULE**: All workflow logic must be in BPMN/DMN - business logic in services
-- **RULE**: Workflow adapter service must abstract Camunda implementation
+- **RULE**: **MUST USE** WorkflowAdapter interface for all workflow operations (see `FRAMEWORKS_DOCUMENTATION.md`)
+- **RULE**: Use OperateApiService for process history and activity tracking
+- **RULE**: Store `processInstanceKey` in entity for workflow tracking
+- **RULE**: Use workflowDefinitions.ts for centralized workflow configuration
 
 ### Observability
 - **RULE**: Use OpenTelemetry for audit logging - NO custom audit code
@@ -139,6 +142,18 @@ alwaysApply: true
 - **RULE**: All components must be documented in Storybook
 - **RULE**: Reusable components must be in shared component library
 - **RULE**: Domain-specific components in module folders
+
+### Frontend Framework Usage
+- **RULE**: **MUST USE** PermissionGate for all permission-based UI (see `FRAMEWORKS_DOCUMENTATION.md`)
+  - Use `mode="hide"` to hide elements without permission
+  - Use `mode="readonly"` to show but make readonly
+  - Use `mode="disabled"` to show but disable interactions
+- **RULE**: **MUST USE** Tabs component for tab-based pages (lazy loading, icons, badges)
+- **RULE**: **MUST USE** SearchBar + ListPageLayout for list pages (consistent search/filter pattern)
+- **RULE**: **MUST USE** Business Rules framework for validation (useValidation hook)
+- **RULE**: **MUST USE** Grid framework plugins (ExcelExportPlugin, PrintPlugin) for table exports
+- **RULE**: **MUST USE** Workflow framework components (BpmnDiagramViewer, ProcessInstanceStatus) for workflow visualization
+- **RULE**: Always check `FRAMEWORKS_DOCUMENTATION.md` before creating new components - use existing frameworks
 
 ### UI/UX
 - **RULE**: Modern UI patterns only - do NOT reuse legacy UI
@@ -267,6 +282,11 @@ alwaysApply: true
 - ❌ **DO NOT** hardcode values - use configuration
 - ❌ **DO NOT** skip tests for "quick fixes"
 - ❌ **DO NOT** put business logic or entities in `common-core`
+- ❌ **DO NOT** create custom permission components (use PermissionGate framework)
+- ❌ **DO NOT** create custom tab components (use Tabs framework)
+- ❌ **DO NOT** create custom search/filter components (use SearchBar framework)
+- ❌ **DO NOT** create custom validation logic (use Business Rules framework)
+- ❌ **DO NOT** create custom workflow visualization (use Workflow framework)
 
 ### Architecture Anti-Patterns
 - ❌ **DO NOT** create tight coupling between services
@@ -283,6 +303,10 @@ alwaysApply: true
 - ❌ **DO NOT** create monolithic components
 - ❌ **DO NOT** mix business logic with UI components
 - ❌ **DO NOT** skip error handling in UI
+- ❌ **DO NOT** create new UI components without checking existing frameworks first
+- ❌ **DO NOT** bypass PermissionGate for permission-based UI
+- ❌ **DO NOT** create custom tab implementations (use Tabs framework)
+- ❌ **DO NOT** create custom list page layouts (use ListPageLayout framework)
 
 ---
 
@@ -307,7 +331,8 @@ Before merging any code, ensure:
 ### Code Documentation
 - **RULE**: All public APIs must be documented
 - **RULE**: Complex business logic must have comments
-- **RULE**: README files for each service/module
+- **RULE**: **SINGLE SOURCE OF TRUTH**: Use `FRAMEWORKS_DOCUMENTATION.md` for all framework documentation
+- **RULE**: Do NOT create separate README files for services - update `FRAMEWORKS_DOCUMENTATION.md` instead
 
 ### API Documentation
 - **RULE**: OpenAPI specification for all services
@@ -315,9 +340,10 @@ Before merging any code, ensure:
 - **RULE**: Error response documentation
 
 ### Architecture Documentation
-- **RULE**: Document service boundaries
-- **RULE**: Document data flow
-- **RULE**: Document deployment architecture
+- **RULE**: Document service boundaries in `FRAMEWORKS_DOCUMENTATION.md`
+- **RULE**: Document data flow in `FRAMEWORKS_DOCUMENTATION.md`
+- **RULE**: Document deployment architecture in `FRAMEWORKS_DOCUMENTATION.md`
+- **RULE**: Update `FRAMEWORKS_DOCUMENTATION.md` when adding new frameworks or services
 
 ---
 
@@ -378,16 +404,20 @@ Before merging any code, ensure:
 3. ✅ **Configuration**: Removed "global config" anti-pattern
 4. ✅ **Common Core**: Limited scope to DTOs, exceptions, security utilities only
 5. ✅ **Authentication**: Keycloak ONLY, removed local DB auth fallback
+6. ✅ **Frameworks**: Comprehensive framework documentation in `FRAMEWORKS_DOCUMENTATION.md`
+7. ✅ **Documentation**: Single source of truth for all framework documentation
 
 **Note**: Single shared database is a project-specific decision. Use table prefixes/schemas for organization.
 
-See `ARCHITECTURE_RECOMMENDATIONS_RESPONSE.md` for detailed implementation plan.
+**See `FRAMEWORKS_DOCUMENTATION.md` for detailed framework implementations and usage patterns.**
 
 ---
 
 ## 🔗 Related Documents
 
-- `IMPLEMENTATION_PLAN.md` - Detailed implementation plan
+- **`FRAMEWORKS_DOCUMENTATION.md`** - **PRIMARY REFERENCE**: Comprehensive documentation of all frameworks, services, and reusable components
 - `Contract Financials and Contract Budget Design.pdf` - Requirements document
 - Legacy code documentation (for business context only)
+
+**Note**: `FRAMEWORKS_DOCUMENTATION.md` is the single source of truth for all framework implementations. Always check this document before creating new components or services.
 

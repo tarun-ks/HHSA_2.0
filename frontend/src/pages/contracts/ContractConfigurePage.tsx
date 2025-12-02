@@ -249,18 +249,22 @@ export const ContractConfigurePage = () => {
   );
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="container-page section-spacing">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-responsive-xl font-bold text-gray-900 dark:text-white truncate">
             Configure Contract: {contract?.contractNumber || contractId}
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate-2">
             {contract?.contractTitle || 'Contract Configuration'}
           </p>
         </div>
-        <Button variant="outline" onClick={() => navigate(`/contracts/${contractId}`)}>
+        <Button 
+          variant="outline" 
+          onClick={() => navigate(`/contracts/${contractId}`)}
+          className="w-full sm:w-auto"
+        >
           Cancel
         </Button>
       </div>
@@ -271,7 +275,7 @@ export const ContractConfigurePage = () => {
         defaultTab="financials"
         variant="underline"
         className="shadow-lg"
-        contentClassName="min-h-[500px]"
+        contentClassName="min-h-[400px] sm:min-h-[500px]"
       />
     </div>
   );

@@ -317,14 +317,22 @@ public class WorkflowController {
     public ResponseEntity<ApiResponse<List<com.hhsa.workflow.dto.TaskHistoryDTO>>> getTaskHistory(
             @PathVariable Long processInstanceKey) {
         try {
+            logger.debug("Getting task history for process instance: {}", processInstanceKey);
             List<com.hhsa.workflow.dto.TaskHistoryDTO> taskHistory = workflowService.getTaskHistory(processInstanceKey);
             // Always return success with empty list if no history found (graceful degradation)
-            return ResponseEntity.ok(ApiResponse.success(taskHistory != null ? taskHistory : new java.util.ArrayList<>(), "Task history retrieved successfully"));
+            if (taskHistory == null) {
+                logger.debug("Task history is null for process instance: {}, returning empty list", processInstanceKey);
+                return ResponseEntity.ok(ApiResponse.success(new java.util.ArrayList<>(), "No task history available"));
+            }
+            logger.debug("Retrieved {} task history entries for process instance: {}", taskHistory.size(), processInstanceKey);
+            return ResponseEntity.ok(ApiResponse.success(taskHistory, "Task history retrieved successfully"));
         } catch (WorkflowException e) {
             logger.warn("Failed to get task history for process instance {}: {}", processInstanceKey, e.getMessage());
+            // Return empty list instead of error (graceful degradation)
             return ResponseEntity.ok(ApiResponse.success(new java.util.ArrayList<>(), "No task history available"));
         } catch (Exception e) {
-            logger.error("Failed to get task history for process instance {}: {}", processInstanceKey, e.getMessage(), e);
+            logger.error("Unexpected error getting task history for process instance {}: {}", processInstanceKey, e.getMessage(), e);
+            // Return empty list instead of error (graceful degradation)
             return ResponseEntity.ok(ApiResponse.success(new java.util.ArrayList<>(), "No task history available"));
         }
     }

@@ -75,10 +75,19 @@ public class DocumentController {
                 })
                 .orElseThrow();
 
+            String contentType = document.getContentType();
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+            String fileName = document.getFileName();
+            if (fileName == null) {
+                fileName = "document";
+            }
+            
             return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(document.getContentType()))
+                .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, 
-                    "attachment; filename=\"" + document.getFileName() + "\"")
+                    "attachment; filename=\"" + fileName + "\"")
                 .body(resource);
         } catch (StorageException e) {
             return ResponseEntity.notFound().build();

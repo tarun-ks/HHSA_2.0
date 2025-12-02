@@ -28,7 +28,7 @@ class ApiClient {
    * Setup request and response interceptors
    */
   private setupInterceptors(): void {
-    // Request interceptor - Add auth token
+    // Request interceptor - Add auth token and X-User-Id header
     this.client.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
         let token = this.getAuthToken();
@@ -41,6 +41,16 @@ class ApiClient {
         
         if (token && config.headers) {
           config.headers.Authorization = `Bearer ${token}`;
+          
+          // Extract user ID from JWT token and set X-User-Id header
+          try {
+            const userId = this.extractUserIdFromToken(token);
+            if (userId) {
+              config.headers['X-User-Id'] = userId;
+            }
+          } catch (error) {
+            console.warn('Failed to extract user ID from token:', error);
+          }
         }
         return config;
       },
@@ -66,9 +76,15 @@ class ApiClient {
             if (newToken && originalRequest.headers) {
               originalRequest.headers.Authorization = `Bearer ${newToken}`;
               return this.client(originalRequest);
+            } else {
+              // No token returned from refresh - redirect to login
+              console.warn('Token refresh returned null, redirecting to login');
+              this.handleLogout();
+              return Promise.reject(new Error('Token refresh failed - redirecting to login'));
             }
           } catch (refreshError) {
             // Refresh failed - redirect to login
+            console.warn('Token refresh failed, redirecting to login:', refreshError);
             this.handleLogout();
             return Promise.reject(refreshError);
           }
@@ -109,6 +125,21 @@ class ApiClient {
       return expirationTime < Date.now();
     } catch {
       return true; // If can't decode, consider expired
+    }
+  }
+
+  /**
+   * Extract user ID from JWT token (from 'sub' claim)
+   */
+  private extractUserIdFromToken(token: string | null): string | null {
+    if (!token) return null;
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      // Keycloak stores user ID in 'sub' claim
+      return payload.sub || null;
+    } catch {
+      return null;
     }
   }
 
@@ -170,6 +201,8 @@ class ApiClient {
 
   /**
    * Handle logout
+   * Clears authentication state and triggers redirect via event
+   * This avoids hardcoding paths and lets the app handle routing
    */
   private handleLogout(): void {
     localStorage.removeItem('accessToken');
@@ -177,7 +210,14 @@ class ApiClient {
     localStorage.removeItem('user');
     this.invalidateTokenCache();
     this.refreshPromise = null; // Clear any pending refresh
-    window.location.href = '/login';
+    
+    // Dispatch custom event for logout - let the app handle routing
+    // AppInitializer listens to this event and handles navigation via React Router
+    // This avoids hardcoding paths and maintains separation of concerns
+    const logoutEvent = new CustomEvent('auth:logout', { 
+      detail: { reason: 'token_refresh_failed' } 
+    });
+    window.dispatchEvent(logoutEvent);
   }
 
   /**

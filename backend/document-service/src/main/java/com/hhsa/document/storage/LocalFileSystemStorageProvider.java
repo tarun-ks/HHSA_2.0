@@ -96,9 +96,6 @@ public class LocalFileSystemStorageProvider implements StorageProvider {
         } catch (FileNotFoundException e) {
             logger.error("Document not found: {}", storageKey, e);
             throw new StorageException("Document not found: " + storageKey, e);
-        } catch (IOException e) {
-            logger.error("Failed to retrieve document: {}", storageKey, e);
-            throw new StorageException("Failed to retrieve document: " + storageKey, e);
         }
     }
 

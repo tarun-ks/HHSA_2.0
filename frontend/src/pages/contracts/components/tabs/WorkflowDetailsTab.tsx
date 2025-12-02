@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { contractService } from '../../../../services/contractService';
 import { Loader } from '../../../../components/atoms/Loader';
+import { Card } from '../../../../components/atoms/Card';
 import { TaskDetailsSection } from '../TaskDetailsSection';
 import { WorkflowStatusSection } from '../../../../frameworks/workflow/components/WorkflowStatusSection';
 import { useAppSelector } from '../../../../store/hooks';
@@ -41,16 +42,17 @@ export const WorkflowDetailsTab = ({ contractId }: WorkflowDetailsTabProps) => {
   const contract = data.data.contract;
 
   return (
-    <div className="space-y-6">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-        Workflow Details
-      </h3>
-
+    <div className="section-spacing">
       {/* Task Details Section */}
-      <div>
-        <h4 className="text-md font-medium text-gray-900 dark:text-white mb-3">
-          Active Tasks
-        </h4>
+      <Card>
+        <div className="mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Active Tasks
+          </h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            View and manage active workflow tasks for this contract
+          </p>
+        </div>
         <TaskDetailsSection
           contractId={contractId}
           processInstanceKey={
@@ -60,14 +62,19 @@ export const WorkflowDetailsTab = ({ contractId }: WorkflowDetailsTabProps) => {
           }
           userId={user?.id}
         />
-      </div>
+      </Card>
 
       {/* Workflow Status Section */}
       {contract && (contract.configurationWorkflowInstanceKey || contract.cofWorkflowInstanceKey) && (
-        <div>
-          <h4 className="text-md font-medium text-gray-900 dark:text-white mb-3">
-            Workflow Status
-          </h4>
+        <Card>
+          <div className="mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Workflow Status
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Monitor workflow progress with visual diagrams and history
+            </p>
+          </div>
           <WorkflowStatusSection
             entityId={contractId}
             entityType="Contract"
@@ -80,7 +87,7 @@ export const WorkflowDetailsTab = ({ contractId }: WorkflowDetailsTabProps) => {
               }),
             }}
           />
-        </div>
+        </Card>
       )}
     </div>
   );

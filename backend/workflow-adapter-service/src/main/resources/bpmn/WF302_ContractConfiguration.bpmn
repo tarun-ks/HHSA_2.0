@@ -22,7 +22,7 @@
     
     <bpmn:userTask id="UserTask_ManagerReview" name="Manager Review">
       <bpmn:extensionElements>
-        <zeebe:candidateGroups>FINANCE_MANAGER,ACCO_MANAGER</zeebe:candidateGroups>
+        <zeebe:candidateGroups>FINANCE_MANAGER,ACCO_MANAGER,ACCO_ADMIN_STAFF</zeebe:candidateGroups>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_ToReview</bpmn:incoming>
       <bpmn:outgoing>Flow_ToGateway</bpmn:outgoing>

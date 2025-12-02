@@ -18,6 +18,14 @@ spring:
     enabled: false
     # No migrations for workflow-adapter-service (uses common tables only)
 
+  # Keycloak JWT Configuration (for extracting user info from tokens)
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8090/realms/hhsa
+          jwk-set-uri: http://localhost:8090/realms/hhsa/protocol/openid-connect/certs
+
 server:
   port: 8093
 

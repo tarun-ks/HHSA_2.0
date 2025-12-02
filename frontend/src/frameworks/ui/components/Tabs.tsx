@@ -111,7 +111,7 @@ export const Tabs = ({
     <div className={`bg-white dark:bg-gray-800 shadow-sm rounded-lg ${className}`}>
       {/* Tab Navigation */}
       <div className={variantStyles.container}>
-        <nav className="flex space-x-1 overflow-x-auto" aria-label="Tabs">
+        <nav className="flex space-x-1 overflow-x-auto scrollbar-thin" aria-label="Tabs">
           {visibleTabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
@@ -121,15 +121,15 @@ export const Tabs = ({
                 disabled={tab.disabled}
                 className={`${variantStyles.tab(isActive)} ${
                   tab.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                } flex items-center space-x-2 whitespace-nowrap`}
+                } flex items-center space-x-1 sm:space-x-2 whitespace-nowrap text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-3`}
                 aria-selected={isActive}
                 role="tab"
               >
-                {tab.icon && <span className="flex-shrink-0">{tab.icon}</span>}
-                <span>{tab.label}</span>
+                {tab.icon && <span className="flex-shrink-0 hidden sm:inline">{tab.icon}</span>}
+                <span className="truncate">{tab.label}</span>
                 {tab.badge !== undefined && (
                   <span
-                    className={`ml-1 px-2 py-0.5 text-xs font-semibold rounded-full ${
+                    className={`ml-1 px-1.5 sm:px-2 py-0.5 text-xs font-semibold rounded-full flex-shrink-0 ${
                       isActive
                         ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
                         : 'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-300'
@@ -145,7 +145,7 @@ export const Tabs = ({
       </div>
 
       {/* Tab Content */}
-      <div className={`p-6 ${contentClassName}`}>
+      <div className={`p-4 sm:p-6 ${contentClassName}`}>
         {activeTabItem && (
           <div
             key={activeTab}

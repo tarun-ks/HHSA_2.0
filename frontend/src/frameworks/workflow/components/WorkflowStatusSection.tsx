@@ -26,10 +26,7 @@ export const WorkflowStatusSection = ({
 
   if (entries.length === 0) {
     return (
-      <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-        <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-2">
-          Workflow Status
-        </h3>
+      <div className="text-center py-8">
         <p className="text-sm text-gray-500 dark:text-gray-400">
           No active workflows
         </p>
@@ -38,22 +35,16 @@ export const WorkflowStatusSection = ({
   }
 
   return (
-    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4">
-      <h3 className="text-md font-semibold text-gray-900 dark:text-white">
-        Workflow Status
-      </h3>
-
-      <div className="space-y-3">
-        {entries.map(([workflowId, instanceKey]) => (
-          <ProcessInstanceStatus
-            key={workflowId}
-            workflowId={workflowId}
-            instanceKey={instanceKey}
-            entityId={entityId}
-            entityType={entityType}
-          />
-        ))}
-      </div>
+    <div className="space-y-4">
+      {entries.map(([workflowId, instanceKey]) => (
+        <ProcessInstanceStatus
+          key={workflowId}
+          workflowId={workflowId}
+          instanceKey={instanceKey}
+          entityId={entityId}
+          entityType={entityType}
+        />
+      ))}
     </div>
   );
 };

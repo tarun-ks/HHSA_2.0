@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAppSelector } from '../../store/hooks';
 import { Button } from '../../components/atoms/Button';
+import { Card } from '../../components/atoms/Card';
 import { workflowService, WorkflowTask } from '../../services/workflowService';
 import { useToast } from '../../hooks/useToast';
 import { Loader } from '../../components/atoms/Loader';
@@ -59,83 +60,129 @@ export const TaskListPage = () => {
   const tasks = data?.data || [];
 
   return (
-    <div className="space-y-6">
+    <div className="container-page section-spacing">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Tasks</h1>
+        <h1 className="text-responsive-xl font-bold text-gray-900 dark:text-white">My Tasks</h1>
       </div>
 
       {tasks.length === 0 ? (
-        <div className="text-center py-12">
+        <Card className="text-center py-12">
           <p className="text-gray-500 dark:text-gray-400">No tasks assigned</p>
-        </div>
+        </Card>
       ) : (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-700">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                  Task ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                  Process
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                  Contract
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                  Created
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {tasks.map((task: WorkflowTask) => (
-                <tr key={task.taskKey} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                    {task.taskId}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
-                    {task.processDefinitionId}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
-                    {task.variables?.contractNumber || task.variables?.contractId || 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                    {new Date(task.creationTime).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
-                      {task.state}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewWorkflow(task)}
-                      >
-                        View Workflow
-                      </Button>
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={() => handleViewTask(task)}
-                      >
-                        View & Complete
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <>
+          {/* Desktop Table View */}
+          <div className="desktop-only">
+            <Card padding="none" className="overflow-hidden">
+              <div className="table-container">
+                <table className="table">
+                  <thead className="table-header">
+                    <tr>
+                      <th className="table-header-cell">Task ID</th>
+                      <th className="table-header-cell">Process</th>
+                      <th className="table-header-cell">Contract</th>
+                      <th className="table-header-cell">Created</th>
+                      <th className="table-header-cell">Status</th>
+                      <th className="table-header-cell text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="table-body">
+                    {tasks.map((task: WorkflowTask) => (
+                      <tr key={task.taskKey} className="table-row">
+                        <td className="table-cell font-medium">{task.taskId}</td>
+                        <td className="table-cell">{task.processDefinitionId}</td>
+                        <td className="table-cell">
+                          {task.variables?.contractNumber || task.variables?.contractId || 'N/A'}
+                        </td>
+                        <td className="table-cell">
+                          {new Date(task.creationTime).toLocaleDateString()}
+                        </td>
+                        <td className="table-cell">
+                          <span className="badge bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
+                            {task.state}
+                          </span>
+                        </td>
+                        <td className="table-cell text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewWorkflow(task)}
+                            >
+                              View Workflow
+                            </Button>
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              onClick={() => handleViewTask(task)}
+                            >
+                              View & Complete
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="mobile-only space-y-4">
+            {tasks.map((task: WorkflowTask) => (
+              <Card key={task.taskKey} hover className="section-spacing">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                      {task.taskId}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      {task.processDefinitionId}
+                    </p>
+                  </div>
+                  <span className="badge ml-2 flex-shrink-0 bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
+                    {task.state}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                  <div>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs">Contract</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {task.variables?.contractNumber || task.variables?.contractId || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs">Created</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {new Date(task.creationTime).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewWorkflow(task)}
+                    className="flex-1"
+                  >
+                    View Workflow
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => handleViewTask(task)}
+                    className="flex-1"
+                  >
+                    View & Complete
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </>
       )}
 
       {selectedTask && (
@@ -152,25 +199,29 @@ export const TaskListPage = () => {
 
       {/* Workflow Visualization Modal */}
       {selectedWorkflowInstance && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-5xl w-full mx-4 max-h-[90vh] overflow-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 max-w-5xl w-full max-h-[90vh] overflow-auto">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                 Workflow Status Visualization
               </h3>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setSelectedWorkflowInstance(null)}
+                className="w-full sm:w-auto"
               >
                 Close
               </Button>
             </div>
-            <BpmnDiagramViewer
-              processDefinitionKey={selectedWorkflowInstance.processDefinitionKey}
-              processInstanceKey={selectedWorkflowInstance.processInstanceKey}
-              height="600px"
-            />
+            <div className="overflow-x-auto">
+              <BpmnDiagramViewer
+                processDefinitionKey={selectedWorkflowInstance.processDefinitionKey}
+                processInstanceKey={selectedWorkflowInstance.processInstanceKey}
+                height="400px"
+                className="sm:h-[600px]"
+              />
+            </div>
           </div>
         </div>
       )}
